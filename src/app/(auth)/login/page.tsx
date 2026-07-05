@@ -5,6 +5,9 @@ import { signUpAction, signInAction } from "./actions";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -20,13 +23,12 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#28292c] p-4" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-      <div className="w-full max-w-md bg-white rounded-3xl p-8 md:p-10 flex flex-col gap-6 shadow-2xl">
+    <div className="min-h-screen flex flex-col justify-center bg-white p-6" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+      <div className="w-full max-w-md mx-auto flex flex-col gap-6">
         
         {/* Header */}
         <div className="flex flex-col items-center text-center space-y-3">
           <div className="w-16 h-16 bg-[#2f4f7f] text-[#a3c2f9] rounded-full flex items-center justify-center shadow-lg mb-2">
-            {/* Replaced Google Font Icon with inline SVG to guarantee it loads */}
             <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9z"/>
             </svg>
@@ -77,6 +79,8 @@ export default function AuthPage() {
               type="email"
               required={!isLogin}
               placeholder="student@school.edu"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-white border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all"
             />
           </div>
@@ -92,6 +96,8 @@ export default function AuthPage() {
                 type="text"
                 required={!isLogin}
                 placeholder="e.g. ScienceWhiz99"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="w-full bg-white border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all"
               />
             </div>
@@ -114,6 +120,8 @@ export default function AuthPage() {
               type="password"
               required
               placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full bg-white border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all"
             />
           </div>
