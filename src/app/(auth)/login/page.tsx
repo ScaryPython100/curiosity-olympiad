@@ -75,7 +75,7 @@ export default function AuthPage() {
               id="email"
               name="email"
               type="email"
-              required={!isLogin}
+              required
               placeholder="student@school.edu"
               className="w-full bg-white border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all"
             />
