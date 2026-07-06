@@ -37,6 +37,11 @@ export async function signUpAction(formData: FormData) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        username: username,
+      },
+    },
   });
 
   if (error) return { error: error.message };
@@ -47,7 +52,7 @@ export async function signUpAction(formData: FormData) {
       .from("student_profiles")
       .insert([{ id: data.user.id, username }]);
       
-    if (profileError) return { error: "Username is already taken!" };
+    if (profileError) return { error: profileError.message };
   }
 
   // Send them to the dashboard!
