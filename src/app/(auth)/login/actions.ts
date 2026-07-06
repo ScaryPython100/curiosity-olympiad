@@ -37,6 +37,11 @@ export async function signUpAction(formData: FormData) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        username: username,
+      },
+    },
   });
 
   if (error) return { error: error.message };
@@ -47,7 +52,7 @@ export async function signUpAction(formData: FormData) {
       .from("student_profiles")
       .insert([{ id: data.user.id, username }]);
       
-    if (profileError) return { error: "Username is already taken!" };
+    if (profileError) return { error: profileError.message };
   }
 
   // Send them to the dashboard!
@@ -56,7 +61,7 @@ export async function signUpAction(formData: FormData) {
 
 // 3. The Login Engine
 export async function signInAction(formData: FormData) {
-  const email = formData.get("identifier") as string; 
+  const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   
   const supabase = await createClient();

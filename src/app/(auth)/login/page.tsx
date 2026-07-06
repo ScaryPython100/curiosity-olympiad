@@ -77,7 +77,7 @@ export default function AuthPage() {
               id="email"
               name="email"
               type="email"
-              required={!isLogin}
+              required
               placeholder="student@school.edu"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
