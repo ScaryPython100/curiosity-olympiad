@@ -5,7 +5,7 @@ import { supabase } from "@/utils/supabase";
 import { calculateLevelProgress } from "@/utils/gamification";
 
 export default function ProfilePage() {
-  const [userStats, setUserStats] = useState({ xp: 2450, points: 2450 });
+  const [userStats, setUserStats] = useState({ xp: 0, points: 0 });
   const [loading, setLoading] = useState(true);
 
   const { level, progressPercentage } = calculateLevelProgress(userStats.xp);
@@ -13,9 +13,13 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
         const { data, error } = await supabase
           .from("user_gamification")
           .select("*")
+          .eq("id", user.id)
           .single();
 
         if (data) {
