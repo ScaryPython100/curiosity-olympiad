@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   // 1. AUTHENTICATION CHECK (Server-Side)
@@ -75,8 +76,11 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Practice Tests */}
-          <div className="bg-white border border-gray-200 p-6 rounded-xl hover:shadow-[0_0_20px_rgba(255,215,0,0.15)] transition-all group md:col-span-2 lg:col-span-1 active:scale-[0.98]">
+          {/* Practice Tests (Now fully wrapped inside a Next.js Link) */}
+          <Link 
+            href="/practice" 
+            className="block text-left bg-white border border-gray-200 p-6 rounded-xl hover:shadow-[0_0_20px_rgba(255,215,0,0.15)] transition-all group md:col-span-2 lg:col-span-1 active:scale-[0.98]"
+          >
             <div className="flex flex-col h-full justify-between">
               <div>
                 <div className="w-12 h-12 bg-[#dde3eb] rounded-lg flex items-center justify-center mb-6 group-hover:bg-[#ffe16d] transition-colors">
@@ -90,7 +94,7 @@ export default async function DashboardPage() {
                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
               </div>
             </div>
-          </div>
+          </Link>
         </section>
 
         {/* Stats / Atmospheric Section */}
@@ -132,14 +136,15 @@ export default async function DashboardPage() {
 
       {/* BottomNavBar Component */}
       <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-4 bg-[#f7f9fb] border-t border-gray-200 z-50">
-        <a className="flex items-center justify-center bg-[#ffe16d] text-[#221b00] rounded-full w-12 h-12 shadow-[0_0_20px_rgba(255,215,0,0.2)] active:scale-90 duration-200 transition-transform" href="#">
+        <Link className="flex items-center justify-center bg-[#ffe16d] text-[#221b00] rounded-full w-12 h-12 shadow-[0_0_20px_rgba(255,215,0,0.2)] active:scale-90 duration-200 transition-transform" href="/dashboard">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>home</span>
-        </a>
-        <a className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="#">
+        </Link>
+        {/* Profile Navigation Button Connected */}
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/profile">
           <div className="w-12 h-12 flex items-center justify-center">
             <span className="material-symbols-outlined">person</span>
           </div>
-        </a>
+        </Link>
         <a className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="#">
           <div className="w-12 h-12 flex items-center justify-center">
             <span className="material-symbols-outlined">settings</span>

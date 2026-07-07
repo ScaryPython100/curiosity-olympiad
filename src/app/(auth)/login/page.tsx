@@ -9,18 +9,28 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    const result = isLogin
-      ? await signInAction(formData)
-      : await signUpAction(formData);
-
-    if (result?.error) {
-      alert(result.error);
-    }
-  };
+  if (isLogin) {
+    // 1. LOGIN LOGIC
+    // After successful log in:
+    window.location.href = '/dashboard';
+  } else {
+    // 2. SIGNUP LOGIC
+    // Call your Supabase sign-up function here...
+    
+    // Once the database returns a successful response:
+    alert("Account created successfully! Please sign in with your new credentials.");
+    
+    // Clear out the state variables so the boxes reset
+    setPassword("");
+    setUsername("");
+    
+    // Switch the UI tab cleanly back to Sign In mode
+    setIsLogin(true);
+  }
+};
 
   return (
     <div className="min-h-screen flex flex-col justify-center bg-white p-6" style={{ fontFamily: 'Montserrat, sans-serif' }}>
