@@ -1,2 +1,19 @@
 @import "tailwindcss";
-@config "../../../tailwind.config.ts";
+
+/* If you need custom font definitions or specific brand overrides in v4, you add them like this: */
+@theme {
+  --font-sans: 'Montserrat', sans-serif;
+  --font-display: 'Montserrat', sans-serif;
+  
+  /* Brand colors matching your screens */
+  --color-primary: #143867;
+  --color-primary-container: #2f4f7f;
+  --color-tertiary-fixed: #ffe16d;
+}
+
+@layer base {
+  body {
+    font-family: 'Montserrat', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
