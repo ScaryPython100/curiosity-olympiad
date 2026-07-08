@@ -57,6 +57,7 @@ export async function getLeaderboard() {
   const { data, error } = await supabase
     .from("user_gamification")
     .select(`
+      user_id,
       xp,
       curiosity_points,
       student_profiles (
@@ -64,7 +65,8 @@ export async function getLeaderboard() {
         avatar_url
       )
     `)
-    .order("curiosity_points", { ascending: false });
+    .order("xp", { ascending: false })
+    .limit(50);
 
   if (error) {
     console.error("Error fetching leaderboard:", error);
