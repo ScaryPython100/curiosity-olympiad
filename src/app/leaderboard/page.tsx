@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useUser } from "@/hooks/useUser";
 import { getLeaderboard } from "@/app/actions/profile";
+import { BADGES } from "@/utils/gamification";
 
 interface LeaderboardEntry {
   user_id: string;
@@ -40,17 +41,20 @@ export default function LeaderboardPage() {
   const topThree = leaderboardData.slice(0, 3);
   const remaining = leaderboardData.slice(3);
 
-  // Find current user's rank and entry
   const userRankIndex = leaderboardData.findIndex(entry => entry.user_id === userId);
   const userEntry = userRankIndex !== -1 ? leaderboardData[userRankIndex] : null;
   const userRank = userRankIndex !== -1 ? userRankIndex + 1 : null;
 
   const isLoading = loading || userLoading;
 
+  const getBestBadge = (xp: number) => {
+    const unlocked = BADGES.filter(b => xp >= b.minXp);
+    return unlocked.length > 0 ? unlocked[unlocked.length - 1] : null;
+  };
+
   return (
     <div className="bg-[#f7f9fb] text-[#191c1e] min-h-screen flex flex-col font-['Montserrat'] antialiased">
       
-      {/* TopAppBar Section */}
       <header className="fixed top-0 z-50 w-full bg-[#f7f9fb] h-16 flex items-center px-4 border-b border-gray-200">
         <Link 
           href="/dashboard"
@@ -61,14 +65,11 @@ export default function LeaderboardPage() {
         <h1 className="text-xl font-bold text-[#143867]">Global Standings</h1>
       </header>
 
-      {/* Main Container */}
       <main className="flex-grow pt-20 pb-32 overflow-y-auto max-w-md mx-auto w-full hide-scrollbar">
         
-        {/* Podium Section */}
         <section className="px-4 mb-10 pt-4 transition-all duration-700 ease-out">
           <div className="flex items-end justify-center gap-2 mb-6 min-h-[220px]">
             {isLoading ? (
-              // Loading Podium
               <div className="flex items-end justify-center gap-2 w-full animate-pulse">
                 <div className="flex flex-col items-center flex-1 order-1">
                   <div className="w-20 h-20 rounded-full bg-gray-200 mb-2"></div>
@@ -92,20 +93,23 @@ export default function LeaderboardPage() {
                 {topThree[1] && (
                   <div className="flex flex-col items-center flex-1 order-1">
                     <div className="relative mb-2">
-                      <div className="w-20 h-20 rounded-full border-4 border-gray-200 overflow-hidden bg-white">
+                      <div className="w-20 h-20 rounded-full border-4 border-gray-200 overflow-hidden bg-white shadow-sm">
                         <img
                           className="w-full h-full object-cover"
-                          alt="Scholar explorer"
+                          alt="Rank 2"
                           src={topThree[1].student_profiles?.avatar_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuDP57RuXi2x5Oi-N6FJbYRupRRXvVm_KtcYT0HvUro2sl6D3VvjGuiJmgamB_bQu8-1nfS3AE5rwpsRmtb3zgody9KeS9jg_7nkd8NE2zrrd08c6cxj2gJkdaqSnOP02zMQ705jficGIloi34z7gC9C_fMItoys2EmQUYebVKU_Ss27Gob9Zzjf_YsscceVXX9wiaWHkZSER0oaiypYdtnSp-h4Bk42TFPWNmHQAgJm1ohSyXdDBnvenPVJFPE9KLTkdod3B_AXCtH9"}
                         />
                       </div>
-                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gray-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">2nd</div>
+                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gray-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-md">2nd</div>
                     </div>
                     <p className="text-sm font-semibold text-[#143867] text-center truncate w-full">
                       {topThree[1].student_profiles?.username || "Scholar"}
                     </p>
-                    <p className="text-xs text-gray-500 font-bold">{topThree[1].xp.toLocaleString()} pts</p>
-                    <div className="w-full h-16 bg-gray-200 rounded-t-lg mt-4 opacity-40"></div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] grayscale brightness-125">{getBestBadge(topThree[1].xp)?.icon}</span>
+                      <p className="text-xs text-gray-500 font-bold">{topThree[1].xp.toLocaleString()} pts</p>
+                    </div>
+                    <div className="w-full h-16 bg-gray-200 rounded-t-lg mt-4 opacity-40 shadow-inner"></div>
                   </div>
                 )}
 
@@ -116,21 +120,25 @@ export default function LeaderboardPage() {
                       <div className="w-24 h-24 rounded-full border-4 border-[#ffe16d] overflow-hidden bg-white shadow-[0_0_15px_rgba(255,215,0,0.25)]">
                         <img
                           className="w-full h-full object-cover"
-                          alt="Senior researcher"
+                          alt="Rank 1"
                           src={topThree[0].student_profiles?.avatar_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuDcmLovT--8_XlQTazvWKBCOfc0dSS5_1bCSrSpFh9Jmd09HI126PUu6RkERIyR6fZZj6O-ISPTe2QKjvIyEzJdmw_pVc4kJl0CS23C2aIbYpgaXFjbLyrqYu89g8Ni9-BluII1Z8q646xX8pkpaZfrecQrC5ftJLZJfJ-jOG1v9phLTfi8vV15qU_etbTZp1dGXlQsX9IVok7J6n0vkvNX_a9vESmKIMUnTvShWkV9As9HpULZxa740Gio0E5NJkRr5-Fdn0ix10Ye"}
                         />
                       </div>
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[#705d00] text-4xl animate-bounce">
                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
                       </div>
-                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-[#ffe16d] text-[#221b00] text-xs px-3 py-1 rounded-full font-extrabold uppercase tracking-widest">1st</div>
+                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-[#ffe16d] text-[#221b00] text-xs px-3 py-1 rounded-full font-extrabold uppercase tracking-widest shadow-md">1st</div>
                     </div>
                     <p className="text-sm font-bold text-[#143867] text-center truncate w-full">
                       {topThree[0].student_profiles?.username || "Newton"}
                     </p>
-                    <p className="text-xs text-[#705d00] font-extrabold">{topThree[0].xp.toLocaleString()} pts</p>
-                    <div className="w-full h-24 bg-[#ffe16d] rounded-t-lg mt-4 shadow-sm flex items-center justify-center">
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs">{getBestBadge(topThree[0].xp)?.icon}</span>
+                      <p className="text-xs text-[#705d00] font-extrabold">{topThree[0].xp.toLocaleString()} pts</p>
+                    </div>
+                    <div className="w-full h-24 bg-[#ffe16d] rounded-t-lg mt-4 shadow-sm flex items-center justify-center relative overflow-hidden">
                       <span className="material-symbols-outlined text-[#221b00] opacity-20 text-4xl">school</span>
+                      <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
                     </div>
                   </div>
                 )}
@@ -139,20 +147,23 @@ export default function LeaderboardPage() {
                 {topThree[2] && (
                   <div className="flex flex-col items-center flex-1 order-3">
                     <div className="relative mb-2">
-                      <div className="w-16 h-16 rounded-full border-4 border-gray-300 overflow-hidden bg-white">
+                      <div className="w-16 h-16 rounded-full border-4 border-gray-300 overflow-hidden bg-white shadow-sm">
                         <img
                           className="w-full h-full object-cover"
-                          alt="Computer scientist"
+                          alt="Rank 3"
                           src={topThree[2].student_profiles?.avatar_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuD2PGNFWl5qfR0NHVUZQ06W8-99rCeuDkAAOmAeci4Lf_zeVSq98O-IFSsnxE0yAhZVTYIBEfaEmmt6AsbHstoS3Gu36OYJFTxtJ4pxdAWoNGWdrRB_H4GKnzGMxIbM-E0GOhx4VmFcuu9wYQIcA4P_MRb7YEUdN-Y6KChtCRPmZBtFD07DrlS7OnbrnmrrS1E0S5bmEaiSFuJ_wqZGaUc-E0RVgLjcmeYtVzM7P_t7bsZ8fqeva-yIrAwYfyKpZgdhdsblowkAaPRK"}
                         />
                       </div>
-                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gray-300 text-gray-800 text-[10px] px-2 py-0.5 rounded-full font-bold">3rd</div>
+                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gray-300 text-gray-800 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-md">3rd</div>
                     </div>
                     <p className="text-sm font-semibold text-[#143867] text-center truncate w-full">
                       {topThree[2].student_profiles?.username || "Ada"}
                     </p>
-                    <p className="text-xs text-gray-500 font-bold">{topThree[2].xp.toLocaleString()} pts</p>
-                    <div className="w-full h-12 bg-gray-200 rounded-t-lg mt-4 opacity-20"></div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] grayscale brightness-110">{getBestBadge(topThree[2].xp)?.icon}</span>
+                      <p className="text-xs text-gray-500 font-bold">{topThree[2].xp.toLocaleString()} pts</p>
+                    </div>
+                    <div className="w-full h-12 bg-gray-200 rounded-t-lg mt-4 opacity-20 shadow-inner"></div>
                   </div>
                 )}
               </>
@@ -160,16 +171,17 @@ export default function LeaderboardPage() {
           </div>
         </section>
 
-        {/* Ranking List Section */}
-        <section className="bg-white rounded-t-[32px] pt-8 px-4 min-h-[400px] border-t border-gray-200 transition-all duration-700 ease-out">
+        <section className="bg-white rounded-t-[32px] pt-8 px-4 min-h-[400px] border-t border-gray-200 transition-all duration-700 ease-out shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest">Top Explorers</h2>
-            <span className="text-xs bg-gray-100 px-2 py-1 rounded-lg text-gray-500 font-medium">Updated just now</span>
+            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Top Explorers</h2>
+            <span className="text-xs bg-gray-100 px-3 py-1 rounded-full text-gray-500 font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+              Live
+            </span>
           </div>
           
           <div className="space-y-2">
             {isLoading ? (
-              // Loading rows
               Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex items-center p-3 rounded-xl border border-gray-100 animate-pulse">
                   <div className="w-8 h-6 bg-gray-100 rounded italic mr-3"></div>
@@ -185,24 +197,30 @@ export default function LeaderboardPage() {
               remaining.map((entry, index) => {
                 const rank = index + 4;
                 const isCurrentUser = entry.user_id === userId;
+                const badge = getBestBadge(entry.xp);
 
                 if (isCurrentUser) {
                   return (
-                    <div key={entry.user_id} className="flex items-center p-4 rounded-xl bg-[#ffe16d] text-[#221b00] border border-yellow-400 shadow-[0_0_15px_rgba(255,215,0,0.25)] relative overflow-hidden">
+                    <div key={entry.user_id} className="flex items-center p-4 rounded-2xl bg-[#ffe16d] text-[#221b00] border border-yellow-400 shadow-[0_4px_15px_rgba(255,215,0,0.25)] relative overflow-hidden mb-4">
                       <div className="absolute -right-4 -bottom-4 opacity-10">
                         <span className="material-symbols-outlined text-[100px]">star</span>
                       </div>
                       <span className="w-8 text-xl font-black italic">{rank}</span>
-                      <div className="w-12 h-12 rounded-full border-2 border-[#221b00] overflow-hidden mx-3 ring-2 ring-white">
+                      <div className="w-12 h-12 rounded-full border-2 border-[#221b00] overflow-hidden mx-3 ring-4 ring-white/50 shadow-md">
                         <img
                           className="w-full h-full object-cover"
-                          alt="Self portrait"
+                          alt="You"
                           src={entry.student_profiles?.avatar_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuAOUd8Wi9a5h1TV9-1SJu8O10qPztkjnel2zaVFZU_RhnWsfH4xAB5gxqt0v6vsZgJLej2op28pwg6uYf4-bl2IGBpISNmQyWTh1dn64DiJ57_EdLdka-5ze8LleOGNWHRhbwUB5yvjRss7OQBwp_I_3LPiorT4dtBEFlCZrnxeyjY6gVLGh30Vsd75ge82nUXBcydscRRCiaA-N4_ahHAh3NOKrksBE78w2bBTxit2JUusvfTo2icM0P6nK0TUrGzxpo3iTGL99KDZ"}
                         />
                       </div>
                       <div className="flex-grow">
-                        <h4 className="text-sm font-bold">You</h4>
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-[#221b00] text-[#ffe16d] font-bold uppercase tracking-tighter">Rising Genius</span>
+                        <h4 className="text-sm font-black flex items-center gap-1">
+                          You
+                          <span className="text-xs">{badge?.icon}</span>
+                        </h4>
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-[#221b00] text-[#ffe16d] font-black uppercase tracking-tighter">
+                          {badge?.name || "Rising Genius"}
+                        </span>
                       </div>
                       <div className="text-right">
                         <p className="text-xl font-black">{entry.xp.toLocaleString()}</p>
@@ -213,44 +231,49 @@ export default function LeaderboardPage() {
                 }
 
                 return (
-                  <div key={entry.user_id} className="flex items-center p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors group cursor-pointer active:scale-[0.98] duration-75">
+                  <div key={entry.user_id} className="flex items-center p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-all group cursor-pointer active:scale-[0.98] duration-75 hover:shadow-sm">
                     <span className="w-8 text-xl font-bold text-gray-300 group-hover:text-[#143867] transition-colors italic">{rank}</span>
-                    <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mx-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden mx-3 border border-gray-200">
                       <img
                         className="w-full h-full object-cover"
-                        alt="Scholar icon"
+                        alt="Explorer"
                         src={entry.student_profiles?.avatar_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuDZSYWU27g4pkV0bkpRC3qzjSh5niW_Ixg-wHXvPPLEO-B4iYH2K_oP5VVA2QlXZ3zInK6DJ3_ix8Aen8sb8kjHpoTcjrQU57bOzZKAtclc_TWKS2bs5rRIBuT6Z0NCSM8PwXhFtq6ZH77mDLouTOXrpcdMA6PrFpHPUTo3W36zmHLcnYOCXoyMNsUMFWal6Jgd64pQdC2N-aAhoqUDI3prj7jAFnHA39T5PC3plKYB_sniWysIGDB7lwa9tM8M0wQdqgNsQ6gFUBzm"}
                       />
                     </div>
                     <div className="flex-grow">
-                      <h4 className="text-sm font-semibold text-[#143867]">{entry.student_profiles?.username || "Explorer"}</h4>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-bold uppercase tracking-tighter">Logic Master</span>
+                      <h4 className="text-sm font-bold text-[#143867] flex items-center gap-1">
+                        {entry.student_profiles?.username || "Explorer"}
+                        <span className="text-xs opacity-70 grayscale group-hover:grayscale-0 transition-all">{badge?.icon}</span>
+                      </h4>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-500 font-bold uppercase tracking-tighter group-hover:bg-[#143867] group-hover:text-white transition-colors">
+                        {badge?.name || "Logic Master"}
+                      </span>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-[#143867]">{entry.xp.toLocaleString()}</p>
-                      <p className="text-[10px] text-gray-400">pts</p>
+                      <p className="text-sm font-black text-[#143867]">{entry.xp.toLocaleString()}</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase">pts</p>
                     </div>
                   </div>
                 );
               })
             )}
-
-            {/* Handle top 3 being the current user as well in the list if desired,
-                but usually they are only in the podium.
-                If current user is in top 3, we don't show the highlight row below. */}
           </div>
 
-          {/* Insight Chip */}
           {!isLoading && userEntry && (
-            <div className="mt-8 mb-6 p-4 bg-[#ffe16d] rounded-xl border border-yellow-400 flex items-start gap-3 shadow-[0_0_15px_rgba(255,215,0,0.25)]">
-              <span className="material-symbols-outlined text-[#221b00] mt-1">lightbulb</span>
+            <div className="mt-8 mb-6 p-5 bg-gradient-to-br from-[#ffe16d] to-[#ffd700] rounded-[24px] border border-yellow-400 flex items-start gap-4 shadow-lg relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-2 opacity-10">
+                <span className="material-symbols-outlined text-4xl">emoji_events</span>
+              </div>
+              <div className="bg-[#221b00] rounded-full p-2 flex items-center justify-center text-yellow-400 shadow-md">
+                <span className="material-symbols-outlined text-xl">lightbulb</span>
+              </div>
               <div>
-                <h5 className="text-sm font-bold text-[#221b00]">Eureka!</h5>
-                <p className="text-xs text-[#544600] leading-relaxed">
+                <h5 className="text-sm font-black text-[#221b00] uppercase tracking-wider">Strategic Insight</h5>
+                <p className="text-xs text-[#544600] leading-relaxed font-semibold mt-1">
                   {userRank && userRank > 1 ? (
-                    <>You're at Rank #{userRank}. {leaderboardData[userRank - 2] && `Only ${(leaderboardData[userRank - 2].xp - userEntry.xp).toLocaleString()} points away from Rank #${userRank - 1}.`} Complete today's logic quest to climb higher!</>
+                    <>You're at Rank #{userRank}. {leaderboardData[userRank - 2] && `Only ${(leaderboardData[userRank - 2].xp - userEntry.xp).toLocaleString()} XP away from Rank #${userRank - 1}.`} Keep exploring!</>
                   ) : (
-                    <>You're leading the way at Rank #1! Keep exploring to maintain your lead.</>
+                    <>You're leading the expedition at Rank #1! The title of Logic Grandmaster awaits.</>
                   )}
                 </p>
               </div>
@@ -259,7 +282,6 @@ export default function LeaderboardPage() {
         </section>
       </main>
 
-      {/* Clean 3-Tab BottomNavBar Component */}
       <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-4 bg-[#f7f9fb] border-t border-gray-200 z-50">
         <Link 
           href="/dashboard" 

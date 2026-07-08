@@ -25,7 +25,6 @@ const createClient = async () => {
 
 /**
  * Updates the student's avatar.
- * Accepts either a default avatar key (e.g., 'avatar_1') or a storage bucket URL.
  */
 export async function updateAvatar(avatarValue: string) {
   const supabase = await createClient();
@@ -48,8 +47,7 @@ export async function updateAvatar(avatarValue: string) {
 }
 
 /**
- * Fetches the leaderboard data by joining user_gamification and student_profiles.
- * Sorted descending by curiosity_points.
+ * Fetches the leaderboard data.
  */
 export async function getLeaderboard() {
   const supabase = await createClient();
@@ -74,4 +72,31 @@ export async function getLeaderboard() {
   }
 
   return { data };
+}
+
+/**
+ * Awards XP to the user (Mock logic for demonstration).
+ */
+export async function awardXP(amount: number, reason: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  // In a real app, you'd check if they already got XP for this today
+  const { data: currentData } = await supabase
+    .from("user_gamification")
+    .select("xp")
+    .eq("user_id", user.id)
+    .single();
+
+  const newXp = (currentData?.xp || 0) + amount;
+
+  const { error } = await supabase
+    .from("user_gamification")
+    .update({ xp: newXp })
+    .eq("user_id", user.id);
+
+  if (error) return { error: error.message };
+  return { success: true, newXp };
 }
