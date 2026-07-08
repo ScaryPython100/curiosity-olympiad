@@ -42,8 +42,11 @@ export default async function DashboardPage() {
         {/* Feature Grid: Bento-style Cards */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          {/* My Tournaments */}
-          <div className="bg-white border border-gray-200 p-6 rounded-xl hover:shadow-[0_0_20px_rgba(255,215,0,0.15)] transition-all group active:scale-[0.98]">
+{/* My Tournaments */}
+          <Link 
+            href="/tournaments"
+            className="block text-left bg-white border border-gray-200 p-6 rounded-xl hover:shadow-[0_0_20px_rgba(255,215,0,0.15)] transition-all group active:scale-[0.98]"
+          >
             <div className="flex flex-col h-full justify-between">
               <div>
                 <div className="w-12 h-12 bg-[#dde3eb] rounded-lg flex items-center justify-center mb-6 group-hover:bg-[#ffe16d] transition-colors">
@@ -57,7 +60,7 @@ export default async function DashboardPage() {
                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Leaderboard Bento Card */}
           <Link 

@@ -3,215 +3,161 @@
 import { useState } from "react";
 import Link from "next/link";
 
-export default function PracticeArenaPage() {
-  const [activeFilter, setActiveFilter] = useState("All Puzzles");
+export default function PracticePage() {
+  const [isLaunching, setIsLaunching] = useState(false);
 
-  const categories = [
-    "All Puzzles",
-    "Logic & Riddles",
-    "Scientific Mysteries",
-    "Historical Anomalies",
-    "Thought Experiments"
-  ];
+  const handleLaunch = () => {
+    setIsLaunching(true);
+    
+    setTimeout(() => {
+      alert("Safe Exam Browser Simulator Initiated. Simulating Fullscreen Environment Lock...");
+      setIsLaunching(false);
+    }, 1500);
+  };
 
   return (
-    <div className="flex flex-col min-h-screen text-[#191c1e] bg-white font-['Montserrat']">
+    <div className="bg-[#f7f9fb] text-[#191c1e] min-h-screen flex flex-col font-['Montserrat'] antialiased">
       
       {/* TopAppBar */}
-      <header className="bg-[#f7f9fb] sticky top-0 z-50 flex items-center justify-between px-4 w-full h-16 border-b border-gray-200">
+      <header className="bg-[#f7f9fb] border-b border-gray-200 flex items-center justify-between px-4 w-full h-16 fixed top-0 z-50">
         <div className="flex items-center gap-4">
-          <Link
-            href="/dashboard"
+          <Link 
+            href="/dashboard" 
+            className="text-[#143867] hover:bg-gray-100 transition-colors p-2 rounded-full active:scale-95 flex items-center justify-center"
             aria-label="Go back"
-            className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-200 transition-colors"
           >
-            <span className="material-symbols-outlined text-[#143867]">arrow_back</span>
+            <span className="material-symbols-outlined text-[28px]">arrow_back</span>
           </Link>
-          <h1 className="text-xl font-bold text-[#143867]">Practice Arena</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[#143867]">notifications</span>
+          <h1 className="text-xl font-bold text-[#143867]">Exam Environment Simulator</h1>
         </div>
       </header>
 
-      {/* Main Canvas */}
-      <main className="flex-grow w-full max-w-7xl mx-auto px-4 py-8 pb-32">
+      {/* Main Container */}
+      <main className="flex-grow w-full max-w-md mx-auto px-4 pt-24 pb-32 space-y-6">
         
-        {/* Search and Filter Section */}
-        <section className="space-y-6">
-          {/* Search Bar */}
-          <div className="relative group max-w-2xl">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#143867] transition-colors">
-              search
+        {/* Header Illustration/Banner */}
+        <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+          <img 
+            className="w-full h-full object-cover opacity-90" 
+            alt="Minimalist academic workspace simulation screen" 
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtFX9M7vA8sByjQgZhNp4DrtvkLrWH2Yu5leGRQ631Ftjh0VjGsHnhAaDfQMus83OJ5ZE1t-QVzhOalXmn8L_jf4mI8KD5TPPliIY41QqhHBVJTIbYnBIwKaf-7l_QyJkFkcVJZdzbrdun92ZuLkIXLhQpXXUJpEH1i5oGeLr8JMQXPrN67snwsxD4AauotDdVHA7hXzG4fbwKJZ4cWKfcAPL5OmXM3NJG2EIIVfd44bHVMHv9FVF6Omap9rMBe9FUhmWDn0utL0iu"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#143867]/20 to-transparent" />
+          <div className="absolute bottom-4 left-4">
+            <span className="bg-[#ffe16d] text-[#221b00] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-[0_0_20px_rgba(255,215,0,0.15)]">
+              CALIBRATION READY
             </span>
-            <input
-              className="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ffe16d] focus:border-[#143867] transition-all text-sm text-[#191c1e]"
-              placeholder="Search for paradoxes, riddles or mysteries..."
-              type="text"
-            />
           </div>
+        </div>
 
-          {/* Categories Horizontal Scroll */}
-          <div className="flex items-center gap-3 overflow-x-auto overflow-y-hidden hide-scrollbar pb-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setActiveFilter(category)}
-                className={`px-6 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors duration-200 ${
-                  activeFilter === category
-                    ? "bg-[#143867] text-white shadow-md"
-                    : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+        {/* System & Proctoring Check Card */}
+        <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[#143867]">verified_user</span>
+            <h2 className="text-lg font-bold text-[#143867]">System & Proctoring Check</h2>
           </div>
-        </section>
-
-        {/* Quiz Cards List */}
-        <section className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          {/* Card 1: The Fermi Paradox */}
-          <article className="border border-gray-200 p-6 rounded-xl flex flex-col justify-between bg-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_25px_-5px_rgba(255,215,0,0.15)]">
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[#143867] text-3xl">rocket_launch</span>
-                </div>
-                <span className="px-3 py-1 rounded-full bg-[#2f4f7f] text-[#a3c2f9] text-xs font-medium uppercase tracking-wider">
-                  Hard
-                </span>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-green-600" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                <span className="text-sm font-medium text-gray-800">Browser Compatibility</span>
               </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold text-[#143867] leading-tight">The Fermi Paradox</h3>
-                <p className="text-gray-600 text-sm">Where is everybody? Explore the chilling silence of the cosmos.</p>
-              </div>
-              <div className="flex items-center gap-4 text-gray-400 text-xs font-semibold">
-                <div className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">quiz</span>
-                  <span>15 Questions</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">schedule</span>
-                  <span>12 Mins</span>
-                </div>
-              </div>
+              <span className="text-xs font-bold text-green-700 uppercase">Verified</span>
             </div>
-            <button className="mt-8 w-full py-3 bg-[#143867] text-white text-sm font-semibold rounded-lg hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-              Start Puzzle
-              <span className="material-symbols-outlined text-sm">play_arrow</span>
-            </button>
-          </article>
-
-          {/* Card 2: Lateral Thinking Escape */}
-          <article className="border border-gray-200 p-6 rounded-xl flex flex-col justify-between bg-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_25px_-5px_rgba(255,215,0,0.15)]">
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[#143867] text-3xl">extension</span>
-                </div>
-                <span className="px-3 py-1 rounded-full bg-[#ffe16d] text-[#221b00] text-xs font-medium uppercase tracking-wider">
-                  Medium
-                </span>
+            
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-green-600" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                <span className="text-sm font-medium text-gray-800">Screen Resolution</span>
               </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold text-[#143867] leading-tight">Lateral Thinking Escape</h3>
-                <p className="text-gray-600 text-sm">Solve riddles that require looking at the world from a different angle.</p>
-              </div>
-              <div className="flex items-center gap-4 text-gray-400 text-xs font-semibold">
-                <div className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">quiz</span>
-                  <span>10 Questions</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">schedule</span>
-                  <span>10 Mins</span>
-                </div>
-              </div>
+              <span className="text-xs font-bold text-green-700 uppercase">Verified</span>
             </div>
-            <button className="mt-8 w-full py-3 bg-[#143867] text-white text-sm font-semibold rounded-lg hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-              Start Puzzle
-              <span className="material-symbols-outlined text-sm">play_arrow</span>
-            </button>
-          </article>
-
-          {/* Card 3: Classic Thought Experiments */}
-          <article className="border border-gray-200 p-6 rounded-xl flex flex-col justify-between bg-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_25px_-5px_rgba(255,215,0,0.15)]">
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[#143867] text-3xl">psychology</span>
-                </div>
-                <span className="px-3 py-1 rounded-full bg-[#d6e3ff] text-[#264776] text-xs font-medium uppercase tracking-wider">
-                  Easy
-                </span>
+            
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-green-600" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                <span className="text-sm font-medium text-gray-800">Proctoring Permission</span>
               </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold text-[#143867] leading-tight">Classic Thought Experiments</h3>
-                <p className="text-gray-600 text-sm">From Schrödinger's Cat to the Trolley Problem, test your ethics and logic.</p>
-              </div>
-              <div className="flex items-center gap-4 text-gray-400 text-xs font-semibold">
-                <div className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">quiz</span>
-                  <span>12 Questions</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">schedule</span>
-                  <span>15 Mins</span>
-                </div>
-              </div>
+              <span className="text-xs font-bold text-green-700 uppercase">Allowed</span>
             </div>
-            <button className="mt-8 w-full py-3 bg-[#143867] text-white text-sm font-semibold rounded-lg hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-              Start Puzzle
-              <span className="material-symbols-outlined text-sm">play_arrow</span>
-            </button>
-          </article>
+          </div>
+          
+          <p className="text-xs text-gray-500 flex gap-1 items-start">
+            <span className="material-symbols-outlined text-[14px]">info</span>
+            Camera and Microphone have been successfully initialized.
+          </p>
         </section>
 
-        {/* "Insight" Chip / Recommendation */}
-        <div className="mt-12 bg-[#f7f9fb] p-6 border border-gray-200 rounded-2xl flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#ffe16d] opacity-10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
-          <div className="flex-shrink-0 w-16 h-16 rounded-full bg-[#ffe16d] flex items-center justify-center text-[#221b00] shadow-sm">
-            <span className="material-symbols-outlined text-3xl">lightbulb</span>
+        {/* Exam Rules & Guidelines */}
+        <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[#143867]">description</span>
+            <h2 className="text-lg font-bold text-[#143867]">Exam Rules & Guidelines</h2>
           </div>
-          <div className="text-center md:text-left">
-            <h4 className="text-xl font-bold text-[#143867] mb-1">Recommended for You</h4>
-            <p className="text-gray-600 text-sm">Based on your interest in Physics, check out our new module on "String Theory Foundations".</p>
+          
+          <div className="space-y-4">
+            <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-[#705d00]">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                This is an exact <span className="font-bold">15-minute calibration mock test</span> simulating the one-time final Olympiad conditions.
+              </p>
+            </div>
+            
+            <div className="flex items-start gap-3 text-[#ba1a1a]">
+              <span className="material-symbols-outlined mt-0.5">warning</span>
+              <p className="text-sm leading-tight">
+                <span className="font-bold">Note:</span> Tab-switching or exiting fullscreen will trigger proctoring alerts. Multiple infractions will terminate the session.
+              </p>
+            </div>
+            
+            <ul className="space-y-2 pt-2 border-t border-gray-100">
+              <li className="flex items-center gap-3 text-gray-600">
+                <span className="w-1.5 h-1.5 bg-[#143867] rounded-full" />
+                <span className="text-xs font-medium">Ensure a stable internet connection.</span>
+              </li>
+              <li className="flex items-center gap-3 text-gray-600">
+                <span className="w-1.5 h-1.5 bg-[#143867] rounded-full" />
+                <span className="text-xs font-medium">Find a quiet environment without background chatter.</span>
+              </li>
+              <li className="flex items-center gap-3 text-gray-600">
+                <span className="w-1.5 h-1.5 bg-[#143867] rounded-full" />
+                <span className="text-xs font-medium">Keep your face clearly visible to the camera at all times.</span>
+              </li>
+            </ul>
           </div>
-          <button className="md:ml-auto px-6 py-2 border-2 border-[#143867] text-[#143867] text-sm font-semibold rounded-lg hover:bg-[#143867] hover:text-white transition-all">
-            Explore Insight
+        </section>
+
+        {/* Launch Button Action Layout */}
+        <div className="py-2">
+          <button 
+            onClick={handleLaunch}
+            disabled={isLaunching}
+            className={`w-full text-white font-bold py-4 rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase text-sm tracking-wider ${
+              isLaunching ? 'bg-[#705d00]' : 'bg-[#143867] hover:bg-[#2f4f7f]'
+            }`}
+          >
+            {isLaunching ? (
+              <>
+                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Securing Environment...
+              </>
+            ) : (
+              <>
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
+                Launch Safe Exam Browser Simulator
+              </>
+            )}
           </button>
+          <p className="text-center text-xs font-medium text-gray-400 mt-3">
+            By clicking launch, you agree to the proctoring terms.
+          </p>
         </div>
       </main>
 
-      {/* BottomNavBar */}
-      <nav className="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-[#f7f9fb] border-t border-gray-200">
-        <Link href="/dashboard" className="flex flex-col items-center justify-center text-gray-600 p-2 hover:bg-gray-100 transition-colors rounded-xl scale-95 active:scale-90">
-          <span className="material-symbols-outlined">home</span>
-          <span className="text-xs font-semibold">Home</span>
-        </Link>
-        <a className="flex flex-col items-center justify-center text-gray-600 p-2 hover:bg-gray-100 transition-colors rounded-xl scale-95 active:scale-90" href="#">
-          <span className="material-symbols-outlined">person</span>
-          <span className="text-xs font-semibold">Profile</span>
-        </a>
-        <a className="flex flex-col items-center justify-center text-gray-600 p-2 hover:bg-gray-100 transition-colors rounded-xl scale-95 active:scale-90" href="#">
-          <span className="material-symbols-outlined">settings</span>
-          <span className="text-xs font-semibold">Settings</span>
-        </a>
-      </nav>
-      {/* 1. Verify your top header button matches this Link tag: */}
-      <Link 
-        href="/dashboard"
-        aria-label="Go back" 
-        className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-200 transition-colors"
-      >
-        <span className="material-symbols-outlined text-[#143867]">arrow_back</span>
-      </Link>
-
-      {/* ... rest of your practice layout content remains the same ... */}
-
-      {/* 2. Replace the bottom Navigation Bar at the end of the file with this layout: */}
+      {/* Streamlined 3-Tab BottomNavBar Component */}
       <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-4 bg-[#f7f9fb] border-t border-gray-200 z-50">
         <Link 
           href="/dashboard" 
@@ -221,6 +167,7 @@ export default function PracticeArenaPage() {
             <span className="material-symbols-outlined">home</span>
           </div>
         </Link>
+        
         <Link 
           href="/profile" 
           className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200"
@@ -229,6 +176,7 @@ export default function PracticeArenaPage() {
             <span className="material-symbols-outlined">person</span>
           </div>
         </Link>
+        
         <a 
           href="#" 
           className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200"
@@ -238,6 +186,7 @@ export default function PracticeArenaPage() {
           </div>
         </a>
       </nav>
+      
     </div>
   );
 }
