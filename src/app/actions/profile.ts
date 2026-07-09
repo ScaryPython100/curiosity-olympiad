@@ -34,13 +34,26 @@ export async function updateAvatar(avatarValue: string) {
     return { error: "User not authenticated" };
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("student_profiles")
     .update({ avatar_url: avatarValue })
-    .eq("id", user.id);
+    .eq("id", user.id)
+    .select();
 
   if (error) {
     return { error: error.message };
+  }
+
+  if (!data || data.length === 0) {
+    // If no rows were updated, it means the profile doesn't exist yet
+    // Default username as 'Explorer' if it doesn't exist
+    const { error: insertError } = await supabase
+      .from("student_profiles")
+      .insert([{ id: user.id, username: 'Explorer', avatar_url: avatarValue }]);
+
+    if (insertError) {
+      return { error: insertError.message };
+    }
   }
 
   return { success: true };
@@ -92,11 +105,21 @@ export async function awardXP(amount: number, reason: string) {
 
   const newXp = (currentData?.xp || 0) + amount;
 
-  const { error } = await supabase
+  const { data: updateData, error: updateError } = await supabase
     .from("user_gamification")
     .update({ xp: newXp })
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .select();
 
-  if (error) return { error: error.message };
+  if (updateError) return { error: updateError.message };
+
+  if (!updateData || updateData.length === 0) {
+    const { error: insertError } = await supabase
+      .from("user_gamification")
+      .insert([{ user_id: user.id, xp: newXp, curiosity_points: 0 }]);
+
+    if (insertError) return { error: insertError.message };
+  }
+
   return { success: true, newXp };
 }
