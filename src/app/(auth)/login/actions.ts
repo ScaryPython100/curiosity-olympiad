@@ -53,6 +53,13 @@ export async function signUpAction(formData: FormData) {
       .insert([{ id: data.user.id, username }]);
       
     if (profileError) return { error: profileError.message };
+
+    // Initialize gamification data
+    const { error: gamificationError } = await supabase
+      .from("user_gamification")
+      .insert([{ user_id: data.user.id, xp: 0, curiosity_points: 0 }]);
+
+    if (gamificationError) return { error: gamificationError.message };
   }
 
   // Send them to the dashboard!
