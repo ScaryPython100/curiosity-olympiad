@@ -97,7 +97,7 @@ export default function LeaderboardPage() {
                         <img
                           className="w-full h-full object-cover"
                           alt="Rank 2"
-                          src={topThree[1].student_profiles?.avatar_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuDP57RuXi2x5Oi-N6FJbYRupRRXvVm_KtcYT0HvUro2sl6D3VvjGuiJmgamB_bQu8-1nfS3AE5rwpsRmtb3zgody9KeS9jg_7nkd8NE2zrrd08c6cxj2gJkdaqSnOP02zMQ705jficGIloi34z7gC9C_fMItoys2EmQUYebVKU_Ss27Gob9Zzjf_YsscceVXX9wiaWHkZSER0oaiypYdtnSp-h4Bk42TFPWNmHQAgJm1ohSyXdDBnvenPVJFPE9KLTkdod3B_AXCtH9"}
+                          src={topThree[1].student_profiles?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=kalam"}
                         />
                       </div>
                       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gray-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-md">2nd</div>
@@ -121,7 +121,7 @@ export default function LeaderboardPage() {
                         <img
                           className="w-full h-full object-cover"
                           alt="Rank 1"
-                          src={topThree[0].student_profiles?.avatar_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuDcmLovT--8_XlQTazvWKBCOfc0dSS5_1bCSrSpFh9Jmd09HI126PUu6RkERIyR6fZZj6O-ISPTe2QKjvIyEzJdmw_pVc4kJl0CS23C2aIbYpgaXFjbLyrqYu89g8Ni9-BluII1Z8q646xX8pkpaZfrecQrC5ftJLZJfJ-jOG1v9phLTfi8vV15qU_etbTZp1dGXlQsX9IVok7J6n0vkvNX_a9vESmKIMUnTvShWkV9As9HpULZxa740Gio0E5NJkRr5-Fdn0ix10Ye"}
+                          src={topThree[0].student_profiles?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=einstein"}
                         />
                       </div>
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[#705d00] text-4xl animate-bounce">
@@ -151,7 +151,7 @@ export default function LeaderboardPage() {
                         <img
                           className="w-full h-full object-cover"
                           alt="Rank 3"
-                          src={topThree[2].student_profiles?.avatar_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuD2PGNFWl5qfR0NHVUZQ06W8-99rCeuDkAAOmAeci4Lf_zeVSq98O-IFSsnxE0yAhZVTYIBEfaEmmt6AsbHstoS3Gu36OYJFTxtJ4pxdAWoNGWdrRB_H4GKnzGMxIbM-E0GOhx4VmFcuu9wYQIcA4P_MRb7YEUdN-Y6KChtCRPmZBtFD07DrlS7OnbrnmrrS1E0S5bmEaiSFuJ_wqZGaUc-E0RVgLjcmeYtVzM7P_t7bsZ8fqeva-yIrAwYfyKpZgdhdsblowkAaPRK"}
+                          src={topThree[2].student_profiles?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=ada"}
                         />
                       </div>
                       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gray-300 text-gray-800 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-md">3rd</div>
@@ -219,7 +219,7 @@ export default function LeaderboardPage() {
                         <img
                           className="w-full h-full object-cover"
                           alt="You"
-                          src={entry.student_profiles?.avatar_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuAOUd8Wi9a5h1TV9-1SJu8O10qPztkjnel2zaVFZU_RhnWsfH4xAB5gxqt0v6vsZgJLej2op28pwg6uYf4-bl2IGBpISNmQyWTh1dn64DiJ57_EdLdka-5ze8LleOGNWHRhbwUB5yvjRss7OQBwp_I_3LPiorT4dtBEFlCZrnxeyjY6gVLGh30Vsd75ge82nUXBcydscRRCiaA-N4_ahHAh3NOKrksBE78w2bBTxit2JUusvfTo2icM0P6nK0TUrGzxpo3iTGL99KDZ"}
+                          src={entry.student_profiles?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=newton"}
                         />
                       </div>
                       <div className="flex-grow">
@@ -246,7 +246,7 @@ export default function LeaderboardPage() {
                       <img
                         className="w-full h-full object-cover"
                         alt="Explorer"
-                        src={entry.student_profiles?.avatar_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuDZSYWU27g4pkV0bkpRC3qzjSh5niW_Ixg-wHXvPPLEO-B4iYH2K_oP5VVA2QlXZ3zInK6DJ3_ix8Aen8sb8kjHpoTcjrQU57bOzZKAtclc_TWKS2bs5rRIBuT6Z0NCSM8PwXhFtq6ZH77mDLouTOXrpcdMA6PrFpHPUTo3W36zmHLcnYOCXoyMNsUMFWal6Jgd64pQdC2N-aAhoqUDI3prj7jAFnHA39T5PC3plKYB_sniWysIGDB7lwa9tM8M0wQdqgNsQ6gFUBzm"}
+                        src={entry.student_profiles?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=curie"}
                       />
                     </div>
                     <div className="flex-grow">
