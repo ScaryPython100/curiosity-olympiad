@@ -1,14 +1,30 @@
-import { redirect } from "next/navigation";
-import Link from "next/link";
+"use client";
 
-export default async function DashboardPage() {
-  // 1. AUTHENTICATION CHECK (Server-Side)
-  // Example logic for when you connect Supabase:
-  // const supabase = createClient();
-  // const { data: { session } } = await supabase.auth.getSession();
-  // if (!session) {
-  //   redirect("/login");
-  // }
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useUser } from "@/hooks/useUser";
+import { awardXP } from "@/app/actions/profile";
+
+export default function DashboardPage() {
+  const { userId, loading: userLoading } = useUser();
+  const [isAwarding, setIsAwarding] = useState(false);
+  const [showReward, setShowReward] = useState(false);
+
+  const handleClaimXP = async () => {
+    if (isAwarding) return;
+    setIsAwarding(true);
+    try {
+      const result = await awardXP(500, "Daily Exploration Bonus");
+      if (result.success) {
+        setShowReward(true);
+        setTimeout(() => setShowReward(false), 3000);
+      }
+    } catch (err) {
+      console.error("Failed to claim XP:", err);
+    } finally {
+      setIsAwarding(false);
+    }
+  };
 
   return (
     <div className="bg-[#f7f9fb] text-[#191c1e] min-h-screen flex flex-col font-['Montserrat']">
@@ -29,20 +45,39 @@ export default async function DashboardPage() {
       <main className="flex-1 flex flex-col px-4 pt-12 pb-32 max-w-7xl mx-auto w-full">
         
         {/* Welcome Header */}
-        <section className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="mb-2">
+        <section className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
+          <div className="mb-2 flex items-center justify-between">
             <span className="bg-[#ffe16d] text-[#221b00] px-3 py-1 rounded-full text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(255,215,0,0.2)]">
-              Dashboard
+              Explorer Dashboard
             </span>
+
+            {/* Gamification Testing Button */}
+            <button
+              onClick={handleClaimXP}
+              disabled={isAwarding}
+              className="flex items-center gap-2 bg-[#143867] text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-[#1d4d8a] transition-all active:scale-95 disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-sm">auto_awesome</span>
+              {isAwarding ? "Exploring..." : "Claim Daily XP"}
+            </button>
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold text-[#143867] mb-2">Welcome Back, Explorer!</h2>
+
+          <h2 className="text-2xl md:text-3xl font-bold text-[#143867] mb-2">Welcome Back!</h2>
           <p className="text-gray-600 text-base">Your intellectual journey continues today. What will you discover?</p>
+
+          {/* Toast Notification for XP */}
+          {showReward && (
+            <div className="absolute top-0 right-0 mt-12 bg-green-500 text-white px-4 py-2 rounded-xl shadow-lg animate-in fade-in zoom-in slide-in-from-top-4 duration-300 flex items-center gap-2">
+              <span className="material-symbols-outlined">workspace_premium</span>
+              <span className="font-bold">+500 XP Earned!</span>
+            </div>
+          )}
         </section>
 
         {/* Feature Grid: Bento-style Cards */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-{/* My Tournaments */}
+          {/* My Tournaments */}
           <Link 
             href="/tournaments"
             className="block text-left bg-white border border-gray-200 p-6 rounded-xl hover:shadow-[0_0_20px_rgba(255,215,0,0.15)] transition-all group active:scale-[0.98]"
@@ -142,24 +177,19 @@ export default async function DashboardPage() {
 
       {/* Streamlined 3-Tab BottomNavBar Component */}
       <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-4 bg-[#f7f9fb] border-t border-gray-200 z-50">
-        {/* Active Home Tab */}
         <Link className="flex items-center justify-center bg-[#ffe16d] text-[#221b00] rounded-full w-12 h-12 shadow-[0_0_20px_rgba(255,215,0,0.2)] active:scale-90 duration-200 transition-transform" href="/dashboard">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>home</span>
         </Link>
-        
-        {/* Profile Tab */}
         <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/profile">
           <div className="w-12 h-12 flex items-center justify-center">
             <span className="material-symbols-outlined">person</span>
           </div>
         </Link>
-        
-        {/* Settings Tab */}
-        <a className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="#">
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/leaderboard">
           <div className="w-12 h-12 flex items-center justify-center">
-            <span className="material-symbols-outlined">settings</span>
+            <span className="material-symbols-outlined">emoji_events</span>
           </div>
-        </a>
+        </Link>
       </nav>
     </div>
   );

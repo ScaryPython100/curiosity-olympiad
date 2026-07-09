@@ -181,6 +181,15 @@ export default function LeaderboardPage() {
           </div>
           
           <div className="space-y-2">
+            {!isLoading && leaderboardData.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <span className="material-symbols-outlined text-4xl text-gray-300">group_off</span>
+                </div>
+                <h3 className="text-lg font-bold text-[#143867]">The stage is empty!</h3>
+                <p className="text-sm text-gray-500 max-w-[200px]">Be the first explorer to claim your spot on the standings.</p>
+              </div>
+            )}
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex items-center p-3 rounded-xl border border-gray-100 animate-pulse">

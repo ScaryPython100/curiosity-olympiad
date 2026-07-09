@@ -113,9 +113,9 @@ export default function ProfilePage() {
               </div>
               <button
                 onClick={() => setShowAvatarModal(true)}
-                className="absolute bottom-0 right-0 bg-[#143867] text-white p-2 rounded-full shadow-md hover:bg-[#1d4d8a] transition-all active:scale-90"
+                className="absolute bottom-0 right-0 bg-[#143867] text-white p-2.5 rounded-full shadow-xl hover:bg-[#1d4d8a] transition-all active:scale-90 border-2 border-white group-hover:scale-110"
               >
-                <span className="material-symbols-outlined text-sm">edit</span>
+                <span className="material-symbols-outlined text-base">photo_camera</span>
               </button>
             </div>
 
@@ -164,10 +164,12 @@ export default function ProfilePage() {
         <section className="mb-8">
           <div className="flex items-center justify-between mb-4 px-2">
             <h2 className="text-lg font-bold text-[#143867] flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#ea580c]">stars</span>
-              Achievements
+              <span className="material-symbols-outlined text-[#ea580c]">military_tech</span>
+              Academic Badges
             </h2>
-            <span className="text-xs font-bold text-gray-400 uppercase">{unlockedBadges.length} / {BADGES.length} Unlocked</span>
+            <span className="text-xs font-bold text-[#ea580c] bg-orange-50 px-3 py-1 rounded-full border border-orange-100">
+              {unlockedBadges.length} / {BADGES.length} UNLOCKED
+            </span>
           </div>
           <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
             {BADGES.map((badge) => {
