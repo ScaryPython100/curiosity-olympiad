@@ -97,7 +97,7 @@ export default function LeaderboardPage() {
                         <img
                           className="w-full h-full object-cover"
                           alt="Rank 2"
-                          src={topThree[1].student_profiles?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=kalam"}
+                          src={topThree[1].student_profiles?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/A._P._J._Abdul_Kalam.jpg/500px-A._P._J._Abdul_Kalam.jpg"}
                         />
                       </div>
                       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gray-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-md">2nd</div>
@@ -121,7 +121,7 @@ export default function LeaderboardPage() {
                         <img
                           className="w-full h-full object-cover"
                           alt="Rank 1"
-                          src={topThree[0].student_profiles?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=einstein"}
+                          src={topThree[0].student_profiles?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Albert_Einstein_Head_cleaned.jpg/500px-Albert_Einstein_Head_cleaned.jpg"}
                         />
                       </div>
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[#705d00] text-4xl animate-bounce">
@@ -151,7 +151,7 @@ export default function LeaderboardPage() {
                         <img
                           className="w-full h-full object-cover"
                           alt="Rank 3"
-                          src={topThree[2].student_profiles?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=ada"}
+                          src={topThree[2].student_profiles?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Ada_Lovelace_daguerreotype_by_Antoine_Claudet_1843_-_cropped.png/500px-Ada_Lovelace_daguerreotype_by_Antoine_Claudet_1843_-_cropped.png"}
                         />
                       </div>
                       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gray-300 text-gray-800 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-md">3rd</div>
@@ -219,7 +219,7 @@ export default function LeaderboardPage() {
                         <img
                           className="w-full h-full object-cover"
                           alt="You"
-                          src={entry.student_profiles?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=newton"}
+                          src={entry.student_profiles?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Portrait_of_Sir_Isaac_Newton%2C_1689_%28brightened%29.jpg/500px-Portrait_of_Sir_Isaac_Newton%2C_1689_%28brightened%29.jpg"}
                         />
                       </div>
                       <div className="flex-grow">
@@ -246,7 +246,7 @@ export default function LeaderboardPage() {
                       <img
                         className="w-full h-full object-cover"
                         alt="Explorer"
-                        src={entry.student_profiles?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=curie"}
+                        src={entry.student_profiles?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Marie_Curie_c._1920s.jpg/500px-Marie_Curie_c._1920s.jpg"}
                       />
                     </div>
                     <div className="flex-grow">
