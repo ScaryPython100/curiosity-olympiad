@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { calculateLevelProgress, AVATARS, BADGES } from "@/utils/gamification";
 import { updateAvatar } from "@/app/actions/profile";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { userId, loading: userLoading } = useUser();
   const [userStats, setUserStats] = useState({ xp: 0, points: 0, username: "", avatar_url: "" });
   const [loading, setLoading] = useState(true);
@@ -62,6 +64,7 @@ export default function ProfilePage() {
       if (result.success) {
         setUserStats(prev => ({ ...prev, avatar_url: url }));
         setShowAvatarModal(false);
+        router.refresh();
       }
     } catch (err) {
       console.error("Failed to update avatar:", err);

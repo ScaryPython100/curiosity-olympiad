@@ -96,18 +96,27 @@ export async function awardXP(amount: number, reason: string) {
 
   if (!user) return { error: "Not authenticated" };
 
-  // In a real app, you'd check if they already got XP for this today
+  // Check if they already got XP for this today to prevent spam
   const { data: currentData } = await supabase
     .from("user_gamification")
-    .select("xp")
+    .select("xp, curiosity_points, last_claimed_date")
     .eq("user_id", user.id)
     .single();
 
+  if (currentData?.last_claimed_date) {
+    const timeSinceLastClaim = Date.now() - new Date(currentData.last_claimed_date).getTime();
+    if (timeSinceLastClaim < 24 * 60 * 60 * 1000) {
+      return { error: "Daily XP already claimed today. Come back tomorrow!" };
+    }
+  }
+
   const newXp = (currentData?.xp || 0) + amount;
+  const newPoints = (currentData?.curiosity_points || 0) + amount;
+  const nowIso = new Date().toISOString();
 
   const { data: updateData, error: updateError } = await supabase
     .from("user_gamification")
-    .update({ xp: newXp })
+    .update({ xp: newXp, curiosity_points: newPoints, last_claimed_date: nowIso })
     .eq("user_id", user.id)
     .select();
 
@@ -116,7 +125,7 @@ export async function awardXP(amount: number, reason: string) {
   if (!updateData || updateData.length === 0) {
     const { error: insertError } = await supabase
       .from("user_gamification")
-      .insert([{ user_id: user.id, xp: newXp, curiosity_points: 0 }]);
+      .insert([{ user_id: user.id, xp: newXp, curiosity_points: newPoints, last_claimed_date: nowIso }]);
 
     if (insertError) return { error: insertError.message };
   }

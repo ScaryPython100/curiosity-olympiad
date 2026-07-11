@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { awardXP } from "@/app/actions/profile";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { userId, loading: userLoading } = useUser();
   const [isAwarding, setIsAwarding] = useState(false);
   const [showReward, setShowReward] = useState(false);
@@ -18,6 +20,9 @@ export default function DashboardPage() {
       if (result.success) {
         setShowReward(true);
         setTimeout(() => setShowReward(false), 3000);
+        router.refresh();
+      } else if (result.error) {
+        alert(result.error);
       }
     } catch (err) {
       console.error("Failed to claim XP:", err);
