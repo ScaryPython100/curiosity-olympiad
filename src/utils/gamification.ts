@@ -34,10 +34,10 @@ export function calculateLevelProgress(totalXp: number) {
 }
 
 export const AVATARS = [
-  { id: 'kalam', name: 'Abdul Kalam', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=kalam' },
-  { id: 'einstein', name: 'Albert Einstein', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=einstein' },
-  { id: 'curie', name: 'Marie Curie', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=curie' },
-  { id: 'ada', name: 'Ada Lovelace', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ada' },
-  { id: 'newton', name: 'Isaac Newton', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=newton' },
-  { id: 'hopper', name: 'Grace Hopper', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=hopper' },
+  { id: 'kalam', name: 'Abdul Kalam', url: '/avatars/abdul_kalam_1783786598184.png' },
+  { id: 'einstein', name: 'Albert Einstein', url: '/avatars/albert_einstein_1783786524612.png' },
+  { id: 'curie', name: 'Marie Curie', url: '/avatars/marie_curie_1783786533839.png' },
+  { id: 'ada', name: 'Ada Lovelace', url: '/avatars/ada_lovelace_1783786544449.png' },
+  { id: 'newton', name: 'Isaac Newton', url: '/avatars/isaac_newton_1783786553524.png' },
+  { id: 'hopper', name: 'Grace Hopper', url: '/avatars/grace_hopper_1783786562459.png' },
 ];

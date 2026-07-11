@@ -2,16 +2,17 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
-import { calculateLevelProgress, AVATARS, BADGES } from "@/utils/gamification";
-import { updateAvatar } from "@/app/actions/profile";
+import { calculateLevelProgress, BADGES } from "@/utils/gamification";
+import { AvatarPickerModal } from "@/components/AvatarPickerModal";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { userId, loading: userLoading } = useUser();
-  const [userStats, setUserStats] = useState({ xp: 0, points: 0, username: "", avatar_url: "" });
+  const [userStats, setUserStats] = useState({ xp: 0, points: 0, username: "", avatar_url: "", rank: "-", streak: "-", quests: "-" });
   const [loading, setLoading] = useState(true);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
 
   const { level, progressPercentage, unlockedBadges, nextBadge } = calculateLevelProgress(userStats.xp);
 
@@ -20,28 +21,26 @@ export default function ProfilePage() {
       if (!userId) return;
 
       try {
-        const { createClient } = await import("@/utils/supabase/client");
-        const supabase = createClient();
+        const { getProfileStats } = await import("@/app/actions/profile");
+        const res = await getProfileStats();
 
-        const { data: gamificationData } = await supabase
-          .from("user_gamification")
-          .select("xp, curiosity_points")
-          .eq("user_id", userId)
-          .single();
+        // Read avatar from localStorage (the DB table lacks an avatar_url column)
+        const savedAvatar = typeof window !== "undefined"
+          ? localStorage.getItem("curiosity_avatar_url") || ""
+          : "";
 
-        const { data: profileData } = await supabase
-          .from("student_profiles")
-          .select("username, avatar_url")
-          .eq("id", userId)
-          .single();
-
-        if (gamificationData || profileData) {
+        if (res.data) {
           setUserStats({
-            xp: gamificationData?.xp || 0,
-            points: gamificationData?.curiosity_points || 0,
-            username: profileData?.username || "Explorer",
-            avatar_url: profileData?.avatar_url || ""
+            xp: res.data.xp,
+            points: res.data.points,
+            username: res.data.username,
+            avatar_url: savedAvatar,
+            rank: res.data.rank,
+            streak: res.data.streak,
+            quests: res.data.quests
           });
+        } else {
+          setUserStats(prev => ({ ...prev, avatar_url: savedAvatar }));
         }
       } catch (err) {
         console.error("Error fetching stats:", err);
@@ -54,21 +53,6 @@ export default function ProfilePage() {
       fetchStats();
     }
   }, [userId, userLoading]);
-
-  const handleAvatarSelect = async (url: string) => {
-    setIsUpdating(true);
-    try {
-      const result = await updateAvatar(url);
-      if (result.success) {
-        setUserStats(prev => ({ ...prev, avatar_url: url }));
-        setShowAvatarModal(false);
-      }
-    } catch (err) {
-      console.error("Failed to update avatar:", err);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
 
   if (userLoading || loading) {
     return (
@@ -195,9 +179,9 @@ export default function ProfilePage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: 'Total XP', value: userStats.xp.toLocaleString(), icon: 'rocket_launch', color: 'bg-blue-50 text-blue-600' },
-            { label: 'Quests', value: '24', icon: 'quiz', color: 'bg-purple-50 text-purple-600' },
-            { label: 'Streak', value: '7 Days', icon: 'local_fire_department', color: 'bg-orange-50 text-orange-600' },
-            { label: 'Ranking', value: '#12', icon: 'leaderboard', color: 'bg-emerald-50 text-emerald-600' },
+            { label: 'Quests', value: userStats.quests, icon: 'quiz', color: 'bg-purple-50 text-purple-600' },
+            { label: 'Streak', value: userStats.streak, icon: 'local_fire_department', color: 'bg-orange-50 text-orange-600' },
+            { label: 'Ranking', value: userStats.rank, icon: 'leaderboard', color: 'bg-emerald-50 text-emerald-600' },
           ].map((stat, i) => (
             <div key={i} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center gap-2 hover:shadow-md transition-shadow">
               <div className={`w-10 h-10 ${stat.color} rounded-xl flex items-center justify-center`}>
@@ -215,35 +199,11 @@ export default function ProfilePage() {
 
       {/* Avatar Selection Modal */}
       {showAvatarModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-[#143867]">Choose your Legend</h3>
-              <button onClick={() => setShowAvatarModal(false)} className="text-gray-400 hover:text-gray-600">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <div className="p-6 grid grid-cols-3 gap-4 max-h-[400px] overflow-y-auto">
-              {AVATARS.map((avatar) => (
-                <button
-                  key={avatar.id}
-                  disabled={isUpdating}
-                  onClick={() => handleAvatarSelect(avatar.url)}
-                  className={`flex flex-col items-center gap-2 p-2 rounded-2xl transition-all ${
-                    userStats.avatar_url === avatar.url
-                      ? 'bg-[#ffe16d] ring-2 ring-yellow-400'
-                      : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-sm">
-                    <img src={avatar.url} alt={avatar.name} className="w-full h-full object-cover" />
-                  </div>
-                  <span className="text-[10px] font-bold text-[#143867] text-center">{avatar.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        <AvatarPickerModal
+          currentAvatarUrl={userStats.avatar_url}
+          onClose={() => setShowAvatarModal(false)}
+          onSuccess={(url) => setUserStats(prev => ({ ...prev, avatar_url: url }))}
+        />
       )}
 
       {/* Global Fixed BottomNavBar */}
@@ -269,13 +229,13 @@ export default function ProfilePage() {
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
           <span className="text-[10px] font-bold mt-0.5">Profile</span>
         </Link>
-        <a 
-          href="#" 
+        <Link 
+          href="/settings" 
           className="flex flex-col items-center justify-center text-gray-500 hover:text-[#143867] transition-all"
         >
           <span className="material-symbols-outlined mb-1">settings</span>
           <span className="text-[10px] font-semibold">Settings</span>
-        </a>
+        </Link>
       </nav>
       
     </div>

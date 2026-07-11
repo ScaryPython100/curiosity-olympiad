@@ -8,29 +8,29 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
-  if (isLogin) {
-    // 1. LOGIN LOGIC
-    // After successful log in:
-    window.location.href = '/dashboard';
-  } else {
-    // 2. SIGNUP LOGIC
-    // Call your Supabase sign-up function here...
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
+    if (!isLogin) formData.append("identifier", username);
+
+    if (isLogin) {
+      const res = await signInAction(formData);
+      if (res?.error) setError(res.error);
+    } else {
+      const res = await signUpAction(formData);
+      if (res?.error) setError(res.error);
+    }
     
-    // Once the database returns a successful response:
-    alert("Account created successfully! Please sign in with your new credentials.");
-    
-    // Clear out the state variables so the boxes reset
-    setPassword("");
-    setUsername("");
-    
-    // Switch the UI tab cleanly back to Sign In mode
-    setIsLogin(true);
-  }
-};
+    setIsLoading(false);
+  };
 
   return (
     <div className="min-h-screen flex flex-col justify-center bg-white p-6" style={{ fontFamily: 'Montserrat, sans-serif' }}>
@@ -79,6 +79,11 @@ export default function AuthPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {error && (
+            <div className="bg-red-50 text-red-500 border border-red-200 p-3 rounded-md text-sm font-medium">
+              {error}
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <label className="font-semibold text-sm text-gray-900" htmlFor="email">
               Email Address

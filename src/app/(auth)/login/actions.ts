@@ -57,7 +57,7 @@ export async function signUpAction(formData: FormData) {
     // Initialize gamification data
     const { error: gamificationError } = await supabase
       .from("user_gamification")
-      .insert([{ user_id: data.user.id, xp: 0, curiosity_points: 0 }]);
+      .insert([{ id: data.user.id, user_id: data.user.id, xp: 0, curiosity_points: 0 }]);
 
     if (gamificationError) return { error: gamificationError.message };
   }
