@@ -23,9 +23,12 @@ export function AvatarPickerModal({ currentAvatarUrl, onClose, onSuccess }: Avat
         onSuccess(url);
         onClose();
         router.refresh();
+      } else if (result.error) {
+        alert(result.error);
       }
     } catch (err) {
       console.error("Failed to update avatar:", err);
+      alert((err as Error).message || "An unexpected error occurred while saving.");
     } finally {
       setIsUpdating(false);
     }

@@ -114,15 +114,14 @@ export async function awardXP(amount: number, reason: string) {
   const newPoints = (currentData?.curiosity_points || 0) + amount;
   const nowIso = new Date().toISOString();
 
-  const { data: updateData, error: updateError } = await supabase
-    .from("user_gamification")
-    .update({ xp: newXp, curiosity_points: newPoints, last_claimed_date: nowIso })
-    .eq("user_id", user.id)
-    .select();
+  if (currentData) {
+    const { error: updateError } = await supabase
+      .from("user_gamification")
+      .update({ xp: newXp, curiosity_points: newPoints, last_claimed_date: nowIso })
+      .eq("user_id", user.id);
 
-  if (updateError) return { error: updateError.message };
-
-  if (!updateData || updateData.length === 0) {
+    if (updateError) return { error: updateError.message };
+  } else {
     const { error: insertError } = await supabase
       .from("user_gamification")
       .insert([{ user_id: user.id, xp: newXp, curiosity_points: newPoints, last_claimed_date: nowIso }]);
