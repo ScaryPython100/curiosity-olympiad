@@ -18,7 +18,7 @@ export function AvatarPickerModal({ currentAvatarUrl, onClose, onSuccess }: Avat
   const handleAvatarSelect = async (url: string) => {
     setIsUpdating(true);
     try {
-      const result = await updateAvatar(url);
+      const result = await updateAvatar(url) as any;
       if (result.success) {
         // Persist avatar selection in localStorage since the DB column doesn't exist
         if (typeof window !== "undefined") {
