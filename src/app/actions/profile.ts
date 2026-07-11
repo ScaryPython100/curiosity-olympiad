@@ -29,7 +29,7 @@ const createClient = async () => {
  * table does not have an avatar_url column.
  * This server action is kept as a no-op success stub so the client flow works.
  */
-export async function updateAvatar(avatarValue: string) {
+export async function updateAvatar(avatarValue: string): Promise<{ success?: boolean; error?: string }> {
   // The student_profiles table does not have an avatar_url column,
   // so we simply return success. The avatar URL is persisted in localStorage
   // by the AvatarPickerModal component.
