@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useUser } from "@/hooks/useUser";
 import { getLeaderboard } from "@/app/actions/profile";
-import { BADGES } from "@/utils/gamification";
+import { BADGES, AVATARS } from "@/utils/gamification";
 
 interface LeaderboardEntry {
   user_id: string;
@@ -12,14 +12,27 @@ interface LeaderboardEntry {
   curiosity_points: number;
   student_profiles: {
     username: string;
-    avatar_url: string;
   } | null;
+}
+
+// Pick a deterministic fallback avatar based on the user_id
+function getFallbackAvatar(userId: string): string {
+  const index = userId.charCodeAt(0) % AVATARS.length;
+  return AVATARS[index].url;
 }
 
 export default function LeaderboardPage() {
   const { userId, loading: userLoading } = useUser();
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Read the current user's avatar from localStorage
+  const [myAvatar, setMyAvatar] = useState("");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setMyAvatar(localStorage.getItem("curiosity_avatar_url") || "");
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchLeaderboard() {
@@ -50,6 +63,12 @@ export default function LeaderboardPage() {
   const getBestBadge = (xp: number) => {
     const unlocked = BADGES.filter(b => xp >= b.minXp);
     return unlocked.length > 0 ? unlocked[unlocked.length - 1] : null;
+  };
+
+  // Resolve avatar: for the current user use localStorage, for others use a deterministic fallback
+  const getAvatar = (entry: LeaderboardEntry) => {
+    if (entry.user_id === userId && myAvatar) return myAvatar;
+    return getFallbackAvatar(entry.user_id);
   };
 
   return (
@@ -97,7 +116,7 @@ export default function LeaderboardPage() {
                         <img
                           className="w-full h-full object-cover"
                           alt="Rank 2"
-                          src={topThree[1].student_profiles?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/A._P._J._Abdul_Kalam.jpg/500px-A._P._J._Abdul_Kalam.jpg"}
+                          src={getAvatar(topThree[1])}
                         />
                       </div>
                       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gray-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-md">2nd</div>
@@ -107,7 +126,7 @@ export default function LeaderboardPage() {
                     </p>
                     <div className="flex items-center gap-1">
                       <span className="text-[10px] grayscale brightness-125">{getBestBadge(topThree[1].xp)?.icon}</span>
-                      <p className="text-xs text-gray-500 font-bold">{topThree[1].xp.toLocaleString()} pts</p>
+                      <p className="text-xs text-gray-500 font-bold">{topThree[1].xp.toLocaleString()} XP</p>
                     </div>
                     <div className="w-full h-16 bg-gray-200 rounded-t-lg mt-4 opacity-40 shadow-inner"></div>
                   </div>
@@ -121,7 +140,7 @@ export default function LeaderboardPage() {
                         <img
                           className="w-full h-full object-cover"
                           alt="Rank 1"
-                          src={topThree[0].student_profiles?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Albert_Einstein_Head_cleaned.jpg/500px-Albert_Einstein_Head_cleaned.jpg"}
+                          src={getAvatar(topThree[0])}
                         />
                       </div>
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[#705d00] text-4xl animate-bounce">
@@ -134,7 +153,7 @@ export default function LeaderboardPage() {
                     </p>
                     <div className="flex items-center gap-1">
                       <span className="text-xs">{getBestBadge(topThree[0].xp)?.icon}</span>
-                      <p className="text-xs text-[#705d00] font-extrabold">{topThree[0].xp.toLocaleString()} pts</p>
+                      <p className="text-xs text-[#705d00] font-extrabold">{topThree[0].xp.toLocaleString()} XP</p>
                     </div>
                     <div className="w-full h-24 bg-[#ffe16d] rounded-t-lg mt-4 shadow-sm flex items-center justify-center relative overflow-hidden">
                       <span className="material-symbols-outlined text-[#221b00] opacity-20 text-4xl">school</span>
@@ -151,7 +170,7 @@ export default function LeaderboardPage() {
                         <img
                           className="w-full h-full object-cover"
                           alt="Rank 3"
-                          src={topThree[2].student_profiles?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Ada_Lovelace_daguerreotype_by_Antoine_Claudet_1843_-_cropped.png/500px-Ada_Lovelace_daguerreotype_by_Antoine_Claudet_1843_-_cropped.png"}
+                          src={getAvatar(topThree[2])}
                         />
                       </div>
                       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gray-300 text-gray-800 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-md">3rd</div>
@@ -161,7 +180,7 @@ export default function LeaderboardPage() {
                     </p>
                     <div className="flex items-center gap-1">
                       <span className="text-[10px] grayscale brightness-110">{getBestBadge(topThree[2].xp)?.icon}</span>
-                      <p className="text-xs text-gray-500 font-bold">{topThree[2].xp.toLocaleString()} pts</p>
+                      <p className="text-xs text-gray-500 font-bold">{topThree[2].xp.toLocaleString()} XP</p>
                     </div>
                     <div className="w-full h-12 bg-gray-200 rounded-t-lg mt-4 opacity-20 shadow-inner"></div>
                   </div>
@@ -207,6 +226,7 @@ export default function LeaderboardPage() {
                 const rank = index + 4;
                 const isCurrentUser = entry.user_id === userId;
                 const badge = getBestBadge(entry.xp);
+                const avatarSrc = getAvatar(entry);
 
                 if (isCurrentUser) {
                   return (
@@ -219,7 +239,7 @@ export default function LeaderboardPage() {
                         <img
                           className="w-full h-full object-cover"
                           alt="You"
-                          src={entry.student_profiles?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Portrait_of_Sir_Isaac_Newton%2C_1689_%28brightened%29.jpg/500px-Portrait_of_Sir_Isaac_Newton%2C_1689_%28brightened%29.jpg"}
+                          src={avatarSrc}
                         />
                       </div>
                       <div className="flex-grow">
@@ -233,7 +253,7 @@ export default function LeaderboardPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-xl font-black">{entry.xp.toLocaleString()}</p>
-                        <p className="text-[10px] uppercase font-bold opacity-70">Points</p>
+                        <p className="text-[10px] uppercase font-bold opacity-70">XP</p>
                       </div>
                     </div>
                   );
@@ -246,7 +266,7 @@ export default function LeaderboardPage() {
                       <img
                         className="w-full h-full object-cover"
                         alt="Explorer"
-                        src={entry.student_profiles?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Marie_Curie_c._1920s.jpg/500px-Marie_Curie_c._1920s.jpg"}
+                        src={avatarSrc}
                       />
                     </div>
                     <div className="flex-grow">
@@ -260,7 +280,7 @@ export default function LeaderboardPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-black text-[#143867]">{entry.xp.toLocaleString()}</p>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase">pts</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase">XP</p>
                     </div>
                   </div>
                 );
@@ -280,9 +300,9 @@ export default function LeaderboardPage() {
                 <h5 className="text-sm font-black text-[#221b00] uppercase tracking-wider">Strategic Insight</h5>
                 <p className="text-xs text-[#544600] leading-relaxed font-semibold mt-1">
                   {userRank && userRank > 1 ? (
-                    <>You're at Rank #{userRank}. {leaderboardData[userRank - 2] && `Only ${(leaderboardData[userRank - 2].xp - userEntry.xp).toLocaleString()} XP away from Rank #${userRank - 1}.`} Keep exploring!</>
+                    <>You&apos;re at Rank #{userRank}. {leaderboardData[userRank - 2] && `Only ${(leaderboardData[userRank - 2].xp - userEntry.xp).toLocaleString()} XP away from Rank #${userRank - 1}.`} Keep exploring!</>
                   ) : (
-                    <>You're leading the expedition at Rank #1! The title of Logic Grandmaster awaits.</>
+                    <>You&apos;re leading the expedition at Rank #1! The title of Logic Grandmaster awaits.</>
                   )}
                 </p>
               </div>
@@ -308,14 +328,14 @@ export default function LeaderboardPage() {
             <span className="material-symbols-outlined">person</span>
           </div>
         </Link>
-        <a 
-          href="#" 
+        <Link 
+          href="/settings" 
           className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200"
         >
           <div className="w-12 h-12 flex items-center justify-center">
             <span className="material-symbols-outlined">settings</span>
           </div>
-        </a>
+        </Link>
       </nav>
       
     </div>

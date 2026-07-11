@@ -11,6 +11,23 @@ export default function DashboardPage() {
   const { userId, loading: userLoading } = useUser();
   const [isAwarding, setIsAwarding] = useState(false);
   const [showReward, setShowReward] = useState(false);
+  const [streak, setStreak] = useState("0 Days");
+
+  useEffect(() => {
+    const fetchStreak = async () => {
+      if (!userId) return;
+      try {
+        const { getProfileStats } = await import("@/app/actions/profile");
+        const res = await getProfileStats();
+        if (res.data) {
+          setStreak(res.data.streak);
+        }
+      } catch (err) {
+        console.error("Error fetching streak:", err);
+      }
+    };
+    if (!userLoading) fetchStreak();
+  }, [userId, userLoading]);
 
   const handleClaimXP = async () => {
     if (isAwarding) return;
@@ -20,6 +37,8 @@ export default function DashboardPage() {
       if (result.success) {
         setShowReward(true);
         setTimeout(() => setShowReward(false), 3000);
+        // Optimistically update the streak if they just claimed
+        setStreak("1 Days");
         router.refresh();
       } else if (result.error) {
         alert(result.error);
@@ -148,7 +167,7 @@ export default function DashboardPage() {
           <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-[#143867] text-white p-10 flex flex-col justify-center min-h-[200px]">
             <div className="z-10">
               <h4 className="text-xl font-bold mb-2">Academic Streak</h4>
-              <p className="text-5xl font-bold mb-2">12 Days</p>
+              <p className="text-5xl font-bold mb-2">{streak}</p>
               <p className="text-xs opacity-80">Consistent curiosity leads to breakthroughs.</p>
             </div>
             <div className="absolute -right-10 -bottom-10 opacity-10">
