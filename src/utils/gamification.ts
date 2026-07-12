@@ -17,6 +17,11 @@ export const BADGES: Badge[] = [
   { id: 'master', name: 'Logic Master', icon: '👑', description: '25,000 XP reached', minXp: 25000 },
 ];
 
+export const getBestBadge = (xp: number) => {
+  const unlocked = BADGES.filter(b => xp >= b.minXp);
+  return unlocked.length > 0 ? unlocked[unlocked.length - 1] : null;
+};
+
 export function calculateLevelProgress(totalXp: number) {
   const level = Math.floor(totalXp / XP_PER_LEVEL) + 1;
   const currentLevelXp = totalXp % XP_PER_LEVEL;

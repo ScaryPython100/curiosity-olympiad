@@ -39,14 +39,29 @@ export async function updateAvatar(avatarValue: string): Promise<{ success?: boo
 /**
  * Fetches the leaderboard data.
  */
-export async function getLeaderboard() {
+export async function getLeaderboard(timeframe: 'all_time' | 'weekly' | 'daily' | 'friends' = 'all_time') {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  // Query gamification data (sorted by XP, top 50)
-  const { data: gamificationData, error: gamError } = await supabase
+  let orderByCol = 'xp';
+  if (timeframe === 'weekly') orderByCol = 'weekly_xp';
+  if (timeframe === 'daily') orderByCol = 'daily_xp';
+
+  let query = supabase
     .from("user_gamification")
-    .select("user_id, xp, curiosity_points")
-    .order("xp", { ascending: false })
+    .select("user_id, xp, daily_xp, weekly_xp, curiosity_points, last_daily_reset, last_weekly_reset, last_claimed_date");
+
+  if (timeframe === 'friends') {
+    if (!user) return { data: [] };
+    const { data: follows } = await supabase.from("follows").select("following_id").eq("follower_id", user.id);
+    if (!follows || follows.length === 0) return { data: [] };
+    const followingIds = follows.map(f => f.following_id);
+    query = query.in("user_id", followingIds);
+  }
+
+  // Query gamification data
+  const { data: gamificationData, error: gamError } = await query
+    .order(orderByCol, { ascending: false })
     .limit(50);
 
   if (gamError) {
@@ -58,8 +73,50 @@ export async function getLeaderboard() {
     return { data: [] };
   }
 
+  const now = new Date();
+
+  // Process data locally to reset expired XP
+  let processedData = gamificationData.map((row) => {
+    // Retroactive fallback for users created before the new columns
+    let rowDaily = row.last_daily_reset === null ? row.xp : row.daily_xp;
+    let rowWeekly = row.last_weekly_reset === null ? row.xp : row.weekly_xp;
+
+    const dailyResetRef = row.last_daily_reset || row.last_claimed_date;
+    if (dailyResetRef) {
+      const lastDaily = new Date(dailyResetRef);
+      const dailyBoundary = new Date(lastDaily);
+      dailyBoundary.setHours(23, 59, 59, 999);
+      if (now > dailyBoundary) rowDaily = 0;
+    }
+
+    const weeklyResetRef = row.last_weekly_reset || row.last_claimed_date;
+    if (weeklyResetRef) {
+      const lastWeekly = new Date(weeklyResetRef);
+      const weeklyBoundary = new Date(lastWeekly);
+      const diffToSunday = lastWeekly.getDay() === 0 ? 0 : 7 - lastWeekly.getDay();
+      weeklyBoundary.setDate(lastWeekly.getDate() + diffToSunday);
+      weeklyBoundary.setHours(23, 59, 59, 999);
+      if (now > weeklyBoundary) rowWeekly = 0;
+    }
+
+    return { ...row, daily_xp: rowDaily, weekly_xp: rowWeekly };
+  });
+
+  // Re-sort and filter after adjusting for time
+  if (timeframe === 'daily') {
+    processedData = processedData.filter(r => r.daily_xp > 0);
+    processedData.sort((a, b) => b.daily_xp - a.daily_xp);
+  } else if (timeframe === 'weekly') {
+    processedData = processedData.filter(r => r.weekly_xp > 0);
+    processedData.sort((a, b) => b.weekly_xp - a.weekly_xp);
+  }
+
+  if (processedData.length === 0) {
+    return { data: [] };
+  }
+
   // Fetch usernames from student_profiles for the user_ids we got
-  const userIds = gamificationData.map((row) => row.user_id);
+  const userIds = processedData.map((row) => row.user_id);
   const { data: profilesData } = await supabase
     .from("student_profiles")
     .select("id, username")
@@ -74,12 +131,19 @@ export async function getLeaderboard() {
   }
 
   // Merge the two datasets
-  const data = gamificationData.map((row) => ({
-    user_id: row.user_id,
-    xp: row.xp,
-    curiosity_points: row.curiosity_points,
-    student_profiles: profileMap.get(row.user_id) || null,
-  }));
+  const data = processedData.map((row) => {
+    let displayXp = row.xp;
+    if (timeframe === 'daily') displayXp = row.daily_xp;
+    if (timeframe === 'weekly') displayXp = row.weekly_xp;
+
+    return {
+      user_id: row.user_id,
+      xp: displayXp,
+      all_time_xp: row.xp,
+      curiosity_points: row.curiosity_points,
+      student_profiles: profileMap.get(row.user_id) || null,
+    };
+  });
 
   return { data };
 }
@@ -99,42 +163,92 @@ export async function awardXP(amount: number, reason: string) {
   // Fetch current data to check daily claim limit
   const { data: currentData, error: fetchError } = await supabase
     .from("user_gamification")
-    .select("xp, curiosity_points, last_claimed_date")
+    .select("xp, curiosity_points, last_claimed_date, daily_xp, weekly_xp, last_daily_reset, last_weekly_reset")
     .eq("user_id", user.id)
     .maybeSingle();
 
   if (fetchError) return { error: fetchError.message };
 
-  // Check 24-hour cooldown
+  const now = new Date();
+
+  // Check 11:59 P.M. cooldown
   if (currentData?.last_claimed_date) {
-    const timeSinceLastClaim = Date.now() - new Date(currentData.last_claimed_date).getTime();
-    if (timeSinceLastClaim < 24 * 60 * 60 * 1000) {
+    const lastClaimed = new Date(currentData.last_claimed_date);
+    const resetBoundary = new Date(lastClaimed);
+    resetBoundary.setHours(23, 59, 59, 999);
+    
+    if (now <= resetBoundary) {
       return { error: "Daily XP already claimed today. Come back tomorrow!" };
+    }
+  }
+
+  let newDailyXp = amount;
+  let newWeeklyXp = amount;
+  
+  if (currentData) {
+    // Reset daily_xp if we crossed a day since last_daily_reset
+    if (currentData.last_daily_reset) {
+      const lastDaily = new Date(currentData.last_daily_reset);
+      const dailyBoundary = new Date(lastDaily);
+      dailyBoundary.setHours(23, 59, 59, 999);
+      if (now > dailyBoundary) {
+        newDailyXp = amount;
+      } else {
+        newDailyXp = (currentData.daily_xp || 0) + amount;
+      }
+    } else {
+      newDailyXp = (currentData.daily_xp || 0) + amount;
+    }
+
+    // Reset weekly_xp if we crossed a Sunday 11:59 PM boundary
+    if (currentData.last_weekly_reset) {
+      const lastWeekly = new Date(currentData.last_weekly_reset);
+      const weeklyBoundary = new Date(lastWeekly);
+      const diffToSunday = lastWeekly.getDay() === 0 ? 0 : 7 - lastWeekly.getDay();
+      weeklyBoundary.setDate(lastWeekly.getDate() + diffToSunday);
+      weeklyBoundary.setHours(23, 59, 59, 999);
+      
+      if (now > weeklyBoundary) {
+        newWeeklyXp = amount;
+      } else {
+        newWeeklyXp = (currentData.weekly_xp || 0) + amount;
+      }
+    } else {
+      newWeeklyXp = (currentData.weekly_xp || 0) + amount;
     }
   }
 
   const newXp = (currentData?.xp || 0) + amount;
   const newPoints = (currentData?.curiosity_points || 0) + amount;
-  const nowIso = new Date().toISOString();
+  const nowIso = now.toISOString();
 
   if (currentData) {
-    // Row exists → UPDATE (works with existing RLS policies)
+    // Row exists → UPDATE
     const { error: updateError } = await supabase
       .from("user_gamification")
-      .update({ xp: newXp, curiosity_points: newPoints, last_claimed_date: nowIso })
+      .update({ 
+        xp: newXp, 
+        curiosity_points: newPoints, 
+        last_claimed_date: nowIso,
+        daily_xp: newDailyXp,
+        weekly_xp: newWeeklyXp,
+        last_daily_reset: nowIso,
+        last_weekly_reset: nowIso
+      })
       .eq("user_id", user.id);
 
     if (updateError) return { error: updateError.message };
   } else {
-    // The DB error "violates foreign key constraint 'user_gamification_id_fkey'" means
-    // the 'id' column itself is a foreign key to the user's ID.
-    // So both id and user_id must be the same as user.id.
     const row = { 
       id: user.id, 
       user_id: user.id, 
       xp: newXp, 
       curiosity_points: newPoints, 
-      last_claimed_date: nowIso 
+      last_claimed_date: nowIso,
+      daily_xp: newDailyXp,
+      weekly_xp: newWeeklyXp,
+      last_daily_reset: nowIso,
+      last_weekly_reset: nowIso
     };
 
     const { error: upsertError } = await supabase
@@ -215,4 +329,225 @@ export async function getProfileStats() {
       quests: "0" // Placeholder until quests are implemented
     }
   };
+}
+
+/**
+ * Follow another user
+ */
+export async function followUser(targetUserId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  if (user.id === targetUserId) {
+    return { error: "Cannot follow yourself" };
+  }
+
+  const { error } = await supabase
+    .from("follows")
+    .insert({ follower_id: user.id, following_id: targetUserId });
+
+  if (error) {
+    if (error.code === '23505') return { success: true }; // Already following
+    return { error: error.message };
+  }
+  return { success: true };
+}
+
+/**
+ * Unfollow another user
+ */
+export async function unfollowUser(targetUserId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase
+    .from("follows")
+    .delete()
+    .eq("follower_id", user.id)
+    .eq("following_id", targetUserId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+/**
+ * Check if the current user is following the target user
+ */
+export async function getFollowStatus(targetUserId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { isFollowing: false };
+
+  const { data, error } = await supabase
+    .from("follows")
+    .select("id")
+    .eq("follower_id", user.id)
+    .eq("following_id", targetUserId)
+    .maybeSingle();
+
+  if (error) return { isFollowing: false };
+  return { isFollowing: !!data };
+}
+
+/**
+ * Get followers count and list for a user
+ */
+export async function getFollowers(userId: string) {
+  const supabase = await createClient();
+  const { data: follows, error } = await supabase
+    .from("follows")
+    .select("follower_id")
+    .eq("following_id", userId);
+
+  if (error || !follows) return { count: 0, data: [] };
+  
+  // To avoid complex joins if not setup, we can fetch usernames manually or rely on UI to just show count for now
+  return { count: follows.length, data: follows };
+}
+
+/**
+ * Get following count and list for a user
+ */
+export async function getFollowing(userId: string) {
+  const supabase = await createClient();
+  const { data: follows, error } = await supabase
+    .from("follows")
+    .select("following_id")
+    .eq("follower_id", userId);
+
+  if (error || !follows) return { count: 0, data: [] };
+  return { count: follows.length, data: follows };
+}
+
+/**
+ * Fetch a public user profile by ID
+ */
+export async function getUserProfile(userId: string) {
+  const supabase = await createClient();
+
+  // 1. Fetch user's gamification data
+  const { data: gamificationData, error: gamError } = await supabase
+    .from("user_gamification")
+    .select("xp, curiosity_points")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (gamError) return { error: gamError.message };
+  if (!gamificationData) return { error: "User not found" };
+
+  // 2. Fetch user's profile
+  const { data: profileData } = await supabase
+    .from("student_profiles")
+    .select("username")
+    .eq("id", userId)
+    .maybeSingle();
+
+  const xp = gamificationData.xp;
+  
+  // 3. Calculate live ranking by counting how many users have more XP
+  const { count, error: countError } = await supabase
+    .from("user_gamification")
+    .select("*", { count: 'exact', head: true })
+    .gt("xp", xp);
+
+  const rank = countError ? "-" : (count !== null ? count + 1 : 1);
+
+  return {
+    data: {
+      userId,
+      xp,
+      points: gamificationData.curiosity_points,
+      username: profileData?.username || "Explorer",
+      rank: `#${rank}`
+    }
+  };
+}
+
+/**
+ * Fetch recent activity of friends
+ */
+export async function getFriendsActivity() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { data: [] };
+
+  const { data: follows } = await supabase.from("follows").select("following_id").eq("follower_id", user.id);
+  if (!follows || follows.length === 0) return { data: [] };
+  const followingIds = follows.map(f => f.following_id);
+
+  const { data: activityData, error } = await supabase
+    .from("user_gamification")
+    .select("user_id, daily_xp, last_claimed_date")
+    .in("user_id", followingIds)
+    .gt("daily_xp", 0)
+    .order("last_claimed_date", { ascending: false })
+    .limit(5);
+
+  if (error || !activityData || activityData.length === 0) return { data: [] };
+
+  const userIds = activityData.map(a => a.user_id);
+  const { data: profiles } = await supabase
+    .from("student_profiles")
+    .select("id, username")
+    .in("id", userIds);
+
+  const profileMap = new Map<string, string>();
+  if (profiles) {
+    for (const p of profiles) profileMap.set(p.id, p.username);
+  }
+
+  const result = activityData.map(a => ({
+    user_id: a.user_id,
+    daily_xp: a.daily_xp,
+    last_claimed_date: a.last_claimed_date,
+    username: profileMap.get(a.user_id) || "Explorer"
+  }));
+
+  return { data: result };
+}
+
+/**
+ * Search for users by username
+ */
+export async function searchUsers(query: string) {
+  if (!query || query.trim().length === 0) return { data: [] };
+  
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { data: [] };
+
+  // 1. Search profiles by username (case insensitive)
+  const { data: profiles, error } = await supabase
+    .from("student_profiles")
+    .select("id, username")
+    .ilike("username", `%${query.trim()}%`)
+    .limit(20);
+
+  if (error || !profiles || profiles.length === 0) return { data: [] };
+
+  // 2. Get gamification stats for these users
+  const userIds = profiles.map(p => p.id);
+  const { data: gamification } = await supabase
+    .from("user_gamification")
+    .select("user_id, xp")
+    .in("user_id", userIds);
+
+  const xpMap = new Map<string, number>();
+  if (gamification) {
+    gamification.forEach(g => xpMap.set(g.user_id, g.xp));
+  }
+
+  // 3. Map together
+  const result = profiles.map(p => ({
+    userId: p.id,
+    username: p.username,
+    xp: xpMap.get(p.id) || 0,
+  }));
+
+  // Sort by XP descending
+  result.sort((a, b) => b.xp - a.xp);
+
+  return { data: result };
 }

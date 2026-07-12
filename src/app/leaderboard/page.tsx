@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useUser } from "@/hooks/useUser";
 import { getLeaderboard } from "@/app/actions/profile";
-import { BADGES, AVATARS } from "@/utils/gamification";
+import { BADGES, AVATARS, getBestBadge } from "@/utils/gamification";
 
 interface LeaderboardEntry {
   user_id: string;
   xp: number;
+  all_time_xp: number;
   curiosity_points: number;
   student_profiles: {
     username: string;
@@ -25,6 +26,7 @@ export default function LeaderboardPage() {
   const { userId, loading: userLoading } = useUser();
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timeframe, setTimeframe] = useState<'daily' | 'weekly' | 'all_time' | 'friends'>('all_time');
 
   // Read the current user's avatar from localStorage
   const [myAvatar, setMyAvatar] = useState("");
@@ -36,8 +38,9 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     async function fetchLeaderboard() {
+      setLoading(true);
       try {
-        const result = await getLeaderboard();
+        const result = await getLeaderboard(timeframe);
         if (result.data) {
           setLeaderboardData(result.data as unknown as LeaderboardEntry[]);
         }
@@ -49,7 +52,7 @@ export default function LeaderboardPage() {
     }
 
     fetchLeaderboard();
-  }, []);
+  }, [timeframe]);
 
   const topThree = leaderboardData.slice(0, 3);
   const remaining = leaderboardData.slice(3);
@@ -59,11 +62,6 @@ export default function LeaderboardPage() {
   const userRank = userRankIndex !== -1 ? userRankIndex + 1 : null;
 
   const isLoading = loading || userLoading;
-
-  const getBestBadge = (xp: number) => {
-    const unlocked = BADGES.filter(b => xp >= b.minXp);
-    return unlocked.length > 0 ? unlocked[unlocked.length - 1] : null;
-  };
 
   // Resolve avatar: for the current user use localStorage, for others use a deterministic fallback
   const getAvatar = (entry: LeaderboardEntry) => {
@@ -84,7 +82,24 @@ export default function LeaderboardPage() {
         <h1 className="text-xl font-bold text-[#143867]">Global Standings</h1>
       </header>
 
-      <main className="flex-grow pt-20 pb-32 overflow-y-auto max-w-md mx-auto w-full hide-scrollbar">
+      {/* Tabs */}
+      <div className="fixed top-16 w-full bg-[#f7f9fb] z-40 border-b border-gray-200 px-4 py-2 flex justify-center gap-2 shadow-sm">
+        {(['daily', 'weekly', 'all_time', 'friends'] as const).map(t => (
+          <button
+            key={t}
+            onClick={() => setTimeframe(t)}
+            className={`flex-1 py-1.5 rounded-full text-xs font-bold capitalize transition-all duration-300 ${
+              timeframe === t 
+                ? "bg-[#143867] text-white shadow-md scale-105" 
+                : "bg-gray-100 text-gray-500 hover:bg-gray-200 active:scale-95"
+            }`}
+          >
+            {t.replace('_', ' ')}
+          </button>
+        ))}
+      </div>
+
+      <main className="flex-grow pt-32 pb-32 overflow-y-auto max-w-md mx-auto w-full hide-scrollbar">
         
         <section className="px-4 mb-10 pt-4 transition-all duration-700 ease-out">
           <div className="flex items-end justify-center gap-2 mb-6 min-h-[220px]">
@@ -110,7 +125,7 @@ export default function LeaderboardPage() {
               <>
                 {/* Rank 2 */}
                 {topThree[1] && (
-                  <div className="flex flex-col items-center flex-1 order-1">
+                  <Link href={topThree[1].user_id === userId ? "/profile" : `/profile/${topThree[1].user_id}`} className="flex flex-col items-center flex-1 order-1 hover:scale-105 transition-transform">
                     <div className="relative mb-2">
                       <div className="w-20 h-20 rounded-full border-4 border-gray-200 overflow-hidden bg-white shadow-sm">
                         <img
@@ -125,16 +140,16 @@ export default function LeaderboardPage() {
                       {topThree[1].student_profiles?.username || "Scholar"}
                     </p>
                     <div className="flex items-center gap-1">
-                      <span className="text-[10px] grayscale brightness-125">{getBestBadge(topThree[1].xp)?.icon}</span>
+                      <span className="text-[10px] grayscale brightness-125">{getBestBadge(topThree[1].all_time_xp)?.icon}</span>
                       <p className="text-xs text-gray-500 font-bold">{topThree[1].xp.toLocaleString()} XP</p>
                     </div>
                     <div className="w-full h-16 bg-gray-200 rounded-t-lg mt-4 opacity-40 shadow-inner"></div>
-                  </div>
+                  </Link>
                 )}
 
                 {/* Rank 1 */}
                 {topThree[0] && (
-                  <div className="flex flex-col items-center flex-1 order-2 z-10 scale-110 -translate-y-4 filter drop-shadow(0_10px_15px_rgba(20,56,103,0.1))">
+                  <Link href={topThree[0].user_id === userId ? "/profile" : `/profile/${topThree[0].user_id}`} className="flex flex-col items-center flex-1 order-2 z-10 scale-110 -translate-y-4 filter drop-shadow(0_10px_15px_rgba(20,56,103,0.1)) hover:scale-[1.15] transition-transform">
                     <div className="relative mb-3">
                       <div className="w-24 h-24 rounded-full border-4 border-[#ffe16d] overflow-hidden bg-white shadow-[0_0_15px_rgba(255,215,0,0.25)]">
                         <img
@@ -152,19 +167,19 @@ export default function LeaderboardPage() {
                       {topThree[0].student_profiles?.username || "Newton"}
                     </p>
                     <div className="flex items-center gap-1">
-                      <span className="text-xs">{getBestBadge(topThree[0].xp)?.icon}</span>
+                      <span className="text-xs">{getBestBadge(topThree[0].all_time_xp)?.icon}</span>
                       <p className="text-xs text-[#705d00] font-extrabold">{topThree[0].xp.toLocaleString()} XP</p>
                     </div>
                     <div className="w-full h-24 bg-[#ffe16d] rounded-t-lg mt-4 shadow-sm flex items-center justify-center relative overflow-hidden">
                       <span className="material-symbols-outlined text-[#221b00] opacity-20 text-4xl">school</span>
                       <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
                     </div>
-                  </div>
+                  </Link>
                 )}
 
                 {/* Rank 3 */}
                 {topThree[2] && (
-                  <div className="flex flex-col items-center flex-1 order-3">
+                  <Link href={topThree[2].user_id === userId ? "/profile" : `/profile/${topThree[2].user_id}`} className="flex flex-col items-center flex-1 order-3 hover:scale-105 transition-transform">
                     <div className="relative mb-2">
                       <div className="w-16 h-16 rounded-full border-4 border-gray-300 overflow-hidden bg-white shadow-sm">
                         <img
@@ -179,11 +194,11 @@ export default function LeaderboardPage() {
                       {topThree[2].student_profiles?.username || "Ada"}
                     </p>
                     <div className="flex items-center gap-1">
-                      <span className="text-[10px] grayscale brightness-110">{getBestBadge(topThree[2].xp)?.icon}</span>
+                      <span className="text-[10px] grayscale brightness-110">{getBestBadge(topThree[2].all_time_xp)?.icon}</span>
                       <p className="text-xs text-gray-500 font-bold">{topThree[2].xp.toLocaleString()} XP</p>
                     </div>
                     <div className="w-full h-12 bg-gray-200 rounded-t-lg mt-4 opacity-20 shadow-inner"></div>
-                  </div>
+                  </Link>
                 )}
               </>
             )}
@@ -225,7 +240,7 @@ export default function LeaderboardPage() {
               remaining.map((entry, index) => {
                 const rank = index + 4;
                 const isCurrentUser = entry.user_id === userId;
-                const badge = getBestBadge(entry.xp);
+                const badge = getBestBadge(entry.all_time_xp);
                 const avatarSrc = getAvatar(entry);
 
                 if (isCurrentUser) {
@@ -260,7 +275,7 @@ export default function LeaderboardPage() {
                 }
 
                 return (
-                  <div key={entry.user_id} className="flex items-center p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-all group cursor-pointer active:scale-[0.98] duration-75 hover:shadow-sm">
+                  <Link href={`/profile/${entry.user_id}`} key={entry.user_id} className="flex items-center p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-all group cursor-pointer active:scale-[0.98] duration-75 hover:shadow-sm">
                     <span className="w-8 text-xl font-bold text-gray-300 group-hover:text-[#143867] transition-colors italic">{rank}</span>
                     <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden mx-3 border border-gray-200">
                       <img
@@ -282,7 +297,7 @@ export default function LeaderboardPage() {
                       <p className="text-sm font-black text-[#143867]">{entry.xp.toLocaleString()}</p>
                       <p className="text-[10px] text-gray-400 font-bold uppercase">XP</p>
                     </div>
-                  </div>
+                  </Link>
                 );
               })
             )}
@@ -311,27 +326,26 @@ export default function LeaderboardPage() {
         </section>
       </main>
 
-      <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-4 bg-[#f7f9fb] border-t border-gray-200 z-50">
-        <Link 
-          href="/dashboard" 
-          className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200"
-        >
+      <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center px-2 pb-6 pt-4 bg-[#f7f9fb] border-t border-gray-200 z-50">
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/dashboard">
           <div className="w-12 h-12 flex items-center justify-center">
             <span className="material-symbols-outlined">home</span>
           </div>
         </Link>
-        <Link 
-          href="/profile" 
-          className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200"
-        >
+        <Link className="flex items-center justify-center bg-[#ffe16d] text-[#221b00] rounded-full w-12 h-12 shadow-[0_0_20px_rgba(255,215,0,0.2)] active:scale-90 duration-200 transition-transform" href="/leaderboard">
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>emoji_events</span>
+        </Link>
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/discover">
+          <div className="w-12 h-12 flex items-center justify-center">
+            <span className="material-symbols-outlined">search</span>
+          </div>
+        </Link>
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/profile">
           <div className="w-12 h-12 flex items-center justify-center">
             <span className="material-symbols-outlined">person</span>
           </div>
         </Link>
-        <Link 
-          href="/settings" 
-          className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200"
-        >
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/settings">
           <div className="w-12 h-12 flex items-center justify-center">
             <span className="material-symbols-outlined">settings</span>
           </div>

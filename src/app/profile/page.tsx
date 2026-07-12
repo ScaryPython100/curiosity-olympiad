@@ -10,7 +10,7 @@ import { AvatarPickerModal } from "@/components/AvatarPickerModal";
 export default function ProfilePage() {
   const router = useRouter();
   const { userId, loading: userLoading } = useUser();
-  const [userStats, setUserStats] = useState({ xp: 0, points: 0, username: "", avatar_url: "", rank: "-", streak: "-", quests: "-" });
+  const [userStats, setUserStats] = useState({ xp: 0, points: 0, username: "", avatar_url: "", rank: "-", streak: "-", quests: "-", followers: 0, following: 0 });
   const [loading, setLoading] = useState(true);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
 
@@ -21,8 +21,17 @@ export default function ProfilePage() {
       if (!userId) return;
 
       try {
-        const { getProfileStats } = await import("@/app/actions/profile");
+        const { getProfileStats, getFollowers, getFollowing } = await import("@/app/actions/profile");
         const res = await getProfileStats();
+        
+        let followersCount = 0;
+        let followingCount = 0;
+        if (userId) {
+          const followersRes = await getFollowers(userId);
+          followersCount = followersRes.count;
+          const followingRes = await getFollowing(userId);
+          followingCount = followingRes.count;
+        }
 
         // Read avatar from localStorage (the DB table lacks an avatar_url column)
         const savedAvatar = typeof window !== "undefined"
@@ -37,7 +46,9 @@ export default function ProfilePage() {
             avatar_url: savedAvatar,
             rank: res.data.rank,
             streak: res.data.streak,
-            quests: res.data.quests
+            quests: res.data.quests,
+            followers: followersCount,
+            following: followingCount
           });
         } else {
           setUserStats(prev => ({ ...prev, avatar_url: savedAvatar }));
@@ -116,6 +127,16 @@ export default function ProfilePage() {
                   <span>✨</span>
                   {userStats.points.toLocaleString()} Points
                 </span>
+              </div>
+              <div className="flex justify-center md:justify-start gap-6 mt-4">
+                <div className="text-center">
+                  <span className="block text-xl font-black text-[#143867]">{userStats.followers}</span>
+                  <span className="text-[10px] uppercase font-bold text-gray-400">Followers</span>
+                </div>
+                <div className="text-center">
+                  <span className="block text-xl font-black text-[#143867]">{userStats.following}</span>
+                  <span className="text-[10px] uppercase font-bold text-gray-400">Following</span>
+                </div>
               </div>
             </div>
           </div>
@@ -207,34 +228,29 @@ export default function ProfilePage() {
       )}
 
       {/* Global Fixed BottomNavBar */}
-      <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 bg-[#f7f9fb] border-t border-gray-200 px-4 pb-2 z-50">
-        <Link 
-          href="/dashboard" 
-          className="flex flex-col items-center justify-center text-gray-500 hover:text-[#143867] transition-all"
-        >
-          <span className="material-symbols-outlined mb-1">home</span>
-          <span className="text-[10px] font-semibold">Home</span>
+      <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center px-2 pb-6 pt-4 bg-[#f7f9fb] border-t border-gray-200 z-50">
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/dashboard">
+          <div className="w-12 h-12 flex items-center justify-center">
+            <span className="material-symbols-outlined">home</span>
+          </div>
         </Link>
-        <Link 
-          href="/leaderboard" 
-          className="flex flex-col items-center justify-center text-gray-500 hover:text-[#143867] transition-all"
-        >
-          <span className="material-symbols-outlined mb-1">emoji_events</span>
-          <span className="text-[10px] font-semibold">Rankings</span>
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/leaderboard">
+          <div className="w-12 h-12 flex items-center justify-center">
+            <span className="material-symbols-outlined">emoji_events</span>
+          </div>
         </Link>
-        <Link 
-          href="/profile" 
-          className="flex flex-col items-center justify-center bg-[#ffe16d] text-[#221b00] rounded-full px-6 py-2 shadow-[0_0_15px_rgba(255,215,0,0.2)] transition-all"
-        >
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/discover">
+          <div className="w-12 h-12 flex items-center justify-center">
+            <span className="material-symbols-outlined">search</span>
+          </div>
+        </Link>
+        <Link className="flex items-center justify-center bg-[#ffe16d] text-[#221b00] rounded-full w-12 h-12 shadow-[0_0_20px_rgba(255,215,0,0.2)] active:scale-90 duration-200 transition-transform" href="/profile">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
-          <span className="text-[10px] font-bold mt-0.5">Profile</span>
         </Link>
-        <Link 
-          href="/settings" 
-          className="flex flex-col items-center justify-center text-gray-500 hover:text-[#143867] transition-all"
-        >
-          <span className="material-symbols-outlined mb-1">settings</span>
-          <span className="text-[10px] font-semibold">Settings</span>
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/settings">
+          <div className="w-12 h-12 flex items-center justify-center">
+            <span className="material-symbols-outlined">settings</span>
+          </div>
         </Link>
       </nav>
       

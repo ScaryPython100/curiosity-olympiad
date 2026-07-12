@@ -219,34 +219,29 @@ export default function SettingsPage() {
       </main>
 
       {/* Global Fixed BottomNavBar */}
-      <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 bg-[#f7f9fb] dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-4 pb-2 z-50 transition-colors duration-300">
-        <Link
-          href="/dashboard"
-          className="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 hover:text-[#143867] dark:hover:text-blue-400 transition-all"
-        >
-          <span className="material-symbols-outlined mb-1">home</span>
-          <span className="text-[10px] font-semibold">Home</span>
+      <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center px-2 pb-6 pt-4 bg-[#f7f9fb] dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-50 transition-colors duration-300">
+        <Link className="flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-[#143867] dark:hover:text-blue-400 transition-all active:scale-90 duration-200" href="/dashboard">
+          <div className="w-12 h-12 flex items-center justify-center">
+            <span className="material-symbols-outlined">home</span>
+          </div>
         </Link>
-        <Link
-          href="/leaderboard"
-          className="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 hover:text-[#143867] dark:hover:text-blue-400 transition-all"
-        >
-          <span className="material-symbols-outlined mb-1">emoji_events</span>
-          <span className="text-[10px] font-semibold">Rankings</span>
+        <Link className="flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-[#143867] dark:hover:text-blue-400 transition-all active:scale-90 duration-200" href="/leaderboard">
+          <div className="w-12 h-12 flex items-center justify-center">
+            <span className="material-symbols-outlined">emoji_events</span>
+          </div>
         </Link>
-        <Link
-          href="/profile"
-          className="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 hover:text-[#143867] dark:hover:text-blue-400 transition-all"
-        >
-          <span className="material-symbols-outlined mb-1">person</span>
-          <span className="text-[10px] font-semibold">Profile</span>
+        <Link className="flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-[#143867] dark:hover:text-blue-400 transition-all active:scale-90 duration-200" href="/discover">
+          <div className="w-12 h-12 flex items-center justify-center">
+            <span className="material-symbols-outlined">search</span>
+          </div>
         </Link>
-        <Link
-          href="/settings"
-          className="flex flex-col items-center justify-center bg-[#ffe16d] dark:bg-blue-600 text-[#221b00] dark:text-white rounded-full px-6 py-2 shadow-[0_0_15px_rgba(255,215,0,0.2)] dark:shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all"
-        >
+        <Link className="flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-[#143867] dark:hover:text-blue-400 transition-all active:scale-90 duration-200" href="/profile">
+          <div className="w-12 h-12 flex items-center justify-center">
+            <span className="material-symbols-outlined">person</span>
+          </div>
+        </Link>
+        <Link className="flex items-center justify-center bg-[#ffe16d] dark:bg-blue-600 text-[#221b00] dark:text-white rounded-full w-12 h-12 shadow-[0_0_20px_rgba(255,215,0,0.2)] dark:shadow-[0_0_15px_rgba(59,130,246,0.3)] active:scale-90 duration-200 transition-transform" href="/settings">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>settings</span>
-          <span className="text-[10px] font-bold mt-0.5">Settings</span>
         </Link>
       </nav>
 

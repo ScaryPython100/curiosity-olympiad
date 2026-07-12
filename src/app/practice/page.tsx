@@ -157,34 +157,32 @@ export default function PracticePage() {
         </div>
       </main>
 
-      {/* Streamlined 3-Tab BottomNavBar Component */}
-      <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-4 bg-[#f7f9fb] border-t border-gray-200 z-50">
-        <Link 
-          href="/dashboard" 
-          className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200"
-        >
+      <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center px-2 pb-6 pt-4 bg-[#f7f9fb] border-t border-gray-200 z-50">
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/dashboard">
           <div className="w-12 h-12 flex items-center justify-center">
             <span className="material-symbols-outlined">home</span>
           </div>
         </Link>
-        
-        <Link 
-          href="/profile" 
-          className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200"
-        >
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/leaderboard">
+          <div className="w-12 h-12 flex items-center justify-center">
+            <span className="material-symbols-outlined">emoji_events</span>
+          </div>
+        </Link>
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/discover">
+          <div className="w-12 h-12 flex items-center justify-center">
+            <span className="material-symbols-outlined">search</span>
+          </div>
+        </Link>
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/profile">
           <div className="w-12 h-12 flex items-center justify-center">
             <span className="material-symbols-outlined">person</span>
           </div>
         </Link>
-        
-        <a 
-          href="#" 
-          className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200"
-        >
+        <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/settings">
           <div className="w-12 h-12 flex items-center justify-center">
             <span className="material-symbols-outlined">settings</span>
           </div>
-        </a>
+        </Link>
       </nav>
       
     </div>
