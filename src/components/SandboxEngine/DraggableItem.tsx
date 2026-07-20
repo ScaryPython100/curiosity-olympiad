@@ -33,7 +33,7 @@ export function DraggableItem({ id, initialPosition, onDragEnd, onDragStart, onD
     };
     
     // Capture pointer events so dragging continues even if cursor leaves element
-    e.target.setPointerCapture(e.pointerId);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -60,7 +60,7 @@ export function DraggableItem({ id, initialPosition, onDragEnd, onDragStart, onD
     if (!isDragging) return;
     setIsDragging(false);
     onDragEnd(id, position);
-    e.target.releasePointerCapture(e.pointerId);
+    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
   };
 
   return (
