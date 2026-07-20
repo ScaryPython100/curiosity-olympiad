@@ -68,12 +68,15 @@ export default function TournamentsPage() {
           </div>
         </section>
 
-        {/* CTA Button */}
-        <section>
-          <button className="w-full bg-[#143867] text-white py-4 px-6 rounded-xl flex items-center justify-center gap-3 shadow-lg active:scale-[0.98] transition-transform">
-            <span className="material-symbols-outlined">download</span>
-            <span className="text-sm font-bold">Download Entry Ticket</span>
+        {/* CTA Buttons */}
+        <section className="flex flex-col gap-3">
+          <Link href="/tournaments/try-mock" className="w-full bg-[#143867] text-white py-4 px-6 rounded-xl flex items-center justify-center gap-3 shadow-sm active:scale-[0.98] transition-transform">
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>quiz</span>
+            <span className="text-sm font-bold">Try Interactive Mock Test</span>
+          </Link>
+          <button className="w-full bg-white border border-gray-200 text-[#143867] py-4 px-6 rounded-xl flex items-center justify-center gap-3 shadow-sm active:scale-[0.98] transition-transform">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>local_activity</span>
+            <span className="text-sm font-bold">Download Entry Ticket</span>
           </button>
         </section>
 
@@ -127,23 +130,7 @@ export default function TournamentsPage() {
           </div>
         </section>
 
-        {/* Simulation Preview Card */}
-        <section>
-          <Link href="/practice" className="block relative w-full h-48 rounded-xl overflow-hidden border border-gray-200 active:scale-[0.99] transition-transform">
-            <div className="absolute inset-0 bg-[#143867]/10 z-10" />
-            <img 
-              className="w-full h-full object-cover" 
-              alt="Safe examination browser terminal preview" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCX17Hg3SuW6zvBrse5uLQm5tM9jEYF7EmRta69_ihHFsjGuvB0cBo9pBUot8UxiX8issmEKAVqvlCtnQ1vBZ96So6tqaj1AxpTF3uSaFNMsWELCaYo-IGOBLKOkeyWyHEXoXjqdpBIuura7pvnSG3VI8XKhvsriOAdumb9fekMKjynwH9IW35EIMml3_qSDkMtPdmFXQmn-n5zUTCTHKNGiCjiyXPsq8AxVGWnjFDa2ttQQVg6iRKWeeaYORRspIaiOf1Q-2MFNM1b"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-6 z-20">
-              <div className="text-white">
-                <p className="text-sm font-bold">Practice Module</p>
-                <p className="text-xs opacity-80 mt-0.5">Test your system before the big day</p>
-              </div>
-            </div>
-          </Link>
-        </section>
+
 
       </main>
 

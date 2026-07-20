@@ -35,59 +35,7 @@ export default function PracticePage() {
       {/* Main Container */}
       <main className="flex-grow w-full max-w-md mx-auto px-4 pt-24 pb-32 space-y-6">
         
-        {/* Header Illustration/Banner */}
-        <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
-          <img 
-            className="w-full h-full object-cover opacity-90" 
-            alt="Minimalist academic workspace simulation screen" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtFX9M7vA8sByjQgZhNp4DrtvkLrWH2Yu5leGRQ631Ftjh0VjGsHnhAaDfQMus83OJ5ZE1t-QVzhOalXmn8L_jf4mI8KD5TPPliIY41QqhHBVJTIbYnBIwKaf-7l_QyJkFkcVJZdzbrdun92ZuLkIXLhQpXXUJpEH1i5oGeLr8JMQXPrN67snwsxD4AauotDdVHA7hXzG4fbwKJZ4cWKfcAPL5OmXM3NJG2EIIVfd44bHVMHv9FVF6Omap9rMBe9FUhmWDn0utL0iu"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#143867]/20 to-transparent" />
-          <div className="absolute bottom-4 left-4">
-            <span className="bg-[#ffe16d] text-[#221b00] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-[0_0_20px_rgba(255,215,0,0.15)]">
-              CALIBRATION READY
-            </span>
-          </div>
-        </div>
 
-        {/* System & Proctoring Check Card */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-4 shadow-sm">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#143867]">verified_user</span>
-            <h2 className="text-lg font-bold text-[#143867]">System & Proctoring Check</h2>
-          </div>
-          
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-green-600" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                <span className="text-sm font-medium text-gray-800">Browser Compatibility</span>
-              </div>
-              <span className="text-xs font-bold text-green-700 uppercase">Verified</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-green-600" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                <span className="text-sm font-medium text-gray-800">Screen Resolution</span>
-              </div>
-              <span className="text-xs font-bold text-green-700 uppercase">Verified</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-green-600" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                <span className="text-sm font-medium text-gray-800">Proctoring Permission</span>
-              </div>
-              <span className="text-xs font-bold text-green-700 uppercase">Allowed</span>
-            </div>
-          </div>
-          
-          <p className="text-xs text-gray-500 flex gap-1 items-start">
-            <span className="material-symbols-outlined text-[14px]">info</span>
-            Camera and Microphone have been successfully initialized.
-          </p>
-        </section>
 
         {/* Exam Rules & Guidelines */}
         <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-4 shadow-sm">

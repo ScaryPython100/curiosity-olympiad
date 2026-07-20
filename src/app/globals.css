@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* If you need custom font definitions or specific brand overrides in v4, you add them like this: */
 @theme {
   --font-sans: 'Montserrat', sans-serif;

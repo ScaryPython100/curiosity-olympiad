@@ -20,16 +20,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userId
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
 
-  // Deterministic fallback avatar based on user_id
-  const getFallbackAvatar = (id: string) => {
-    if (!id) return AVATARS[0].url;
-    let hash = 0;
-    for (let i = 0; i < id.length; i++) {
-      hash = id.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const index = Math.abs(hash) % AVATARS.length;
-    return AVATARS[index].url;
-  };
+
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -93,15 +84,15 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userId
 
   if (loading) {
     return (
-      <div className="bg-[#f7f9fb] dark:bg-gray-900 text-[#191c1e] dark:text-gray-100 min-h-screen flex items-center justify-center font-['Montserrat']">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#143867] dark:border-blue-400 border-t-transparent"></div>
+      <div className="bg-[#f7f9fb] text-[#191c1e] min-h-screen flex items-center justify-center font-['Montserrat']">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#143867] border-t-transparent"></div>
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="bg-[#f7f9fb] dark:bg-gray-900 text-[#191c1e] dark:text-gray-100 min-h-screen flex flex-col items-center justify-center font-['Montserrat']">
+      <div className="bg-[#f7f9fb] text-[#191c1e] min-h-screen flex flex-col items-center justify-center font-['Montserrat']">
         <h2 className="text-2xl font-bold mb-4">Explorer Not Found</h2>
         <button onClick={() => router.back()} className="text-blue-500 hover:underline">Go Back</button>
       </div>
@@ -111,15 +102,15 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userId
   const isSelf = currentUserId === userId;
   const badge = getBestBadge(profile.xp);
   const currentLevel = Math.floor(profile.xp / 1000) + 1;
-  const avatarUrl = getFallbackAvatar(userId);
+  const currentLevel = Math.floor(profile.xp / 1000) + 1;
 
   return (
-    <div className="bg-[#f7f9fb] dark:bg-gray-900 text-[#191c1e] dark:text-gray-100 min-h-screen flex flex-col font-['Montserrat'] pb-32">
+    <div className="bg-[#f7f9fb] text-[#191c1e] min-h-screen flex flex-col font-['Montserrat'] pb-32">
       
       {/* TopAppBar Component */}
-      <header className="w-full top-0 sticky bg-[#f7f9fb]/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 z-40 transition-colors duration-300">
+      <header className="w-full top-0 sticky bg-[#f7f9fb]/90 backdrop-blur-md border-b border-gray-200 z-40 transition-colors duration-300">
         <div className="flex items-center px-4 py-3 w-full max-w-2xl mx-auto gap-4">
-          <button onClick={() => router.back()} className="text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 p-2 rounded-full transition-colors">
+          <button onClick={() => router.back()} className="text-gray-600 hover:bg-gray-200 p-2 rounded-full transition-colors">
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <h1 className="text-xl font-bold tracking-tight">Public Profile</h1>
@@ -131,8 +122,10 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userId
         {/* Avatar Section */}
         <div className="relative mb-6">
           <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#143867] to-[#2f4f7f] p-1 shadow-2xl">
-            <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-gray-800">
-              <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+            <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
+              <span className="text-4xl font-bold text-[#143867] uppercase">
+                {profile.username.substring(0, 2)}
+              </span>
             </div>
           </div>
         </div>
@@ -154,8 +147,8 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userId
             disabled={followLoading}
             className={`mb-8 px-8 py-2 rounded-full font-bold shadow-md transition-all active:scale-95 disabled:opacity-50 ${
               isFollowing 
-                ? "bg-gray-200 text-gray-800 hover:bg-red-100 hover:text-red-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-red-900/50" 
-                : "bg-[#143867] text-white hover:bg-[#1d4d8a] dark:bg-blue-600 dark:hover:bg-blue-500"
+                ? "bg-gray-200 text-gray-800 hover:bg-red-100 hover:text-red-600" 
+                : "bg-[#143867] text-white hover:bg-[#1d4d8a]"
             }`}
           >
             {isFollowing ? (followLoading ? "..." : "Following") : (followLoading ? "..." : "Follow")}
@@ -163,30 +156,30 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userId
         )}
 
         {/* Followers / Following Counts */}
-        <div className="flex gap-8 mb-8 text-center bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 w-full justify-center">
+        <div className="flex gap-8 mb-8 text-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100 w-full justify-center">
           <div>
             <div className="text-2xl font-bold">{followersCount}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Followers</div>
+            <div className="text-xs text-gray-500 uppercase tracking-wider">Followers</div>
           </div>
-          <div className="w-px bg-gray-200 dark:bg-gray-700"></div>
+          <div className="w-px bg-gray-200"></div>
           <div>
             <div className="text-2xl font-bold">{followingCount}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Following</div>
+            <div className="text-xs text-gray-500 uppercase tracking-wider">Following</div>
           </div>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4 w-full">
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center justify-center text-center">
-            <span className="material-symbols-outlined text-[#143867] dark:text-blue-400 text-3xl mb-2">military_tech</span>
-            <div className="text-xl font-bold text-[#143867] dark:text-blue-300">{profile.xp.toLocaleString()} XP</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">Total Experience</div>
+          <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center">
+            <span className="material-symbols-outlined text-[#143867] text-3xl mb-2">military_tech</span>
+            <div className="text-xl font-bold text-[#143867]">{profile.xp.toLocaleString()} XP</div>
+            <div className="text-xs text-gray-500 font-medium">Total Experience</div>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col items-center justify-center text-center">
-            <span className="material-symbols-outlined text-[#143867] dark:text-blue-400 text-3xl mb-2">leaderboard</span>
-            <div className="text-xl font-bold text-[#143867] dark:text-blue-300">{profile.rank}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">Global Rank</div>
+          <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center">
+            <span className="material-symbols-outlined text-[#143867] text-3xl mb-2">leaderboard</span>
+            <div className="text-xl font-bold text-[#143867]">{profile.rank}</div>
+            <div className="text-xs text-gray-500 font-medium">Global Rank</div>
           </div>
         </div>
 
