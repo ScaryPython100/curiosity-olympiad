@@ -102,7 +102,6 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userId
   const isSelf = currentUserId === userId;
   const badge = getBestBadge(profile.xp);
   const currentLevel = Math.floor(profile.xp / 1000) + 1;
-  const currentLevel = Math.floor(profile.xp / 1000) + 1;
 
   return (
     <div className="bg-[#f7f9fb] text-[#191c1e] min-h-screen flex flex-col font-['Montserrat'] pb-32">
