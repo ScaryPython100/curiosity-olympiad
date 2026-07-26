@@ -89,13 +89,14 @@ export default function LeaderboardPage() {
       <header className="fixed top-0 z-50 w-full bg-[#f7f9fb] h-16 flex items-center px-4 border-b border-gray-200">
         <Link 
           href="/dashboard"
-          className="mr-4 text-[#143867] active:scale-95 duration-150 transition-colors hover:bg-gray-100 rounded-full p-2 flex items-center justify-center"
+          className="mr-3 text-[#143867] active:scale-95 duration-150 transition-colors hover:bg-gray-200/80 rounded-full px-3 py-1.5 flex items-center gap-1.5 text-xs font-bold bg-white border border-gray-300 shadow-xs"
         >
-          <span className="material-symbols-outlined leading-none">arrow_back</span>
+          <span className="material-symbols-outlined text-sm leading-none">arrow_back</span>
+          <span>Back</span>
         </Link>
         <div className="flex items-center gap-2">
           <img src="/agastya-logo.svg" alt="Agastya Logo" className="w-6 h-6 object-contain" />
-          <h1 className="text-xl font-bold text-[#143867]">Global Standings</h1>
+          <h1 className="text-lg sm:text-xl font-bold text-[#143867]">Global Standings</h1>
         </div>
       </header>
 
