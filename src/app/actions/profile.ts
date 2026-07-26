@@ -83,6 +83,8 @@ export async function getLeaderboard(timeframe: 'weekly' | 'daily' | 'friends' =
   currentWeekStart.setDate(diffToMonday);
   currentWeekStart.setHours(0, 0, 0, 0);
 
+  const fixCutoff = new Date("2026-07-27T00:30:00Z");
+
   // Process data locally to reset expired XP
   let processedData = gamificationData.map((row) => {
     let rowDaily = row.daily_xp || 0;
@@ -93,8 +95,8 @@ export async function getLeaderboard(timeframe: 'weekly' | 'daily' | 'friends' =
       rowDaily = 0;
     } else {
       const lastDaily = new Date(dailyResetRef);
-      if (lastDaily < todayStart) {
-        rowDaily = 0; // Reset to 0 for the new day
+      if (lastDaily < todayStart || lastDaily < fixCutoff || row.daily_xp === row.xp) {
+        rowDaily = 0; // Reset to 0 for today's new cycle
       }
     }
 
