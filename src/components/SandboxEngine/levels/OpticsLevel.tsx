@@ -1,5 +1,6 @@
+"use client";
+
 import { useState, useRef, useEffect } from 'react';
-import { DraggableItem, Position } from '../DraggableItem';
 
 interface OpticsLevelProps {
   recordAction: (actionType: string, actionDetails?: any) => void;
@@ -7,25 +8,20 @@ interface OpticsLevelProps {
 }
 
 export function OpticsLevel({ recordAction, experimentSubIndex = 0 }: OpticsLevelProps) {
-  const [flashlightPos, setFlashlightPos] = useState<Position>({ x: 50, y: 150 });
-  const [prismPos, setPrismPos] = useState<Position>({ x: 400, y: 250 });
-  
   const [useRedPrism, setUseRedPrism] = useState(false);
   const [refractiveIndex, setRefractiveIndex] = useState(1.5);
   const [beamIntensity, setBeamIntensity] = useState(100);
-  const [slitWidth, setSlitWidth] = useState(2);
+
+  // State for Experiment 1 (Water Bowl Magnification)
+  const [lemonBaseSize, setLemonBaseSize] = useState<"Small" | "Medium" | "Large">("Medium");
+
+  // State for Experiment 2 (Prism Refraction)
+  const [laserColor, setLaserColor] = useState<"White" | "Red" | "Green" | "Blue">("White");
+
+  // State for Experiment 3 (Shadow Tracker)
+  const [shadowSourceType, setShadowSourceType] = useState<"Tubelight" | "LED">("Tubelight");
 
   const workspaceRef = useRef<HTMLDivElement>(null);
-  const [workspaceSize, setWorkspaceSize] = useState({ width: 800, height: 400 });
-
-  useEffect(() => {
-    if (workspaceRef.current) {
-      setWorkspaceSize({
-        width: workspaceRef.current.clientWidth,
-        height: workspaceRef.current.clientHeight
-      });
-    }
-  }, []);
 
   const expInfo = [
     {
@@ -61,30 +57,6 @@ export function OpticsLevel({ recordAction, experimentSubIndex = 0 }: OpticsLeve
     slider2Val: `${beamIntensity}%`
   };
 
-  // Simple collision detection for beam (Flashlight points straight right)
-  const beamY = flashlightPos.y + 20;
-  const beamX = flashlightPos.x + 60;
-  
-  const prismHit = 
-    prismPos.x > beamX &&
-    prismPos.x < beamX + 600 && // Within beam range
-    beamY > prismPos.y &&
-    beamY < prismPos.y + 60; // Hits the prism height
-    
-  const handleDragStart = (id: string) => {
-    recordAction(`drag_start_${id}`);
-  };
-
-  const handleDrag = (id: string, newPos: Position) => {
-    if (id === 'flashlight') setFlashlightPos(newPos);
-    if (id === 'prism') setPrismPos(newPos);
-  };
-
-  const handleDragEnd = (id: string, newPos: Position) => {
-    recordAction(`drag_end_${id}`, newPos);
-    handleDrag(id, newPos);
-  };
-
   const toggleOptionalTool = () => {
     recordAction('optional_tool_used');
     setUseRedPrism(prev => !prev);
@@ -100,8 +72,227 @@ export function OpticsLevel({ recordAction, experimentSubIndex = 0 }: OpticsLeve
     recordAction('changed_beam_intensity', { val });
   };
 
-  // Dispersion factor scales with refractive index n
-  const dispScale = (refractiveIndex - 1) * 2;
+  const renderCanvas = () => {
+    if (experimentSubIndex === 0) {
+      // --- EXPERIMENT 1: WATER BOWL MAGNIFICATION LAB ---
+      const magnificationFactor = refractiveIndex;
+      const lemonSizePx = (lemonBaseSize === "Small" ? 50 : lemonBaseSize === "Medium" ? 75 : 100) * (0.8 + (magnificationFactor - 1) * 1.5);
+      const bgOpacity = beamIntensity / 100;
+
+      return (
+        <div 
+          ref={workspaceRef}
+          className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden transition-all duration-300"
+          style={{ backgroundColor: useRedPrism ? '#2a1205' : `rgba(15, 23, 42, ${0.4 + bgOpacity * 0.6})` }}
+        >
+          {/* Table Surface */}
+          <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-amber-950 to-amber-900 border-t-4 border-amber-700/50 flex items-center justify-center">
+            <span className="text-amber-200/30 text-xs font-bold uppercase tracking-widest">Polished Wooden Dining Table</span>
+          </div>
+
+          {/* Light Rays Background */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-40">
+            <line x1="100" y1="50" x2="400" y2="250" stroke={useRedPrism ? "#f97316" : "#fef08a"} strokeWidth="4" strokeDasharray="6 6" />
+            <line x1="700" y1="50" x2="400" y2="250" stroke={useRedPrism ? "#f97316" : "#fef08a"} strokeWidth="4" strokeDasharray="6 6" />
+          </svg>
+
+          {/* Glass Water Bowl Container */}
+          <div className="relative z-10 w-72 h-72 md:w-80 md:h-80 rounded-full border-8 border-cyan-200/60 bg-gradient-to-b from-cyan-400/20 via-sky-300/30 to-blue-600/40 backdrop-blur-md shadow-2xl flex items-center justify-center overflow-hidden ring-4 ring-cyan-400/20">
+            
+            {/* Water Surface Ripple */}
+            <div className="absolute top-8 w-full h-4 bg-cyan-200/30 border-b border-cyan-100/40 animate-pulse" />
+
+            {/* Magnified Lemon */}
+            <div 
+              className="transition-all duration-200 ease-out rounded-full bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500 shadow-inner flex items-center justify-center border-2 border-yellow-200 relative group cursor-pointer"
+              style={{
+                width: `${lemonSizePx}px`,
+                height: `${lemonSizePx * 0.8}px`,
+                filter: `drop-shadow(0 10px 15px rgba(0,0,0,0.3))`
+              }}
+            >
+              {/* Lemon Peel Details */}
+              <div className="w-3 h-3 bg-green-600 rounded-full absolute -left-1 opacity-80" />
+              <span className="text-[10px] font-black text-amber-950 uppercase tracking-wider opacity-80 select-none">
+                Submerged Lemon
+              </span>
+            </div>
+
+            {/* Convex Lens Ray Refraction Indicator */}
+            <div className="absolute bottom-3 text-center bg-gray-900/80 px-3 py-1 rounded-full border border-cyan-400/40">
+              <span className="text-[11px] font-bold text-cyan-200">
+                Magnification: {(magnificationFactor * 1.5).toFixed(1)}x • Refracted Ray Angle: {Math.round((refractiveIndex - 1) * 90)}°
+              </span>
+            </div>
+          </div>
+
+          {/* Control Sub-Bar */}
+          <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-gray-900/90 p-2 rounded-xl border border-gray-700 text-xs">
+            <span className="text-gray-300 font-bold">Lemon Size:</span>
+            {(["Small", "Medium", "Large"] as const).map((sz) => (
+              <button
+                key={sz}
+                onClick={() => setLemonBaseSize(sz)}
+                className={`px-2 py-1 rounded text-xs font-bold ${lemonBaseSize === sz ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-400'}`}
+              >
+                {sz}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    } else if (experimentSubIndex === 1) {
+      // --- EXPERIMENT 2: PRISM DAYLIGHT REFRACTION & COLOR DISPERSION LAB ---
+      const prismAngleDeg = Math.round(refractiveIndex * 30);
+
+      return (
+        <div 
+          ref={workspaceRef}
+          className="relative w-full h-full bg-[#080d1a] flex items-center justify-center overflow-hidden"
+        >
+          {/* Optical Grid */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293d_1px,transparent_1px),linear-gradient(to_bottom,#1f293d_1px,transparent_1px)] bg-[size:2rem_2rem] opacity-20" />
+
+          {/* Laser Emitter */}
+          <div className="absolute left-8 z-10 flex items-center gap-2">
+            <div className="w-16 h-10 bg-gray-700 border-2 border-gray-500 rounded-lg flex items-center justify-center shadow-lg">
+              <span className="text-[10px] font-black text-gray-200 uppercase">LIGHT RAY</span>
+            </div>
+            <div className="w-4 h-4 bg-red-500 rounded-full animate-ping" />
+          </div>
+
+          {/* SVG Light Paths */}
+          <svg className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+            {/* Incident White Beam */}
+            <line x1="80" y1="200" x2="350" y2="200" stroke={laserColor === "White" ? "#ffffff" : laserColor.toLowerCase()} strokeWidth="6" strokeLinecap="round" />
+
+            {/* Dispersed Rainbow Spectrum inside and exiting the Prism */}
+            {laserColor === "White" ? (
+              <>
+                <line x1="350" y1="200" x2="700" y2="120" stroke="#ef4444" strokeWidth="4" opacity="0.9" />
+                <line x1="350" y1="200" x2="700" y2="145" stroke="#f97316" strokeWidth="4" opacity="0.9" />
+                <line x1="350" y1="200" x2="700" y2="170" stroke="#eab308" strokeWidth="4" opacity="0.9" />
+                <line x1="350" y1="200" x2="700" y2="195" stroke="#22c55e" strokeWidth="4" opacity="0.9" />
+                <line x1="350" y1="200" x2="700" y2="220" stroke="#06b6d4" strokeWidth="4" opacity="0.9" />
+                <line x1="350" y1="200" x2="700" y2="245" stroke="#3b82f6" strokeWidth="4" opacity="0.9" />
+                <line x1="350" y1="200" x2="700" y2="270" stroke="#a855f7" strokeWidth="4" opacity="0.9" />
+              </>
+            ) : (
+              <line x1="350" y1="200" x2="700" y2={200 + (refractiveIndex - 1) * 60} stroke={laserColor.toLowerCase()} strokeWidth="6" opacity="0.9" />
+            )}
+          </svg>
+
+          {/* Glass Prism */}
+          <div 
+            className="relative z-10 transition-transform duration-300 ease-out cursor-pointer"
+            style={{ transform: `rotate(${prismAngleDeg - 45}deg)` }}
+          >
+            <div className="w-40 h-40 bg-gradient-to-tr from-cyan-400/30 via-sky-200/40 to-white/60 border-4 border-cyan-200/80 backdrop-blur-md shadow-2xl flex items-center justify-center"
+                 style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}>
+              <span className="text-[10px] font-bold text-gray-900 bg-white/80 px-2 py-0.5 rounded shadow-sm">
+                n = {refractiveIndex.toFixed(2)}
+              </span>
+            </div>
+          </div>
+
+          {/* Projection Screen on Right */}
+          <div className="absolute right-10 z-10 w-4 h-64 bg-gray-200 border-2 border-gray-400 rounded-sm shadow-xl flex flex-col justify-around py-2">
+            {laserColor === "White" && (
+              <div className="w-full h-full bg-gradient-to-b from-red-500 via-yellow-400 via-green-500 via-blue-500 to-purple-600 rounded-xs opacity-90 shadow-md" />
+            )}
+          </div>
+
+          {/* Control Overlay */}
+          <div className="absolute bottom-4 left-4 z-20 flex items-center gap-2 bg-gray-900/90 p-2 rounded-xl border border-gray-700 text-xs">
+            <span className="text-gray-300 font-bold">Light Source:</span>
+            {(["White", "Red", "Green", "Blue"] as const).map((col) => (
+              <button
+                key={col}
+                onClick={() => setLaserColor(col)}
+                className={`px-2.5 py-1 rounded text-xs font-bold ${laserColor === col ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-400'}`}
+              >
+                {col}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    } else {
+      // --- EXPERIMENT 3: SHADOW ANGLE & SOLAR TRACKER LAB ---
+      const sunAngleDeg = Math.round(refractiveIndex * 45);
+      const poleHeightPx = Math.round(beamIntensity * 1.2 + 40);
+
+      const sunRad = (sunAngleDeg * Math.PI) / 180;
+      const sunX = 400 - Math.cos(sunRad) * 280;
+      const sunY = 320 - Math.sin(sunRad) * 220;
+
+      const shadowLengthPx = Math.min(350, Math.max(10, poleHeightPx / Math.tan(sunRad)));
+
+      return (
+        <div 
+          ref={workspaceRef}
+          className="relative w-full h-full bg-gradient-to-b from-sky-900 via-sky-800 to-slate-900 flex flex-col items-center justify-end overflow-hidden"
+        >
+          {/* Ground Plane */}
+          <div className="relative w-full h-24 bg-gradient-to-t from-emerald-950 to-emerald-900 border-t-4 border-emerald-700/60 flex items-center justify-center z-10">
+            <span className="text-emerald-300/30 text-xs font-bold uppercase tracking-widest">Outdoor Ground Plane</span>
+          </div>
+
+          {/* SVG Sky Arc & Sun Light Rays */}
+          <svg className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+            <line x1={sunX} y1={sunY} x2="400" y2={320 - poleHeightPx} stroke="#fde047" strokeWidth="3" strokeDasharray="5 5" opacity="0.8" />
+            <line x1={sunX} y1={sunY} x2={400 + shadowLengthPx} y2="320" stroke="#fde047" strokeWidth="2" strokeDasharray="3 3" opacity="0.6" />
+          </svg>
+
+          {/* Dynamic Sun Orb */}
+          <div 
+            className="absolute z-10 w-16 h-16 rounded-full bg-yellow-300 shadow-[0_0_50px_rgba(253,224,71,0.9)] border-4 border-yellow-100 flex items-center justify-center transition-all duration-300"
+            style={{ left: `${sunX - 32}px`, top: `${sunY - 32}px` }}
+          >
+            <span className="text-[10px] font-black text-amber-950">{sunAngleDeg}°</span>
+          </div>
+
+          {/* Flagpole & Cast Shadow Container */}
+          <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 flex items-end">
+            <div 
+              className="w-4 bg-gradient-to-t from-slate-400 to-slate-200 border border-slate-600 rounded-t-sm shadow-md relative"
+              style={{ height: `${poleHeightPx}px` }}
+            >
+              <div className="w-6 h-6 bg-red-600 rounded-xs absolute -top-2 -right-6 shadow-sm" />
+            </div>
+
+            <div 
+              className={`absolute bottom-0 left-4 h-3 bg-gray-950 rounded-r-full transition-all duration-200 origin-left ${
+                shadowSourceType === "Tubelight" ? "opacity-60 blur-xs" : "opacity-90"
+              }`}
+              style={{ width: `${shadowLengthPx}px` }}
+            />
+          </div>
+
+          {/* Information Overlay */}
+          <div className="absolute top-4 right-4 z-20 bg-gray-900/90 p-3 rounded-xl border border-gray-700 text-xs text-gray-200 space-y-1">
+            <p className="font-bold text-yellow-300">☀️ Solar Angle: {sunAngleDeg}°</p>
+            <p className="font-bold text-cyan-300">📏 Shadow Length: {Math.round(shadowLengthPx)} cm</p>
+            <p className="text-[11px] text-gray-400">Edge: {shadowSourceType === "Tubelight" ? "Soft Penumbra" : "Sharp Umbra"}</p>
+          </div>
+
+          {/* Control Overlay */}
+          <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-gray-900/90 p-2 rounded-xl border border-gray-700 text-xs">
+            <span className="text-gray-300 font-bold">Light Source:</span>
+            {(["Tubelight", "LED"] as const).map((src) => (
+              <button
+                key={src}
+                onClick={() => setShadowSourceType(src)}
+                className={`px-2 py-1 rounded text-xs font-bold ${shadowSourceType === src ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-400'}`}
+              >
+                {src === "Tubelight" ? "Soft Penumbra (Tubelight)" : "Sharp Umbra (LED)"}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+  };
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -151,109 +342,11 @@ export function OpticsLevel({ recordAction, experimentSubIndex = 0 }: OpticsLeve
             className="w-24 md:w-32 accent-indigo-500 cursor-pointer"
           />
         </div>
-
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">Lemon Size:</span>
-          {[1, 2, 5].map((w) => (
-            <button
-              key={w}
-              onClick={() => { setSlitWidth(w); recordAction('changed_slit_width', { width: w }); }}
-              className={`px-2 py-0.5 rounded font-mono ${slitWidth === w ? 'bg-indigo-600 text-white font-bold' : 'bg-gray-800 text-gray-400'}`}
-            >
-              {w === 1 ? "Small" : w === 2 ? "Medium" : "Large"}
-            </button>
-          ))}
-        </div>
       </div>
 
-      {/* Physics Workspace */}
-      <div 
-        ref={workspaceRef}
-        className="relative w-full flex-1 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-gray-950 overflow-hidden"
-        style={{ touchAction: 'none' }}
-      >
-        {!prismHit && (
-          <div 
-            className="absolute bg-white pointer-events-none transition-opacity duration-200"
-            style={{ 
-              left: beamX, 
-              top: beamY - (slitWidth * 1.5), 
-              width: workspaceSize.width - beamX,
-              height: slitWidth * 3,
-              opacity: beamIntensity / 100,
-              boxShadow: `0 0 ${slitWidth * 6}px rgba(255,255,255,0.8)` 
-            }}
-          />
-        )}
-
-        {prismHit && (
-          <>
-            <div 
-              className="absolute bg-white pointer-events-none transition-opacity duration-200"
-              style={{ 
-                left: beamX, 
-                top: beamY - (slitWidth * 1.5), 
-                width: prismPos.x - beamX,
-                height: slitWidth * 3,
-                opacity: beamIntensity / 100,
-                boxShadow: `0 0 ${slitWidth * 6}px rgba(255,255,255,0.8)` 
-              }}
-            />
-            <div className="absolute pointer-events-none" style={{ left: prismPos.x + 28, top: beamY - 12, opacity: beamIntensity / 100 }}>
-               {useRedPrism ? (
-                  <div className="w-[800px] h-8 bg-red-500 shadow-[0_0_30px_rgba(255,0,0,1)] origin-left -rotate-6" />
-               ) : (
-                 <div className="flex flex-col gap-0.5">
-                   <div 
-                     className="w-[800px] h-2 bg-red-500 shadow-[0_0_10px_red] origin-left transition-transform" 
-                     style={{ transform: `rotate(${-12 * dispScale}deg)` }}
-                   />
-                   <div 
-                     className="w-[800px] h-2 bg-yellow-500 shadow-[0_0_10px_yellow] origin-left transition-transform"
-                     style={{ transform: `rotate(${-6 * dispScale}deg)` }}
-                   />
-                   <div 
-                     className="w-[800px] h-2 bg-green-500 shadow-[0_0_10px_green] origin-left transition-transform"
-                     style={{ transform: `rotate(0deg)` }}
-                   />
-                   <div 
-                     className="w-[800px] h-2 bg-blue-500 shadow-[0_0_10px_blue] origin-left transition-transform"
-                     style={{ transform: `rotate(${6 * dispScale}deg)` }}
-                   />
-                   <div 
-                     className="w-[800px] h-2 bg-purple-500 shadow-[0_0_10px_purple] origin-left transition-transform"
-                     style={{ transform: `rotate(${12 * dispScale}deg)` }}
-                   />
-                 </div>
-               )}
-            </div>
-          </>
-        )}
-
-        <DraggableItem 
-          id="flashlight" 
-          initialPosition={flashlightPos} 
-          onDragStart={handleDragStart} 
-          onDrag={handleDrag}
-          onDragEnd={handleDragEnd}
-          bounds={workspaceSize}
-        >
-          <div className="w-16 h-10 bg-gray-700 rounded-lg flex items-center justify-end pr-1 border-2 border-gray-600 shadow-xl cursor-grab">
-             <div className="w-2 h-8 bg-yellow-300 rounded-sm" />
-          </div>
-        </DraggableItem>
-
-        <DraggableItem 
-          id="prism" 
-          initialPosition={prismPos} 
-          onDragStart={handleDragStart} 
-          onDrag={handleDrag}
-          onDragEnd={handleDragEnd}
-          bounds={workspaceSize}
-        >
-          <div className={`w-14 h-16 ${useRedPrism ? 'bg-red-400/50 border-red-500' : 'bg-white/30 border-white/50'} backdrop-blur-md rounded-sm border-[1px] shadow-2xl flex items-center justify-center cursor-grab`} style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}>
-          </div>
-        </DraggableItem>
+      {/* Dynamic Physics Visual Canvas Container */}
+      <div className="flex-1 w-full relative overflow-hidden bg-gray-950">
+        {renderCanvas()}
       </div>
     </div>
   );
