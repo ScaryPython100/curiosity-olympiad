@@ -85,13 +85,13 @@ const PRACTICE_QUESTIONS: Question[] = [
     title: "Lemon Magnification in a Water Bowl",
     question: "Why does the lemon appear larger when you increase the Water Bowl Curvature slider in Experiment 1 above?",
     options: [
-      "Water enters the lemon peel and makes it swell instantly",
-      "The curved glass bowl and water act like a convex magnifying lens, bending (refracting) light rays outward to enlarge the image",
-      "The yellow color of the lemon reflects off the dining table surface",
-      "Water slows down light so much that the lemon looks twice as heavy"
+      "Water enters through microscopic pores in the lemon peel, causing it to physically swell and expand",
+      "The curved glass bowl of water acts like a magnifying lens, bending light outward to enlarge its image",
+      "Yellow light reflects strongly off the table surface, projecting a double shadow around the lemon",
+      "Water compresses room air inside the glass bowl, magnifying object reflections toward your eyes"
     ],
     correct: 1,
-    explanation: "A curved glass bowl of water refracts (bends) diverging light rays from the lemon, functioning as an everyday convex magnifying lens that enlarges the image.",
+    explanation: "A curved glass bowl of water acts like an everyday convex magnifying lens. The curved surface refracts (bends) light rays outward, making the submerged lemon look larger to your eyes.",
     level: "both"
   },
   {
@@ -99,16 +99,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 1,
     experimentIndex: 0,
     module: "Optics",
-    title: "Daylight Brightness & Clarity",
+    title: "Daylight Brightness & Visual Clarity",
     question: "When you adjust the Daylight Brightness slider in Experiment 1, why does the lemon look clearer and more vibrant in bright light?",
     options: [
-      "Bright light adds yellow paint molecules to the lemon's skin",
-      "More light photons reflect off the lemon peel into your eyes, giving your retinas stronger visual information to form a sharp image",
-      "Darkness freezes light rays in place inside the bowl",
-      "The water evaporates instantly in bright light"
+      "Bright daylight heats up the water, turning it into a clearer transparent liquid for sharper vision",
+      "More reflected light rays enter your eyes from the lemon, giving your retinas stronger visual details",
+      "Sunlight reacts chemically with lemon skin pigments, releasing glowing fluorescent light particles",
+      "Bright light removes microscopic air bubbles from water, reducing scattered shadow blurring inside"
     ],
     correct: 1,
-    explanation: "Vision occurs when reflected light enters our eyes. Brighter daylight means more photons reflect from the lemon through the water lens into our retinas.",
+    explanation: "We see objects when light rays bounce off them into our eyes. Brighter daylight means more light photons reflect off the lemon's peel into your eyes, forming a sharper image.",
     level: "both"
   },
   {
@@ -119,13 +119,13 @@ const PRACTICE_QUESTIONS: Question[] = [
     title: "Curved Glass vs. Flat Glass Optics",
     question: "If you replaced the curved glass bowl in Experiment 1 with a flat, square glass box of water, why wouldn't the lemon look magnified anymore?",
     options: [
-      "Flat glass is magically colder than curved glass",
-      "Flat glass surfaces bend light rays parallel instead of converging or diverging them, so the image stays its normal size",
-      "Water refuses to touch flat glass walls",
-      "Square glass absorbs 100% of yellow light"
+      "Flat glass absorbs incoming light rays completely, preventing light from exiting the back side of the box",
+      "Flat glass allows light rays to pass straight through without bending them outward to magnify images",
+      "Water inside flat square containers becomes denser, blocking light rays from stretching outward",
+      "Flat glass reflects 90% of yellow light wavelengths back into water, making images look smaller"
     ],
     correct: 1,
-    explanation: "A magnifying lens requires curvature to bend rays at different angles. A flat glass container allows light rays to pass through without changing their relative angles.",
+    explanation: "Magnification requires a curved lens surface to bend light rays at different angles. A flat glass box lets light pass straight through parallel, so objects remain their normal visual size.",
     level: "both"
   },
 
@@ -135,16 +135,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 1,
     experimentIndex: 1,
     module: "Optics",
-    title: "Glass Prism Refractive Index Shift",
+    title: "Glass Prism Light Bending Shift",
     question: "When you increase the Glass Prism Angle slider in Experiment 2, what happens to the light ray passing through the prism?",
     options: [
-      "The light ray bends more steeply because a higher angle multiplies the refractive bending path",
-      "The light ray turns back toward the flashlight bulb",
-      "The light ray disappears because glass destroys light",
-      "The prism turns into a mirror"
+      "The light ray bends more sharply because a steeper glass angle forces light to change direction more",
+      "The light ray reflects straight backward toward the lamp because dense glass acts like a silver mirror",
+      "The light ray speeds up dramatically inside the glass prism, shooting straight through without turning",
+      "The light ray splits into invisible heat waves that evaporate the outer glass coating of the prism"
     ],
     correct: 0,
-    explanation: "Higher refractive index media and steeper glass face angles slow down light and bend rays more sharply away from the incident path.",
+    explanation: "Light slows down and changes direction when entering glass from air. A steeper prism surface angle forces the light ray to refract (bend) at a sharper angle away from its original path.",
     level: "level2"
   },
   {
@@ -152,16 +152,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 1,
     experimentIndex: 1,
     module: "Optics",
-    title: "Apparent Depth of Submerged Objects",
+    title: "Apparent Depth of Submerged Coin",
     question: "Why does a coin placed at the bottom of a water glass appear shallower and higher up than it actually is?",
     options: [
-      "Water pressure pushes the coin upward towards the surface",
-      "Light rays traveling from the coin bend away from the normal when exiting water into air, causing your eyes to trace back a virtual image above the real position",
-      "Air bubbles lift the coin's shadow to the top",
-      "Glass acts like a mirror that flips top and bottom"
+      "Water pressure at the bottom of the glass pushes the metal coin upward closer to the surface",
+      "Light rays bend away as they exit water into air, making your brain trace a shallower image position",
+      "Air bubbles trapped under the glass mirror elevate the coin's visual reflection higher in the water",
+      "Light slows down in water, making the coin appear twice as heavy and floating near the top surface"
     ],
     correct: 1,
-    explanation: "Light entering a less dense medium (air from water) speeds up and refracts away from the normal line. Tracing these rays back creates an apparent shallower virtual position.",
+    explanation: "Light traveling from the underwater coin speeds up and bends away as it exits water into air. Tracing these bent rays straight back creates an apparent shallower virtual position.",
     level: "both"
   },
   {
@@ -172,13 +172,13 @@ const PRACTICE_QUESTIONS: Question[] = [
     title: "Rainbow Dispersion & Prism Effect",
     question: "When white sunlight passes through a glass prism in Experiment 2, why does it separate into a spectrum of 7 rainbow colors?",
     options: [
-      "Water drops paint the light with chemical dyes",
-      "Different wavelengths (colors) of light travel at slightly different speeds in glass/water, bending at different angles (dispersion)",
-      "Red light destroys blue light molecules inside the glass",
-      "Prisms absorb all white light and release heat instead"
+      "Glass prisms contain chemical dyes that color white light as it passes through the center glass",
+      "Different colors of light travel at different speeds in glass, bending at slightly different angles",
+      "White light friction against glass molecules creates thermal heat that glows in rainbow colors",
+      "Red light absorbs green and blue wavelengths, leaving only leftover rainbow colors on the screen"
     ],
     correct: 1,
-    explanation: "Refractive index varies slightly with wavelength. Violet light (shorter wavelength) bends more than red light (longer wavelength), causing spatial dispersion into a color rainbow.",
+    explanation: "White light is made of all rainbow colors mixed together. Red light bends the least while violet light bends the most inside glass, spreading the colors into a visible rainbow spectrum.",
     level: "both"
   },
 
@@ -191,13 +191,13 @@ const PRACTICE_QUESTIONS: Question[] = [
     title: "Sun Elevation Angle & Shadow Length",
     question: "In Experiment 3, when the Sun Elevation Angle slider is set low near sunrise/sunset, why are shadows on the ground extremely long?",
     options: [
-      "Sunlight is heavier near sunset",
-      "Low sun angles strike objects at a shallow slant, projecting light rays far across the ground before hitting the surface",
-      "Objects grow taller at sunset",
-      "The ground absorbs shadow rays at noon"
+      "Sunlight carries less energy near sunset, allowing ground shadows to expand and stretch outward",
+      "Low sun angles strike objects at a shallow slant, projecting light rays far across the ground surface",
+      "The atmosphere acts like a giant lens at dusk, magnifying the physical height of objects and shadows",
+      "Ground temperature drops at sunset, preventing Earth's surface from absorbing black shadow rays"
     ],
     correct: 1,
-    explanation: "Shadow length is proportional to $\\cot(\\theta)$ of the solar elevation angle $\\theta$. Low solar angles result in long geometric shadow projections.",
+    explanation: "When the Sun is low in the sky, light rays strike objects at a shallow angle. The object blocks light over a wider stretch of ground, casting a longer geometric shadow.",
     level: "level2"
   },
   {
@@ -208,13 +208,13 @@ const PRACTICE_QUESTIONS: Question[] = [
     title: "Pinhole Camera Image Inversion",
     question: "Why does a simple pinhole camera form an inverted (upside down) image of a distant tree on its screen?",
     options: [
-      "Air inside the box is upside down",
-      "Light rays travel in straight lines through the tiny pinhole, so light from the top of the tree lands on the bottom of the screen",
-      "The screen is magnetized to flip light rays",
-      "Pinhole boxes absorb red light first"
+      "Air pressure inside the dark camera box flips light rays upside down before hitting the back screen",
+      "Light travels in straight lines through the small hole, so top rays land at the bottom of the screen",
+      "The glass screen contains magnetic poles that pull red light rays to the top and blue rays to the bottom",
+      "Light reflects off the inner box walls twice, reversing top and bottom positions on the image screen"
     ],
     correct: 1,
-    explanation: "Rectilinear propagation of light dictates that light rays from the top of an object pass straight through the pinhole to the lower part of the screen, creating an inverted image.",
+    explanation: "Light travels in straight lines! Rays from the top of the tree pass through the tiny pinhole and continue straight down to the bottom of the screen, creating an inverted image.",
     level: "both"
   },
   {
@@ -223,15 +223,15 @@ const PRACTICE_QUESTIONS: Question[] = [
     experimentIndex: 2,
     module: "Optics",
     title: "Shadow Softness & Penumbra Effects",
-    question: "Why does a large tubelight produce soft, blurry shadow edges (penumbra) while a tiny flashlight LED produces sharp, crisp shadows (umbra)?",
+    question: "Why does a long tubelight produce soft, blurry shadow edges (penumbra) while a tiny LED produces sharp, crisp shadows?",
     options: [
-      "Tubelights emit cold light while flashlights emit hot light",
-      "A Tubelight is an extended light source emitting rays from multiple points, creating partial overlap regions (penumbras)",
-      "LED light is heavier than fluorescent light",
-      "Shadows are made of dust particles that tubelights blow away"
+      "Long tubelights emit cooler light waves that soften shadow edges, whereas flashlights emit hot light",
+      "Extended tubelights emit light from multiple points, creating partial overlap regions with soft edges",
+      "Flashlight beams travel faster through air, blasting away soft penumbra shadows around object edges",
+      "Tubelight glass diffuses air dust particles, casting a blurry gray mist around the shadow border"
     ],
     correct: 1,
-    explanation: "Extended light sources emit light rays from multiple angles. Regions blocked from some but not all light origin points form a soft gradient shadow called a penumbra.",
+    explanation: "A tubelight is a wide, extended light source emitting rays from many points. Areas that receive light from some points but not others form a soft gradient shadow edge called a penumbra.",
     level: "both"
   },
 
@@ -245,13 +245,13 @@ const PRACTICE_QUESTIONS: Question[] = [
     title: "Why 3 Fan Blades in Tropical Indian Homes?",
     question: "In Experiment 1 (Everyday Air & Fan Blades Lab), why do ceiling fans in Indian homes typically use 3 blades instead of 4 or 5 blades used in cooler European countries?",
     options: [
-      "Three blades are lighter and spin faster at higher RPM, creating a stronger cooling breeze in hot climates",
-      "Three blades use three times more electricity than five blades",
-      "Four blades create a vacuum that freezes the room instantly",
-      "The number of blades is purely decorative and has zero effect on air circulation"
+      "Three blades are lighter and spin at higher RPM, pushing a stronger cooling breeze in hot weather",
+      "Three blades consume much less electricity while creating a partial room vacuum that lowers room temp",
+      "Four blades create air turbulence that traps hot air near the ceiling, preventing room air circulation",
+      "Five-blade fans spin too fast for tropical humidity, causing fan motors to overheat and slow down"
     ],
     correct: 0,
-    explanation: "In hot climates, 3-blade fans spin faster with less aerodynamic drag to push high-velocity air for cooling. In colder climates, 4 or 5 blades move air more quietly and gently.",
+    explanation: "In hot climates, 3-blade fans encounter less aerodynamic drag, allowing them to spin faster at higher RPM to push high-velocity air for stronger cooling breezes.",
     level: "both"
   },
   {
@@ -259,16 +259,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 2,
     experimentIndex: 0,
     module: "Gravity",
-    title: "Fan Speed Regulator (RPM) & Air Circulation",
+    title: "Fan Speed Regulator (RPM) & Air Displacement",
     question: "When you turn up the Fan Speed Regulator slider in Experiment 1, why does the air circulation in the room increase so dramatically?",
     options: [
-      "Faster blades create gravity waves that pull wind from outside",
-      "Higher RPM increases blade velocity, forcing a larger volume of air molecules downward per second",
-      "Spinning blades turn oxygen into nitrogen gas",
-      "The electric motor cools the air by releasing ice"
+      "Faster fan blades create magnetic suction waves that draw cooler outdoor air inside the room",
+      "Higher RPM increases blade speed, forcing a larger mass of air molecules downward every second",
+      "Spinning fan blades convert room oxygen into cooler nitrogen gas, lowering air density near the floor",
+      "The electric motor cools room air directly by releasing chilled moisture particles from the blades"
     ],
     correct: 1,
-    explanation: "Ceiling fans work by angled blades displacing air downward. Increasing blade RPM multiplies the mass of air molecules pushed downward per second.",
+    explanation: "Ceiling fan blades are angled to push air downward. Turning up the speed regulator multiplies blade RPM, displacing a much greater volume of air molecules toward the floor every second.",
     level: "both"
   },
   {
@@ -276,16 +276,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 2,
     experimentIndex: 0,
     module: "Gravity",
-    title: "Airflow Breeze Lines & Skin Evaporation Cooling",
+    title: "Airflow Breeze & Skin Evaporation Cooling",
     question: "Why does moving air from fan blades make your skin feel cooler on a hot afternoon, even though the fan doesn't lower room temperature?",
     options: [
-      "The fan blades destroy heat molecules in the air",
-      "Moving air speeds up the evaporation of sweat from your skin, which absorbs body heat and cools you down",
-      "Fan breeze turns skin pores into ice crystals",
-      "The fan pushes cold floor air up to your face"
+      "Moving air destroys heat energy in the room, physically cooling down ambient air temperature",
+      "Moving air speeds up sweat evaporation from skin, carrying away body heat to make you feel cool",
+      "Fan breezes compress skin pores, preventing internal body heat from escaping onto your forehead",
+      "Fan blades push cold floor air upward, creating a cold air blanket around your upper torso"
     ],
     correct: 1,
-    explanation: "Fans create wind chill! The breeze accelerates sweat evaporation from your skin, which requires latent heat of vaporization, cooling your body.",
+    explanation: "Fans don't cool room air—they cool people! Moving air accelerates sweat evaporation off your skin. Liquid sweat absorbs body heat as it turns to vapor, cooling your body.",
     level: "both"
   },
 
@@ -295,16 +295,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 2,
     experimentIndex: 1,
     module: "Gravity",
-    title: "Planet Mass Factor & Gravitational Pull",
+    title: "Planet Mass & Gravitational Pull",
     question: "In Experiment 2, when you increase the Planet Mass Factor slider, what happens to the gravitational attraction on the orbiting satellite?",
     options: [
-      "Gravitational pull increases proportionally ($F \\propto M$), requiring higher orbital velocity to prevent crashing",
-      "Gravitational pull disappears completely",
-      "The satellite stops moving and floats backwards",
-      "Mass has zero impact on gravity"
+      "Increasing planet mass increases gravitational pull, requiring faster orbital speed to stay in orbit",
+      "Increasing planet mass creates anti-gravity space waves that push orbiting satellites outward",
+      "Satellite orbital speed depends only on distance, while planet mass has zero effect on gravity pull",
+      "Larger planets absorb space vacuum pressure, causing satellites to float in fixed stationary points"
     ],
     correct: 0,
-    explanation: "Newton's Law of Universal Gravitation ($F = G \\frac{m_1 m_2}{r^2}$) shows gravitational force scales directly with planet mass.",
+    explanation: "Gravitational force depends directly on mass. A heavier planet exerts a stronger gravitational pull on nearby satellites, requiring faster sideways speed to avoid crashing.",
     level: "both"
   },
   {
@@ -312,16 +312,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 2,
     experimentIndex: 1,
     module: "Gravity",
-    title: "Orbital Speed of Satellites near Earth",
+    title: "Orbital Speed of Low-Earth Satellites",
     question: "Why don't artificial communication satellites in low Earth orbit crash down to the ground despite Earth's strong gravity?",
     options: [
-      "Satellites carry giant anti-gravity helium balloons",
-      "Satellites travel sideways at high orbital velocity (~7.8 km/s), so as they fall toward Earth, Earth's surface curves away beneath them at the exact same rate",
-      "Outer space has zero gravity pulling on satellites",
-      "Rocket engines burn fuel continuously 24/7 to hold them up"
+      "Satellites carry helium gas tanks that create upward buoyant force against Earth's gravitational pull",
+      "Satellites travel sideways so fast that as they fall, Earth's curved surface falls away beneath them",
+      "Gravity does not exist at space station altitude, allowing satellites to float without falling",
+      "Rocket engines burn fuel continuously 24 hours a day to hold satellites up against gravity"
     ],
     correct: 1,
-    explanation: "Orbiting is continuous free-fall! The satellite falls toward Earth while moving forward so fast that its curved trajectory matches the curvature of the Earth.",
+    explanation: "Orbiting is continuous free-fall! Satellites travel sideways so fast (~7.8 km/s) that as gravity pulls them down, Earth's round surface curves away beneath them at the exact same rate.",
     level: "level2"
   },
   {
@@ -332,13 +332,13 @@ const PRACTICE_QUESTIONS: Question[] = [
     title: "Tidal Waves & Lunar Gravitational Pull",
     question: "Why do ocean tides rise and fall twice every day on coastal beaches in India?",
     options: [
-      "Undersea whales swim toward shore every 12 hours",
-      "The gravitational attraction of the Moon pulls ocean water outward into tidal bulges as the Earth rotates under them",
-      "Sunlight heats the sea water, making it expand into high tide",
-      "Wind blows ocean water off the equator into rivers"
+      "Undersea volcanic heat expands ocean water twice daily, pushing high tides onto coastal shores",
+      "The Moon's gravitational pull attracts ocean water, creating tidal bulges as Earth rotates under them",
+      "Daytime solar heat evaporates coastal seawater, causing low tides that refill during cool night hours",
+      "Ocean wind currents change direction every 12 hours, piling up seawater along beach coastlines"
     ],
     correct: 1,
-    explanation: "The Moon's differential gravitational force stretches Earth's water, creating two bulges on opposite sides of the planet that cause high and low tides as Earth rotates daily.",
+    explanation: "The Moon's gravity pulls on Earth's oceans, stretching water into two bulges on opposite sides of the planet. As Earth rotates through these bulges every day, beaches experience high tides.",
     level: "both"
   },
 
@@ -351,13 +351,13 @@ const PRACTICE_QUESTIONS: Question[] = [
     title: "Atmospheric Drag on Falling Objects",
     question: "In Earth's atmosphere, why does a heavy cricket ball reach the ground faster than a light bird feather dropped from the same balcony height?",
     options: [
-      "Gravity pulls 100 times harder on cricket balls than feathers",
-      "Air resistance (aerodynamic drag) exerts an upward force that slows down the feather much more relative to its small mass",
-      "Feathers have negative gravity charge",
-      "The cricket ball creates a black hole below it"
+      "Gravity pulls much stronger on heavy cricket balls than on feathers dropped from the same height",
+      "Air resistance creates an upward drag force that slows down the light feather far more than the ball",
+      "Feathers carry a negative static charge that repels them from Earth's magnetic ground surface",
+      "Heavy objects create downward air vortexes that pull them toward the ground much faster than air"
     ],
     correct: 1,
-    explanation: "In air, drag opposes motion. Because feathers have high surface area relative to their small mass, air resistance rapidly equals their weight, reaching terminal velocity early.",
+    explanation: "In air, drag resists falling objects. Because feathers have a large surface area relative to their tiny mass, upward air resistance quickly balances their weight, slowing their drop.",
     level: "both"
   },
   {
@@ -365,16 +365,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 2,
     experimentIndex: 2,
     module: "Gravity",
-    title: "Vacuum Acceleration (Galileo's Leaning Tower)",
+    title: "Galileo Vacuum Chamber Drop",
     question: "If you repeated the cricket ball vs. feather drop inside a vacuum chamber where all air has been pumped out, how would they fall?",
     options: [
-      "The cricket ball still lands 5 seconds earlier",
-      "Both objects fall with identical gravitational acceleration ($g = 9.8\\text{ m/s}^2$) and touch the ground at the exact same instant",
-      "Both objects float upward to the ceiling",
-      "The feather turns into pure energy"
+      "The cricket ball still lands first because heavy objects naturally accelerate faster than light ones",
+      "Both objects fall with identical acceleration ($g=9.8\\text{ m/s}^2$) and land at the exact same instant",
+      "Removing air causes both objects to lose weight and float upward toward the top of the chamber",
+      "The feather falls faster than the ball in a vacuum because zero air drag unleashes its light mass"
     ],
     correct: 1,
-    explanation: "In a vacuum, air resistance is zero! Gravitational acceleration is independent of mass, so all objects accelerate at the exact same rate ($g$).",
+    explanation: "Galileo proved that in a vacuum (zero air resistance), gravity accelerates all objects at the exact same rate ($g = 9.8\\text{ m/s}^2$), regardless of their mass or weight!",
     level: "both"
   },
   {
@@ -382,16 +382,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 2,
     experimentIndex: 2,
     module: "Gravity",
-    title: "Centrifugal Force in Curves (Bus Turns)",
+    title: "Centrifugal Force & Inertia in Bus Turns",
     question: "When a school bus makes a sharp right turn on a road, why do passengers feel thrown toward the left side of their seats?",
     options: [
-      "Air pressure pushes passengers toward the left windows",
-      "Inertia (Newton's 1st Law) keeps passengers moving straight forward while the bus turns right under them",
-      "Gravity flips 90 degrees during turns",
-      "The bus wheels release magnetic push forces"
+      "Air pressure inside turning buses shifts toward the outer windows, pushing passengers sideways",
+      "Your body's inertia tries to keep moving in a straight line while the bus turns right underneath you",
+      "Gravity shifts sideways during sharp vehicle turns, pulling passengers toward the left seats",
+      "Turning tires create outward magnetic force fields that push passenger bodies toward the doors"
     ],
     correct: 1,
-    explanation: "Inertia resists changes in direction. Your body attempts to continue moving in a straight line while the vehicle curves beneath you.",
+    explanation: "Inertia is your body's tendency to resist changes in motion. When the bus turns right, your body naturally tries to keep moving straight ahead, making you feel pushed to the left.",
     level: "both"
   },
 
@@ -405,13 +405,13 @@ const PRACTICE_QUESTIONS: Question[] = [
     title: "Wooden vs. Stainless Steel Spoons in Hot Curry",
     question: "When cooking soup or sambar in Experiment 1, why can you hold a wooden spoon handle without burning your hand, while a stainless steel spoon becomes too hot to touch in seconds?",
     options: [
-      "Wood absorbs all the heat energy and destroys it",
-      "Stainless steel is a rapid thermal conductor with free electrons, whereas wood is a natural thermal insulator with trapped air pockets",
-      "Wood is heavier than steel so heat cannot travel up the handle",
-      "Steel reacts chemically with boiling water to generate fire"
+      "Wood destroys heat energy inside its fibers, keeping the handle cool even in boiling liquid",
+      "Steel conducts heat rapidly via free electrons, while wood acts as an insulator trapping air",
+      "Steel absorbs heat because it is heavier, whereas wooden handles reflect 100% of heat rays",
+      "Boiling curry reacts chemically with metal spoons, generating heat energy that burns your hand"
     ],
     correct: 1,
-    explanation: "Metals conduct heat rapidly through colliding free electrons. Wood contains tiny air pockets and rigid cellulose fibers that act as an insulator.",
+    explanation: "Metals like steel are great thermal conductors—heat travels quickly through free electrons up to the handle. Wood contains trapped air pockets and acts as a natural insulator.",
     level: "both"
   },
   {
@@ -422,13 +422,13 @@ const PRACTICE_QUESTIONS: Question[] = [
     title: "Effect of Stirring Speed on Hot Soup",
     question: "When you increase the Stirring Speed slider in Experiment 1 (Kitchen Heat Lab), why does the soup cool down to an even, comfortable eating temperature much faster?",
     options: [
-      "Stirring creates whirlpools that teleport heat into outer space",
-      "Stirring brings hot soup from the bottom up to the surface where heat can escape into the air via convection and steam",
-      "Spoon movement creates friction that freezes liquid",
-      "Stirring pushes all the salt to the bottom of the bowl"
+      "Stirring creates air friction that freezes water molecules near the surface of the soup bowl",
+      "Stirring brings hot liquid from the bottom up to the surface where heat escapes via steam",
+      "Stirring forces salt to dissolve faster, which chemically lowers the liquid boiling temperature",
+      "Fast spoon movement pushes heat energy into the bowl walls, cooling down the central soup liquid"
     ],
     correct: 1,
-    explanation: "Without stirring, the top surface cools while the bottom stays scalding hot. Stirring forces convection currents, bringing hot liquid to the surface where steam escapes.",
+    explanation: "Without stirring, only the top layer cools while the bottom stays scalding hot. Stirring creates convection currents, circulating hot soup to the top where heat escapes into the air.",
     level: "both"
   },
   {
@@ -436,16 +436,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 3,
     experimentIndex: 0,
     module: "Chemistry",
-    title: "Soup Temperature (°C) & Steam Formation",
+    title: "Soup Temperature & Steam Formation",
     question: "Why does raising the Soup Temperature (°C) slider in Experiment 1 cause more visible steam clouds to rise from the bowl?",
     options: [
-      "High heat turns stainless steel spoons into smoke",
-      "Higher temperature gives water molecules extra kinetic energy, allowing more molecules to escape liquid state as steam vapor",
-      "Steam only forms when salt is added to cold water",
-      "Heat compresses room air into visible clouds"
+      "High heat turns stainless steel spoon molecules into visible white steam rising above the bowl",
+      "Higher temperature gives water molecules extra energy to break liquid bonds and escape as steam",
+      "Steam forms when room air moisture condenses against cold soup liquid surfaces near the top",
+      "Hot soup releases trapped oxygen bubbles that expand into visible steam clouds in open room air"
     ],
     correct: 1,
-    explanation: "Temperature measures average kinetic energy of molecules. Hotter soup means more water molecules move fast enough to break liquid bonds and evaporate into steam.",
+    explanation: "Temperature measures kinetic energy. Hotter soup means water molecules move faster and gain enough energy to break away from liquid water and evaporate into steam vapor clouds.",
     level: "both"
   },
 
@@ -458,13 +458,13 @@ const PRACTICE_QUESTIONS: Question[] = [
     title: "Pressure Cooker High Boiling Point",
     question: "Why does food cook in a pressure cooker in 5 minutes, whereas in an open vessel it takes 20 minutes?",
     options: [
-      "Pressure cookers inject artificial microwave rays into food",
-      "Trapped steam increases internal air pressure, raising the boiling point of water above 100°C so food cooks at much higher temperatures",
-      "Pressure cookers destroy water molecules to make heat",
-      "Rubber gaskets absorb cold air from the kitchen"
+      "Pressure cookers generate internal microwave radiation that cooks food from the inside out",
+      "Trapped steam increases air pressure, raising water boiling point above 100°C for faster cooking",
+      "Pressure cookers compress food molecules physically, breaking down tough fibers in 5 minutes",
+      "Rubber lid gaskets absorb cold kitchen air, forcing all thermal energy into the cooking liquid"
     ],
     correct: 1,
-    explanation: "High vapor pressure prevents water from boiling at 100°C. Trapped pressure forces the boiling point up to ~120°C, accelerating thermal chemical breakdown in food.",
+    explanation: "Trapped steam increases internal pressure inside the sealed cooker. High pressure prevents water from boiling at 100°C, pushing the boiling point up to ~120°C so food cooks 4x faster!",
     level: "both"
   },
   {
@@ -472,16 +472,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 3,
     experimentIndex: 1,
     module: "Chemistry",
-    title: "Earthen Pot (Matka) Evaporative Cooling",
+    title: "Earthen Pot / Matka Evaporative Cooling",
     question: "In Experiment 2, why does drinking water kept inside a porous clay pot (Matka) stay refreshingly cold during hot summer days without any electricity?",
     options: [
-      "Clay pots contain secret ice blocks inside their walls",
-      "Water seeps through microscopic clay pores and evaporates off the outer surface, absorbing heat energy from the water inside (evaporative cooling)",
-      "Clay reflects 100% of room light rays",
-      "Dark clay turns oxygen into cold nitrogen gas"
+      "Clay pot walls contain natural mineral ice pockets that cool down internal water without power",
+      "Water seeps through clay pores and evaporates outside, absorbing heat energy from inside water",
+      "Dark terracotta clay reflects 100% of room light, preventing external heat from touching water",
+      "Clay pores absorb oxygen from surrounding air, converting room humidity into cold nitrogen gas"
     ],
     correct: 1,
-    explanation: "Evaporation is a cooling process! Water escaping clay pores requires latent heat of vaporization, which it draws out of the internal liquid water, keeping it cool.",
+    explanation: "Evaporation is a cooling process! Small amounts of water seep through tiny clay pores and evaporate off the outer surface. Evaporation requires heat, which it draws from the water inside.",
     level: "both"
   },
   {
@@ -489,16 +489,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 3,
     experimentIndex: 1,
     module: "Chemistry",
-    title: "Clay Porosity & Humidity Effects",
+    title: "Clay Porosity & Humidity Effects in Matka",
     question: "Why does an earthenware Matka cool water much more effectively in dry summer weather (like Rajasthan) than in humid rainy weather (like Kerala)?",
     options: [
-      "Dry air accelerates water evaporation rates from clay pores, whereas humid air already saturated with moisture slows down evaporation",
-      "Rainwater turns clay into solid metal",
-      "Humidity makes clay pots shrink",
-      "Rajasthan air contains free ice particles"
+      "Dry air accelerates water evaporation from clay pores, whereas humid air slows down evaporation",
+      "Humid air turns clay pot walls into solid metal, blocking evaporative cooling during rainy weather",
+      "High humidity makes clay pores shrink tight, preventing water seepage needed for cooling",
+      "Dry desert air contains cold air ions that react with clay minerals to create artificial cooling"
     ],
     correct: 0,
-    explanation: "Low relative humidity creates a steep vapor concentration gradient, accelerating evaporation and maximizing cooling efficiency.",
+    explanation: "Dry air has low humidity, encouraging rapid water evaporation off the Matka's surface. In humid air already filled with moisture, water cannot evaporate quickly, reducing the cooling effect.",
     level: "both"
   },
 
@@ -508,16 +508,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 3,
     experimentIndex: 2,
     module: "Chemistry",
-    title: "Candle Snuffing under Glass Jar (Oxygen Depletion)",
+    title: "Candle Flame Oxygen Depletion in Sealed Jar",
     question: "In Experiment 3, when you place an inverted glass jar over a burning candle, why does the flame flicker and go out after a few seconds?",
     options: [
-      "Glass jar weight squashes the candle wick flat",
-      "Combustion consumes available Oxygen ($O_2$) inside the jar to produce $CO_2$; once $O_2$ drops below critical levels, the chemical reaction stops",
-      "Glass jars absorb heat and freeze candle wax",
-      "Nitrogen gas inside the jar catches fire and burns the candle"
+      "The heavy weight of the glass jar squashes candle flame heat, forcing the wick to go out",
+      "Combustion uses up oxygen inside the jar; once oxygen drops low, the flame reaction stops",
+      "Glass jars absorb flame heat rapidly, freezing candle wax into solid non-flammable liquid",
+      "Carbon dioxide gas inside glass jars catches fire, consuming all flame energy in a few seconds"
     ],
     correct: 1,
-    explanation: "Fire requires fuel, heat, and oxygen. Enclosing a candle limits the $O_2$ supply. Once $O_2$ is depleted into $CO_2$ and $H_2O$, combustion cannot be sustained.",
+    explanation: "Fire requires fuel, heat, and oxygen! Covering a candle with a glass jar traps a limited amount of oxygen. Once the flame consumes the available oxygen, combustion stops and the flame goes out.",
     level: "both"
   },
   {
@@ -525,16 +525,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 3,
     experimentIndex: 2,
     module: "Chemistry",
-    title: "Camphor Sublimation (Solid to Gas)",
+    title: "Camphor Sublimation Solid to Gas",
     question: "When you leave a piece of white camphor or naphthalene ball out in open air, why does it shrink and disappear without leaving any liquid wetness on the floor?",
     options: [
-      "Ants eat the camphor when no one is looking",
-      "Camphor undergoes sublimation, changing directly from a solid state into a gas vapor without passing through liquid state",
-      "Camphor melts into invisible water that seeps into floor tiles",
-      "Sunlight turns camphor into plastic molecules"
+      "Camphor melts into invisible transparent liquid that quickly seeps deep into floor tiles",
+      "Camphor undergoes sublimation, changing directly from a solid into a gas without liquid state",
+      "Microscopic room insects consume camphor solid particles when no one is watching the floor",
+      "Sunlight breaks camphor chemical bonds, converting solid white wax into invisible plastic dust"
     ],
     correct: 1,
-    explanation: "Sublimation occurs when a substance's triple point pressure is higher than atmospheric pressure, causing solid molecules to transition directly to vapor.",
+    explanation: "Sublimation occurs when a solid turns directly into a gas without melting into a liquid first! Camphor molecules escape straight into air as gas vapor, leaving no wet residue.",
     level: "level2"
   },
   {
@@ -542,16 +542,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 3,
     experimentIndex: 2,
     module: "Chemistry",
-    title: "Baking Soda & Vinegar Reaction ($CO_2$ Gas)",
+    title: "Baking Soda & Vinegar Reaction CO₂ Gas",
     question: "When you mix kitchen baking soda (Sodium Bicarbonate) with lemon juice or vinegar (Acetic Acid), why does the mixture fizz violently and produce gas bubbles?",
     options: [
-      "The acid boils the baking soda instantly",
-      "An acid-base reaction occurs, producing Carbon Dioxide ($CO_2$) gas bubbles, water, and salt",
-      "Baking soda releases trapped oxygen bubbles",
-      "Vinegar melts into hydrogen gas flames"
+      "Vinegar acid heats baking soda to its boiling point instantly, generating scalding steam bubbles",
+      "An acid-base reaction occurs, producing carbon dioxide gas bubbles, water, and neutral salt",
+      "Baking soda releases trapped atmospheric oxygen bubbles when exposed to liquid acid solution",
+      "Mixing vinegar with baking soda breaks water molecules into explosive hydrogen gas bubbles"
     ],
     correct: 1,
-    explanation: "$NaHCO_3 + CH_3COOH \\rightarrow CH_3COONa + H_2O + CO_2\\uparrow$. The rapid release of carbon dioxide gas creates energetic effervescence and bubbles.",
+    explanation: "Mixing baking soda (a base) with vinegar (an acid) triggers an acid-base chemical reaction. Carbon dioxide gas ($CO_2$) is rapidly produced, forming energetic bubbles and fizzing effervescence!",
     level: "both"
   }
 ];
