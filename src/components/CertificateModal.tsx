@@ -19,6 +19,7 @@ interface CertificateModalProps {
   isEligible?: boolean;
   userRank?: number | null;
   onUpdateRealName?: (name: string) => void;
+  isCompletedCycle?: boolean;
 }
 
 export default function CertificateModal({
@@ -31,6 +32,7 @@ export default function CertificateModal({
   isEligible = false,
   userRank,
   onUpdateRealName,
+  isCompletedCycle = false,
 }: CertificateModalProps) {
   const [copied, setCopied] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -53,8 +55,10 @@ export default function CertificateModal({
 
   if (!isOpen) return null;
 
-  // Strict unlocking criteria: User MUST be Rank #1 AND eligible
-  const isUnlocked = Boolean(isEligible && userRank === 1);
+  // Unlocking criteria: Must be Rank #1 AND the cycle MUST be completed (isCompletedCycle)
+  const isRankOne = Boolean(isEligible || userRank === 1);
+  const isUnlocked = isRankOne && isCompletedCycle;
+  const isPendingCycleEnd = isRankOne && !isCompletedCycle;
 
   const handlePrint = () => {
     if (!isUnlocked) return;
@@ -95,7 +99,7 @@ export default function CertificateModal({
           
           <div className="flex items-center gap-1.5 text-amber-300 font-bold text-xs uppercase tracking-wider">
             <span className="material-symbols-outlined text-base">workspace_premium</span>
-            <span>{isUnlocked ? "Merit Certificate" : "Specimen Preview"}</span>
+            <span>{isUnlocked ? "Merit Certificate" : isPendingCycleEnd ? "Rank #1 (Cycle Pending)" : "Specimen Preview"}</span>
           </div>
 
           <button
@@ -111,14 +115,14 @@ export default function CertificateModal({
         <div className="p-4 sm:p-6 bg-[#f7f9fb] overflow-y-auto flex-1">
           {!isUnlocked ? (
             /* =========================================================
-               LOCKED SPECIMEN PREVIEW (Compact & Clean on Mobile)
+               LOCKED / PENDING CYCLE END PREVIEW
                ========================================================= */
             <div className="space-y-4 text-center max-w-md mx-auto">
               
               {/* Specimen Header Badge */}
-              <div className="inline-flex items-center gap-2 bg-[#fff7ed] text-[#ea580c] border border-[#ffedd5] px-3.5 py-1.5 rounded-full text-xs font-bold shadow-xs">
-                <span className="material-symbols-outlined text-sm">lock</span>
-                <span>Watermarked Specimen Preview</span>
+              <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold shadow-xs ${isPendingCycleEnd ? "bg-amber-100 text-amber-900 border border-amber-300" : "bg-[#fff7ed] text-[#ea580c] border border-[#ffedd5]"}`}>
+                <span className="material-symbols-outlined text-sm">{isPendingCycleEnd ? "hourglass_top" : "lock"}</span>
+                <span>{isPendingCycleEnd ? "Cycle In Progress — Unlocks at Midnight" : "Watermarked Specimen Preview"}</span>
               </div>
 
               {/* Compact Framed Mini-Certificate Card */}
@@ -127,7 +131,7 @@ export default function CertificateModal({
                 {/* Diagonal Watermark Text */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none transform -rotate-12 select-none">
                   <span className="text-2xl sm:text-3xl font-black font-mono text-[#143867] uppercase tracking-widest text-center">
-                    SPECIMEN PREVIEW • NOT FOR DISTRIBUTION
+                    {isPendingCycleEnd ? "RANK 1 STANDING • UNLOCKS AT CYCLE END" : "SPECIMEN PREVIEW • NOT FOR DISTRIBUTION"}
                   </span>
                 </div>
 
@@ -160,17 +164,23 @@ export default function CertificateModal({
               {/* Requirement Alert Callout */}
               <div className="bg-[#143867] text-white rounded-2xl p-3.5 sm:p-4 text-left shadow-sm space-y-2">
                 <div className="flex items-start gap-2.5">
-                  <span className="material-symbols-outlined text-amber-400 text-lg shrink-0 mt-0.5">info</span>
+                  <span className="material-symbols-outlined text-amber-400 text-lg shrink-0 mt-0.5">
+                    {isPendingCycleEnd ? "schedule" : "info"}
+                  </span>
                   <div className="space-y-1">
-                    <h5 className="text-xs font-bold text-amber-300">Rank #1 Champion Exclusive</h5>
+                    <h5 className="text-xs font-bold text-amber-300">
+                      {isPendingCycleEnd ? "⏳ Rank #1 Standing Confirmed!" : "Rank #1 Champion Exclusive"}
+                    </h5>
                     <p className="text-[11px] text-gray-200 leading-relaxed">
-                      Official certificates, unblurred PDF downloads, and printing unlock <strong className="text-white">EXCLUSIVELY for the Rank #1 Champion</strong> at the end of the week.
+                      {isPendingCycleEnd
+                        ? "You are currently holding Rank #1! Official certificates are finalized and issued at the conclusion of the cycle (11:59 PM). Please wait until the cycle ends to download your unblurred certificate!"
+                        : "Official certificates, unblurred PDF downloads, and printing unlock EXCLUSIVELY for the Rank #1 Champion at the end of the week."}
                     </p>
                   </div>
                 </div>
                 
                 <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
-                  <span className="text-gray-300 font-medium">Your Current Standing:</span>
+                  <span className="text-gray-300 font-medium">Your Live Standing:</span>
                   <span className="px-2.5 py-0.5 bg-white/20 rounded-full font-mono font-bold text-amber-200">
                     {userRank ? `Rank #${userRank}` : "Unranked"}
                   </span>

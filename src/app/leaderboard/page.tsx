@@ -28,6 +28,7 @@ export default function LeaderboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isCertModalOpen, setIsCertModalOpen] = useState(false);
   const [certType, setCertType] = useState<RankCertificateType>("Weekly Rank 1");
+  const [selectedCertIsCompleted, setSelectedCertIsCompleted] = useState(false);
 
   const myAvatar = useUserAvatar(userId);
   const [studentRealName, setStudentRealName] = useState("Student Champion");
@@ -438,12 +439,13 @@ export default function LeaderboardPage() {
                   <button
                     onClick={() => {
                       setCertType(timeframe === "daily" ? "Daily Rank 1" : "Weekly Rank 1");
+                      setSelectedCertIsCompleted(false);
                       setIsCertModalOpen(true);
                     }}
                     className="px-4 py-2.5 bg-[#143867] hover:bg-[#1e4a85] text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95"
                   >
                     <span className="material-symbols-outlined text-sm text-[#f37021]">preview</span>
-                    <span>Preview {timeframe === "daily" ? "Daily" : "Weekly"} Rank #1 Certificate</span>
+                    <span>Preview {timeframe === "daily" ? "Daily" : "Weekly"} Specimen</span>
                   </button>
 
                   <Link
@@ -457,6 +459,68 @@ export default function LeaderboardPage() {
               </div>
             </div>
           )}
+
+          {/* =========================================================
+             EARNED MERIT CERTIFICATES & NOTIFICATIONS SECTION
+             ========================================================= */}
+          {!isLoading && (
+            <div className="mt-6 mb-8 p-6 bg-white rounded-3xl border-2 border-emerald-500 shadow-xl space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                    📜
+                  </span>
+                  <h3 className="text-base font-black text-[#143867]">
+                    Finalized Merit Certificates & Notifications
+                  </h3>
+                </div>
+                <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded-full uppercase tracking-wider">
+                  Official Issue Center
+                </span>
+              </div>
+
+              {/* Ready to Download Notification Card for Completed Cycles */}
+              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-black rounded uppercase">
+                      READY TO DOWNLOAD
+                    </span>
+                    <span className="text-xs font-bold text-emerald-900">
+                      Weekly Rank #1 Champion Certificate (Completed Cycle)
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-800 leading-relaxed">
+                    Official finalized certificate for ending the cycle in 1st Place. Includes unblurred print access, PDF export, and verified Agastya Seal!
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setCertType("Weekly Rank 1");
+                    setSelectedCertIsCompleted(true);
+                    setIsCertModalOpen(true);
+                  }}
+                  className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 shrink-0"
+                >
+                  <span className="material-symbols-outlined text-sm">download</span>
+                  <span>Claim & Download Certificate 📜</span>
+                </button>
+              </div>
+
+              {/* Notice for Mid-Cycle Live Rank 1 Holders */}
+              {userRank === 1 && (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3">
+                  <span className="material-symbols-outlined text-amber-600 text-lg shrink-0 mt-0.5">schedule</span>
+                  <div className="space-y-1 text-xs text-amber-900">
+                    <h5 className="font-bold">⏳ Active Cycle Notice for Current #1 Leader</h5>
+                    <p className="leading-relaxed">
+                      You are currently sitting at <strong>Rank #1</strong> on the live standings! Official unblurred certificates are generated automatically at <strong>11:59 PM</strong> when the cycle completes. Check your Notifications box here after midnight to claim!
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </section>
       </main>
 
@@ -464,10 +528,11 @@ export default function LeaderboardPage() {
         isOpen={isCertModalOpen}
         onClose={() => setIsCertModalOpen(false)}
         studentRealName={studentRealName || userEntry?.student_profiles?.username || "Student Explorer"}
-        achievementType={timeframe === "daily" ? "Daily Rank 1" : "Weekly Rank 1"}
+        achievementType={certType}
         awardDate={new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-        isEligible={userRank === 1}
+        isEligible={userRank === 1 || selectedCertIsCompleted}
         userRank={userRank}
+        isCompletedCycle={selectedCertIsCompleted}
       />
 
 
