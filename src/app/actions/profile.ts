@@ -74,35 +74,44 @@ export async function getLeaderboard(timeframe: 'weekly' | 'daily' | 'friends' =
   }
 
   const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+
+  // Compute current week start (Monday 00:00:00)
+  const currentWeekStart = new Date(now);
+  const dayOfWeek = currentWeekStart.getDay();
+  const diffToMonday = currentWeekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+  currentWeekStart.setDate(diffToMonday);
+  currentWeekStart.setHours(0, 0, 0, 0);
 
   // Process data locally to reset expired XP
   let processedData = gamificationData.map((row) => {
-    // Retroactive fallback for users created before the new columns
-    let rowDaily = row.last_daily_reset === null ? row.xp : row.daily_xp;
-    let rowWeekly = row.last_weekly_reset === null ? row.xp : row.weekly_xp;
+    let rowDaily = row.daily_xp || 0;
+    let rowWeekly = row.weekly_xp || 0;
 
     const dailyResetRef = row.last_daily_reset || row.last_claimed_date;
-    if (dailyResetRef) {
+    if (!dailyResetRef) {
+      rowDaily = 0;
+    } else {
       const lastDaily = new Date(dailyResetRef);
-      const dailyBoundary = new Date(lastDaily);
-      dailyBoundary.setHours(23, 59, 59, 999);
-      if (now > dailyBoundary) rowDaily = 0;
+      if (lastDaily < todayStart) {
+        rowDaily = 0; // Reset to 0 for the new day
+      }
     }
 
     const weeklyResetRef = row.last_weekly_reset || row.last_claimed_date;
-    if (weeklyResetRef) {
+    if (!weeklyResetRef) {
+      rowWeekly = 0;
+    } else {
       const lastWeekly = new Date(weeklyResetRef);
-      const weeklyBoundary = new Date(lastWeekly);
-      const diffToSunday = lastWeekly.getDay() === 0 ? 0 : 7 - lastWeekly.getDay();
-      weeklyBoundary.setDate(lastWeekly.getDate() + diffToSunday);
-      weeklyBoundary.setHours(23, 59, 59, 999);
-      if (now > weeklyBoundary) rowWeekly = 0;
+      if (lastWeekly < currentWeekStart) {
+        rowWeekly = 0; // Reset to 0 for the new week
+      }
     }
 
     return { ...row, daily_xp: rowDaily, weekly_xp: rowWeekly };
   });
 
-  // Re-sort and filter after adjusting for time
+  // Re-sort after adjusting for time
   if (timeframe === 'daily') {
     processedData.sort((a, b) => b.daily_xp - a.daily_xp);
   } else if (timeframe === 'weekly') {
