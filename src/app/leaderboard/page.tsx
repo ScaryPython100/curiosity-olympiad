@@ -524,8 +524,7 @@ export default function LeaderboardPage() {
                   onClick={() => {
                     const targetCert = timeframe === "daily" ? "Daily Rank 1" : "Weekly Rank 1";
                     setCertType(targetCert);
-                    const isCompleted = userRank !== 1;
-                    setSelectedCertIsCompleted(isCompleted);
+                    setSelectedCertIsCompleted(true); // Unlock finalized certificate for download!
                     setIsCertModalOpen(true);
                   }}
                   className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 mt-1"
