@@ -39,7 +39,7 @@ export async function updateAvatar(avatarValue: string): Promise<{ success?: boo
 /**
  * Fetches the leaderboard data.
  */
-export async function getLeaderboard(timeframe: 'all_time' | 'weekly' | 'daily' | 'friends' = 'all_time') {
+export async function getLeaderboard(timeframe: 'weekly' | 'daily' | 'friends' = 'weekly') {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -269,7 +269,60 @@ export async function awardXP(amount: number, reason: string) {
     }
   }
 
-  return { success: true, newXp };
+  return { success: true, newXp, newXP: newXp, newPoints: newPoints };
+}
+
+/**
+ * Awards XP specifically for mock test attempts, practice labs, and telemetry bonuses without daily claim locks.
+ */
+export async function addActivityXP(amount: number, reason: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: currentData, error: fetchError } = await supabase
+    .from("user_gamification")
+    .select("xp, curiosity_points, daily_xp, weekly_xp")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (fetchError) return { error: fetchError.message };
+
+  const newXp = (currentData?.xp || 0) + amount;
+  const newPoints = (currentData?.curiosity_points || 0) + amount;
+  const newDailyXp = (currentData?.daily_xp || 0) + amount;
+  const newWeeklyXp = (currentData?.weekly_xp || 0) + amount;
+  const nowIso = new Date().toISOString();
+
+  if (currentData) {
+    const { error: updateError } = await supabase
+      .from("user_gamification")
+      .update({
+        xp: newXp,
+        curiosity_points: newPoints,
+        daily_xp: newDailyXp,
+        weekly_xp: newWeeklyXp,
+      })
+      .eq("user_id", user.id);
+
+    if (updateError) return { error: updateError.message };
+  } else {
+    const row = {
+      id: user.id,
+      user_id: user.id,
+      xp: newXp,
+      curiosity_points: newPoints,
+      last_claimed_date: nowIso,
+      daily_xp: newDailyXp,
+      weekly_xp: newWeeklyXp,
+      last_daily_reset: nowIso,
+      last_weekly_reset: nowIso,
+    };
+    await supabase.from("user_gamification").upsert(row, { onConflict: "user_id" });
+  }
+
+  return { success: true, newXp, newXP: newXp, newPoints: newPoints };
 }
 
 /**

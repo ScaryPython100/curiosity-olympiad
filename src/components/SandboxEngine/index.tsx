@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTelemetry } from './useTelemetry';
 import { OpticsLevel } from './levels/OpticsLevel';
 import { GravityLevel } from './levels/GravityLevel';
 import { ChemistryLevel } from './levels/ChemistryLevel';
 
-export default function SandboxEngine() {
+interface SandboxEngineProps {
+  onLevelChange?: (index: number) => void;
+  level?: "level1" | "level2";
+}
+
+export default function SandboxEngine({ onLevelChange, level }: SandboxEngineProps = {}) {
   const { telemetryData, recordAction, resetTelemetry } = useTelemetry();
   
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
@@ -15,6 +20,10 @@ export default function SandboxEngine() {
 
   const levels = ['optics', 'gravity', 'chemistry'];
   const currentLevelId = levels[currentLevelIndex];
+
+  useEffect(() => {
+    onLevelChange?.(currentLevelIndex);
+  }, [currentLevelIndex, onLevelChange]);
 
   // We wrap recordAction so the parent component can know when something happens if needed
   const handleRecordAction = (actionType: string, actionDetails?: any) => {

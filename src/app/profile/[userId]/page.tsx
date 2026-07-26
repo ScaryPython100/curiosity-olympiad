@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { getUserProfile, getFollowStatus, followUser, unfollowUser, getFollowers, getFollowing } from "@/app/actions/profile";
 import { getBestBadge, BADGES, AVATARS } from "@/utils/gamification";
+import { useUserAvatar } from "@/utils/userAvatar";
 import Link from "next/link";
 
 export default function PublicProfilePage({ params }: { params: Promise<{ userId: string }> }) {
@@ -100,6 +101,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userId
   }
 
   const isSelf = currentUserId === userId;
+  const displayAvatar = useUserAvatar(userId, profile?.avatar_url, profile?.username);
   const badge = getBestBadge(profile.xp);
   const currentLevel = Math.floor(profile.xp / 1000) + 1;
 
@@ -122,9 +124,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userId
         <div className="relative mb-6">
           <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#143867] to-[#2f4f7f] p-1 shadow-2xl">
             <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
-              <span className="text-4xl font-bold text-[#143867] uppercase">
-                {profile.username.substring(0, 2)}
-              </span>
+              <img src={displayAvatar} alt={profile.username} className="w-full h-full object-cover" />
             </div>
           </div>
         </div>

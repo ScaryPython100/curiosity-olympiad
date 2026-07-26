@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { calculateLevelProgress } from "@/utils/gamification";
+import { getUserAvatar } from "@/utils/userAvatar";
 
 export default function DiscoverPage() {
   const router = useRouter();
@@ -55,21 +56,8 @@ export default function DiscoverPage() {
     );
   }
 
-  // Same fallback avatar logic as dashboard/leaderboard
   const getAvatarUrl = (id: string) => {
-    let hash = 0;
-    for (let i = 0; i < id.length; i++) {
-      hash = id.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const avatars = [
-      '/avatars/abdul_kalam_1783786598184.png',
-      '/avatars/albert_einstein_1783786524612.png',
-      '/avatars/marie_curie_1783786533839.png',
-      '/avatars/ada_lovelace_1783786544449.png',
-      '/avatars/isaac_newton_1783786553524.png',
-      '/avatars/grace_hopper_1783786562459.png'
-    ];
-    return avatars[Math.abs(hash) % 6];
+    return getUserAvatar(id);
   };
 
   return (

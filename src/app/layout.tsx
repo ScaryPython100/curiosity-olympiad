@@ -1,11 +1,4 @@
 import "./globals.css"; // This import is what hooks up Tailwind!
-import { Montserrat } from "next/font/google";
-
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-montserrat",
-});
 
 export const metadata = {
   title: "Curiosity Olympiad",
@@ -18,12 +11,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${montserrat.variable}`} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Safe Google Material Symbols injection */}
+        {/* Montserrat & Material Symbols injection */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link 
           rel="stylesheet" 
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" 
+          href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" 
         />
         <script
           dangerouslySetInnerHTML={{

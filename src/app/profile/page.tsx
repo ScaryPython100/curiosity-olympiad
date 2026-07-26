@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { calculateLevelProgress, BADGES } from "@/utils/gamification";
 import { AvatarPickerModal } from "@/components/AvatarPickerModal";
+import { useUserAvatar } from "@/utils/userAvatar";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { userId, loading: userLoading } = useUser();
   const [userStats, setUserStats] = useState({ xp: 0, points: 0, username: "", avatar_url: "", rank: "-", streak: "-", quests: "-", followers: 0, following: 0 });
+  const displayAvatar = useUserAvatar(userId, userStats.avatar_url, userStats.username);
   const [loading, setLoading] = useState(true);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
 
@@ -98,13 +100,7 @@ export default function ProfilePage() {
             {/* Avatar Section */}
             <div className="relative group">
               <div className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden border-4 border-[#ffe16d] shadow-lg">
-                {userStats.avatar_url ? (
-                  <img src={userStats.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-4xl font-bold text-[#143867] uppercase">
-                    {userStats.username.substring(0, 2)}
-                  </span>
-                )}
+                <img src={displayAvatar} alt="Profile" className="w-full h-full object-cover" />
               </div>
               <button
                 onClick={() => setShowAvatarModal(true)}
@@ -138,6 +134,8 @@ export default function ProfilePage() {
                   <span className="text-[10px] uppercase font-bold text-gray-400">Following</span>
                 </div>
               </div>
+
+
             </div>
           </div>
 
@@ -167,7 +165,7 @@ export default function ProfilePage() {
 
         {/* Badges Section - New Playful UI */}
         <section className="mb-8">
-          <div className="flex items-center justify-between mb-4 px-2">
+          <div className="flex items-center justify-between mb-2 px-2">
             <h2 className="text-lg font-bold text-[#143867] flex items-center gap-2">
               <span className="material-symbols-outlined text-[#ea580c]">military_tech</span>
               Academic Badges
@@ -176,20 +174,39 @@ export default function ProfilePage() {
               {unlockedBadges.length} / {BADGES.length} UNLOCKED
             </span>
           </div>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+          <p className="text-[11px] text-gray-500 mb-4 px-2">
+            Badges grant XP & custom flair. <span className="font-bold text-[#143867]">Official Printable Certificates of Excellence</span> are exclusively awarded for achieving Rank #1 on the national leaderboard.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
             {BADGES.map((badge) => {
               const isUnlocked = userStats.xp >= badge.minXp;
               return (
                 <div
                   key={badge.id}
-                  className={`flex flex-col items-center p-4 rounded-2xl border transition-all duration-300 ${
+                  className={`flex flex-col items-center justify-between p-4 rounded-2xl border transition-all duration-300 ${
                     isUnlocked
                       ? 'bg-white border-yellow-200 shadow-md scale-100'
                       : 'bg-gray-50 border-gray-100 grayscale opacity-40 scale-95'
                   }`}
                 >
-                  <span className="text-3xl mb-2">{badge.icon}</span>
-                  <span className="text-[10px] font-bold text-center leading-tight text-[#143867]">{badge.name}</span>
+                  <div className="flex flex-col items-center">
+                    <span className="text-3xl mb-2">{badge.icon}</span>
+                    <span className="text-xs font-bold text-center leading-tight text-[#143867]">{badge.name}</span>
+                    <span className="text-[10px] text-gray-400 mt-1">{badge.description}</span>
+                  </div>
+
+                  {isUnlocked && (
+                    <a
+                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                        `I just unlocked the "${badge.name}" ${badge.icon} badge in the @AgastyaOrg Curiosity Olympiad! 🚀✨ #AahAhaHaha #CuriosityOlympiad`
+                      )}&url=${encodeURIComponent("https://curiosity-olympiad.vercel.app")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 text-[10px] font-bold px-3 py-1 bg-[#143867] hover:bg-[#1e4a85] text-white rounded-xl flex items-center gap-1 transition-all shadow-xs"
+                    >
+                      <span>𝕏 Share</span>
+                    </a>
+                  )}
                 </div>
               );
             })}

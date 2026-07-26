@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 130" fill="none">
+  <!-- Agastya Circle (Dot above A) -->
+  <circle cx="60" cy="22" r="14" stroke="#f37021" stroke-width="8" fill="none" />
+  <!-- Agastya Peak / Stylized A -->
+  <path d="M60 42 L18 118 L42 118 L60 82 L78 118 L102 118 Z" fill="#f37021" />
+</svg>

@@ -56,15 +56,36 @@ export function ChemistryLevel({ recordAction }: ChemistryLevelProps) {
     checkMix(id, newPos);
   };
 
+  const [temperature, setTemperature] = useState(25);
+  const [catalystAdded, setCatalystAdded] = useState(false);
+  const [stirSpeed, setStirSpeed] = useState(2);
+
   const resetBeaker = () => {
     recordAction('optional_tool_used'); // Using this as the "reset" tool usage
     setBeakerMix([]);
     setDropA({ x: 100, y: 100 });
     setDropB({ x: 100, y: 200 });
     setDropC({ x: 100, y: 300 });
+    setTemperature(25);
+    setCatalystAdded(false);
   };
 
-  // Determine Beaker State based on mix
+  const handleTempChange = (val: number) => {
+    setTemperature(val);
+    recordAction('changed_temperature', { val });
+  };
+
+  const handleStirChange = (val: number) => {
+    setStirSpeed(val);
+    recordAction('changed_stir_speed', { val });
+  };
+
+  const toggleCatalyst = () => {
+    setCatalystAdded(prev => !prev);
+    recordAction('toggled_catalyst');
+  };
+
+  // Determine Beaker State based on mix & temperature
   let beakerColor = "bg-white/10";
   let showBubbles = false;
 
@@ -87,25 +108,72 @@ export function ChemistryLevel({ recordAction }: ChemistryLevelProps) {
     else if (beakerMix.includes('C')) beakerColor = "bg-yellow-500";
   }
 
+  // High temp or catalyst induces bubbling in any mixed reaction
+  if (beakerMix.length > 0 && (temperature > 60 || catalystAdded)) {
+    showBubbles = true;
+  }
+
   return (
     <div className="flex flex-col h-full w-full">
       {/* Level Header */}
-      <div className="bg-gray-800 p-4 border-b border-gray-700 flex justify-between items-center shrink-0">
+      <div className="bg-gray-800 p-3 border-b border-gray-700 flex flex-wrap justify-between items-center gap-2 shrink-0">
         <div className="flex-1 pr-4">
-          <h2 className="text-xl font-bold text-gray-100 flex items-center gap-2">
-             <span className="bg-indigo-600 text-xs px-2 py-1 rounded text-white uppercase tracking-wider">Mission 3</span>
-             Chemical Ecosystem Module
+          <h2 className="text-base md:text-lg font-bold text-gray-100 flex items-center gap-2">
+             <span className="bg-indigo-600 text-xs px-2 py-0.5 rounded text-white uppercase tracking-wider">Experiment 3</span>
+             Everyday Kitchen Science & Heat Lab
           </h2>
-          <p className="text-sm text-indigo-200 font-medium mt-1">
-            <strong>Objective:</strong> Experiment by mixing the unknown liquids. Discover the exact combination that creates a bubbling green reaction.
+          <p className="text-xs text-indigo-200 mt-0.5">
+            <strong>Objective:</strong> Adjust Soup Temperature (°C) and Stirring Speed to discover how heat transfers in your kitchen.
           </p>
         </div>
-        <button 
-          onClick={resetBeaker}
-          className="bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-2 rounded-lg text-sm font-bold transition-colors"
-        >
-          Flush System
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={toggleCatalyst}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${catalystAdded ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+          >
+            {catalystAdded ? 'Stainless Steel Spoon' : 'Wooden Spoon (Insulator)'}
+          </button>
+          <button 
+            onClick={resetBeaker}
+            className="bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+          >
+            Reset Bowl
+          </button>
+        </div>
+      </div>
+
+      {/* Interactive Simulation Variables Toolbar */}
+      <div className="bg-gray-900/90 border-b border-gray-700/80 px-4 py-2 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-300 shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-indigo-300">Soup Temperature: {temperature}°C</span>
+          <input
+            type="range"
+            min="20"
+            max="100"
+            step="10"
+            value={temperature}
+            onChange={(e) => handleTempChange(parseInt(e.target.value))}
+            className="w-24 md:w-32 accent-indigo-500 cursor-pointer"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-indigo-300">Stirring Speed: {stirSpeed === 0 ? "Still" : stirSpeed < 5 ? "Gentle" : "Rapid"}</span>
+          <input
+            type="range"
+            min="0"
+            max="10"
+            step="1"
+            value={stirSpeed}
+            onChange={(e) => handleStirChange(parseInt(e.target.value))}
+            className="w-24 md:w-32 accent-indigo-500 cursor-pointer"
+          />
+        </div>
+
+        <div className="flex items-center gap-1 text-[11px] text-gray-400">
+          <span className="material-symbols-outlined text-sm text-yellow-400">info</span>
+          <span>{temperature > 60 ? '🔥 High thermal energy: accelerated reaction' : 'Optimal reaction at 25°C-40°C'}</span>
+        </div>
       </div>
 
       {/* Physics Workspace */}

@@ -6,7 +6,19 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { awardXP } from "@/app/actions/profile";
 import { getBestBadge, BADGES } from "@/utils/gamification";
+import { getUserAvatar, useUserAvatar } from "@/utils/userAvatar";
 import { playLevelUpSound } from "@/utils/audio";
+
+const PARTNER_SCHOOLS = [
+  { name: "Global Olympiad Partner Academy", location: "Worldwide", icon: "public", badgeColor: "bg-[#143867] text-white border-[#f37021]", emblem: "🌐" },
+  { name: "STEM Excellence Institute", location: "Delhi", icon: "precision_manufacturing", badgeColor: "bg-[#f37021] text-white border-[#143867]", emblem: "🦾" },
+  { name: "Innovation & Curiosity Charter", location: "Bangalore", icon: "lightbulb", badgeColor: "bg-[#2f4f7f] text-white border-[#f37021]", emblem: "💡" },
+  { name: "Agastya Campus Creativity Lab", location: "Kuppam", icon: "science", badgeColor: "bg-[#143867] text-[#ffe16d] border-[#f37021]", emblem: "Å", logo: "/agastya-logo.svg" },
+  { name: "National Science Foundation Network", location: "India", icon: "biotech", badgeColor: "bg-emerald-700 text-white border-emerald-300", emblem: "🔬" },
+  { name: "Future Explorers Foundation", location: "Mumbai", icon: "rocket_launch", badgeColor: "bg-purple-700 text-white border-purple-300", emblem: "🚀" },
+  { name: "Aah! Aha! Ha-ha! Learning Center", location: "Agastya", icon: "auto_awesome", badgeColor: "bg-[#f37021] text-white border-[#ffe16d]", emblem: "✨" },
+  { name: "Young Instructors Academy", location: "Hyderabad", icon: "school", badgeColor: "bg-[#143867] text-white border-blue-300", emblem: "🎓" },
+];
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -17,6 +29,7 @@ export default function DashboardPage() {
   const [streak, setStreak] = useState("0 Days");
   const [xp, setXp] = useState(0);
   const [friendsActivity, setFriendsActivity] = useState<any[]>([]);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchStreak = async () => {
@@ -41,6 +54,34 @@ export default function DashboardPage() {
     };
     if (!userLoading) fetchStreak();
   }, [userId, userLoading]);
+
+  const handleCopyInvite = () => {
+    const text = "Join me on Curiosity Olympiad! Experience hands-on science learning inspired by Agastya's Aah! Aha! Ha-ha! philosophy. Spark your curiosity today! 🚀 https://curiosity-olympiad.vercel.app";
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 3000);
+  };
+
+  const handleShare = (platform: string) => {
+    const text = encodeURIComponent("Join me on Curiosity Olympiad! Experience hands-on science learning inspired by Agastya's Aah! Aha! Ha-ha! philosophy. Spark your curiosity today! 🚀 #CuriosityOlympiad #Agastya");
+    const url = encodeURIComponent("https://curiosity-olympiad.vercel.app");
+    
+    if (platform === "whatsapp") {
+      window.open(`https://api.whatsapp.com/send?text=${text}%20${url}`, "_blank");
+    } else if (platform === "twitter") {
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank");
+    } else if (platform === "facebook") {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
+    } else if (platform === "native" && typeof navigator !== "undefined" && navigator.share) {
+      navigator.share({
+        title: "Curiosity Olympiad x Agastya",
+        text: "Join me on Curiosity Olympiad! Experience hands-on science learning inspired by Agastya's Aah! Aha! Ha-ha! philosophy.",
+        url: "https://curiosity-olympiad.vercel.app"
+      }).catch(() => {});
+    } else {
+      handleCopyInvite();
+    }
+  };
 
   const handleClaimXP = async () => {
     if (isAwarding) return;
@@ -135,6 +176,103 @@ export default function DashboardPage() {
               </div>
             </div>
           )}
+        </section>
+
+        {/* Agastya Promotional Hero Banner */}
+        <section className="mb-10 overflow-hidden rounded-3xl bg-gradient-to-br from-[#143867] via-[#1b4a8e] to-[#0d2340] text-white shadow-[0_12px_40px_rgba(20,56,103,0.3)] relative border border-blue-400/20">
+          <div className="absolute -right-16 -top-16 w-72 h-72 bg-[#ffe16d]/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute left-1/3 -bottom-20 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="p-6 md:p-10 relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 bg-[#ffe16d]/20 backdrop-blur-md border border-[#ffe16d]/40 text-[#ffe16d] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+                <span className="material-symbols-outlined text-sm">auto_awesome</span>
+                <span>Inspired by Agastya International Foundation</span>
+              </div>
+              <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight mb-3 text-white leading-tight">
+                "Aah! Aha! Ha-ha!" <br className="hidden sm:inline" />
+                <span className="text-[#ffe16d]">Curiosity, Discovery & Joy in Science.</span>
+              </h3>
+              <p className="text-blue-100 text-sm md:text-base leading-relaxed opacity-95 mb-6">
+                Our platform replaces rote memorization with experiential simulations, leveled practice, and hands-on scientific discovery. Spark your inner scientist today!
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href="/about"
+                  className="inline-flex items-center gap-2 bg-[#ffe16d] text-[#221b00] font-bold px-6 py-3 rounded-full text-xs md:text-sm shadow-lg hover:bg-[#ffd73e] hover:scale-105 transition-all active:scale-95"
+                >
+                  <span>Explore Agastya Mission</span>
+                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                </Link>
+                <Link
+                  href="/practice"
+                  className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3 rounded-full text-xs md:text-sm backdrop-blur-sm border border-white/20 transition-all"
+                >
+                  <span className="material-symbols-outlined text-sm">science</span>
+                  <span>Try Interactive Lab</span>
+                </Link>
+              </div>
+            </div>
+
+            <div className="hidden lg:flex flex-col items-center justify-center gap-3 bg-white/10 border border-white/20 p-5 rounded-2xl backdrop-blur-md min-w-[260px]">
+              <div className="w-14 h-14 rounded-2xl bg-white p-1.5 flex items-center justify-center shadow-md">
+                <img src="/agastya-logo.svg" alt="Agastya Logo" className="w-full h-full object-contain" />
+              </div>
+              <div className="text-center">
+                <p className="text-xs font-black text-[#f37021] uppercase tracking-wider">The Agastya Way</p>
+                <p className="text-[11px] text-blue-100 mt-1 font-bold">
+                  Curiosity • Creativity • Confidence
+                </p>
+                <p className="text-[10px] text-[#ffe16d] italic mt-0.5">
+                  Under the Umbrella of Care
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-blue-100 font-bold bg-[#143867]/60 px-3 py-1 rounded-full border border-blue-400/30">
+                <span className="material-symbols-outlined text-sm text-[#f37021]">verified</span>
+                <span>1.5M+ Young Minds Sparked</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Rolling Partner School Logo Carousel - Official Insignia Badges */}
+        <section className="mb-10 overflow-hidden bg-white border-2 border-[#f37021]/30 rounded-3xl py-6 px-6 shadow-md relative">
+          <div className="flex flex-col items-center justify-center mb-5 text-center">
+            <span className="bg-orange-50 text-[#f37021] text-[10px] font-black uppercase px-3 py-1 rounded-full border border-orange-200 tracking-widest mb-1.5">
+              Institutional Collaborations
+            </span>
+            <p className="text-xs font-extrabold uppercase tracking-widest text-[#143867]">
+              Official Academic Partners & Olympic Charters Worldwide
+            </p>
+          </div>
+          <div className="flex overflow-hidden relative">
+            <div className="animate-marquee flex items-center gap-6 py-2">
+              {[...PARTNER_SCHOOLS, ...PARTNER_SCHOOLS].map((school, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-3 px-4 py-3 bg-gray-50 border-2 border-gray-200/80 rounded-2xl whitespace-nowrap hover:border-[#f37021] hover:bg-white hover:shadow-md transition-all group"
+                >
+                  <div className={`w-10 h-10 rounded-xl ${school.badgeColor || "bg-[#143867] text-white"} flex items-center justify-center shadow-xs shrink-0 border`}>
+                    {school.logo ? (
+                      <img src={school.logo} alt={school.name} className="w-6 h-6 object-contain" />
+                    ) : (
+                      <span className="text-lg font-bold">{school.emblem || "🏛️"}</span>
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-xs font-extrabold text-[#143867] leading-none group-hover:text-[#f37021] transition-colors">{school.name}</p>
+                      <span className="material-symbols-outlined text-xs text-[#f37021]">verified</span>
+                    </div>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-1 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#f37021]"></span>
+                      {school.location}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
 
         {/* Feature Grid: Bento-style Cards */}
@@ -286,22 +424,7 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-4">
                 {friendsActivity.map((activity, index) => {
-                  // Fallback avatar based on user_id
-                  let hash = 0;
-                  for (let i = 0; i < activity.user_id.length; i++) {
-                    hash = activity.user_id.charCodeAt(i) + ((hash << 5) - hash);
-                  }
-                  // We know there are 6 avatars
-                  const avatarIndex = Math.abs(hash) % 6;
-                  const avatars = [
-                    '/avatars/abdul_kalam_1783786598184.png',
-                    '/avatars/albert_einstein_1783786524612.png',
-                    '/avatars/marie_curie_1783786533839.png',
-                    '/avatars/ada_lovelace_1783786544449.png',
-                    '/avatars/isaac_newton_1783786553524.png',
-                    '/avatars/grace_hopper_1783786562459.png'
-                  ];
-                  const avatarUrl = avatars[avatarIndex];
+                  const avatarUrl = getUserAvatar(activity.user_id);
                   
                   return (
                     <div key={index} className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors">
@@ -324,6 +447,61 @@ export default function DashboardPage() {
                 })}
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Social Media Invite / Share Card */}
+        <section className="mb-8 rounded-2xl bg-gradient-to-r from-[#143867]/5 to-[#ffe16d]/10 border border-gray-200/80 p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#143867] text-[#ffe16d] flex items-center justify-center shrink-0 shadow-md">
+              <span className="material-symbols-outlined text-2xl">share</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-base font-bold text-[#143867]">Invite Classmates & Friends</h4>
+                <span className="bg-[#ea580c]/10 text-[#ea580c] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  +100 XP per Friend
+                </span>
+              </div>
+              <p className="text-xs text-gray-600 mt-1">
+                Share the gift of curiosity! Challenge your classmates to experiential science tests.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center flex-wrap gap-2.5 w-full md:w-auto justify-end">
+            <button
+              onClick={() => handleShare("whatsapp")}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#25D366] text-white rounded-full text-xs font-bold hover:bg-[#1EBE5D] transition-all shadow-sm active:scale-95"
+              title="Share on WhatsApp"
+            >
+              <span className="material-symbols-outlined text-sm">chat</span>
+              <span>WhatsApp</span>
+            </button>
+            <button
+              onClick={() => handleShare("twitter")}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#1DA1F2] text-white rounded-full text-xs font-bold hover:bg-[#0c85d0] transition-all shadow-sm active:scale-95"
+              title="Share on X"
+            >
+              <span className="material-symbols-outlined text-sm">post</span>
+              <span>X (Twitter)</span>
+            </button>
+            <button
+              onClick={() => handleShare("facebook")}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#1877F2] text-white rounded-full text-xs font-bold hover:bg-[#0d65d9] transition-all shadow-sm active:scale-95"
+              title="Share on Facebook"
+            >
+              <span className="material-symbols-outlined text-sm">thumb_up</span>
+              <span>Facebook</span>
+            </button>
+            <button
+              onClick={() => handleShare("native")}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#143867] text-white rounded-full text-xs font-bold hover:bg-[#1d4d8a] transition-all shadow-sm active:scale-95"
+              title="Copy link or share"
+            >
+              <span className="material-symbols-outlined text-sm">content_copy</span>
+              <span>{copied ? "Link Copied!" : "Copy Link"}</span>
+            </button>
           </div>
         </section>
       </main>

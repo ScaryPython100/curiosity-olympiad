@@ -23,6 +23,7 @@ export function AvatarPickerModal({ currentAvatarUrl, onClose, onSuccess }: Avat
         // Persist avatar selection in localStorage since the DB column doesn't exist
         if (typeof window !== "undefined") {
           localStorage.setItem("curiosity_avatar_url", url);
+          window.dispatchEvent(new Event("curiosity_avatar_changed"));
         }
         onSuccess(url);
         onClose();

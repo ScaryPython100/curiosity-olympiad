@@ -10,7 +10,10 @@ export function OpticsLevel({ recordAction }: OpticsLevelProps) {
   const [prismPos, setPrismPos] = useState<Position>({ x: 400, y: 250 });
   
   const [useRedPrism, setUseRedPrism] = useState(false);
-  
+  const [refractiveIndex, setRefractiveIndex] = useState(1.5);
+  const [beamIntensity, setBeamIntensity] = useState(100);
+  const [slitWidth, setSlitWidth] = useState(2);
+
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [workspaceSize, setWorkspaceSize] = useState({ width: 800, height: 400 });
 
@@ -52,56 +55,140 @@ export function OpticsLevel({ recordAction }: OpticsLevelProps) {
     setUseRedPrism(prev => !prev);
   };
 
+  const handleRefractiveChange = (val: number) => {
+    setRefractiveIndex(val);
+    recordAction('changed_refractive_index', { val });
+  };
+
+  const handleIntensityChange = (val: number) => {
+    setBeamIntensity(val);
+    recordAction('changed_beam_intensity', { val });
+  };
+
+  // Dispersion factor scales with refractive index n
+  const dispScale = (refractiveIndex - 1) * 2;
+
   return (
     <div className="flex flex-col h-full w-full">
       {/* Level Header */}
-      <div className="bg-gray-800 p-4 border-b border-gray-700 flex justify-between items-center shrink-0">
+      <div className="bg-gray-800 p-3 border-b border-gray-700 flex flex-wrap justify-between items-center gap-2 shrink-0">
         <div className="flex-1 pr-4">
-          <h2 className="text-xl font-bold text-gray-100 flex items-center gap-2">
-             <span className="bg-indigo-600 text-xs px-2 py-1 rounded text-white uppercase tracking-wider">Mission 1</span>
-             Optics Module
+          <h2 className="text-base md:text-lg font-bold text-gray-100 flex items-center gap-2">
+             <span className="bg-indigo-600 text-xs px-2 py-0.5 rounded text-white uppercase tracking-wider">Experiment 1</span>
+             Everyday Light & Magnification Lab
           </h2>
-          <p className="text-sm text-indigo-200 font-medium mt-1">
-            <strong>Objective:</strong> Use the prism to split the white light beam. Experiment with the Red Glass to observe how it filters the spectrum.
+          <p className="text-xs text-indigo-200 mt-0.5">
+            <strong>Objective:</strong> Adjust Water Bowl Curvature and Daylight Brightness to discover how curved water bends light to magnify objects in daily life.
           </p>
         </div>
         <button 
           onClick={toggleOptionalTool}
-          className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${useRedPrism ? 'bg-red-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${useRedPrism ? 'bg-orange-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
         >
-          {useRedPrism ? 'Disable Red Glass' : 'Use Red Glass'}
+          {useRedPrism ? 'Normal Daylight' : 'Toggle Sunset Orange Light'}
         </button>
+      </div>
+
+      {/* Interactive Simulation Variables Toolbar */}
+      <div className="bg-gray-900/90 border-b border-gray-700/80 px-4 py-2 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-300 shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-indigo-300">Water Bowl Curvature: {Math.round((refractiveIndex - 1) * 100)}%</span>
+          <input
+            type="range"
+            min="1.0"
+            max="2.0"
+            step="0.05"
+            value={refractiveIndex}
+            onChange={(e) => handleRefractiveChange(parseFloat(e.target.value))}
+            className="w-24 md:w-32 accent-indigo-500 cursor-pointer"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-indigo-300">Daylight Brightness: {beamIntensity}%</span>
+          <input
+            type="range"
+            min="20"
+            max="100"
+            step="5"
+            value={beamIntensity}
+            onChange={(e) => handleIntensityChange(parseInt(e.target.value))}
+            className="w-24 md:w-32 accent-indigo-500 cursor-pointer"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-indigo-300">Lemon Size:</span>
+          {[1, 2, 5].map((w) => (
+            <button
+              key={w}
+              onClick={() => { setSlitWidth(w); recordAction('changed_slit_width', { width: w }); }}
+              className={`px-2 py-0.5 rounded font-mono ${slitWidth === w ? 'bg-indigo-600 text-white font-bold' : 'bg-gray-800 text-gray-400'}`}
+            >
+              {w === 1 ? "Small" : w === 2 ? "Medium" : "Large"}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Physics Workspace */}
       <div 
         ref={workspaceRef}
-        className="relative w-full h-[400px] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-gray-900 overflow-hidden"
+        className="relative w-full flex-1 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-gray-950 overflow-hidden"
         style={{ touchAction: 'none' }}
       >
         {!prismHit && (
           <div 
-            className="absolute h-4 bg-white shadow-[0_0_20px_rgba(255,255,255,0.8)] pointer-events-none"
-            style={{ left: beamX, top: beamY - 2, width: workspaceSize.width - beamX }}
+            className="absolute bg-white pointer-events-none transition-opacity duration-200"
+            style={{ 
+              left: beamX, 
+              top: beamY - (slitWidth * 1.5), 
+              width: workspaceSize.width - beamX,
+              height: slitWidth * 3,
+              opacity: beamIntensity / 100,
+              boxShadow: `0 0 ${slitWidth * 6}px rgba(255,255,255,0.8)` 
+            }}
           />
         )}
 
         {prismHit && (
           <>
             <div 
-              className="absolute h-4 bg-white shadow-[0_0_20px_rgba(255,255,255,0.8)] pointer-events-none"
-              style={{ left: beamX, top: beamY - 2, width: prismPos.x - beamX }}
+              className="absolute bg-white pointer-events-none transition-opacity duration-200"
+              style={{ 
+                left: beamX, 
+                top: beamY - (slitWidth * 1.5), 
+                width: prismPos.x - beamX,
+                height: slitWidth * 3,
+                opacity: beamIntensity / 100,
+                boxShadow: `0 0 ${slitWidth * 6}px rgba(255,255,255,0.8)` 
+              }}
             />
-            <div className="absolute opacity-80 pointer-events-none" style={{ left: prismPos.x + 28, top: beamY - 12 }}>
+            <div className="absolute pointer-events-none" style={{ left: prismPos.x + 28, top: beamY - 12, opacity: beamIntensity / 100 }}>
                {useRedPrism ? (
                   <div className="w-[800px] h-8 bg-red-500 shadow-[0_0_30px_rgba(255,0,0,1)] origin-left -rotate-6" />
                ) : (
                  <div className="flex flex-col gap-0.5">
-                   <div className="w-[800px] h-2 bg-red-500 shadow-[0_0_10px_red] origin-left -rotate-12" />
-                   <div className="w-[800px] h-2 bg-yellow-500 shadow-[0_0_10px_yellow] origin-left -rotate-6" />
-                   <div className="w-[800px] h-2 bg-green-500 shadow-[0_0_10px_green] origin-left rotate-0" />
-                   <div className="w-[800px] h-2 bg-blue-500 shadow-[0_0_10px_blue] origin-left rotate-6" />
-                   <div className="w-[800px] h-2 bg-purple-500 shadow-[0_0_10px_purple] origin-left rotate-12" />
+                   <div 
+                     className="w-[800px] h-2 bg-red-500 shadow-[0_0_10px_red] origin-left transition-transform" 
+                     style={{ transform: `rotate(${-12 * dispScale}deg)` }}
+                   />
+                   <div 
+                     className="w-[800px] h-2 bg-yellow-500 shadow-[0_0_10px_yellow] origin-left transition-transform"
+                     style={{ transform: `rotate(${-6 * dispScale}deg)` }}
+                   />
+                   <div 
+                     className="w-[800px] h-2 bg-green-500 shadow-[0_0_10px_green] origin-left transition-transform"
+                     style={{ transform: `rotate(0deg)` }}
+                   />
+                   <div 
+                     className="w-[800px] h-2 bg-blue-500 shadow-[0_0_10px_blue] origin-left transition-transform"
+                     style={{ transform: `rotate(${6 * dispScale}deg)` }}
+                   />
+                   <div 
+                     className="w-[800px] h-2 bg-purple-500 shadow-[0_0_10px_purple] origin-left transition-transform"
+                     style={{ transform: `rotate(${12 * dispScale}deg)` }}
+                   />
                  </div>
                )}
             </div>

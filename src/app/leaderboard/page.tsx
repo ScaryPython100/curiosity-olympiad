@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useUser } from "@/hooks/useUser";
 import { getLeaderboard } from "@/app/actions/profile";
 import { BADGES, AVATARS, getBestBadge } from "@/utils/gamification";
+import CertificateModal, { RankCertificateType } from "@/components/CertificateModal";
+import { getUserAvatar, useUserAvatar } from "@/utils/userAvatar";
 
 interface LeaderboardEntry {
   user_id: string;
@@ -16,25 +18,19 @@ interface LeaderboardEntry {
   } | null;
 }
 
-// Pick a deterministic fallback avatar based on the user_id
-function getFallbackAvatar(userId: string): string {
-  const index = userId.charCodeAt(0) % AVATARS.length;
-  return AVATARS[index].url;
-}
+
 
 export default function LeaderboardPage() {
   const { userId, loading: userLoading } = useUser();
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [timeframe, setTimeframe] = useState<'daily' | 'weekly' | 'all_time' | 'friends'>('all_time');
+  const [timeframe, setTimeframe] = useState<'daily' | 'weekly' | 'friends'>('weekly');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
+  const [certType, setCertType] = useState<RankCertificateType>("Weekly Rank 1");
 
-  // Read the current user's avatar from localStorage
-  const [myAvatar, setMyAvatar] = useState("");
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setMyAvatar(localStorage.getItem("curiosity_avatar_url") || "");
-    }
-  }, []);
+  const myAvatar = useUserAvatar(userId);
+  const [studentRealName, setStudentRealName] = useState("Student Champion");
 
   useEffect(() => {
     async function fetchLeaderboard() {
@@ -55,18 +51,36 @@ export default function LeaderboardPage() {
   }, [timeframe]);
 
   const topThree = leaderboardData.slice(0, 3);
-  const remaining = leaderboardData.slice(3);
+  const remaining = leaderboardData.slice(3, 25);
+  const filteredRemaining = remaining.filter(entry => {
+    if (!searchQuery.trim()) return true;
+    const name = entry.student_profiles?.username || "Explorer";
+    return name.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   const userRankIndex = leaderboardData.findIndex(entry => entry.user_id === userId);
   const userEntry = userRankIndex !== -1 ? leaderboardData[userRankIndex] : null;
   const userRank = userRankIndex !== -1 ? userRankIndex + 1 : null;
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedRealName = localStorage.getItem("curiosity_real_name");
+      const storedUsername = localStorage.getItem("curiosity_username");
+      if (storedRealName) {
+        setStudentRealName(storedRealName);
+      } else if (userEntry?.student_profiles?.username) {
+        setStudentRealName(userEntry.student_profiles.username);
+      } else if (storedUsername) {
+        setStudentRealName(storedUsername);
+      }
+    }
+  }, [userEntry]);
+
   const isLoading = loading || userLoading;
 
-  // Resolve avatar: for the current user use localStorage, for others use a deterministic fallback
+  // Resolve avatar: for the current user use localStorage hook, for others use unified getUserAvatar
   const getAvatar = (entry: LeaderboardEntry) => {
-    if (entry.user_id === userId && myAvatar) return myAvatar;
-    return getFallbackAvatar(entry.user_id);
+    return getUserAvatar(entry.user_id, null, entry.student_profiles?.username);
   };
 
   return (
@@ -79,12 +93,15 @@ export default function LeaderboardPage() {
         >
           <span className="material-symbols-outlined leading-none">arrow_back</span>
         </Link>
-        <h1 className="text-xl font-bold text-[#143867]">Global Standings</h1>
+        <div className="flex items-center gap-2">
+          <img src="/agastya-logo.svg" alt="Agastya Logo" className="w-6 h-6 object-contain" />
+          <h1 className="text-xl font-bold text-[#143867]">Global Standings</h1>
+        </div>
       </header>
 
       {/* Tabs */}
       <div className="fixed top-16 w-full bg-[#f7f9fb] z-40 border-b border-gray-200 px-4 py-2 flex justify-center gap-2 shadow-sm">
-        {(['daily', 'weekly', 'all_time', 'friends'] as const).map(t => (
+        {(['daily', 'weekly', 'friends'] as const).map(t => (
           <button
             key={t}
             onClick={() => setTimeframe(t)}
@@ -206,12 +223,36 @@ export default function LeaderboardPage() {
         </section>
 
         <section className="bg-white rounded-t-[32px] pt-8 px-4 min-h-[400px] border-t border-gray-200 transition-all duration-700 ease-out shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Top Explorers</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+              Top Explorers <span className="text-[10px] bg-[#143867] text-white px-2 py-0.5 rounded-full font-extrabold">Top 25</span>
+            </h2>
             <span className="text-xs bg-gray-100 px-3 py-1 rounded-full text-gray-500 font-bold flex items-center gap-1">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
               Live
             </span>
+          </div>
+
+          {/* Leaderboard Search Input */}
+          <div className="mb-6 relative">
+            <input
+              type="text"
+              placeholder="Search explorer by nickname..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-2xl text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#143867]/20 focus:border-[#143867] transition-all"
+            />
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+              search
+            </span>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <span className="material-symbols-outlined text-sm">close</span>
+              </button>
+            )}
           </div>
           
           <div className="space-y-2">
@@ -237,7 +278,7 @@ export default function LeaderboardPage() {
                 </div>
               ))
             ) : (
-              remaining.map((entry, index) => {
+              filteredRemaining.map((entry, index) => {
                 const rank = index + 4;
                 const isCurrentUser = entry.user_id === userId;
                 const badge = getBestBadge(entry.all_time_xp);
@@ -301,30 +342,134 @@ export default function LeaderboardPage() {
                 );
               })
             )}
+
+            {/* In-Line "Your Rank" Card right below the Top Explorers list */}
+            {!isLoading && userEntry && (
+              <div className="mt-4 pt-3 border-t-2 border-dashed border-gray-200">
+                <p className="text-[10px] uppercase font-extrabold text-gray-400 tracking-wider mb-2">Your Live Standings Spot</p>
+                <div className="flex items-center p-3.5 rounded-2xl bg-[#143867] text-white border-2 border-[#f37021] shadow-md relative overflow-hidden">
+                  <div className="w-9 text-lg font-black text-[#ffe16d] italic shrink-0">
+                    #{userRank}
+                  </div>
+                  <div className="w-10 h-10 rounded-full border-2 border-[#ffe16d] overflow-hidden bg-white mx-3 shrink-0 shadow-xs">
+                    <img
+                      className="w-full h-full object-cover"
+                      alt="You"
+                      src={getAvatar(userEntry)}
+                    />
+                  </div>
+                  <div className="flex-grow min-w-0">
+                    <h4 className="text-xs font-black flex items-center gap-1 text-white truncate">
+                      You ({userEntry.student_profiles?.username || "Explorer"})
+                      <span className="text-xs">{getBestBadge(userEntry.all_time_xp)?.icon}</span>
+                    </h4>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-[#f37021] text-white font-extrabold uppercase tracking-tighter inline-block mt-0.5">
+                      {userRank && userRank <= 25 ? "Top 25 Member" : `Rank #${userRank}`}
+                    </span>
+                  </div>
+                  <div className="text-right shrink-0 ml-2">
+                    <p className="text-base font-black text-[#ffe16d]">{userEntry.xp.toLocaleString()}</p>
+                    <p className="text-[9px] uppercase font-bold text-gray-300">XP</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
-          {!isLoading && userEntry && (
-            <div className="mt-8 mb-6 p-5 bg-gradient-to-br from-[#ffe16d] to-[#ffd700] rounded-[24px] border border-yellow-400 flex items-start gap-4 shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-2 opacity-10">
-                <span className="material-symbols-outlined text-4xl">emoji_events</span>
+          {/* Human-Friendly Agastya Awards & Weekly Champion Guide */}
+          {!isLoading && (
+            <div className="mt-8 mb-6 p-6 bg-gradient-to-br from-[#fff8f3] via-white to-[#fff8f3] rounded-3xl border-2 border-[#f37021] text-[#143867] shadow-lg relative overflow-hidden">
+              <div className="absolute top-3 right-4 opacity-10 pointer-events-none">
+                <img src="/agastya-logo.svg" alt="Agastya" className="w-40 h-40 object-contain" />
               </div>
-              <div className="bg-[#221b00] rounded-full p-2 flex items-center justify-center text-yellow-400 shadow-md">
-                <span className="material-symbols-outlined text-xl">lightbulb</span>
-              </div>
-              <div>
-                <h5 className="text-sm font-black text-[#221b00] uppercase tracking-wider">Strategic Insight</h5>
-                <p className="text-xs text-[#544600] leading-relaxed font-semibold mt-1">
-                  {userRank && userRank > 1 ? (
-                    <>You&apos;re at Rank #{userRank}. {leaderboardData[userRank - 2] && `Only ${(leaderboardData[userRank - 2].xp - userEntry.xp).toLocaleString()} XP away from Rank #${userRank - 1}.`} Keep exploring!</>
-                  ) : (
-                    <>You&apos;re leading the expedition at Rank #1! The title of Logic Grandmaster awaits.</>
-                  )}
+
+              <div className="relative z-10 space-y-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-3 py-1 bg-[#f37021] text-white text-[11px] font-black rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm">emoji_events</span>
+                    Agastya Champion Awards
+                  </span>
+                  <span className="text-xs text-[#ea580c] font-extrabold flex items-center gap-1">
+                    <span>•</span>
+                    <span>Curiosity • Creativity • Confidence under Care</span>
+                  </span>
+                </div>
+
+                <h5 className="text-lg md:text-xl font-black tracking-tight text-[#143867]">
+                  {userRank === 1
+                    ? "🏆 You are currently #1 on the Leaderboard!"
+                    : userRank === 2
+                    ? "🥈 You are currently #2 on the Leaderboard!"
+                    : userRank === 3
+                    ? "🥉 You are currently #3 on the Leaderboard!"
+                    : userRank && userRank <= 5
+                    ? `⭐ You are currently #${userRank} in the Top 5!`
+                    : userRank && userRank <= 10
+                    ? `🔥 You are currently #${userRank} in the Top 10!`
+                    : userRank && userRank <= 20
+                    ? `⚡ You are currently #${userRank} in the Top 20!`
+                    : userRank && userRank <= 50
+                    ? `🎯 You are currently #${userRank} in the Top 50!`
+                    : "🚀 Every experiment and lab brings you closer to the top!"}
+                </h5>
+
+                <p className="text-xs md:text-sm text-gray-700 font-medium leading-relaxed max-w-xl">
+                  {userRank === 1
+                    ? "🏆 Undisputed Champion! Your relentless curiosity and scientific spirit lead the entire Olympiad. Keep experimenting to protect your crown!"
+                    : userRank === 2
+                    ? "🥈 So close to the top! You're sitting right on the podium in 2nd place. Just one more breakthrough lab can launch you into 1st!"
+                    : userRank === 3
+                    ? "🥉 Outstanding Podium Performance! 3rd Place is a massive achievement. Push your limits in practice labs to climb higher!"
+                    : userRank && userRank <= 5
+                    ? "⭐ Elite Top 5 Contender! Your creative problem-solving is inspiring. A quick practice test could leapfrog you into the top 3!"
+                    : userRank && userRank <= 10
+                    ? "🔥 Official Top 10 Scholar! You are among the sharpest minds this week. Keep testing hypotheses to storm into the Top 5!"
+                    : userRank && userRank <= 20
+                    ? "⚡ Top 20 Trailblazer! You're rapidly climbing the ranks. Complete a few more interactive modules to break into the Top 10!"
+                    : userRank && userRank <= 50
+                    ? "🎯 Solid Rising Star! You're in the Top 50. Every daily lab and practice test brings you closer to the leaderboard spotlight!"
+                    : "🚀 Curiosity Unleashed! Every experiment you conduct builds your confidence. Explore practice labs to claim your spot on the leaderboard!"}
                 </p>
+
+
+
+                <div className="pt-3 flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => {
+                      setCertType(timeframe === "daily" ? "Daily Rank 1" : "Weekly Rank 1");
+                      setIsCertModalOpen(true);
+                    }}
+                    className="px-4 py-2.5 bg-[#143867] hover:bg-[#1e4a85] text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-sm text-[#f37021]">preview</span>
+                    <span>Preview {timeframe === "daily" ? "Daily" : "Weekly"} Rank #1 Certificate</span>
+                  </button>
+
+                  <Link
+                    href="/practice"
+                    className="px-4 py-2.5 bg-[#f37021] hover:bg-[#d95e16] text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-sm">science</span>
+                    <span>Earn XP in Practice Labs</span>
+                  </Link>
+                </div>
               </div>
             </div>
           )}
         </section>
       </main>
+
+      <CertificateModal
+        isOpen={isCertModalOpen}
+        onClose={() => setIsCertModalOpen(false)}
+        studentRealName={studentRealName || userEntry?.student_profiles?.username || "Student Explorer"}
+        achievementType={timeframe === "daily" ? "Daily Rank 1" : "Weekly Rank 1"}
+        awardDate={new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+        isEligible={userRank === 1}
+        userRank={userRank}
+      />
+
+
 
       <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center px-2 pb-6 pt-4 bg-[#f7f9fb] border-t border-gray-200 z-50">
         <Link className="flex items-center justify-center text-gray-600 hover:text-[#143867] transition-all active:scale-90 duration-200" href="/dashboard">
