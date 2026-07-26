@@ -173,14 +173,19 @@ export async function awardXP(amount: number, reason: string) {
   if (fetchError) return { error: fetchError.message };
 
   const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
 
-  // Check 11:59 P.M. cooldown
-  if (currentData?.last_claimed_date) {
+  // Compute current week start (Monday 00:00:00)
+  const currentWeekStart = new Date(now);
+  const dayOfWeek = currentWeekStart.getDay();
+  const diffToMonday = currentWeekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+  currentWeekStart.setDate(diffToMonday);
+  currentWeekStart.setHours(0, 0, 0, 0);
+
+  // Check daily login claim cooldown ONLY for daily_login claims
+  if (reason === "daily_login" && currentData?.last_claimed_date) {
     const lastClaimed = new Date(currentData.last_claimed_date);
-    const resetBoundary = new Date(lastClaimed);
-    resetBoundary.setHours(23, 59, 59, 999);
-    
-    if (now <= resetBoundary) {
+    if (lastClaimed >= todayStart) {
       return { error: "Daily XP already claimed today. Come back tomorrow!" };
     }
   }
@@ -189,35 +194,20 @@ export async function awardXP(amount: number, reason: string) {
   let newWeeklyXp = amount;
   
   if (currentData) {
-    // Reset daily_xp if we crossed a day since last_daily_reset
+    // Reset daily_xp if last reset was before today 00:00 AM
     if (currentData.last_daily_reset) {
       const lastDaily = new Date(currentData.last_daily_reset);
-      const dailyBoundary = new Date(lastDaily);
-      dailyBoundary.setHours(23, 59, 59, 999);
-      if (now > dailyBoundary) {
-        newDailyXp = amount;
-      } else {
+      if (lastDaily >= todayStart) {
         newDailyXp = (currentData.daily_xp || 0) + amount;
       }
-    } else {
-      newDailyXp = (currentData.daily_xp || 0) + amount;
     }
 
-    // Reset weekly_xp if we crossed a Sunday 11:59 PM boundary
+    // Reset weekly_xp if last reset was before this week's Monday 00:00 AM
     if (currentData.last_weekly_reset) {
       const lastWeekly = new Date(currentData.last_weekly_reset);
-      const weeklyBoundary = new Date(lastWeekly);
-      const diffToSunday = lastWeekly.getDay() === 0 ? 0 : 7 - lastWeekly.getDay();
-      weeklyBoundary.setDate(lastWeekly.getDate() + diffToSunday);
-      weeklyBoundary.setHours(23, 59, 59, 999);
-      
-      if (now > weeklyBoundary) {
-        newWeeklyXp = amount;
-      } else {
+      if (lastWeekly >= currentWeekStart) {
         newWeeklyXp = (currentData.weekly_xp || 0) + amount;
       }
-    } else {
-      newWeeklyXp = (currentData.weekly_xp || 0) + amount;
     }
   }
 
@@ -286,17 +276,44 @@ export async function addActivityXP(amount: number, reason: string) {
 
   const { data: currentData, error: fetchError } = await supabase
     .from("user_gamification")
-    .select("xp, curiosity_points, daily_xp, weekly_xp")
+    .select("xp, curiosity_points, daily_xp, weekly_xp, last_daily_reset, last_weekly_reset")
     .eq("user_id", user.id)
     .maybeSingle();
 
   if (fetchError) return { error: fetchError.message };
 
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+
+  // Compute current week start (Monday 00:00:00)
+  const currentWeekStart = new Date(now);
+  const dayOfWeek = currentWeekStart.getDay();
+  const diffToMonday = currentWeekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+  currentWeekStart.setDate(diffToMonday);
+  currentWeekStart.setHours(0, 0, 0, 0);
+
+  let newDailyXp = amount;
+  let newWeeklyXp = amount;
+
+  if (currentData) {
+    if (currentData.last_daily_reset) {
+      const lastDaily = new Date(currentData.last_daily_reset);
+      if (lastDaily >= todayStart) {
+        newDailyXp = (currentData.daily_xp || 0) + amount;
+      }
+    }
+
+    if (currentData.last_weekly_reset) {
+      const lastWeekly = new Date(currentData.last_weekly_reset);
+      if (lastWeekly >= currentWeekStart) {
+        newWeeklyXp = (currentData.weekly_xp || 0) + amount;
+      }
+    }
+  }
+
   const newXp = (currentData?.xp || 0) + amount;
   const newPoints = (currentData?.curiosity_points || 0) + amount;
-  const newDailyXp = (currentData?.daily_xp || 0) + amount;
-  const newWeeklyXp = (currentData?.weekly_xp || 0) + amount;
-  const nowIso = new Date().toISOString();
+  const nowIso = now.toISOString();
 
   if (currentData) {
     const { error: updateError } = await supabase
@@ -306,6 +323,8 @@ export async function addActivityXP(amount: number, reason: string) {
         curiosity_points: newPoints,
         daily_xp: newDailyXp,
         weekly_xp: newWeeklyXp,
+        last_daily_reset: nowIso,
+        last_weekly_reset: nowIso
       })
       .eq("user_id", user.id);
 
