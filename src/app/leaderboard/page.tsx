@@ -493,33 +493,34 @@ export default function LeaderboardPage() {
               )}
 
               {/* Ready to Download Notification Card for Completed Past Cycles */}
-              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full overflow-hidden">
-                <div className="space-y-1 min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-black rounded uppercase">
-                      COMPLETED CYCLE CERTIFICATES
-                    </span>
-                    <span className="text-xs font-bold text-emerald-900 truncate">
-                      Past Finalized Rank #1 Champion Records
-                    </span>
-                  </div>
-                  <p className="text-[11px] sm:text-xs text-emerald-800 leading-relaxed">
-                    Official certificates for ending past daily/weekly cycles in 1st Place. Includes unblurred print access, PDF export, and verified Agastya Seal!
+              <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex flex-col gap-3 w-full">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="px-2.5 py-1 bg-emerald-600 text-white text-[10px] font-black rounded-lg uppercase tracking-wider shadow-xs">
+                    COMPLETED CYCLE CERTIFICATES
+                  </span>
+                  <span className="text-xs font-bold text-emerald-900">
+                    Past Finalized Rank #1 Records
+                  </span>
+                </div>
+                
+                <div>
+                  <h4 className="text-xs sm:text-sm font-black text-emerald-950">Official Merit Certificate Issue Center</h4>
+                  <p className="text-[11px] sm:text-xs text-emerald-800 leading-relaxed mt-1">
+                    Official finalized certificates for ending past daily or weekly cycles in 1st Place. Includes unblurred print access, PDF export, and verified Agastya Seal!
                   </p>
                 </div>
 
                 <button
                   onClick={() => {
                     setCertType("Weekly Rank 1");
-                    // Check if cycle is completed or if user is currently active #1
-                    const isCompleted = userRank !== 1; // Completed past cycle if not currently mid-cycle #1
+                    const isCompleted = userRank !== 1;
                     setSelectedCertIsCompleted(isCompleted);
                     setIsCertModalOpen(true);
                   }}
-                  className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 shrink-0 max-w-full"
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 mt-1"
                 >
-                  <span className="material-symbols-outlined text-sm">download</span>
-                  <span className="truncate">Claim & Download Certificate 📜</span>
+                  <span className="material-symbols-outlined text-base">download</span>
+                  <span>Claim & Download Certificate 📜</span>
                 </button>
               </div>
             </div>

@@ -104,19 +104,13 @@ export async function getLeaderboard(timeframe: 'weekly' | 'daily' | 'friends' =
 
   // Re-sort and filter after adjusting for time
   if (timeframe === 'daily') {
-    processedData = processedData.filter(r => r.daily_xp > 0);
     processedData.sort((a, b) => b.daily_xp - a.daily_xp);
   } else if (timeframe === 'weekly') {
-    processedData = processedData.filter(r => r.weekly_xp > 0);
     processedData.sort((a, b) => b.weekly_xp - a.weekly_xp);
   }
 
-  if (processedData.length === 0) {
-    return { data: [] };
-  }
-
   // Fetch usernames from student_profiles for the user_ids we got
-  const userIds = processedData.map((row) => row.user_id);
+  const userIds = gamificationData.map((row) => row.user_id);
   const { data: profilesData } = await supabase
     .from("student_profiles")
     .select("id, username")
