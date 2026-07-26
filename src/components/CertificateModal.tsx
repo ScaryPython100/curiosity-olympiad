@@ -169,12 +169,18 @@ export default function CertificateModal({
                   </span>
                   <div className="space-y-1">
                     <h5 className="text-xs font-bold text-amber-300">
-                      {isPendingCycleEnd ? "⏳ Rank #1 Standing Confirmed!" : "Rank #1 Champion Exclusive"}
+                      {isPendingCycleEnd 
+                        ? (achievementType === "Daily Rank 1" ? "⏳ Daily Rank #1 Standing (Cycle Pending)" : "⏳ Weekly Rank #1 Standing (Cycle Pending)")
+                        : (achievementType === "Daily Rank 1" ? "Daily Rank #1 Champion Exclusive" : "Weekly Rank #1 Champion Exclusive")}
                     </h5>
                     <p className="text-[11px] text-gray-200 leading-relaxed">
                       {isPendingCycleEnd
-                        ? "You are currently holding Rank #1! Official certificates are finalized and issued at the conclusion of the cycle (11:59 PM). Please wait until the cycle ends to download your unblurred certificate!"
-                        : "Official certificates, unblurred PDF downloads, and printing unlock EXCLUSIVELY for the Rank #1 Champion at the end of the week."}
+                        ? (achievementType === "Daily Rank 1"
+                            ? "You are currently holding Daily Rank #1! Today's daily cycle closes tonight at 11:59 PM. Please return after midnight to claim your unblurred Daily Certificate!"
+                            : "You are currently holding Weekly Rank #1! This week's cycle closes Sunday at 11:59 PM. Please return after Sunday midnight to claim your unblurred Weekly Certificate!")
+                        : (achievementType === "Daily Rank 1"
+                            ? "Official Daily Rank #1 Certificates unlock EXCLUSIVELY for today's top daily champion after the daily cycle ends at 11:59 PM tonight."
+                            : "Official Weekly Rank #1 Certificates unlock EXCLUSIVELY for the top weekly champion at the end of the week (Sunday 11:59 PM).")}
                     </p>
                   </div>
                 </div>

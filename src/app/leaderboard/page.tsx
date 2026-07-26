@@ -479,14 +479,20 @@ export default function LeaderboardPage() {
                 </span>
               </div>
 
-              {/* Notice for Mid-Cycle Live Rank 1 Holders (Day not ended yet) */}
+              {/* Notice for Mid-Cycle Live Rank 1 Holders */}
               {userRank === 1 && (
                 <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3 w-full">
                   <span className="material-symbols-outlined text-amber-600 text-lg shrink-0 mt-0.5">schedule</span>
                   <div className="space-y-1 text-xs text-amber-900 min-w-0">
-                    <h5 className="font-bold text-amber-950">⏳ Active Cycle Notice for Current #1 Leader</h5>
+                    <h5 className="font-bold text-amber-950">
+                      {timeframe === "daily" ? "⏳ Active Daily Cycle Notice for #1 Leader" : "⏳ Active Weekly Cycle Notice for #1 Leader"}
+                    </h5>
                     <p className="leading-relaxed text-[11px] sm:text-xs">
-                      You are currently sitting at <strong>Rank #1</strong> on the live standings! Today's cycle is still active until <strong>11:59 PM</strong>. Please wait until midnight when today's cycle completes to claim your official unblurred certificate.
+                      {timeframe === "daily" ? (
+                        <>You are currently sitting at <strong>Daily Rank #1</strong>! Today's daily cycle is active until <strong>11:59 PM tonight</strong>. Please return after midnight to claim your official unblurred Daily Certificate.</>
+                      ) : (
+                        <>You are currently sitting at <strong>Weekly Rank #1</strong>! This week's cycle is active until <strong>Sunday at 11:59 PM</strong>. Please return after Sunday midnight to claim your official unblurred Weekly Certificate.</>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -496,23 +502,28 @@ export default function LeaderboardPage() {
               <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex flex-col gap-3 w-full">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <span className="px-2.5 py-1 bg-emerald-600 text-white text-[10px] font-black rounded-lg uppercase tracking-wider shadow-xs">
-                    COMPLETED CYCLE CERTIFICATES
+                    {timeframe === "daily" ? "COMPLETED DAILY CYCLES" : "COMPLETED WEEKLY CYCLES"}
                   </span>
                   <span className="text-xs font-bold text-emerald-900">
-                    Past Finalized Rank #1 Records
+                    {timeframe === "daily" ? "Past Daily Rank #1 Records" : "Past Weekly Rank #1 Records"}
                   </span>
                 </div>
                 
                 <div>
-                  <h4 className="text-xs sm:text-sm font-black text-emerald-950">Official Merit Certificate Issue Center</h4>
+                  <h4 className="text-xs sm:text-sm font-black text-emerald-950">
+                    {timeframe === "daily" ? "Official Daily Merit Certificate Center" : "Official Weekly Merit Certificate Center"}
+                  </h4>
                   <p className="text-[11px] sm:text-xs text-emerald-800 leading-relaxed mt-1">
-                    Official finalized certificates for ending past daily or weekly cycles in 1st Place. Includes unblurred print access, PDF export, and verified Agastya Seal!
+                    {timeframe === "daily"
+                      ? "Official finalized certificates for ending past daily cycles in 1st Place. Resets every night at 11:59 PM!"
+                      : "Official finalized certificates for ending past weekly cycles in 1st Place. Resets every Sunday at 11:59 PM!"}
                   </p>
                 </div>
 
                 <button
                   onClick={() => {
-                    setCertType("Weekly Rank 1");
+                    const targetCert = timeframe === "daily" ? "Daily Rank 1" : "Weekly Rank 1";
+                    setCertType(targetCert);
                     const isCompleted = userRank !== 1;
                     setSelectedCertIsCompleted(isCompleted);
                     setIsCertModalOpen(true);
@@ -520,7 +531,7 @@ export default function LeaderboardPage() {
                   className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 mt-1"
                 >
                   <span className="material-symbols-outlined text-base">download</span>
-                  <span>Claim & Download Certificate 📜</span>
+                  <span>Claim & Download {timeframe === "daily" ? "Daily" : "Weekly"} Certificate 📜</span>
                 </button>
               </div>
             </div>
