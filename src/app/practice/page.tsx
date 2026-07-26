@@ -713,9 +713,6 @@ export default function PracticePage() {
             <h1 className="text-lg font-black text-[#143867] tracking-tight">
               Experiential Assessment Practice Lab
             </h1>
-            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-              Aah! Aha! Ha-ha! • Agastya Science Modules
-            </p>
           </div>
         </div>
 

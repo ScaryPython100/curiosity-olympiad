@@ -25,10 +25,6 @@ export default function AboutPage() {
       <main className="flex-1 px-4 pt-10 pb-28 max-w-5xl mx-auto w-full">
         {/* Hero Section */}
         <section className="mb-14 text-center">
-          <div className="inline-flex items-center gap-2 bg-[#ffe16d]/30 border border-[#ffe16d]/80 text-[#705d00] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6 shadow-xs">
-            <span className="material-symbols-outlined text-sm">auto_awesome</span>
-            <span>Inspired by Agastya International Foundation</span>
-          </div>
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-[#143867] tracking-tight leading-tight mb-6">
             "Aah! Aha! Ha-ha!"
           </h1>

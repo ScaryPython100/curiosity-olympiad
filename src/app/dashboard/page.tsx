@@ -185,10 +185,6 @@ export default function DashboardPage() {
           
           <div className="p-6 md:p-10 relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 bg-[#ffe16d]/20 backdrop-blur-md border border-[#ffe16d]/40 text-[#ffe16d] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
-                <span className="material-symbols-outlined text-sm">auto_awesome</span>
-                <span>Inspired by Agastya International Foundation</span>
-              </div>
               <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight mb-3 text-white leading-tight">
                 "Aah! Aha! Ha-ha!" <br className="hidden sm:inline" />
                 <span className="text-[#ffe16d]">Curiosity, Discovery & Joy in Science.</span>
