@@ -99,67 +99,83 @@ export function GravityLevel({ recordAction, experimentSubIndex = 0 }: GravityLe
     if (experimentSubIndex === 0) {
       // --- EXPERIMENT 1: CEILING FAN AIRFLOW & BREEZE VELOCITY LAB ---
       const fanSpeedRpm = Math.round(attractorMass * 2 * 60 + launchSpeed);
-      const animDurationSec = Math.max(0.2, 3 - attractorMass * 0.8);
+      // Faster regulator & airflow speed = faster rotation and faster breeze particles!
+      const spinDurationSec = Math.max(0.15, 2.0 / (attractorMass * 1.2));
+      const breezeDurationSec = Math.max(0.25, 2.5 - (launchSpeed / 200));
 
       return (
         <div 
           ref={workspaceRef}
           className="relative w-full h-full bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-950 flex flex-col items-center justify-between p-4 overflow-hidden"
         >
-          {/* Ceiling Structure */}
-          <div className="w-64 h-4 bg-gray-700 border-b-2 border-gray-600 rounded-b-md shadow-md flex justify-center">
-            <div className="w-4 h-12 bg-gray-500 border-x-2 border-gray-400" />
-          </div>
+          {/* Ceiling Suspension Rod */}
+          <div className="relative z-10 w-full flex flex-col items-center">
+            <div className="w-48 h-3 bg-gray-700 border-b-2 border-gray-600 rounded-b-md shadow-md flex justify-center">
+              <div className="w-3 h-10 bg-gray-500 border-x-2 border-gray-400" />
+            </div>
 
-          {/* Spinning Ceiling Fan Assembly */}
-          <div className="relative z-10 -mt-6 flex flex-col items-center">
-            {/* Motor Housing */}
-            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-700 to-amber-500 border-4 border-amber-300 shadow-2xl flex items-center justify-center relative">
-              <span className="text-[10px] font-black text-amber-950 uppercase">{bladeCount} BLADES</span>
+            {/* Ceiling Fan Motor & Perfectly Centered Rotating Hub */}
+            <div className="relative w-64 h-64 flex items-center justify-center -mt-2">
+              
+              {/* Central Fixed Motor Canopy */}
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-700 via-amber-500 to-amber-300 border-4 border-amber-200 shadow-2xl z-20 flex items-center justify-center">
+                <div className="w-6 h-6 rounded-full bg-amber-900 border-2 border-amber-300 flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-amber-200 animate-ping" />
+                </div>
+              </div>
 
-              {/* Rotating Blade Container */}
+              {/* Symmetrically Centered Spinning Blades Container */}
               <div 
-                className="absolute inset-0 flex items-center justify-center transition-all"
+                className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none origin-center"
                 style={{
-                  animation: `spin ${animDurationSec}s linear infinite`
+                  animation: `spin ${spinDurationSec}s linear infinite`
                 }}
               >
                 {Array.from({ length: bladeCount }).map((_, bIdx) => {
                   const rotDeg = (360 / bladeCount) * bIdx;
                   return (
-                    <div 
+                    <div
                       key={bIdx}
-                      className="absolute w-32 h-6 bg-gradient-to-r from-amber-800 to-amber-600 border border-amber-400 rounded-r-full shadow-lg origin-left"
-                      style={{ transform: `rotate(${rotDeg}deg)` }}
-                    />
+                      className="absolute w-28 h-7 bg-gradient-to-r from-amber-700 via-amber-600 to-amber-500 border-2 border-amber-300 rounded-full shadow-xl flex items-center justify-end pr-2"
+                      style={{
+                        transformOrigin: '0% 50%',
+                        transform: `rotate(${rotDeg}deg) translateX(8px)`
+                      }}
+                    >
+                      <div className="w-3 h-3 rounded-full bg-amber-900/40 border border-amber-300/60" />
+                    </div>
                   );
                 })}
               </div>
             </div>
           </div>
 
-          {/* Downward Airflow Breeze Stream Lines */}
+          {/* Dynamic Animated Downward Airflow Breeze Stream Lines */}
           {showBreezeLines && (
-            <div className="absolute inset-0 flex justify-around pointer-events-none opacity-60">
-              {[1, 2, 3, 4, 5].map((line) => (
+            <div className="absolute inset-0 flex justify-around pointer-events-none opacity-80 z-0 overflow-hidden">
+              {[1, 2, 3, 4, 5, 6].map((line) => (
                 <div 
                   key={line}
-                  className="w-1 bg-gradient-to-b from-cyan-400/80 via-sky-300/40 to-transparent rounded-full animate-pulse"
-                  style={{ 
-                    height: '60%', 
-                    marginTop: '20%',
-                    animationDuration: `${1.5 / (line % 2 + 1)}s` 
-                  }}
-                />
+                  className="w-1.5 h-full relative flex flex-col justify-around"
+                >
+                  <div 
+                    className="w-full bg-gradient-to-b from-cyan-400 via-sky-300 to-transparent rounded-full shadow-[0_0_12px_#38bdf8] animate-bounce"
+                    style={{ 
+                      height: `${20 + (line % 3) * 15}%`,
+                      animationDuration: `${breezeDurationSec / (0.8 + (line % 3) * 0.2)}s`,
+                      animationIterationCount: 'infinite'
+                    }}
+                  />
+                </div>
               ))}
             </div>
           )}
 
-          {/* Living Room Seating Silhouette at Bottom */}
-          <div className="relative z-10 w-full flex flex-col items-center mb-2">
+          {/* Bottom Room Seating Silhouette & Velocity Display */}
+          <div className="relative z-20 w-full flex flex-col items-center mb-2">
             <div className="bg-gray-900/90 px-4 py-2 rounded-2xl border border-gray-700 text-center shadow-lg">
               <span className="text-xs font-bold text-cyan-300">
-                🌀 Fan Speed: {fanSpeedRpm} RPM • Air Velocity: {Math.round(launchSpeed / 10)} km/h
+                🌀 Fan Speed: {fanSpeedRpm} RPM • Breeze Velocity: {Math.round(launchSpeed / 10)} km/h
               </span>
               <p className="text-[11px] text-gray-400">
                 {bladeCount === 3 ? "3-Blade Indian Tropical Fan: High RPM & Maximum Air Displacement" : `${bladeCount}-Blade Fan: Quiet Low-Speed Circulation`}
