@@ -108,13 +108,13 @@ export default function SandboxEngine({
   const isLastLevel = currentLevelIndex === levelsCount - 1;
 
   return (
-    <div className="w-full max-w-4xl mx-auto flex flex-col gap-4 bg-gray-50 p-6 rounded-2xl shadow-sm border border-gray-100">
+    <div className="w-full max-w-4xl mx-auto flex flex-col gap-3 bg-gray-50 p-3 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
       
-      <div className="flex justify-between items-center px-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 px-1">
         <div>
-          <h3 className="text-gray-800 font-bold text-lg">Curiosity Assessment</h3>
-          <div className="flex items-center gap-2">
-            <p className="text-sm text-gray-500 font-semibold">Experiment {currentLevelIndex + 1} of {levelsCount}</p>
+          <h3 className="text-gray-800 font-bold text-base sm:text-lg">Curiosity Assessment</h3>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-xs sm:text-sm text-gray-500 font-semibold">Experiment {currentLevelIndex + 1} of {levelsCount}</p>
             <div className="flex items-center gap-1">
               {[0, 1, 2].map((idx) => (
                 <button
@@ -138,7 +138,7 @@ export default function SandboxEngine({
         
         <button 
           onClick={handleNextOrSubmit}
-          className={`${isLastLevel ? 'bg-green-600 hover:bg-green-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white px-6 py-2 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center gap-2`}
+          className={`w-full sm:w-auto justify-center ${isLastLevel ? 'bg-green-600 hover:bg-green-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 flex items-center gap-2`}
         >
           <span>{isLastLevel ? 'Submit Complete Test' : 'Next Experiment →'}</span>
           <span className="material-symbols-outlined text-sm">{isLastLevel ? 'send' : 'arrow_forward'}</span>
@@ -146,7 +146,7 @@ export default function SandboxEngine({
       </div>
 
       {/* Dynamic Physics Level Container */}
-      <div className="w-full rounded-2xl overflow-hidden shadow-2xl border-4 border-gray-800 bg-gray-900 flex flex-col h-[500px]">
+      <div className="w-full rounded-2xl overflow-hidden shadow-2xl border-2 sm:border-4 border-gray-800 bg-gray-900 flex flex-col h-[380px] sm:h-[450px] md:h-[500px]">
         {renderLevel()}
       </div>
 

@@ -464,13 +464,13 @@ export default function LeaderboardPage() {
              EARNED MERIT CERTIFICATES & NOTIFICATIONS SECTION
              ========================================================= */}
           {!isLoading && (
-            <div className="mt-6 mb-8 p-6 bg-white rounded-3xl border-2 border-emerald-500 shadow-xl space-y-4">
+            <div className="mt-6 mb-8 p-4 sm:p-6 bg-white rounded-3xl border-2 border-emerald-500 shadow-xl space-y-4 max-w-full overflow-hidden">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
                     📜
                   </span>
-                  <h3 className="text-base font-black text-[#143867]">
+                  <h3 className="text-sm sm:text-base font-black text-[#143867]">
                     Finalized Merit Certificates & Notifications
                   </h3>
                 </div>
@@ -479,46 +479,49 @@ export default function LeaderboardPage() {
                 </span>
               </div>
 
-              {/* Ready to Download Notification Card for Completed Cycles */}
-              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-black rounded uppercase">
-                      READY TO DOWNLOAD
-                    </span>
-                    <span className="text-xs font-bold text-emerald-900">
-                      Weekly Rank #1 Champion Certificate (Completed Cycle)
-                    </span>
-                  </div>
-                  <p className="text-xs text-emerald-800 leading-relaxed">
-                    Official finalized certificate for ending the cycle in 1st Place. Includes unblurred print access, PDF export, and verified Agastya Seal!
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setCertType("Weekly Rank 1");
-                    setSelectedCertIsCompleted(true);
-                    setIsCertModalOpen(true);
-                  }}
-                  className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 shrink-0"
-                >
-                  <span className="material-symbols-outlined text-sm">download</span>
-                  <span>Claim & Download Certificate 📜</span>
-                </button>
-              </div>
-
-              {/* Notice for Mid-Cycle Live Rank 1 Holders */}
+              {/* Notice for Mid-Cycle Live Rank 1 Holders (Day not ended yet) */}
               {userRank === 1 && (
-                <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3">
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3 w-full">
                   <span className="material-symbols-outlined text-amber-600 text-lg shrink-0 mt-0.5">schedule</span>
-                  <div className="space-y-1 text-xs text-amber-900">
-                    <h5 className="font-bold">⏳ Active Cycle Notice for Current #1 Leader</h5>
-                    <p className="leading-relaxed">
-                      You are currently sitting at <strong>Rank #1</strong> on the live standings! Official unblurred certificates are generated automatically at <strong>11:59 PM</strong> when the cycle completes. Check your Notifications box here after midnight to claim!
+                  <div className="space-y-1 text-xs text-amber-900 min-w-0">
+                    <h5 className="font-bold text-amber-950">⏳ Active Cycle Notice for Current #1 Leader</h5>
+                    <p className="leading-relaxed text-[11px] sm:text-xs">
+                      You are currently sitting at <strong>Rank #1</strong> on the live standings! Today's cycle is still active until <strong>11:59 PM</strong>. Please wait until midnight when today's cycle completes to claim your official unblurred certificate.
                     </p>
                   </div>
                 </div>
               )}
+
+              {/* Ready to Download Notification Card for Completed Past Cycles */}
+              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full overflow-hidden">
+                <div className="space-y-1 min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-black rounded uppercase">
+                      COMPLETED CYCLE CERTIFICATES
+                    </span>
+                    <span className="text-xs font-bold text-emerald-900 truncate">
+                      Past Finalized Rank #1 Champion Records
+                    </span>
+                  </div>
+                  <p className="text-[11px] sm:text-xs text-emerald-800 leading-relaxed">
+                    Official certificates for ending past daily/weekly cycles in 1st Place. Includes unblurred print access, PDF export, and verified Agastya Seal!
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setCertType("Weekly Rank 1");
+                    // Check if cycle is completed or if user is currently active #1
+                    const isCompleted = userRank !== 1; // Completed past cycle if not currently mid-cycle #1
+                    setSelectedCertIsCompleted(isCompleted);
+                    setIsCertModalOpen(true);
+                  }}
+                  className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 shrink-0 max-w-full"
+                >
+                  <span className="material-symbols-outlined text-sm">download</span>
+                  <span className="truncate">Claim & Download Certificate 📜</span>
+                </button>
+              </div>
             </div>
           )}
         </section>
