@@ -8,6 +8,7 @@ import { addActivityXP } from "@/app/actions/profile";
 export interface Question {
   id: number;
   mockTestId: number;
+  experimentIndex: 0 | 1 | 2;
   module: "Optics" | "Gravity" | "Chemistry";
   title: string;
   question: string;
@@ -75,12 +76,14 @@ const MOCK_TESTS: MockTestInfo[] = [
 
 const PRACTICE_QUESTIONS: Question[] = [
   // --- MOCK TEST 1 (Optics & Refraction) ---
+  // Experiment 1 (Water Bowl Magnification) -> Questions 1, 2, 3
   {
     id: 1,
     mockTestId: 1,
+    experimentIndex: 0,
     module: "Optics",
     title: "Lemon Magnification in a Water Bowl",
-    question: "Why does the lemon appear larger when you increase the Water Bowl Curvature slider in the experiment above?",
+    question: "Why does the lemon appear larger when you increase the Water Bowl Curvature slider in Experiment 1 above?",
     options: [
       "Water enters the lemon peel and makes it swell instantly",
       "The curved glass bowl and water act like a convex magnifying lens, bending (refracting) light rays outward to enlarge the image",
@@ -94,9 +97,10 @@ const PRACTICE_QUESTIONS: Question[] = [
   {
     id: 2,
     mockTestId: 1,
+    experimentIndex: 0,
     module: "Optics",
     title: "Daylight Brightness & Clarity",
-    question: "When you adjust the Daylight Brightness slider in the Light & Magnification Lab, why does the lemon look clearer and more vibrant in bright light?",
+    question: "When you adjust the Daylight Brightness slider in Experiment 1, why does the lemon look clearer and more vibrant in bright light?",
     options: [
       "Bright light adds yellow paint molecules to the lemon's skin",
       "More light photons reflect off the lemon peel into your eyes, giving your retinas stronger visual information to form a sharp image",
@@ -110,6 +114,7 @@ const PRACTICE_QUESTIONS: Question[] = [
   {
     id: 3,
     mockTestId: 1,
+    experimentIndex: 0,
     module: "Optics",
     title: "Curved Glass vs. Flat Glass Optics",
     question: "If you replaced the curved glass bowl in Experiment 1 with a flat, square glass box of water, why wouldn't the lemon look magnified anymore?",
@@ -123,25 +128,29 @@ const PRACTICE_QUESTIONS: Question[] = [
     explanation: "A magnifying lens requires curvature to bend rays at different angles. A flat glass container allows light rays to pass through without changing their relative angles.",
     level: "both"
   },
+
+  // Experiment 2 (Prism Refraction & Color Dispersion) -> Questions 4, 5, 6
   {
     id: 4,
     mockTestId: 1,
+    experimentIndex: 1,
     module: "Optics",
-    title: "Focal Length Shift in Water Lenses",
-    question: "When you increase the liquid refractive index from 1.0 (air) to 1.33 (water), what happens to the focal point of the light rays passing through the bowl?",
+    title: "Glass Prism Refractive Index Shift",
+    question: "When you increase the Glass Prism Angle slider in Experiment 2, what happens to the light ray passing through the prism?",
     options: [
-      "The focal point shifts closer to the lens because light bends more steeply inside dense water",
-      "The focal point disappears because light cannot travel through liquids",
-      "The focal point moves to infinity because water destroys light velocity",
-      "The light rays turn into magnetic force lines"
+      "The light ray bends more steeply because a higher angle multiplies the refractive bending path",
+      "The light ray turns back toward the flashlight bulb",
+      "The light ray disappears because glass destroys light",
+      "The prism turns into a mirror"
     ],
     correct: 0,
-    explanation: "Higher refractive index media slow down light more dramatically, causing greater refraction (bending) at the interface and shortening the focal length.",
+    explanation: "Higher refractive index media and steeper glass face angles slow down light and bend rays more sharply away from the incident path.",
     level: "level2"
   },
   {
     id: 5,
     mockTestId: 1,
+    experimentIndex: 1,
     module: "Optics",
     title: "Apparent Depth of Submerged Objects",
     question: "Why does a coin placed at the bottom of a water glass appear shallower and higher up than it actually is?",
@@ -158,9 +167,10 @@ const PRACTICE_QUESTIONS: Question[] = [
   {
     id: 6,
     mockTestId: 1,
+    experimentIndex: 1,
     module: "Optics",
     title: "Rainbow Dispersion & Prism Effect",
-    question: "When white sunlight passes through a glass prism or water droplet, why does it separate into a spectrum of 7 rainbow colors?",
+    question: "When white sunlight passes through a glass prism in Experiment 2, why does it separate into a spectrum of 7 rainbow colors?",
     options: [
       "Water drops paint the light with chemical dyes",
       "Different wavelengths (colors) of light travel at slightly different speeds in glass/water, bending at different angles (dispersion)",
@@ -171,25 +181,29 @@ const PRACTICE_QUESTIONS: Question[] = [
     explanation: "Refractive index varies slightly with wavelength. Violet light (shorter wavelength) bends more than red light (longer wavelength), causing spatial dispersion into a color rainbow.",
     level: "both"
   },
+
+  // Experiment 3 (Sun Angle & Shadow Tracker) -> Questions 7, 8, 9
   {
     id: 7,
     mockTestId: 1,
+    experimentIndex: 2,
     module: "Optics",
-    title: "Total Internal Reflection in Optical Fibers",
-    question: "In high-speed fiber optic cables, why does light travel inside the curved glass strand without leaking out into the air?",
+    title: "Sun Elevation Angle & Shadow Length",
+    question: "In Experiment 3, when the Sun Elevation Angle slider is set low near sunrise/sunset, why are shadows on the ground extremely long?",
     options: [
-      "The glass tube is lined with black electrical tape",
-      "Light strikes the glass boundary at an angle greater than the critical angle, causing 100% total internal reflection inside the core",
-      "Electricity pulls the light forward like a magnet",
-      "Light turns into sound waves inside fiber cables"
+      "Sunlight is heavier near sunset",
+      "Low sun angles strike objects at a shallow slant, projecting light rays far across the ground before hitting the surface",
+      "Objects grow taller at sunset",
+      "The ground absorbs shadow rays at noon"
     ],
     correct: 1,
-    explanation: "When light travels from a higher index core to a lower index cladding at an angle exceeding the critical angle, it undergoes total internal reflection, trapping 100% of the light inside.",
+    explanation: "Shadow length is proportional to $\\cot(\\theta)$ of the solar elevation angle $\\theta$. Low solar angles result in long geometric shadow projections.",
     level: "level2"
   },
   {
     id: 8,
     mockTestId: 1,
+    experimentIndex: 2,
     module: "Optics",
     title: "Pinhole Camera Image Inversion",
     question: "Why does a simple pinhole camera form an inverted (upside down) image of a distant tree on its screen?",
@@ -206,6 +220,7 @@ const PRACTICE_QUESTIONS: Question[] = [
   {
     id: 9,
     mockTestId: 1,
+    experimentIndex: 2,
     module: "Optics",
     title: "Shadow Softness & Penumbra Effects",
     question: "Why does a large tubelight produce soft, blurry shadow edges (penumbra) while a tiny flashlight LED produces sharp, crisp shadows (umbra)?",
@@ -221,12 +236,14 @@ const PRACTICE_QUESTIONS: Question[] = [
   },
 
   // --- MOCK TEST 2 (Gravity, Motion & Airflow) ---
+  // Experiment 1 (Ceiling Fan Airflow) -> Questions 10, 11, 12
   {
     id: 10,
     mockTestId: 2,
+    experimentIndex: 0,
     module: "Gravity",
     title: "Why 3 Fan Blades in Tropical Indian Homes?",
-    question: "In the Everyday Air & Fan Blades Lab, why do ceiling fans in Indian homes typically use 3 blades instead of 4 or 5 blades used in cooler European countries?",
+    question: "In Experiment 1 (Everyday Air & Fan Blades Lab), why do ceiling fans in Indian homes typically use 3 blades instead of 4 or 5 blades used in cooler European countries?",
     options: [
       "Three blades are lighter and spin faster at higher RPM, creating a stronger cooling breeze in hot climates",
       "Three blades use three times more electricity than five blades",
@@ -240,9 +257,10 @@ const PRACTICE_QUESTIONS: Question[] = [
   {
     id: 11,
     mockTestId: 2,
+    experimentIndex: 0,
     module: "Gravity",
     title: "Fan Speed Regulator (RPM) & Air Circulation",
-    question: "When you turn up the Fan Speed Regulator (RPM) slider in Experiment 2, why does the air circulation in the room increase so dramatically?",
+    question: "When you turn up the Fan Speed Regulator slider in Experiment 1, why does the air circulation in the room increase so dramatically?",
     options: [
       "Faster blades create gravity waves that pull wind from outside",
       "Higher RPM increases blade velocity, forcing a larger volume of air molecules downward per second",
@@ -256,6 +274,7 @@ const PRACTICE_QUESTIONS: Question[] = [
   {
     id: 12,
     mockTestId: 2,
+    experimentIndex: 0,
     module: "Gravity",
     title: "Airflow Breeze Lines & Skin Evaporation Cooling",
     question: "Why does moving air from fan blades make your skin feel cooler on a hot afternoon, even though the fan doesn't lower room temperature?",
@@ -269,41 +288,29 @@ const PRACTICE_QUESTIONS: Question[] = [
     explanation: "Fans create wind chill! The breeze accelerates sweat evaporation from your skin, which requires latent heat of vaporization, cooling your body.",
     level: "both"
   },
+
+  // Experiment 2 (Planetary Gravity & Orbital Velocity) -> Questions 13, 14, 15
   {
     id: 13,
     mockTestId: 2,
+    experimentIndex: 1,
     module: "Gravity",
-    title: "Atmospheric Drag on Falling Objects",
-    question: "In Earth's atmosphere, why does a heavy cricket ball reach the ground faster than a light bird feather dropped from the same balcony height?",
+    title: "Planet Mass Factor & Gravitational Pull",
+    question: "In Experiment 2, when you increase the Planet Mass Factor slider, what happens to the gravitational attraction on the orbiting satellite?",
     options: [
-      "Gravity pulls 100 times harder on cricket balls than feathers",
-      "Air resistance (aerodynamic drag) exerts a upward force that slows down the feather much more relative to its small mass",
-      "Feathers have negative gravity charge",
-      "The cricket ball creates a black hole below it"
+      "Gravitational pull increases proportionally ($F \\propto M$), requiring higher orbital velocity to prevent crashing",
+      "Gravitational pull disappears completely",
+      "The satellite stops moving and floats backwards",
+      "Mass has zero impact on gravity"
     ],
-    correct: 1,
-    explanation: "In air, drag opposes motion. Because feathers have high surface area relative to their small mass, air resistance rapidly equals their weight, reaching terminal velocity early.",
+    correct: 0,
+    explanation: "Newton's Law of Universal Gravitation ($F = G \\frac{m_1 m_2}{r^2}$) shows gravitational force scales directly with planet mass.",
     level: "both"
   },
   {
     id: 14,
     mockTestId: 2,
-    module: "Gravity",
-    title: "Vacuum Acceleration (Galileo's Leaning Tower)",
-    question: "If you repeated the cricket ball vs. feather drop inside a vacuum chamber where all air has been pumped out, how would they fall?",
-    options: [
-      "The cricket ball still lands 5 seconds earlier",
-      "Both objects fall with identical gravitational acceleration ($g = 9.8\\text{ m/s}^2$) and touch the ground at the exact same instant",
-      "Both objects float upward to the ceiling",
-      "The feather turns into pure energy"
-    ],
-    correct: 1,
-    explanation: "In a vacuum, air resistance is zero! Gravitational acceleration is independent of mass, so all objects accelerate at the exact same rate ($g$).",
-    level: "both"
-  },
-  {
-    id: 15,
-    mockTestId: 2,
+    experimentIndex: 1,
     module: "Gravity",
     title: "Orbital Speed of Satellites near Earth",
     question: "Why don't artificial communication satellites in low Earth orbit crash down to the ground despite Earth's strong gravity?",
@@ -318,8 +325,9 @@ const PRACTICE_QUESTIONS: Question[] = [
     level: "level2"
   },
   {
-    id: 16,
+    id: 15,
     mockTestId: 2,
+    experimentIndex: 1,
     module: "Gravity",
     title: "Tidal Waves & Lunar Gravitational Pull",
     question: "Why do ocean tides rise and fall twice every day on coastal beaches in India?",
@@ -333,25 +341,46 @@ const PRACTICE_QUESTIONS: Question[] = [
     explanation: "The Moon's differential gravitational force stretches Earth's water, creating two bulges on opposite sides of the planet that cause high and low tides as Earth rotates daily.",
     level: "both"
   },
+
+  // Experiment 3 (Freefall Drag & Air Resistance) -> Questions 16, 17, 18
+  {
+    id: 16,
+    mockTestId: 2,
+    experimentIndex: 2,
+    module: "Gravity",
+    title: "Atmospheric Drag on Falling Objects",
+    question: "In Earth's atmosphere, why does a heavy cricket ball reach the ground faster than a light bird feather dropped from the same balcony height?",
+    options: [
+      "Gravity pulls 100 times harder on cricket balls than feathers",
+      "Air resistance (aerodynamic drag) exerts an upward force that slows down the feather much more relative to its small mass",
+      "Feathers have negative gravity charge",
+      "The cricket ball creates a black hole below it"
+    ],
+    correct: 1,
+    explanation: "In air, drag opposes motion. Because feathers have high surface area relative to their small mass, air resistance rapidly equals their weight, reaching terminal velocity early.",
+    level: "both"
+  },
   {
     id: 17,
     mockTestId: 2,
+    experimentIndex: 2,
     module: "Gravity",
-    title: "Weightlessness inside the International Space Station",
-    question: "Why do astronauts inside the ISS float around as if there is zero gravity, even though gravity at space station altitude is 90% of Earth's surface gravity?",
+    title: "Vacuum Acceleration (Galileo's Leaning Tower)",
+    question: "If you repeated the cricket ball vs. feather drop inside a vacuum chamber where all air has been pumped out, how would they fall?",
     options: [
-      "The space station is shielded with lead anti-gravity panels",
-      "Both the astronauts and the space station are in perpetual free-fall together toward Earth, creating apparent weightlessness",
-      "Astronauts wear special magnetic boots that push against space",
-      "Air pressure inside space stations destroys gravity forces"
+      "The cricket ball still lands 5 seconds earlier",
+      "Both objects fall with identical gravitational acceleration ($g = 9.8\\text{ m/s}^2$) and touch the ground at the exact same instant",
+      "Both objects float upward to the ceiling",
+      "The feather turns into pure energy"
     ],
     correct: 1,
-    explanation: "Astronauts float not because gravity is absent, but because the ISS and everything inside it are accelerating toward Earth at the exact same rate in free-fall orbit.",
-    level: "level2"
+    explanation: "In a vacuum, air resistance is zero! Gravitational acceleration is independent of mass, so all objects accelerate at the exact same rate ($g$).",
+    level: "both"
   },
   {
     id: 18,
     mockTestId: 2,
+    experimentIndex: 2,
     module: "Gravity",
     title: "Centrifugal Force in Curves (Bus Turns)",
     question: "When a school bus makes a sharp right turn on a road, why do passengers feel thrown toward the left side of their seats?",
@@ -367,12 +396,14 @@ const PRACTICE_QUESTIONS: Question[] = [
   },
 
   // --- MOCK TEST 3 (Chemistry & Thermodynamics) ---
+  // Experiment 1 (Soup Conduction & Stirring Convection) -> Questions 19, 20, 21
   {
     id: 19,
     mockTestId: 3,
+    experimentIndex: 0,
     module: "Chemistry",
     title: "Wooden vs. Stainless Steel Spoons in Hot Curry",
-    question: "When cooking soup or sambar in Experiment 3, why can you hold a wooden spoon handle without burning your hand, while a stainless steel spoon becomes too hot to touch in seconds?",
+    question: "When cooking soup or sambar in Experiment 1, why can you hold a wooden spoon handle without burning your hand, while a stainless steel spoon becomes too hot to touch in seconds?",
     options: [
       "Wood absorbs all the heat energy and destroys it",
       "Stainless steel is a rapid thermal conductor with free electrons, whereas wood is a natural thermal insulator with trapped air pockets",
@@ -386,9 +417,10 @@ const PRACTICE_QUESTIONS: Question[] = [
   {
     id: 20,
     mockTestId: 3,
+    experimentIndex: 0,
     module: "Chemistry",
     title: "Effect of Stirring Speed on Hot Soup",
-    question: "When you increase the Stirring Speed slider in the Kitchen Heat Lab, why does the soup cool down to an even, comfortable eating temperature much faster?",
+    question: "When you increase the Stirring Speed slider in Experiment 1 (Kitchen Heat Lab), why does the soup cool down to an even, comfortable eating temperature much faster?",
     options: [
       "Stirring creates whirlpools that teleport heat into outer space",
       "Stirring brings hot soup from the bottom up to the surface where heat can escape into the air via convection and steam",
@@ -402,9 +434,10 @@ const PRACTICE_QUESTIONS: Question[] = [
   {
     id: 21,
     mockTestId: 3,
+    experimentIndex: 0,
     module: "Chemistry",
     title: "Soup Temperature (°C) & Steam Formation",
-    question: "Why does raising the Soup Temperature (°C) slider in Experiment 3 cause more visible steam clouds to rise from the bowl?",
+    question: "Why does raising the Soup Temperature (°C) slider in Experiment 1 cause more visible steam clouds to rise from the bowl?",
     options: [
       "High heat turns stainless steel spoons into smoke",
       "Higher temperature gives water molecules extra kinetic energy, allowing more molecules to escape liquid state as steam vapor",
@@ -415,9 +448,12 @@ const PRACTICE_QUESTIONS: Question[] = [
     explanation: "Temperature measures average kinetic energy of molecules. Hotter soup means more water molecules move fast enough to break liquid bonds and evaporate into steam.",
     level: "both"
   },
+
+  // Experiment 2 (Matka Evaporative Cooling & Pressure Cooker) -> Questions 22, 23, 24
   {
     id: 22,
     mockTestId: 3,
+    experimentIndex: 1,
     module: "Chemistry",
     title: "Pressure Cooker High Boiling Point",
     question: "Why does food cook in a pressure cooker in 5 minutes, whereas in an open vessel it takes 20 minutes?",
@@ -434,9 +470,10 @@ const PRACTICE_QUESTIONS: Question[] = [
   {
     id: 23,
     mockTestId: 3,
+    experimentIndex: 1,
     module: "Chemistry",
     title: "Earthen Pot (Matka) Evaporative Cooling",
-    question: "Why does drinking water kept inside a porous clay pot (Matka) stay refreshingly cold during hot summer days without any electricity?",
+    question: "In Experiment 2, why does drinking water kept inside a porous clay pot (Matka) stay refreshingly cold during hot summer days without any electricity?",
     options: [
       "Clay pots contain secret ice blocks inside their walls",
       "Water seeps through microscopic clay pores and evaporates off the outer surface, absorbing heat energy from the water inside (evaporative cooling)",
@@ -450,9 +487,29 @@ const PRACTICE_QUESTIONS: Question[] = [
   {
     id: 24,
     mockTestId: 3,
+    experimentIndex: 1,
+    module: "Chemistry",
+    title: "Clay Porosity & Humidity Effects",
+    question: "Why does an earthenware Matka cool water much more effectively in dry summer weather (like Rajasthan) than in humid rainy weather (like Kerala)?",
+    options: [
+      "Dry air accelerates water evaporation rates from clay pores, whereas humid air already saturated with moisture slows down evaporation",
+      "Rainwater turns clay into solid metal",
+      "Humidity makes clay pots shrink",
+      "Rajasthan air contains free ice particles"
+    ],
+    correct: 0,
+    explanation: "Low relative humidity creates a steep vapor concentration gradient, accelerating evaporation and maximizing cooling efficiency.",
+    level: "both"
+  },
+
+  // Experiment 3 (Oxygen Depletion & Reaction Kinetics) -> Questions 25, 26, 27
+  {
+    id: 25,
+    mockTestId: 3,
+    experimentIndex: 2,
     module: "Chemistry",
     title: "Candle Snuffing under Glass Jar (Oxygen Depletion)",
-    question: "When you place an inverted glass jar over a burning candle, why does the flame flicker and go out after a few seconds?",
+    question: "In Experiment 3, when you place an inverted glass jar over a burning candle, why does the flame flicker and go out after a few seconds?",
     options: [
       "Glass jar weight squashes the candle wick flat",
       "Combustion consumes available Oxygen ($O_2$) inside the jar to produce $CO_2$; once $O_2$ drops below critical levels, the chemical reaction stops",
@@ -464,8 +521,9 @@ const PRACTICE_QUESTIONS: Question[] = [
     level: "both"
   },
   {
-    id: 25,
+    id: 26,
     mockTestId: 3,
+    experimentIndex: 2,
     module: "Chemistry",
     title: "Camphor Sublimation (Solid to Gas)",
     question: "When you leave a piece of white camphor or naphthalene ball out in open air, why does it shrink and disappear without leaving any liquid wetness on the floor?",
@@ -480,24 +538,9 @@ const PRACTICE_QUESTIONS: Question[] = [
     level: "level2"
   },
   {
-    id: 26,
-    mockTestId: 3,
-    module: "Chemistry",
-    title: "Rusting of Iron in Coastal Moisture",
-    question: "Why do iron window grills and bicycle chains rust much faster in coastal cities (like Mumbai or Chennai) than in dry desert cities (like Jaipur)?",
-    options: [
-      "Coastal cities have hotter sunlight that melts iron",
-      "Rusting requires both Oxygen ($O_2$) and Moisture ($H_2O$); humid salty air in coastal areas accelerates the electrochemical oxidation of iron into hydrated iron oxide",
-      "Jaipur air contains protective oil coatings",
-      "Sea waves push salt crystals that scratch iron"
-    ],
-    correct: 1,
-    explanation: "Iron corrosion is an electrochemical redox process requiring oxygen and water. High humidity and dissolved sea salt ions ($Na^+, Cl^-$) increase electrical conductivity, accelerating rust formation.",
-    level: "both"
-  },
-  {
     id: 27,
     mockTestId: 3,
+    experimentIndex: 2,
     module: "Chemistry",
     title: "Baking Soda & Vinegar Reaction ($CO_2$ Gas)",
     question: "When you mix kitchen baking soda (Sodium Bicarbonate) with lemon juice or vinegar (Acetic Acid), why does the mixture fizz violently and produce gas bubbles?",
@@ -1067,41 +1110,52 @@ export default function PracticePage() {
               {/* Render the integrated Sandbox Engine */}
               <div className="w-full">
                 <SandboxEngine
+                  mockTestId={selectedMockTestId}
+                  activeExperimentIndex={currentExpIndex}
+                  onExperimentChange={(idx) => setCurrentExpIndex(idx)}
                   onLevelChange={(idx) => setCurrentExpIndex(idx)}
                   level={difficulty === "level2" ? "level2" : "level1"}
+                  onSubmitComplete={handleSubmitTest}
                 />
               </div>
             </div>
 
-            {/* EXPERIENTIAL MCQ QUESTION LIST */}
+            {/* EXPERIENTIAL MCQ QUESTION LIST LINKED TO ACTIVE EXPERIMENT */}
             <div className="space-y-6">
-              <div className="bg-gradient-to-r from-[#fff7ed] to-[#eff6ff] border-l-4 border-[#ea580c] p-4 rounded-xl my-2 shadow-xs">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div>
-                    <span className="text-xs font-black uppercase px-2.5 py-0.5 rounded-full bg-[#ea580c] text-white tracking-wide">
-                      Linked Real-Life Questions
-                    </span>
-                    <h3 className="text-lg font-black text-[#143867] mt-1.5">
-                      {activeMockTest.title} ({mockTestQuestions.length} Questions)
-                    </h3>
-                    <p className="text-xs text-gray-700 font-medium mt-0.5">
-                      Answer these questions based on your observations in the interactive daily-life experiment above!
-                    </p>
-                  </div>
-                  {isSubmitted && (
-                    <span className="text-sm font-bold text-[#143867] bg-[#eef2f7] px-4 py-1.5 rounded-full border border-[#d1dbe5]">
-                      Final Score: {calculateScore()} / {mockTestQuestions.length} Correct
-                    </span>
-                  )}
-                </div>
-              </div>
+              {(() => {
+                const currentExperimentQuestions = mockTestQuestions.filter(
+                  (q) => q.experimentIndex === currentExpIndex
+                );
 
-              <div className="grid grid-cols-1 gap-6">
-                {mockTestQuestions.map((q, idx) => {
-                  const selectedIdx = selectedAnswers[q.id];
-                  const isCorrect = selectedIdx === q.correct;
+                return (
+                  <>
+                    <div className="bg-gradient-to-r from-[#fff7ed] to-[#eff6ff] border-l-4 border-[#ea580c] p-4 rounded-xl my-2 shadow-xs">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div>
+                          <span className="text-xs font-black uppercase px-2.5 py-0.5 rounded-full bg-[#ea580c] text-white tracking-wide">
+                            Experiment {currentExpIndex + 1} of 3 • Real-Life Questions
+                          </span>
+                          <h3 className="text-lg font-black text-[#143867] mt-1.5">
+                            {activeMockTest.title} (Showing {currentExperimentQuestions.length} Questions for Active Experiment {currentExpIndex + 1})
+                          </h3>
+                          <p className="text-xs text-gray-700 font-medium mt-0.5">
+                            These 3 questions dynamically update when you switch experiments in the simulation above!
+                          </p>
+                        </div>
+                        {isSubmitted && (
+                          <span className="text-sm font-bold text-[#143867] bg-[#eef2f7] px-4 py-1.5 rounded-full border border-[#d1dbe5]">
+                            Final Score: {calculateScore()} / {mockTestQuestions.length} Correct
+                          </span>
+                        )}
+                      </div>
+                    </div>
 
-                  return (
+                    <div className="grid grid-cols-1 gap-6">
+                      {currentExperimentQuestions.map((q, idx) => {
+                        const selectedIdx = selectedAnswers[q.id];
+                        const isCorrect = selectedIdx === q.correct;
+
+                        return (
                     <div
                       key={q.id}
                       className={`bg-white rounded-2xl p-6 border-2 transition-all shadow-xs space-y-4 ${
@@ -1200,8 +1254,12 @@ export default function PracticePage() {
                   );
                 })}
               </div>
+            </>
+          );
+        })()}
+      </div>
 
-              {/* Assessment Footer Controls */}
+      {/* Assessment Footer Controls */}
               <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
                 <button
                   onClick={() => {
@@ -1240,7 +1298,6 @@ export default function PracticePage() {
                 )}
               </div>
             </div>
-          </div>
         )}
       </main>
     </div>

@@ -3,9 +3,10 @@ import { DraggableItem, Position } from '../DraggableItem';
 
 interface OpticsLevelProps {
   recordAction: (actionType: string, actionDetails?: any) => void;
+  experimentSubIndex?: number;
 }
 
-export function OpticsLevel({ recordAction }: OpticsLevelProps) {
+export function OpticsLevel({ recordAction, experimentSubIndex = 0 }: OpticsLevelProps) {
   const [flashlightPos, setFlashlightPos] = useState<Position>({ x: 50, y: 150 });
   const [prismPos, setPrismPos] = useState<Position>({ x: 400, y: 250 });
   
@@ -25,6 +26,40 @@ export function OpticsLevel({ recordAction }: OpticsLevelProps) {
       });
     }
   }, []);
+
+  const expInfo = [
+    {
+      title: "Everyday Light & Water Bowl Magnification Lab",
+      objective: "Adjust Water Bowl Curvature and Daylight Brightness to discover how curved water bends light to magnify objects in daily life.",
+      slider1Label: "Water Bowl Curvature",
+      slider1Val: `${Math.round((refractiveIndex - 1) * 100)}%`,
+      slider2Label: "Daylight Brightness",
+      slider2Val: `${beamIntensity}%`
+    },
+    {
+      title: "Prism Daylight Refraction & Color Dispersion Lab",
+      objective: "Adjust Glass Prism Angle and Light Wavelength to discover how white light disperses into a rainbow spectrum.",
+      slider1Label: "Glass Prism Angle",
+      slider1Val: `${Math.round(refractiveIndex * 30)}°`,
+      slider2Label: "Light Wavelength",
+      slider2Val: `${Math.round(beamIntensity * 4 + 350)} nm`
+    },
+    {
+      title: "Shadow Angle & Solar Tracker Lab",
+      objective: "Adjust Sun Elevation Angle and Object Height to observe shadow length, penumbra softness, and solar tracking.",
+      slider1Label: "Sun Elevation Angle",
+      slider1Val: `${Math.round(refractiveIndex * 45)}°`,
+      slider2Label: "Object Height",
+      slider2Val: `${beamIntensity} cm`
+    }
+  ][experimentSubIndex] || {
+    title: "Everyday Light & Magnification Lab",
+    objective: "Adjust Water Bowl Curvature and Daylight Brightness to discover how curved water bends light to magnify objects in daily life.",
+    slider1Label: "Water Bowl Curvature",
+    slider1Val: `${Math.round((refractiveIndex - 1) * 100)}%`,
+    slider2Label: "Daylight Brightness",
+    slider2Val: `${beamIntensity}%`
+  };
 
   // Simple collision detection for beam (Flashlight points straight right)
   const beamY = flashlightPos.y + 20;
@@ -74,11 +109,11 @@ export function OpticsLevel({ recordAction }: OpticsLevelProps) {
       <div className="bg-gray-800 p-3 border-b border-gray-700 flex flex-wrap justify-between items-center gap-2 shrink-0">
         <div className="flex-1 pr-4">
           <h2 className="text-base md:text-lg font-bold text-gray-100 flex items-center gap-2">
-             <span className="bg-indigo-600 text-xs px-2 py-0.5 rounded text-white uppercase tracking-wider">Experiment 1</span>
-             Everyday Light & Magnification Lab
+             <span className="bg-indigo-600 text-xs px-2 py-0.5 rounded text-white uppercase tracking-wider">Experiment {experimentSubIndex + 1}</span>
+             {expInfo.title}
           </h2>
           <p className="text-xs text-indigo-200 mt-0.5">
-            <strong>Objective:</strong> Adjust Water Bowl Curvature and Daylight Brightness to discover how curved water bends light to magnify objects in daily life.
+            <strong>Objective:</strong> {expInfo.objective}
           </p>
         </div>
         <button 
@@ -92,7 +127,7 @@ export function OpticsLevel({ recordAction }: OpticsLevelProps) {
       {/* Interactive Simulation Variables Toolbar */}
       <div className="bg-gray-900/90 border-b border-gray-700/80 px-4 py-2 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-300 shrink-0">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">Water Bowl Curvature: {Math.round((refractiveIndex - 1) * 100)}%</span>
+          <span className="font-bold text-indigo-300">{expInfo.slider1Label}: {expInfo.slider1Val}</span>
           <input
             type="range"
             min="1.0"
@@ -105,7 +140,7 @@ export function OpticsLevel({ recordAction }: OpticsLevelProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">Daylight Brightness: {beamIntensity}%</span>
+          <span className="font-bold text-indigo-300">{expInfo.slider2Label}: {expInfo.slider2Val}</span>
           <input
             type="range"
             min="20"

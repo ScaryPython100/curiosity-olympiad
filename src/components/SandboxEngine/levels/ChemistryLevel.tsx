@@ -3,9 +3,10 @@ import { DraggableItem, Position } from '../DraggableItem';
 
 interface ChemistryLevelProps {
   recordAction: (actionType: string, actionDetails?: any) => void;
+  experimentSubIndex?: number;
 }
 
-export function ChemistryLevel({ recordAction }: ChemistryLevelProps) {
+export function ChemistryLevel({ recordAction, experimentSubIndex = 0 }: ChemistryLevelProps) {
   const [dropA, setDropA] = useState<Position>({ x: 100, y: 100 });
   const [dropB, setDropB] = useState<Position>({ x: 100, y: 200 });
   const [dropC, setDropC] = useState<Position>({ x: 100, y: 300 });
@@ -23,6 +24,44 @@ export function ChemistryLevel({ recordAction }: ChemistryLevelProps) {
       });
     }
   }, []);
+
+  const [temperature, setTemperature] = useState(25);
+  const [catalystAdded, setCatalystAdded] = useState(false);
+  const [stirSpeed, setStirSpeed] = useState(2);
+
+  const expInfo = [
+    {
+      title: "Everyday Kitchen Science & Heat Lab",
+      objective: "Adjust Soup Temperature (°C) and Stirring Speed to discover how heat transfers in your kitchen.",
+      slider1Label: "Soup Temperature",
+      slider1Val: `${temperature}°C`,
+      slider2Label: "Stirring Speed",
+      slider2Val: stirSpeed === 1 ? "Gentle" : stirSpeed === 2 ? "Moderate" : "Rapid"
+    },
+    {
+      title: "Earthenware Matka Evaporative Cooling Lab",
+      objective: "Adjust Clay Porosity and Ambient Humidity to observe natural evaporative cooling without electricity.",
+      slider1Label: "Clay Porosity",
+      slider1Val: `${Math.round(temperature * 0.9)}%`,
+      slider2Label: "Ambient Humidity",
+      slider2Val: `${Math.round(stirSpeed * 25)}%`
+    },
+    {
+      title: "Candle Flame Oxygen Depletion & Reaction Lab",
+      objective: "Adjust Glass Jar Volume and Oxygen Concentration to observe combustion kinetics and flame extinction.",
+      slider1Label: "Glass Jar Volume",
+      slider1Val: `${Math.round(temperature * 10)} mL`,
+      slider2Label: "Oxygen Concentration",
+      slider2Val: `${Math.round(stirSpeed * 7 + 7)}%`
+    }
+  ][experimentSubIndex] || {
+    title: "Everyday Kitchen Science & Heat Lab",
+    objective: "Adjust Soup Temperature (°C) and Stirring Speed to discover how heat transfers in your kitchen.",
+    slider1Label: "Soup Temperature",
+    slider1Val: `${temperature}°C`,
+    slider2Label: "Stirring Speed",
+    slider2Val: stirSpeed === 1 ? "Gentle" : stirSpeed === 2 ? "Moderate" : "Rapid"
+  };
 
   const beakerCenter = { x: 400, y: 200 };
   
@@ -56,10 +95,6 @@ export function ChemistryLevel({ recordAction }: ChemistryLevelProps) {
     checkMix(id, newPos);
   };
 
-  const [temperature, setTemperature] = useState(25);
-  const [catalystAdded, setCatalystAdded] = useState(false);
-  const [stirSpeed, setStirSpeed] = useState(2);
-
   const resetBeaker = () => {
     recordAction('optional_tool_used'); // Using this as the "reset" tool usage
     setBeakerMix([]);
@@ -78,11 +113,6 @@ export function ChemistryLevel({ recordAction }: ChemistryLevelProps) {
   const handleStirChange = (val: number) => {
     setStirSpeed(val);
     recordAction('changed_stir_speed', { val });
-  };
-
-  const toggleCatalyst = () => {
-    setCatalystAdded(prev => !prev);
-    recordAction('toggled_catalyst');
   };
 
   // Determine Beaker State based on mix & temperature
@@ -119,20 +149,22 @@ export function ChemistryLevel({ recordAction }: ChemistryLevelProps) {
       <div className="bg-gray-800 p-3 border-b border-gray-700 flex flex-wrap justify-between items-center gap-2 shrink-0">
         <div className="flex-1 pr-4">
           <h2 className="text-base md:text-lg font-bold text-gray-100 flex items-center gap-2">
-             <span className="bg-indigo-600 text-xs px-2 py-0.5 rounded text-white uppercase tracking-wider">Experiment 3</span>
-             Everyday Kitchen Science & Heat Lab
+             <span className="bg-indigo-600 text-xs px-2 py-0.5 rounded text-white uppercase tracking-wider">Experiment {experimentSubIndex + 1}</span>
+             {expInfo.title}
           </h2>
           <p className="text-xs text-indigo-200 mt-0.5">
-            <strong>Objective:</strong> Adjust Soup Temperature (°C) and Stirring Speed to discover how heat transfers in your kitchen.
+            <strong>Objective:</strong> {expInfo.objective}
           </p>
         </div>
+        
         <div className="flex items-center gap-2">
           <button 
-            onClick={toggleCatalyst}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${catalystAdded ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+            onClick={() => setCatalystAdded(prev => !prev)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${catalystAdded ? 'bg-emerald-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
           >
-            {catalystAdded ? 'Stainless Steel Spoon' : 'Wooden Spoon (Insulator)'}
+            {catalystAdded ? 'Wooden Spoon (Insulator)' : 'Metal Spoon (Conductor)'}
           </button>
+          
           <button 
             onClick={resetBeaker}
             className="bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
@@ -145,12 +177,12 @@ export function ChemistryLevel({ recordAction }: ChemistryLevelProps) {
       {/* Interactive Simulation Variables Toolbar */}
       <div className="bg-gray-900/90 border-b border-gray-700/80 px-4 py-2 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-300 shrink-0">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">Soup Temperature: {temperature}°C</span>
+          <span className="font-bold text-indigo-300">{expInfo.slider1Label}: {expInfo.slider1Val}</span>
           <input
             type="range"
-            min="20"
+            min="10"
             max="100"
-            step="10"
+            step="1"
             value={temperature}
             onChange={(e) => handleTempChange(parseInt(e.target.value))}
             className="w-24 md:w-32 accent-indigo-500 cursor-pointer"
@@ -158,7 +190,7 @@ export function ChemistryLevel({ recordAction }: ChemistryLevelProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">Stirring Speed: {stirSpeed === 0 ? "Still" : stirSpeed < 5 ? "Gentle" : "Rapid"}</span>
+          <span className="font-bold text-indigo-300">{expInfo.slider2Label}: {expInfo.slider2Val}</span>
           <input
             type="range"
             min="0"

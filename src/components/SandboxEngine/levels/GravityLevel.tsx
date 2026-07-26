@@ -3,9 +3,10 @@ import { DraggableItem, Position } from '../DraggableItem';
 
 interface GravityLevelProps {
   recordAction: (actionType: string, actionDetails?: any) => void;
+  experimentSubIndex?: number;
 }
 
-export function GravityLevel({ recordAction }: GravityLevelProps) {
+export function GravityLevel({ recordAction, experimentSubIndex = 0 }: GravityLevelProps) {
   const [nodePos, setNodePos] = useState<Position>({ x: 100, y: 200 });
   const [showVector, setShowVector] = useState(false);
   const [attractorMass, setAttractorMass] = useState(1.0);
@@ -22,6 +23,40 @@ export function GravityLevel({ recordAction }: GravityLevelProps) {
       });
     }
   }, []);
+
+  const expInfo = [
+    {
+      title: "Everyday Air & Fan Blades Lab",
+      objective: "Adjust Ceiling Fan Speed Regulator and Airflow Speed to discover how fan blades create cooling breezes in daily life.",
+      slider1Label: "Fan Speed Regulator",
+      slider1Val: `${Math.round(attractorMass * 3)}`,
+      slider2Label: "Airflow Speed",
+      slider2Val: `${Math.round(launchSpeed / 10)} km/h`
+    },
+    {
+      title: "Planetary Gravity & Orbital Velocity Lab",
+      objective: "Adjust Planet Mass and Orbital Velocity to observe how satellite trajectories curve into stable free-fall orbits.",
+      slider1Label: "Planet Mass Factor",
+      slider1Val: `${attractorMass.toFixed(1)} M⊕`,
+      slider2Label: "Orbital Velocity",
+      slider2Val: `${(launchSpeed / 30).toFixed(1)} km/s`
+    },
+    {
+      title: "Freefall Gravity & Terminal Air Resistance Lab",
+      objective: "Adjust Object Mass and Drop Altitude to observe atmospheric drag, Galileo's equivalence principle, and terminal velocity.",
+      slider1Label: "Object Mass",
+      slider1Val: `${(attractorMass * 5).toFixed(1)} kg`,
+      slider2Label: "Drop Altitude",
+      slider2Val: `${Math.round(launchSpeed * 2)} m`
+    }
+  ][experimentSubIndex] || {
+    title: "Everyday Air & Fan Blades Lab",
+    objective: "Adjust Ceiling Fan Speed Regulator and Airflow Speed to discover how fan blades create cooling breezes in daily life.",
+    slider1Label: "Fan Speed Regulator",
+    slider1Val: `${Math.round(attractorMass * 3)}`,
+    slider2Label: "Airflow Speed",
+    slider2Val: `${Math.round(launchSpeed / 10)} km/h`
+  };
 
   const attractor = { x: 400, y: 200 };
   
@@ -81,30 +116,30 @@ export function GravityLevel({ recordAction }: GravityLevelProps) {
       <div className="bg-gray-800 p-3 border-b border-gray-700 flex flex-wrap justify-between items-center gap-2 shrink-0">
         <div className="flex-1 pr-4">
           <h2 className="text-base md:text-lg font-bold text-gray-100 flex items-center gap-2">
-             <span className="bg-indigo-600 text-xs px-2 py-0.5 rounded text-white uppercase tracking-wider">Experiment 2</span>
-             Everyday Air & Fan Blades Lab
+             <span className="bg-indigo-600 text-xs px-2 py-0.5 rounded text-white uppercase tracking-wider">Experiment {experimentSubIndex + 1}</span>
+             {expInfo.title}
           </h2>
           <p className="text-xs text-indigo-200 mt-0.5">
-            <strong>Objective:</strong> Adjust Ceiling Fan Speed Regulator and Airflow Speed to discover how fan blades create cooling breezes in daily life.
+            <strong>Objective:</strong> {expInfo.objective}
           </p>
         </div>
         <button 
           onClick={toggleVector}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${showVector ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${showVector ? 'bg-[#f37021] text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
         >
-          {showVector ? 'Hide Airflow Breeze Lines' : 'Show Airflow Breeze Lines'}
+          {showVector ? 'Hide Airflow Lines' : 'Show Airflow Breeze Lines'}
         </button>
       </div>
 
       {/* Interactive Simulation Variables Toolbar */}
       <div className="bg-gray-900/90 border-b border-gray-700/80 px-4 py-2 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-300 shrink-0">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">Fan Speed Regulator: {Math.round(attractorMass * 2)}</span>
+          <span className="font-bold text-indigo-300">{expInfo.slider1Label}: {expInfo.slider1Val}</span>
           <input
             type="range"
             min="0.5"
-            max="3.0"
-            step="0.2"
+            max="2.5"
+            step="0.1"
             value={attractorMass}
             onChange={(e) => handleMassChange(parseFloat(e.target.value))}
             className="w-24 md:w-32 accent-indigo-500 cursor-pointer"
@@ -112,7 +147,7 @@ export function GravityLevel({ recordAction }: GravityLevelProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">Airflow Speed: {Math.round(launchSpeed / 10)} km/h</span>
+          <span className="font-bold text-indigo-300">{expInfo.slider2Label}: {expInfo.slider2Val}</span>
           <input
             type="range"
             min="100"
