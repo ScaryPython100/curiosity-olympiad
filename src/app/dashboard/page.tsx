@@ -8,6 +8,8 @@ import { awardXP } from "@/app/actions/profile";
 import { getBestBadge, BADGES } from "@/utils/gamification";
 import { getUserAvatar, useUserAvatar } from "@/utils/userAvatar";
 import { playLevelUpSound } from "@/utils/audio";
+import KuppuMascot from "@/components/KuppuMascot";
+import AgastyaVanHighway from "@/components/AgastyaVanHighway";
 
 const PARTNER_SCHOOLS = [
   { name: "Global Olympiad Partner Academy", location: "Worldwide", icon: "public", badgeColor: "bg-[#143867] text-white border-[#f37021]", emblem: "🌐" },
@@ -176,6 +178,25 @@ export default function DashboardPage() {
               </div>
             </div>
           )}
+        </section>
+
+        {/* 🐵 NEW: Kuppu the Curious Langur Mascot Banner */}
+        <section className="mb-10">
+          <KuppuMascot
+            defaultState="aah"
+            title="🐵 Kuppu the Curious Langur"
+            subtitle="Official Mascot of Agastya Kuppam Creative Campus"
+          />
+        </section>
+
+        {/* 🚌 NEW: The Agastya Mobile Science Van Progress Highway */}
+        <section className="mb-10">
+          <AgastyaVanHighway
+            currentXp={xp}
+            targetXp={1000}
+            title="🚌 Agastya Mobile Science Van Progress Highway"
+            subtitle="Drive along the winding road of the Kuppam Creative Campus as you earn XP!"
+          />
         </section>
 
         {/* Agastya Promotional Hero Banner */}

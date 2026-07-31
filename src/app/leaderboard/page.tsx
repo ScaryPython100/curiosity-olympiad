@@ -6,6 +6,7 @@ import { useUser } from "@/hooks/useUser";
 import { getLeaderboard } from "@/app/actions/profile";
 import { BADGES, AVATARS, getBestBadge } from "@/utils/gamification";
 import CertificateModal, { RankCertificateType } from "@/components/CertificateModal";
+import KuppuMascot from "@/components/KuppuMascot";
 import { getUserAvatar, useUserAvatar } from "@/utils/userAvatar";
 
 interface LeaderboardEntry {
@@ -130,7 +131,15 @@ export default function LeaderboardPage() {
       </div>
 
       <main className="flex-grow pt-32 pb-32 overflow-y-auto max-w-md mx-auto w-full hide-scrollbar">
-        
+        {/* 🐵 NEW: Kuppu Celebratory Mascot Banner */}
+        <section className="px-4 mb-6">
+          <KuppuMascot
+            defaultState="haha"
+            title="🐵 Kuppu Celebrates Champions!"
+            subtitle="Ha-ha! Pure joy of climbing the Olympic Leaderboard!"
+          />
+        </section>
+
         <section className="px-4 mb-10 pt-4 transition-all duration-700 ease-out">
           <div className="flex items-end justify-center gap-2 mb-6 min-h-[220px]">
             {isLoading ? (

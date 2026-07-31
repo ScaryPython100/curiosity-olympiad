@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import SandboxEngine from "@/components/SandboxEngine";
 import { addActivityXP } from "@/app/actions/profile";
+import KuppuMascot from "@/components/KuppuMascot";
 
 export interface Question {
   id: number;
@@ -774,6 +775,15 @@ export default function PracticePage() {
                   Attempt official science mock tests across Optics, Orbital Physics, and Chemistry. Your live telemetry (hypothesis reversals & variable adjustments) earns you bonus curiosity points!
                 </p>
               </div>
+            </div>
+
+            {/* 🐵 NEW: Kuppu Mascot Banner in Discovery (Aha!) Mode */}
+            <div className="space-y-4">
+              <KuppuMascot
+                defaultState="aha"
+                title="🐵 Kuppu's Practice Lab"
+                subtitle="Test hypotheses & discover scientific laws!"
+              />
             </div>
 
             {/* Difficulty Tier Selector (Level 1 vs Level 2) */}
