@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import SandboxEngine from "@/components/SandboxEngine";
 import { addActivityXP } from "@/app/actions/profile";
-import KuppuMascot from "@/components/KuppuMascot";
+import RoamingKuppuMascot from "@/components/RoamingKuppuMascot";
 
 export interface Question {
   id: number;
@@ -777,14 +777,8 @@ export default function PracticePage() {
               </div>
             </div>
 
-            {/* 🐵 NEW: Kuppu Mascot Banner in Discovery (Aha!) Mode */}
-            <div className="space-y-4">
-              <KuppuMascot
-                defaultState="aha"
-                title="🐵 Kuppu's Practice Lab"
-                subtitle="Test hypotheses & discover scientific laws!"
-              />
-            </div>
+            {/* 🐵 NEW: Free-Floating Kuppu Mascot in Discovery (Aha!) Mode */}
+            <RoamingKuppuMascot initialMood="aha" userName="Explorer" />
 
             {/* Difficulty Tier Selector (Level 1 vs Level 2) */}
             <div className="space-y-4">

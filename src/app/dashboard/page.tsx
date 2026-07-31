@@ -8,8 +8,7 @@ import { awardXP } from "@/app/actions/profile";
 import { getBestBadge, BADGES } from "@/utils/gamification";
 import { getUserAvatar, useUserAvatar } from "@/utils/userAvatar";
 import { playLevelUpSound } from "@/utils/audio";
-import KuppuMascot from "@/components/KuppuMascot";
-import AgastyaVanHighway from "@/components/AgastyaVanHighway";
+import RoamingKuppuMascot from "@/components/RoamingKuppuMascot";
 
 const PARTNER_SCHOOLS = [
   { name: "Global Olympiad Partner Academy", location: "Worldwide", icon: "public", badgeColor: "bg-[#143867] text-white border-[#f37021]", emblem: "🌐" },
@@ -180,23 +179,37 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* 🐵 NEW: Kuppu the Curious Langur Mascot Banner */}
-        <section className="mb-10">
-          <KuppuMascot
-            defaultState="aah"
-            title="🐵 Kuppu the Curious Langur"
-            subtitle="Official Mascot of Agastya Kuppam Creative Campus"
-          />
-        </section>
+        {/* 🐵 NEW: Free-Floating, Smoothly Jumping Kuppu Mascot (NO Corporate Box!) */}
+        <RoamingKuppuMascot initialMood="aah" userName="Explorer" />
 
-        {/* 🚌 NEW: The Agastya Mobile Science Van Progress Highway */}
+        {/* 🗺️ NEW: Playful Organic Invitation to the Full 11-Milestone Kuppam Campus Map */}
         <section className="mb-10">
-          <AgastyaVanHighway
-            currentXp={xp}
-            targetXp={1000}
-            title="🚌 Agastya Mobile Science Van Progress Highway"
-            subtitle="Drive along the winding road of the Kuppam Creative Campus as you earn XP!"
-          />
+          <div className="bg-gradient-to-r from-[#eaf6ff] via-[#f7fbff] to-[#fff7ed] rounded-3xl p-6 sm:p-8 border-2 border-[#143867]/15 shadow-md hover:shadow-xl transition-all relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white shadow-md flex items-center justify-center border-2 border-amber-400 shrink-0">
+                <span className="text-4xl sm:text-5xl">🗺️</span>
+              </div>
+              <div>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f37021] text-white text-[10px] font-black uppercase tracking-wider mb-1">
+                  <span>🚌 Interactive Highway</span>
+                </span>
+                <h3 className="text-lg sm:text-xl font-black text-[#143867] tracking-tight">
+                  Agastya Kuppam Creative Campus Map
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">
+                  Drive the Agastya Science Van across 11 official landmarks from <strong className="text-[#143867]">Jhunjhunwala Discovery Center</strong> to <strong className="text-[#143867]">Ramanujan Math Park</strong>!
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/campus-map"
+              className="px-6 py-3 rounded-full bg-[#143867] hover:bg-[#1e4a85] text-[#ffe16d] font-black text-xs sm:text-sm shadow-md transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shrink-0"
+            >
+              <span>Open Campus Map 🗺️</span>
+              <span className="material-symbols-outlined text-sm">arrow_forward</span>
+            </Link>
+          </div>
         </section>
 
         {/* Agastya Promotional Hero Banner */}
