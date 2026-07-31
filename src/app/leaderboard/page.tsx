@@ -29,6 +29,8 @@ export default function LeaderboardPage() {
   const [isCertModalOpen, setIsCertModalOpen] = useState(false);
   const [certType, setCertType] = useState<RankCertificateType>("Weekly Rank 1");
   const [selectedCertIsCompleted, setSelectedCertIsCompleted] = useState(false);
+  const [pastDailyChampionId, setPastDailyChampionId] = useState<string | null>(null);
+  const [pastWeeklyChampionId, setPastWeeklyChampionId] = useState<string | null>(null);
 
   const myAvatar = useUserAvatar(userId);
   const [studentRealName, setStudentRealName] = useState("Student Champion");
@@ -40,6 +42,12 @@ export default function LeaderboardPage() {
         const result = await getLeaderboard(timeframe);
         if (result.data) {
           setLeaderboardData(result.data as unknown as LeaderboardEntry[]);
+        }
+        if (result.pastDailyChampionId !== undefined) {
+          setPastDailyChampionId(result.pastDailyChampionId);
+        }
+        if (result.pastWeeklyChampionId !== undefined) {
+          setPastWeeklyChampionId(result.pastWeeklyChampionId);
         }
       } catch (error) {
         console.error("Failed to fetch leaderboard:", error);
@@ -62,6 +70,9 @@ export default function LeaderboardPage() {
   const userRankIndex = leaderboardData.findIndex(entry => entry.user_id === userId);
   const userEntry = userRankIndex !== -1 ? leaderboardData[userRankIndex] : null;
   const userRank = userRankIndex !== -1 ? userRankIndex + 1 : null;
+  const isPastChampion = timeframe === "daily"
+    ? Boolean(userId && pastDailyChampionId && userId === pastDailyChampionId)
+    : Boolean(userId && pastWeeklyChampionId && userId === pastWeeklyChampionId);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -156,7 +167,7 @@ export default function LeaderboardPage() {
                       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gray-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-md">2nd</div>
                     </div>
                     <p className="text-sm font-semibold text-[#143867] text-center truncate w-full">
-                      {topThree[1].student_profiles?.username || "Scholar"}
+                      {topThree[1].student_profiles?.username || "Explorer"}
                     </p>
                     <div className="flex items-center gap-1">
                       <span className="text-[10px] grayscale brightness-125">{getBestBadge(topThree[1].all_time_xp)?.icon}</span>
@@ -183,7 +194,7 @@ export default function LeaderboardPage() {
                       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-[#ffe16d] text-[#221b00] text-xs px-3 py-1 rounded-full font-extrabold uppercase tracking-widest shadow-md">1st</div>
                     </div>
                     <p className="text-sm font-bold text-[#143867] text-center truncate w-full">
-                      {topThree[0].student_profiles?.username || "Newton"}
+                      {topThree[0].student_profiles?.username || "Explorer"}
                     </p>
                     <div className="flex items-center gap-1">
                       <span className="text-xs">{getBestBadge(topThree[0].all_time_xp)?.icon}</span>
@@ -210,7 +221,7 @@ export default function LeaderboardPage() {
                       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gray-300 text-gray-800 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-md">3rd</div>
                     </div>
                     <p className="text-sm font-semibold text-[#143867] text-center truncate w-full">
-                      {topThree[2].student_profiles?.username || "Ada"}
+                      {topThree[2].student_profiles?.username || "Explorer"}
                     </p>
                     <div className="flex items-center gap-1">
                       <span className="text-[10px] grayscale brightness-110">{getBestBadge(topThree[2].all_time_xp)?.icon}</span>
@@ -499,40 +510,42 @@ export default function LeaderboardPage() {
               )}
 
               {/* Ready to Download Notification Card for Completed Past Cycles */}
-              <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex flex-col gap-3 w-full">
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <span className="px-2.5 py-1 bg-emerald-600 text-white text-[10px] font-black rounded-lg uppercase tracking-wider shadow-xs">
-                    {timeframe === "daily" ? "COMPLETED DAILY CYCLES" : "COMPLETED WEEKLY CYCLES"}
-                  </span>
-                  <span className="text-xs font-bold text-emerald-900">
-                    {timeframe === "daily" ? "Past Daily Rank #1 Records" : "Past Weekly Rank #1 Records"}
-                  </span>
-                </div>
-                
-                <div>
-                  <h4 className="text-xs sm:text-sm font-black text-emerald-950">
-                    {timeframe === "daily" ? "Official Daily Merit Certificate Center" : "Official Weekly Merit Certificate Center"}
-                  </h4>
-                  <p className="text-[11px] sm:text-xs text-emerald-800 leading-relaxed mt-1">
-                    {timeframe === "daily"
-                      ? "Official finalized certificates for ending past daily cycles in 1st Place. Resets every night at 11:59 PM!"
-                      : "Official finalized certificates for ending past weekly cycles in 1st Place. Resets every Sunday at 11:59 PM!"}
-                  </p>
-                </div>
+              {isPastChampion && (
+                <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex flex-col gap-3 w-full">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="px-2.5 py-1 bg-emerald-600 text-white text-[10px] font-black rounded-lg uppercase tracking-wider shadow-xs">
+                      {timeframe === "daily" ? "COMPLETED DAILY CYCLES" : "COMPLETED WEEKLY CYCLES"}
+                    </span>
+                    <span className="text-xs font-bold text-emerald-900">
+                      {timeframe === "daily" ? "Past Daily Rank #1 Records" : "Past Weekly Rank #1 Records"}
+                    </span>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-black text-emerald-950">
+                      {timeframe === "daily" ? "Official Daily Merit Certificate Center" : "Official Weekly Merit Certificate Center"}
+                    </h4>
+                    <p className="text-[11px] sm:text-xs text-emerald-800 leading-relaxed mt-1">
+                      {timeframe === "daily"
+                        ? "Official finalized certificates for ending past daily cycles in 1st Place. Resets every night at 11:59 PM!"
+                        : "Official finalized certificates for ending past weekly cycles in 1st Place. Resets every Sunday at 11:59 PM!"}
+                    </p>
+                  </div>
 
-                <button
-                  onClick={() => {
-                    const targetCert = timeframe === "daily" ? "Daily Rank 1" : "Weekly Rank 1";
-                    setCertType(targetCert);
-                    setSelectedCertIsCompleted(true); // Unlock finalized certificate for download!
-                    setIsCertModalOpen(true);
-                  }}
-                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 mt-1"
-                >
-                  <span className="material-symbols-outlined text-base">download</span>
-                  <span>Claim & Download {timeframe === "daily" ? "Daily" : "Weekly"} Certificate 📜</span>
-                </button>
-              </div>
+                  <button
+                    onClick={() => {
+                      const targetCert = timeframe === "daily" ? "Daily Rank 1" : "Weekly Rank 1";
+                      setCertType(targetCert);
+                      setSelectedCertIsCompleted(true); // Unlock finalized certificate for download!
+                      setIsCertModalOpen(true);
+                    }}
+                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 mt-1"
+                  >
+                    <span className="material-symbols-outlined text-base">download</span>
+                    <span>Claim & Download {timeframe === "daily" ? "Daily" : "Weekly"} Certificate 📜</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </section>
@@ -544,9 +557,9 @@ export default function LeaderboardPage() {
         studentRealName={studentRealName || userEntry?.student_profiles?.username || "Student Explorer"}
         achievementType={certType}
         awardDate={new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-        isEligible={userRank === 1 || selectedCertIsCompleted}
+        isEligible={isPastChampion || userRank === 1}
         userRank={userRank}
-        isCompletedCycle={selectedCertIsCompleted}
+        isCompletedCycle={selectedCertIsCompleted && isPastChampion}
       />
 
 

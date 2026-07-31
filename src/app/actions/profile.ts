@@ -85,6 +85,33 @@ export async function getLeaderboard(timeframe: 'weekly' | 'daily' | 'friends' =
 
   const fixCutoff = new Date("2026-07-27T00:30:00Z");
 
+  // Determine who finished #1 in the previous completed daily and weekly cycles
+  let pastDailyChampionId: string | null = null;
+  let maxPastDailyXp = -1;
+  for (const row of gamificationData) {
+    const dailyResetRef = row.last_daily_reset || row.last_claimed_date;
+    if (dailyResetRef) {
+      const lastDaily = new Date(dailyResetRef);
+      if (lastDaily < todayStart && (row.daily_xp || 0) > maxPastDailyXp && (row.daily_xp || 0) > 0 && row.daily_xp !== row.xp) {
+        maxPastDailyXp = row.daily_xp;
+        pastDailyChampionId = row.user_id;
+      }
+    }
+  }
+
+  let pastWeeklyChampionId: string | null = null;
+  let maxPastWeeklyXp = -1;
+  for (const row of gamificationData) {
+    const weeklyResetRef = row.last_weekly_reset || row.last_claimed_date;
+    if (weeklyResetRef) {
+      const lastWeekly = new Date(weeklyResetRef);
+      if (lastWeekly < currentWeekStart && (row.weekly_xp || 0) > maxPastWeeklyXp && (row.weekly_xp || 0) > 0) {
+        maxPastWeeklyXp = row.weekly_xp;
+        pastWeeklyChampionId = row.user_id;
+      }
+    }
+  }
+
   // Process data locally to reset expired XP
   let processedData = gamificationData.map((row) => {
     let rowDaily = row.daily_xp || 0;
@@ -150,7 +177,7 @@ export async function getLeaderboard(timeframe: 'weekly' | 'daily' | 'friends' =
     };
   });
 
-  return { data };
+  return { data, pastDailyChampionId, pastWeeklyChampionId };
 }
 
 /**

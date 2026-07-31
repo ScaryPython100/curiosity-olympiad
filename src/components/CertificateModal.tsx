@@ -35,23 +35,8 @@ export default function CertificateModal({
   isCompletedCycle = false,
 }: CertificateModalProps) {
   const [copied, setCopied] = useState(false);
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [customRealName, setCustomRealName] = useState("");
-  const [nameInput, setNameInput] = useState("");
 
-  const displayName = customRealName || studentRealName || "Student Champion";
-
-  const handleSaveRealName = () => {
-    const trimmed = nameInput.trim();
-    if (trimmed) {
-      setCustomRealName(trimmed);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("curiosity_real_name", trimmed);
-      }
-      if (onUpdateRealName) onUpdateRealName(trimmed);
-    }
-    setIsEditingName(false);
-  };
+  const displayName = studentRealName || "Student Champion";
 
   if (!isOpen) return null;
 
@@ -224,37 +209,9 @@ export default function CertificateModal({
                   This formal certificate is proudly presented to
                 </p>
                 <div className="flex items-center justify-center gap-2 max-w-md mx-auto border-b-2 border-[#143867]/30 py-1">
-                  {isEditingName ? (
-                    <div className="flex items-center gap-2 w-full">
-                      <input
-                        type="text"
-                        value={nameInput}
-                        onChange={(e) => setNameInput(e.target.value)}
-                        placeholder="Enter Full Real Name..."
-                        className="w-full px-2 py-1 border-2 border-[#f37021] rounded-lg text-center text-base font-serif font-bold text-[#143867] focus:outline-none"
-                        autoFocus
-                      />
-                      <button
-                        onClick={handleSaveRealName}
-                        className="px-3 py-1 bg-[#143867] text-white text-xs font-bold rounded-lg"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <h1 className="text-2xl sm:text-4xl font-extrabold text-[#143867] font-serif">
-                        {displayName}
-                      </h1>
-                      <button
-                        onClick={() => setIsEditingName(true)}
-                        className="text-gray-400 hover:text-[#f37021] transition-colors p-1"
-                        title="Edit Real Name"
-                      >
-                        <span className="material-symbols-outlined text-sm">edit</span>
-                      </button>
-                    </>
-                  )}
+                  <h1 className="text-2xl sm:text-4xl font-extrabold text-[#143867] font-serif">
+                    {displayName}
+                  </h1>
                 </div>
               </div>
 
