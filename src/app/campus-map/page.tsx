@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { getProfileStats } from "@/app/actions/profile";
-import RoamingKuppuMascot from "@/components/RoamingKuppuMascot";
 
 export interface CampusLandmark {
   id: number;
@@ -202,9 +201,7 @@ export default function CampusMapPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#14532d] via-[#15803d] to-[#166534] text-white selection:bg-[#ffe16d] selection:text-[#143867] pb-24 relative overflow-x-hidden">
-      
-      {/* 🐵 Free-Floating, Crawling Kuppu Mascot that moves out of the way when clicked! */}
-      <RoamingKuppuMascot initialMood="aah" userName={userName} />
+
 
       {/* Top Header Nav */}
       <header className="sticky top-0 z-40 bg-[#14532d]/90 backdrop-blur-md border-b border-emerald-400/20 px-4 sm:px-8 py-4 shadow-lg">

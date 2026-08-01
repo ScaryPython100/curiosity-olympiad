@@ -8,7 +8,7 @@ import { awardXP } from "@/app/actions/profile";
 import { getBestBadge, BADGES } from "@/utils/gamification";
 import { getUserAvatar, useUserAvatar } from "@/utils/userAvatar";
 import { playLevelUpSound } from "@/utils/audio";
-import RoamingKuppuMascot from "@/components/RoamingKuppuMascot";
+import KuppuMascot from "@/components/KuppuMascot";
 
 const PARTNER_SCHOOLS = [
   { name: "Global Olympiad Partner Academy", location: "Worldwide", icon: "public", badgeColor: "bg-[#143867] text-white border-[#f37021]", emblem: "🌐" },
@@ -179,8 +179,8 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* 🐵 NEW: Free-Floating, Smoothly Jumping Kuppu Mascot (NO Corporate Box!) */}
-        <RoamingKuppuMascot initialMood="aah" userName="Explorer" />
+        {/* 🐵 NEW: Interactive, Free-Floating Kuppu Mascot Component Restricted to Dashboard */}
+        <KuppuMascot userName="Explorer" />
 
         {/* 🗺️ NEW: Playful Organic Invitation to the Full 11-Milestone Kuppam Campus Map */}
         <section className="mb-10">

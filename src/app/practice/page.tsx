@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import SandboxEngine from "@/components/SandboxEngine";
 import { addActivityXP } from "@/app/actions/profile";
-import RoamingKuppuMascot from "@/components/RoamingKuppuMascot";
 
 export interface Question {
   id: number;
@@ -776,9 +775,6 @@ export default function PracticePage() {
                 </p>
               </div>
             </div>
-
-            {/* 🐵 NEW: Free-Floating Kuppu Mascot in Discovery (Aha!) Mode */}
-            <RoamingKuppuMascot initialMood="aha" userName="Explorer" />
 
             {/* Difficulty Tier Selector (Level 1 vs Level 2) */}
             <div className="space-y-4">
