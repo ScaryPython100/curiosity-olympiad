@@ -7,6 +7,7 @@ import { getUserProfile, getFollowStatus, followUser, unfollowUser, getFollowers
 import { getBestBadge, BADGES, AVATARS } from "@/utils/gamification";
 import { useUserAvatar } from "@/utils/userAvatar";
 import Link from "next/link";
+import { CuriosityQuotientCard } from "@/components/CuriosityQuotientCard";
 
 export default function PublicProfilePage({ params }: { params: Promise<{ userId: string }> }) {
   const router = useRouter();
@@ -165,6 +166,11 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userId
             <div className="text-2xl font-bold">{followingCount}</div>
             <div className="text-xs text-gray-500 uppercase tracking-wider">Following</div>
           </div>
+        </div>
+
+        {/* 📊 NEW: Curiosity Quotient (CQ) Analytics Engine Radar Chart */}
+        <div className="w-full mb-6">
+          <CuriosityQuotientCard xp={profile.xp} username={profile.username || "Explorer"} />
         </div>
 
         {/* Stats Grid */}

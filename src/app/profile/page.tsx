@@ -7,6 +7,7 @@ import { useUser } from "@/hooks/useUser";
 import { calculateLevelProgress, BADGES } from "@/utils/gamification";
 import { AvatarPickerModal } from "@/components/AvatarPickerModal";
 import { useUserAvatar } from "@/utils/userAvatar";
+import { CuriosityQuotientCard } from "@/components/CuriosityQuotientCard";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -162,6 +163,9 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* 📊 NEW: Curiosity Quotient (CQ) Analytics Engine Radar Chart */}
+        <CuriosityQuotientCard xp={userStats.xp} username={userStats.username || "Explorer"} />
 
         {/* Badges Section - New Playful UI */}
         <section className="mb-8">

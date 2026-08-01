@@ -1,0 +1,321 @@
+"use client";
+
+import React, { useState } from "react";
+
+export interface CQAxis {
+  id: string;
+  label: string;
+  score: number; // 0 to 100
+  icon: string;
+  description: string;
+  superpowerText: string;
+}
+
+interface CuriosityQuotientCardProps {
+  xp?: number;
+  username?: string;
+}
+
+export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: CuriosityQuotientCardProps) {
+  // Deterministic calculation based on XP so CQ scores grow realistically as student earns XP
+  const baseScore = Math.min(95, Math.max(65, 68 + Math.floor(xp / 300)));
+  
+  const axes: CQAxis[] = [
+    {
+      id: "spatial",
+      label: "Spatial Logic",
+      score: Math.min(98, baseScore + 4),
+      icon: "view_in_ar",
+      description: "Visualizing 3D structures, molecular geometry & spatial transformations.",
+      superpowerText: "You effortlessly rotate 3D structures in your mind and understand physical geometry!"
+    },
+    {
+      id: "pattern",
+      label: "Pattern Recognition",
+      score: Math.min(99, baseScore + 8),
+      icon: "pattern",
+      description: "Identifying recurring biological cycles, mathematical series & data trends.",
+      superpowerText: "You naturally see hidden connections in scientific data faster than 94% of peers!"
+    },
+    {
+      id: "epistemic",
+      label: "Epistemic Vigilance",
+      score: Math.min(96, baseScore + 2),
+      icon: "fact_check",
+      description: "Questioning assumptions, verifying experimental controls & spotting bias.",
+      superpowerText: "You think like a rigorous scientist—always demanding experimental proof and controls!"
+    },
+    {
+      id: "deductive",
+      label: "Deductive Reasoning",
+      score: Math.min(97, baseScore + 6),
+      icon: "psychology",
+      description: "Deriving logical scientific conclusions from evidence and hypotheses.",
+      superpowerText: "You excel at tracing cause and effect from initial premises to accurate discoveries!"
+    },
+    {
+      id: "inquiry",
+      label: "Experimental Inquiry",
+      score: Math.min(98, baseScore + 5),
+      icon: "science",
+      description: "Designing hands-on tests and curiosity-driven lab exploration.",
+      superpowerText: "Your curiosity drives you to test hypotheses rather than just reading about them!"
+    }
+  ];
+
+  // Calculate overall Curiosity Quotient (CQ) — like IQ, where 100 is average and 125+ is Genius
+  const avgScore = Math.round(axes.reduce((sum, a) => sum + a.score, 0) / axes.length);
+  const overallCQ = 100 + Math.round((avgScore - 60) * 0.85);
+
+  // Find cognitive superpower (highest score)
+  const superpower = axes.reduce((prev, curr) => (curr.score > prev.score ? curr : prev), axes[0]);
+
+  const [selectedAxis, setSelectedAxis] = useState<CQAxis>(superpower);
+
+  // SVG Radar Chart geometry (5 vertices)
+  const size = 260;
+  const center = size / 2;
+  const radius = 95;
+  const numAxes = axes.length;
+
+  // Calculate (x, y) coordinates for angle and radius
+  const getCoordinates = (index: number, rValue: number) => {
+    const angle = (Math.PI * 2 * index) / numAxes - Math.PI / 2;
+    const x = center + rValue * Math.cos(angle);
+    const y = center + rValue * Math.sin(angle);
+    return { x, y };
+  };
+
+  // Generate grid polygon string for a given percentage (0.2 to 1.0)
+  const getGridPolygon = (pct: number) => {
+    return axes
+      .map((_, i) => {
+        const { x, y } = getCoordinates(i, radius * pct);
+        return `${x},${y}`;
+      })
+      .join(" ");
+  };
+
+  // Generate student's data polygon string
+  const getDataPolygon = () => {
+    return axes
+      .map((axis, i) => {
+        const { x, y } = getCoordinates(i, (radius * axis.score) / 100);
+        return `${x},${y}`;
+      })
+      .join(" ");
+  };
+
+  return (
+    <section className="mb-8 bg-gradient-to-br from-[#ffffff] via-[#fffaf4] to-[#fff5ec] rounded-3xl p-6 sm:p-8 border-2 border-[#f37021] shadow-xl relative overflow-hidden">
+      {/* Background Decorative Emblem */}
+      <div className="absolute top-0 right-0 -mr-16 -mt-16 w-52 h-52 rounded-full bg-[#ffe16d]/20 pointer-events-none blur-2xl"></div>
+
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 relative z-10">
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f37021] text-white text-[11px] font-black uppercase tracking-wider shadow-xs mb-2">
+            <span className="material-symbols-outlined text-sm">radar</span>
+            <span>Agastya Cognitive Profile</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-[#143867] tracking-tight">
+            The &ldquo;Curiosity Quotient&rdquo; (CQ) Analytics Engine
+          </h2>
+          <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
+            How {username} thinks — dynamic cognitive profile graded from H5P &amp; Lab Performance.
+          </p>
+        </div>
+
+        {/* CQ Badge */}
+        <div className="flex items-center gap-3 bg-[#143867] text-white px-4 py-3 rounded-2xl border-2 border-[#ffe16d] shadow-md shrink-0">
+          <span className="material-symbols-outlined text-3xl text-[#ffe16d]">psychology</span>
+          <div>
+            <div className="text-[10px] uppercase font-bold text-[#ffe16d] tracking-widest">
+              Overall Quotient
+            </div>
+            <div className="text-2xl font-black italic tracking-tight flex items-baseline gap-1">
+              CQ {overallCQ}
+              <span className="text-xs font-bold text-emerald-400 not-italic">
+                {overallCQ >= 125 ? "• Genius Explorer" : overallCQ >= 115 ? "• Master Inquirer" : "• Rising Scholar"}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Radar & Axis Interactive Display */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10">
+        
+        {/* Left Side: Pure SVG Radar Chart */}
+        <div className="lg:col-span-6 flex flex-col items-center justify-center py-2 bg-white/70 rounded-3xl border border-orange-100 p-4 shadow-sm">
+          <div className="relative">
+            <svg
+              width={size}
+              height={size}
+              viewBox={`0 0 ${size} ${size}`}
+              className="overflow-visible"
+            >
+              <defs>
+                <linearGradient id="cqPolygonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#f37021" stopOpacity="0.45" />
+                  <stop offset="100%" stopColor="#ffe16d" stopOpacity="0.65" />
+                </linearGradient>
+              </defs>
+
+              {/* Concentric Polygonal Grids (20%, 40%, 60%, 80%, 100%) */}
+              {[0.2, 0.4, 0.6, 0.8, 1.0].map((pct, idx) => (
+                <polygon
+                  key={idx}
+                  points={getGridPolygon(pct)}
+                  fill="none"
+                  stroke={pct === 1.0 ? "#cbd5e1" : "#e2e8f0"}
+                  strokeWidth={pct === 1.0 ? "2" : "1"}
+                  strokeDasharray={pct === 1.0 ? "none" : "3,3"}
+                />
+              ))}
+
+              {/* Radial Axis Lines */}
+              {axes.map((_, i) => {
+                const { x, y } = getCoordinates(i, radius);
+                return (
+                  <line
+                    key={i}
+                    x1={center}
+                    y1={center}
+                    x2={x}
+                    y2={y}
+                    stroke="#cbd5e1"
+                    strokeWidth="1.5"
+                  />
+                );
+              })}
+
+              {/* Student Cognitive Footprint Polygon */}
+              <polygon
+                points={getDataPolygon()}
+                fill="url(#cqPolygonGrad)"
+                stroke="#ea580c"
+                strokeWidth="2.5"
+                className="transition-all duration-700 ease-out"
+              />
+
+              {/* Interactive Vertex Dots & Labels */}
+              {axes.map((axis, i) => {
+                const { x, y } = getCoordinates(i, (radius * axis.score) / 100);
+                const labelPos = getCoordinates(i, radius + 22);
+                const isSelected = selectedAxis.id === axis.id;
+
+                return (
+                  <g key={axis.id} className="cursor-pointer" onClick={() => setSelectedAxis(axis)}>
+                    {/* Glowing outer circle on selected */}
+                    {isSelected && (
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r={12}
+                        fill="#f37021"
+                        fillOpacity={0.2}
+                        className="animate-ping"
+                      />
+                    )}
+
+                    {/* Vertex point */}
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r={isSelected ? 6 : 4.5}
+                      fill={isSelected ? "#ea580c" : "#143867"}
+                      stroke="#ffffff"
+                      strokeWidth="2"
+                      className="transition-all duration-300"
+                    />
+
+                    {/* Axis Label Text */}
+                    <text
+                      x={labelPos.x}
+                      y={labelPos.y}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className={`text-[10px] font-black tracking-tight transition-colors ${
+                        isSelected ? "fill-[#ea580c] font-extrabold" : "fill-[#143867]"
+                      }`}
+                    >
+                      {axis.label} ({axis.score})
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">
+            Click any vertex or skill axis below to inspect
+          </p>
+        </div>
+
+        {/* Right Side: Interactive Skill Axes Breakdown */}
+        <div className="lg:col-span-6 space-y-3">
+          {axes.map((axis) => {
+            const isSelected = selectedAxis.id === axis.id;
+            return (
+              <div
+                key={axis.id}
+                onClick={() => setSelectedAxis(axis)}
+                className={`p-3.5 rounded-2xl border-2 transition-all cursor-pointer ${
+                  isSelected
+                    ? "bg-white border-[#f37021] shadow-md scale-[1.01]"
+                    : "bg-white/60 border-gray-100 hover:bg-white hover:border-gray-200"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className={`material-symbols-outlined text-lg ${isSelected ? "text-[#f37021]" : "text-[#143867]"}`}>
+                      {axis.icon}
+                    </span>
+                    <span className="text-xs sm:text-sm font-black text-[#143867]">
+                      {axis.label}
+                    </span>
+                  </div>
+                  <span className={`text-xs font-black px-2 py-0.5 rounded-full ${
+                    isSelected ? "bg-[#f37021] text-white" : "bg-gray-100 text-[#143867]"
+                  }`}>
+                    {axis.score}/100
+                  </span>
+                </div>
+
+                {/* Progress bar */}
+                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-1.5">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      isSelected ? "bg-gradient-to-r from-[#f37021] to-[#ffe16d]" : "bg-[#143867]"
+                    }`}
+                    style={{ width: `${axis.score}%` }}
+                  ></div>
+                </div>
+
+                <p className="text-[11px] text-gray-600 leading-relaxed">
+                  {axis.description}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Cognitive Superpower Highlight Banner */}
+      <div className="mt-6 p-4 bg-gradient-to-r from-[#143867] to-[#1e4a85] rounded-2xl text-white flex items-center gap-3.5 shadow-md relative z-10">
+        <div className="w-10 h-10 rounded-xl bg-[#f37021] text-white flex items-center justify-center shrink-0 shadow-sm">
+          <span className="material-symbols-outlined text-xl">auto_awesome</span>
+        </div>
+        <div className="min-w-0">
+          <div className="text-[10px] font-extrabold uppercase text-[#ffe16d] tracking-wider">
+            Cognitive Superpower: {superpower.label}
+          </div>
+          <p className="text-xs sm:text-sm font-bold text-white leading-relaxed">
+            &ldquo;{superpower.superpowerText}&rdquo;
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
