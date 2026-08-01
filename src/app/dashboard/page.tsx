@@ -213,6 +213,40 @@ export default function DashboardPage() {
           </div>
         </section>
 
+        {/* 🔬 NEW: Playful Invitation to The Agastya Curiosity Journal & DIY Home Lab */}
+        <section className="mb-10">
+          <div className="bg-gradient-to-r from-[#fff7ed] via-[#fffbeb] to-[#fef3c7] rounded-3xl p-6 sm:p-8 border-2 border-amber-300/80 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+            <div className="flex items-center gap-4 relative z-10">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#f37021] to-[#d95e16] flex items-center justify-center text-3xl shadow-md shrink-0">
+                🔬
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f37021] text-white text-[10px] font-black uppercase tracking-wider">
+                    <span>Aah! • Aha! • Ha-ha!</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-200 text-amber-950 text-[10px] font-black uppercase tracking-wider">
+                    <span>Zero-Cost Science Kit</span>
+                  </span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-black text-[#143867] tracking-tight">
+                  The Curiosity Journal &amp; DIY Home Lab
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">
+                  Log your daily <strong className="text-[#143867]">&ldquo;Why?&rdquo;</strong> hypothesis, applaud discoveries from fellow scholars across India, or build zero-cost experiments at home!
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/curiosity-journal"
+              className="px-6 py-3.5 rounded-full bg-[#f37021] hover:bg-[#d95e16] text-white font-black text-xs sm:text-sm shadow-md transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shrink-0 border-2 border-white/40"
+            >
+              <span>Open Curiosity Journal ➔</span>
+            </Link>
+          </div>
+        </section>
+
         {/* Agastya Promotional Hero Banner */}
         <section className="mb-10 overflow-hidden rounded-3xl bg-gradient-to-br from-[#143867] via-[#1b4a8e] to-[#0d2340] text-white shadow-[0_12px_40px_rgba(20,56,103,0.3)] relative border border-blue-400/20">
           <div className="absolute -right-16 -top-16 w-72 h-72 bg-[#ffe16d]/15 rounded-full blur-3xl pointer-events-none" />
