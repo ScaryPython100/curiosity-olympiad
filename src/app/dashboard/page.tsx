@@ -196,7 +196,7 @@ export default function DashboardPage() {
                     <span>🚌 Mobile Science Van Highway</span>
                   </span>
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#143867] text-[#ffe16d] text-[10px] font-black uppercase tracking-wider">
-                    <span>Level {Math.floor((xp || 450) / 100) + 1} • {xp || 450} / 1000 XP</span>
+                    <span>Level {Math.floor((xp || 450) / 100) + 1} • {xp || 450} / 10000 XP</span>
                   </span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-black text-[#143867] tracking-tight">
