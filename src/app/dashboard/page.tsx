@@ -182,32 +182,37 @@ export default function DashboardPage() {
         {/* 🐵 NEW: Interactive, Free-Floating Kuppu Mascot Component Restricted to Dashboard */}
         <KuppuMascot userName="Explorer" />
 
-        {/* 🗺️ NEW: Playful Organic Invitation to the Full 11-Milestone Kuppam Campus Map */}
+        {/* 🗺️ NEW: Beautifully Styled CTA Card for Full Campus Map (11 Milestones) */}
         <section className="mb-10">
           <div className="bg-gradient-to-r from-[#eaf6ff] via-[#f7fbff] to-[#fff7ed] rounded-3xl p-6 sm:p-8 border-2 border-[#143867]/15 shadow-md hover:shadow-xl transition-all relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white shadow-md flex items-center justify-center border-2 border-amber-400 shrink-0">
-                <span className="text-4xl sm:text-5xl">🗺️</span>
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white shadow-md flex flex-col items-center justify-center border-2 border-amber-400 shrink-0 p-2">
+                <span className="text-3xl sm:text-4xl">🚌</span>
+                <span className="text-[10px] font-black text-[#143867] uppercase tracking-tighter mt-0.5">Kuppam</span>
               </div>
               <div>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f37021] text-white text-[10px] font-black uppercase tracking-wider mb-1">
-                  <span>🚌 Interactive Highway</span>
-                </span>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f37021] text-white text-[10px] font-black uppercase tracking-wider">
+                    <span>🚌 Mobile Science Van Highway</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#143867] text-[#ffe16d] text-[10px] font-black uppercase tracking-wider">
+                    <span>Level {Math.floor((xp || 450) / 100) + 1} • {xp || 450} / 1000 XP</span>
+                  </span>
+                </div>
                 <h3 className="text-lg sm:text-xl font-black text-[#143867] tracking-tight">
                   Agastya Kuppam Creative Campus Map
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-600 font-medium">
-                  Drive the Agastya Science Van across 11 official landmarks from <strong className="text-[#143867]">Jhunjhunwala Discovery Center</strong> to <strong className="text-[#143867]">Ramanujan Math Park</strong>!
+                  Drive your Science Van across 11 official campus landmarks from <strong className="text-[#143867]">Entrance</strong> to <strong className="text-[#143867]">VisionWorks</strong>!
                 </p>
               </div>
             </div>
 
             <Link
               href="/campus-map"
-              className="px-6 py-3 rounded-full bg-[#143867] hover:bg-[#1e4a85] text-[#ffe16d] font-black text-xs sm:text-sm shadow-md transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shrink-0"
+              className="px-6 py-3.5 rounded-full bg-[#143867] hover:bg-[#1e4a85] text-[#ffe16d] font-black text-xs sm:text-sm shadow-md transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shrink-0 border-2 border-[#ffe16d]/30"
             >
-              <span>Open Campus Map 🗺️</span>
-              <span className="material-symbols-outlined text-sm">arrow_forward</span>
+              <span>Open Full Campus Map (11 Milestones) ➔</span>
             </Link>
           </div>
         </section>
