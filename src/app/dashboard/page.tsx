@@ -8,7 +8,6 @@ import { awardXP } from "@/app/actions/profile";
 import { getBestBadge, BADGES } from "@/utils/gamification";
 import { getUserAvatar, useUserAvatar } from "@/utils/userAvatar";
 import { playLevelUpSound } from "@/utils/audio";
-import KuppuMascot from "@/components/KuppuMascot";
 
 const PARTNER_SCHOOLS = [
   { name: "Global Olympiad Partner Academy", location: "Worldwide", icon: "public", badgeColor: "bg-[#143867] text-white border-[#f37021]", emblem: "🌐" },
@@ -179,10 +178,7 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* 🐵 NEW: Interactive, Free-Floating Kuppu Mascot Component Restricted to Dashboard */}
-        <KuppuMascot userName="Explorer" />
-
-        {/* 🗺️ NEW: Beautifully Styled CTA Card for Full Campus Map (11 Milestones) */}
+        {/* 🗺️ Beautifully Styled CTA Card for Full Campus Map */}
         <section className="mb-10">
           <div className="bg-gradient-to-r from-[#eaf6ff] via-[#f7fbff] to-[#fff7ed] rounded-3xl p-6 sm:p-8 border-2 border-[#143867]/15 shadow-md hover:shadow-xl transition-all relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
@@ -203,7 +199,7 @@ export default function DashboardPage() {
                   Agastya Kuppam Creative Campus Map
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-600 font-medium">
-                  Drive your Science Van across 11 official campus landmarks from <strong className="text-[#143867]">Entrance</strong> to <strong className="text-[#143867]">VisionWorks</strong>!
+                  Drive your Science Van across official campus landmarks from <strong className="text-[#143867]">Entrance</strong> to <strong className="text-[#143867]">VisionWorks</strong>!
                 </p>
               </div>
             </div>
@@ -212,7 +208,7 @@ export default function DashboardPage() {
               href="/campus-map"
               className="px-6 py-3.5 rounded-full bg-[#143867] hover:bg-[#1e4a85] text-[#ffe16d] font-black text-xs sm:text-sm shadow-md transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shrink-0 border-2 border-[#ffe16d]/30"
             >
-              <span>Open Full Campus Map (11 Milestones) ➔</span>
+              <span>Open Campus Map ➔</span>
             </Link>
           </div>
         </section>

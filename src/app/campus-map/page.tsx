@@ -15,7 +15,7 @@ export interface CampusLandmark {
   y: number; // percentage height on SVG map (0-100)
 }
 
-// Exactly matching the 11 official landmarks with 0 to 10,000 XP scale (increments of 1,000 XP)!
+// Exactly matching the official landmarks with 0 to 10,000 XP scale (increments of 1,000 XP)!
 const CAMPUS_LANDMARKS: CampusLandmark[] = [
   {
     id: 1,
@@ -129,7 +129,7 @@ const CAMPUS_LANDMARKS: CampusLandmark[] = [
   }
 ];
 
-// Custom, high-fidelity SVG landmark illustration for each of the 11 Agastya Kuppam Campus landmarks
+// Custom, high-fidelity SVG landmark illustration for each of the Agastya Kuppam Campus landmarks
 function renderCustomLandmarkIcon(id: number, isUnlocked: boolean) {
   const strokeColor = isUnlocked ? "#FFE16D" : "#94A3B8";
   const accentColor = isUnlocked ? "#F37021" : "#64748B";
@@ -340,9 +340,7 @@ function renderCustomLandmarkIcon(id: number, isUnlocked: boolean) {
 }
 
 export default function CampusMapPage() {
-  // Fetch user XP or mock to 8600 XP for testing if 0
   const [userXp, setUserXp] = useState(8600);
-  const [userName, setUserName] = useState("Explorer");
   const [selectedLandmark, setSelectedLandmark] = useState<CampusLandmark | null>(null);
   const [vanHonking, setVanHonking] = useState(false);
 
@@ -350,10 +348,8 @@ export default function CampusMapPage() {
     async function loadData() {
       const res = await getProfileStats();
       if (res.data) {
-        // Use user's real XP if positive, otherwise default/mock to 8600 XP for testing
         const fetchedXp = res.data.xp || 8600;
         setUserXp(fetchedXp);
-        setUserName(res.data.username || "Explorer");
       }
     }
     loadData();
@@ -402,14 +398,13 @@ export default function CampusMapPage() {
 
   return (
     /* 
-      1. BACKGROUND WITH LUSH GREEN TREES & FOREST (ZERO EMOJIS CONSTRAINT):
-      Rich outdoor emerald gradient container with multi-layered SVG forest silhouettes,
-      pine trees, oak trees, and rolling hills without any emojis.
+      1. FULL-BLEED BACKGROUND WITH LUSH GREEN TREES & FOREST (ZERO EMOJIS CONSTRAINT):
+      No inner box or margins—the entire viewport is filled edge-to-edge with our lush SVG forest landscape.
     */
-    <div className="min-h-screen bg-gradient-to-b from-[#0f3d24] via-[#145330] to-[#166534] text-white selection:bg-[#ffe16d] selection:text-[#143867] pb-24 relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#0e3b26] text-white selection:bg-[#ffe16d] selection:text-[#143867] relative overflow-x-hidden flex flex-col">
       
-      {/* Top Header Nav */}
-      <header className="sticky top-0 z-40 bg-[#0f3d24]/90 backdrop-blur-md border-b border-emerald-400/20 px-4 sm:px-8 py-4 shadow-lg">
+      {/* Top Header Nav - Sleek & Clean */}
+      <header className="sticky top-0 z-40 bg-[#0f3d24]/95 backdrop-blur-md border-b border-emerald-400/20 px-4 sm:px-8 py-3.5 shadow-lg">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
@@ -421,16 +416,15 @@ export default function CampusMapPage() {
             </Link>
             <div>
               <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#f37021] text-white text-[10px] font-black uppercase tracking-widest mb-0.5">
-                Official Agastya Highway
+                Agastya Creative Campus
               </span>
-              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              <h1 className="text-lg sm:text-2xl font-black text-white tracking-tight">
                 The Winding Road of Kuppam Hills
               </h1>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* The 'Honk Van' Feature: button at top of screen labeled 'Honk Van! 🎺' */}
             <button
               onClick={handleHonk}
               className={`px-5 py-2.5 rounded-full bg-[#ffe16d] hover:bg-yellow-300 text-[#143867] font-black text-xs sm:text-sm shadow-lg transition-all flex items-center gap-2 hover:scale-105 active:scale-95 border-2 border-[#f37021] ${
@@ -449,12 +443,15 @@ export default function CampusMapPage() {
         </div>
       </header>
 
-      {/* Main Interactive Highway Canvas */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-8 pt-8">
+      {/* ========================================================
+          FULL-BLEED EDGE-TO-EDGE HIGHWAY CANVAS WITH LUSH SVG FOREST
+          Zero empty side margins—covers 100% of the screen width and height!
+          ======================================================== */}
+      <main className="relative flex-1 w-full min-h-[820px] sm:min-h-[880px] overflow-hidden">
         
-        {/* Helper subtitle */}
-        <div className="text-center max-w-2xl mx-auto mb-8">
-          <p className="text-sm sm:text-base text-emerald-100 font-medium">
+        {/* Helper Subtitle Banner */}
+        <div className="absolute top-4 left-0 right-0 z-20 pointer-events-none text-center px-4">
+          <p className="inline-block bg-[#0f3d24]/90 backdrop-blur-md px-5 py-2 rounded-full border border-emerald-400/30 text-xs sm:text-sm text-emerald-100 font-medium shadow-lg">
             Click any milestone circle along the highway to explore Agastya&apos;s real-world labs, like the{" "}
             <strong className="text-[#ffe16d]">Jhunjhunwala Discovery Center</strong> and{" "}
             <strong className="text-[#ffe16d]">Ramanujan Math Park</strong>!
@@ -462,195 +459,192 @@ export default function CampusMapPage() {
         </div>
 
         {/* ========================================================
-            THE WINDING HIGHWAY CANVAS WITH LUSH SVG FOREST TREES & HILLS
+            BACKGROUND LAYER: EDGE-TO-EDGE LUSH FOREST TREES & HILLS (ZERO EMOJIS)
+            Clean SVG geometric pine trees, oak trees, and hills stretching across the entire screen
             ======================================================== */}
-        <div className="relative w-full h-[680px] sm:h-[750px] bg-[#0e3b26] rounded-3xl border-2 border-emerald-400/30 shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden p-4 sm:p-8">
-          
-          {/* ========================================================
-              BACKGROUND LAYER: LUSH FOREST TREES & ROLLING HILLS (ZERO EMOJIS)
-              Clean SVG geometric pine trees, oak trees, and hills
-              ======================================================== */}
-          <svg
-            className="absolute inset-0 w-full h-full pointer-events-none opacity-95"
-            viewBox="0 0 1000 750"
-            preserveAspectRatio="none"
-          >
-            {/* Far Background Rolling Forest Hills */}
-            <path
-              d="M0 650 Q 250 540, 500 620 Q 750 680, 1000 580 L 1000 750 L 0 750 Z"
-              fill="#092819"
-            />
-            <path
-              d="M0 580 Q 200 640, 450 560 Q 750 490, 1000 600 L 1000 750 L 0 750 Z"
-              fill="#0b301e"
-            />
-            <path
-              d="M0 700 Q 300 620, 600 690 Q 850 720, 1000 660 L 1000 750 L 0 750 Z"
-              fill="#0f3b25"
-            />
+        <svg
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          viewBox="0 0 1000 800"
+          preserveAspectRatio="none"
+        >
+          {/* Far Background Deep Rolling Forest Hills */}
+          <path
+            d="M0 680 Q 250 560, 500 640 Q 750 700, 1000 590 L 1000 800 L 0 800 Z"
+            fill="#092819"
+          />
+          <path
+            d="M0 600 Q 200 670, 450 580 Q 750 500, 1000 620 L 1000 800 L 0 800 Z"
+            fill="#0b301e"
+          />
+          <path
+            d="M0 720 Q 300 640, 600 710 Q 850 740, 1000 680 L 1000 800 L 0 800 Z"
+            fill="#0f3b25"
+          />
 
-            {/* Top Border Pine Trees & Forest Canopy Silhouettes */}
-            <g fill="#144f32">
-              <polygon points="50,140 30,190 70,190" />
-              <polygon points="50,110 35,150 65,150" />
-              <polygon points="120,130 95,185 145,185" />
-              <polygon points="120,95 102,145 138,145" />
-              <circle cx="210" cy="140" r="38" />
-              <circle cx="240" cy="155" r="32" />
-              <polygon points="340,120 315,180 365,180" />
-              <polygon points="340,90 322,140 358,140" />
-              <polygon points="520,110 495,170 545,170" />
-              <polygon points="520,80 502,130 538,130" />
-              <circle cx="640" cy="135" r="36" />
-              <circle cx="670" cy="145" r="30" />
-              <polygon points="780,105 755,165 805,165" />
-              <polygon points="780,75 762,125 798,125" />
-              <circle cx="920" cy="125" r="42" />
-              <circle cx="950" cy="140" r="35" />
-            </g>
+          {/* Lush Forest Canopies along Top, Bottom, and Both Edges (Eliminating any empty feel) */}
+          <g fill="#144f32">
+            {/* Top row trees */}
+            <polygon points="50,160 30,210 70,210" />
+            <polygon points="50,130 35,170 65,170" />
+            <polygon points="130,150 105,205 155,205" />
+            <polygon points="130,115 112,165 148,165" />
+            <circle cx="220" cy="160" r="42" />
+            <circle cx="255" cy="175" r="35" />
+            <polygon points="360,140 335,200 385,200" />
+            <polygon points="360,110 342,160 378,160" />
+            <polygon points="540,130 515,190 565,190" />
+            <polygon points="540,100 522,150 558,150" />
+            <circle cx="660" cy="155" r="40" />
+            <circle cx="690" cy="165" r="34" />
+            <polygon points="800,125 775,185 825,185" />
+            <polygon points="800,95 782,145 818,145" />
+            <circle cx="940" cy="145" r="46" />
+            <circle cx="970" cy="160" r="38" />
+            {/* Edge trees to fill left & right sides completely */}
+            <circle cx="15" cy="380" r="55" />
+            <circle cx="25" cy="520" r="50" />
+            <circle cx="985" cy="380" r="58" />
+            <circle cx="975" cy="520" r="52" />
+          </g>
 
-            {/* Bottom Border Lush Evergreen Forest Trees */}
-            <g fill="#124a2f">
-              <polygon points="80,680 55,750 105,750" />
-              <polygon points="80,640 62,695 98,695" />
-              <circle cx="200" cy="695" r="45" />
-              <circle cx="240" cy="710" r="38" />
-              <polygon points="380,660 350,735 410,735" />
-              <polygon points="380,625 360,675 400,675" />
-              <circle cx="560" cy="685" r="42" />
-              <polygon points="710,655 680,730 740,730" />
-              <polygon points="710,620 690,670 730,670" />
-              <circle cx="860" cy="690" r="46" />
-              <circle cx="910" cy="710" r="40" />
-            </g>
+          {/* Bottom Border Lush Evergreen Forest Trees */}
+          <g fill="#124a2f">
+            <polygon points="80,720 55,800 105,800" />
+            <polygon points="80,680 62,735 98,735" />
+            <circle cx="210" cy="735" r="48" />
+            <circle cx="250" cy="750" r="42" />
+            <polygon points="400,700 370,780 430,780" />
+            <polygon points="400,660 380,715 420,715" />
+            <circle cx="580" cy="725" r="46" />
+            <polygon points="730,695 700,775 760,775" />
+            <polygon points="730,655 710,710 750,710" />
+            <circle cx="890" cy="730" r="50" />
+            <circle cx="940" cy="750" r="44" />
+          </g>
 
-            {/* Midground Foliage Clusters & Oak Tree Crowns */}
-            <g fill="#18613e" opacity="0.8">
-              <circle cx="160" cy="350" r="30" />
-              <circle cx="190" cy="365" r="25" />
-              <circle cx="820" cy="420" r="32" />
-              <circle cx="850" cy="435" r="28" />
-              <circle cx="480" cy="240" r="28" />
-              <circle cx="510" cy="255" r="24" />
-            </g>
-          </svg>
+          {/* Midground Foliage Clusters & Oak Tree Crowns */}
+          <g fill="#18613e" opacity="0.85">
+            <circle cx="170" cy="380" r="34" />
+            <circle cx="200" cy="395" r="28" />
+            <circle cx="840" cy="460" r="36" />
+            <circle cx="870" cy="475" r="30" />
+            <circle cx="500" cy="270" r="32" />
+            <circle cx="530" cy="285" r="26" />
+          </g>
+        </svg>
 
-          {/* 
-            2. THE WINDING SVG HIGHWAY (CUBIC BEZIERS ONLY):
-            Buttery smooth S-curve using continuous Cubic Bezier curves (C commands only).
-            Zero quadratic curves (Q) or straight lines (L) to ensure zero sharp edges or angles.
-          */}
-          <svg
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-          >
-            {/* Outer Grassy Highway Bank */}
-            <path
-              d="M 8 82 C 16 82, 32 68, 45 78 C 55 86, 75 80, 88 64 C 94 54, 88 44, 75 44 C 64 44, 42 54, 30 48 C 18 42, 10 36, 16 28 C 24 18, 55 16, 88 16"
-              fill="none"
-              stroke="#0b2c1d"
-              strokeWidth="7.8"
-              strokeLinecap="round"
-            />
-            {/* Dark asphalt highway base */}
-            <path
-              d="M 8 82 C 16 82, 32 68, 45 78 C 55 86, 75 80, 88 64 C 94 54, 88 44, 75 44 C 64 44, 42 54, 30 48 C 18 42, 10 36, 16 28 C 24 18, 55 16, 88 16"
-              fill="none"
-              stroke="#334155"
-              strokeWidth="5.6"
-              strokeLinecap="round"
-            />
-            {/* Dashed orange/yellow center line of the Agastya Highway */}
-            <path
-              d="M 8 82 C 16 82, 32 68, 45 78 C 55 86, 75 80, 88 64 C 94 54, 88 44, 75 44 C 64 44, 42 54, 30 48 C 18 42, 10 36, 16 28 C 24 18, 55 16, 88 16"
-              fill="none"
-              stroke="#ffe16d"
-              strokeWidth="0.8"
-              strokeDasharray="2 2"
-              strokeLinecap="round"
-            />
-          </svg>
+        {/* 
+          2. THE WINDING SVG HIGHWAY (CUBIC BEZIERS ONLY):
+          Smooth S-curve spanning the full screen width and height.
+        */}
+        <svg
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+        >
+          {/* Outer Grassy Highway Bank */}
+          <path
+            d="M 8 84 C 16 84, 32 70, 45 80 C 55 88, 75 82, 88 66 C 94 56, 88 46, 75 46 C 64 46, 42 56, 30 50 C 18 44, 10 38, 16 30 C 24 20, 55 18, 88 18"
+            fill="none"
+            stroke="#0b2c1d"
+            strokeWidth="7.8"
+            strokeLinecap="round"
+          />
+          {/* Dark asphalt highway base */}
+          <path
+            d="M 8 84 C 16 84, 32 70, 45 80 C 55 88, 75 82, 88 66 C 94 56, 88 46, 75 46 C 64 46, 42 56, 30 50 C 18 44, 10 38, 16 30 C 24 20, 55 18, 88 18"
+            fill="none"
+            stroke="#334155"
+            strokeWidth="5.6"
+            strokeLinecap="round"
+          />
+          {/* Dashed yellow center line */}
+          <path
+            d="M 8 84 C 16 84, 32 70, 45 80 C 55 88, 75 82, 88 66 C 94 56, 88 46, 75 46 C 64 46, 42 56, 30 50 C 18 44, 10 38, 16 30 C 24 20, 55 18, 88 18"
+            fill="none"
+            stroke="#ffe16d"
+            strokeWidth="0.8"
+            strokeDasharray="2 2"
+            strokeLinecap="round"
+          />
+        </svg>
 
-          {/* 
-            3. THE 11 OFFICIAL LANDMARKS (WITH CUSTOM SVG ILLUSTRATED ICONS):
-            Render circular nodes at each milestone along the path with custom campus SVG icons.
-          */}
-          {CAMPUS_LANDMARKS.map((landmark) => {
-            const isUnlocked = userXp >= landmark.xpRequired;
-            const isCurrent = currentLandmark.id === landmark.id;
-            const isSelected = selectedLandmark?.id === landmark.id;
+        {/* 
+          3. THE OFFICIAL LANDMARKS (WITH CUSTOM SVG ILLUSTRATED ICONS):
+          Render circular nodes at each milestone along the full-bleed path.
+        */}
+        {CAMPUS_LANDMARKS.map((landmark) => {
+          const isUnlocked = userXp >= landmark.xpRequired;
+          const isCurrent = currentLandmark.id === landmark.id;
+          const isSelected = selectedLandmark?.id === landmark.id;
 
-            return (
-              <div
-                key={landmark.id}
-                style={{ left: `${landmark.x}%`, top: `${landmark.y}%` }}
-                className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group z-10"
+          return (
+            <div
+              key={landmark.id}
+              style={{ left: `${landmark.x}%`, top: `${landmark.y}%` }}
+              className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group z-10"
+            >
+              {/* Milestone Node Circle with Custom Landmark SVG Icon */}
+              <button
+                onClick={() => setSelectedLandmark(landmark)}
+                className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center border-4 shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 ${
+                  isUnlocked
+                    ? "bg-[#143867] border-[#ffe16d] text-[#ffe16d] shadow-[0_0_25px_rgba(255,225,109,0.5)]"
+                    : "bg-[#1e293b] border-gray-600 text-gray-400 opacity-85"
+                } ${isCurrent ? "ring-4 ring-amber-400 animate-pulse" : ""} ${
+                  isSelected ? "scale-110 ring-4 ring-white" : ""
+                }`}
+                title={`${landmark.name} (${landmark.xpRequired} XP required)`}
               >
-                {/* Milestone Node Circle with Custom Landmark SVG Icon */}
-                <button
-                  onClick={() => setSelectedLandmark(landmark)}
-                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center border-4 shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 ${
-                    isUnlocked
-                      ? "bg-[#143867] border-[#ffe16d] text-[#ffe16d] shadow-[0_0_25px_rgba(255,225,109,0.5)]"
-                      : "bg-[#1e293b] border-gray-600 text-gray-400 opacity-85"
-                  } ${isCurrent ? "ring-4 ring-amber-400 animate-pulse" : ""} ${
-                    isSelected ? "scale-110 ring-4 ring-white" : ""
-                  }`}
-                  title={`${landmark.name} (${landmark.xpRequired} XP required)`}
-                >
-                  {renderCustomLandmarkIcon(landmark.id, isUnlocked)}
-                </button>
+                {renderCustomLandmarkIcon(landmark.id, isUnlocked)}
+              </button>
 
-                {/* Milestone Badge Text */}
-                <div
-                  className={`mt-2 px-3 py-1 rounded-xl text-center shadow-lg transition-all border ${
-                    isUnlocked
-                      ? "bg-white text-[#143867] border-amber-300"
-                      : "bg-[#0f172a]/90 text-gray-300 border-gray-700"
-                  }`}
-                >
-                  <p className="text-[10px] sm:text-xs font-black tracking-tight whitespace-nowrap">
-                    {landmark.name}
-                  </p>
-                  <p className="text-[9px] font-bold text-[#f37021]">{landmark.xpRequired} XP</p>
-                </div>
+              {/* Milestone Badge Text */}
+              <div
+                className={`mt-2 px-3 py-1 rounded-xl text-center shadow-lg transition-all border ${
+                  isUnlocked
+                    ? "bg-white text-[#143867] border-amber-300"
+                    : "bg-[#0f172a]/90 text-gray-300 border-gray-700"
+                }`}
+              >
+                <p className="text-[10px] sm:text-xs font-black tracking-tight whitespace-nowrap">
+                  {landmark.name}
+                </p>
+                <p className="text-[9px] font-bold text-[#f37021]">{landmark.xpRequired} XP</p>
               </div>
-            );
-          })}
-
-          {/* ========================================================
-              4. THE MOBILE SCIENCE VAN (YELLOW/ORANGE ELEMENT)
-              Calculated exact coordinate position along SVG path based on user XP relative to 10000 XP total.
-              ======================================================== */}
-          <div
-            style={{ left: `${vanX}%`, top: `${vanY}%` }}
-            className={`absolute -translate-x-1/2 -translate-y-full pb-4 z-20 pointer-events-none transition-all duration-700 ease-out ${
-              vanHonking ? "animate-bounce scale-110" : ""
-            }`}
-          >
-            <div className="relative flex flex-col items-center">
-              {/* Van Bubble */}
-              <div className="w-16 h-12 sm:w-20 sm:h-14 bg-white rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.5)] border-2 border-[#f37021] overflow-hidden flex items-center justify-center p-1 bg-gradient-to-br from-yellow-300 to-amber-500">
-                <img
-                  src="/agastya-science-van.jpg"
-                  alt="Agastya Mobile Science Van"
-                  className="w-full h-full object-cover rounded-xl"
-                  onError={(e) => {
-                    (e.target as HTMLElement).style.display = "none";
-                  }}
-                />
-                <span className="text-2xl sm:text-3xl absolute">🚌</span>
-              </div>
-              <span className="px-2.5 py-0.5 bg-[#f37021] text-white text-[10px] font-black rounded-full shadow-md mt-1 whitespace-nowrap border border-white/30">
-                You are here! ({userXp} XP) 🚌
-              </span>
             </div>
+          );
+        })}
+
+        {/* ========================================================
+            4. THE MOBILE SCIENCE VAN
+            ======================================================== */}
+        <div
+          style={{ left: `${vanX}%`, top: `${vanY}%` }}
+          className={`absolute -translate-x-1/2 -translate-y-full pb-4 z-20 pointer-events-none transition-all duration-700 ease-out ${
+            vanHonking ? "animate-bounce scale-110" : ""
+          }`}
+        >
+          <div className="relative flex flex-col items-center">
+            <div className="w-16 h-12 sm:w-20 sm:h-14 bg-white rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.5)] border-2 border-[#f37021] overflow-hidden flex items-center justify-center p-1 bg-gradient-to-br from-yellow-300 to-amber-500">
+              <img
+                src="/agastya-science-van.jpg"
+                alt="Agastya Mobile Science Van"
+                className="w-full h-full object-cover rounded-xl"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+              <span className="text-2xl sm:text-3xl absolute">🚌</span>
+            </div>
+            <span className="px-2.5 py-0.5 bg-[#f37021] text-white text-[10px] font-black rounded-full shadow-md mt-1 whitespace-nowrap border border-white/30">
+              You are here! ({userXp} XP) 🚌
+            </span>
           </div>
         </div>
 
         {/* ========================================================
-            3. INTERACTIVITY: MODAL WITH REAL-WORLD KUPPAM TRIVIA
+            5. INTERACTIVITY: MODAL WITH REAL-WORLD KUPPAM TRIVIA
             ======================================================== */}
         {selectedLandmark && (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
