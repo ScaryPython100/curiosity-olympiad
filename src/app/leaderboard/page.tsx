@@ -201,7 +201,9 @@ export default function LeaderboardPage() {
                       <p className="text-xs text-[#705d00] font-extrabold">{topThree[0].xp.toLocaleString()} XP</p>
                     </div>
                     <div className="w-full h-24 bg-[#ffe16d] rounded-t-lg mt-4 shadow-sm flex items-center justify-center relative overflow-hidden">
-                      <span className="material-symbols-outlined text-[#221b00] opacity-20 text-4xl">school</span>
+                      <span className="material-symbols-outlined text-[#221b00] opacity-20 text-4xl">
+                        {timeframe === "friends" ? "emoji_events" : "school"}
+                      </span>
                       <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
                     </div>
                   </Link>
@@ -447,17 +449,19 @@ export default function LeaderboardPage() {
 
 
                 <div className="pt-3 flex flex-wrap items-center gap-3">
-                  <button
-                    onClick={() => {
-                      setCertType(timeframe === "daily" ? "Daily Rank 1" : "Weekly Rank 1");
-                      setSelectedCertIsCompleted(false);
-                      setIsCertModalOpen(true);
-                    }}
-                    className="px-4 py-2.5 bg-[#143867] hover:bg-[#1e4a85] text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95"
-                  >
-                    <span className="material-symbols-outlined text-sm text-[#f37021]">preview</span>
-                    <span>Preview {timeframe === "daily" ? "Daily" : "Weekly"} Specimen</span>
-                  </button>
+                  {timeframe !== "friends" && (
+                    <button
+                      onClick={() => {
+                        setCertType(timeframe === "daily" ? "Daily Rank 1" : "Weekly Rank 1");
+                        setSelectedCertIsCompleted(false);
+                        setIsCertModalOpen(true);
+                      }}
+                      className="px-4 py-2.5 bg-[#143867] hover:bg-[#1e4a85] text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95"
+                    >
+                      <span className="material-symbols-outlined text-sm text-[#f37021]">preview</span>
+                      <span>Preview {timeframe === "daily" ? "Daily" : "Weekly"} Specimen</span>
+                    </button>
+                  )}
 
                   <Link
                     href="/practice"
@@ -472,9 +476,9 @@ export default function LeaderboardPage() {
           )}
 
           {/* =========================================================
-             EARNED MERIT CERTIFICATES & NOTIFICATIONS SECTION
+             EARNED MERIT CERTIFICATES & NOTIFICATIONS SECTION (ONLY FOR DAILY & WEEKLY)
              ========================================================= */}
-          {!isLoading && (
+          {!isLoading && timeframe !== "friends" && (
             <div className="mt-6 mb-8 p-4 sm:p-6 bg-white rounded-3xl border-2 border-emerald-500 shadow-xl space-y-4 max-w-full overflow-hidden">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
