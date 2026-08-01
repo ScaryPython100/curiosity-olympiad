@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
-export type KuppuState = "idle" | "crawling" | "climbing" | "scampering";
+export type KuppuState = "idle" | "climbing" | "scampering";
 
 export interface KuppuMascotProps {
   userName?: string;
@@ -10,32 +10,80 @@ export interface KuppuMascotProps {
   onStateChange?: (state: KuppuState) => void;
 }
 
-interface MascotPosition {
-  x: number; // viewport percentage (10 to 88)
-  y: number; // viewport percentage (15 to 85)
+export interface CampusBranch {
+  id: number;
+  name: string;
+  side: "left" | "right";
+  topPercent: number; // Vertical position along viewport (%)
+  perchX: number; // Viewport X (%) where Kuppu perches
+  perchY: number; // Viewport Y (%) where Kuppu perches
   facing: "left" | "right";
 }
 
-// Open, safe zones around the dashboard viewport where Kuppu can explore freely
-const SAFE_EXPLORATION_ZONES = [
-  { x: 82, y: 75, label: "Bottom Right" },
-  { x: 15, y: 78, label: "Bottom Left" },
-  { x: 82, y: 28, label: "Top Right" },
-  { x: 15, y: 28, label: "Top Left" },
-  { x: 85, y: 50, label: "Mid Right" },
-  { x: 12, y: 50, label: "Mid Left" },
-  { x: 65, y: 80, label: "Bottom Center Right" },
-  { x: 35, y: 80, label: "Bottom Center Left" },
-  { x: 70, y: 22, label: "Top Center Right" },
-  { x: 30, y: 22, label: "Top Center Left" },
+// 6 beautiful side branches fixed on the Left and Right edges of the Dashboard UI
+const CAMPUS_BRANCHES: CampusBranch[] = [
+  {
+    id: 0,
+    name: "Top-Right Tree Branch",
+    side: "right",
+    topPercent: 22,
+    perchX: 92,
+    perchY: 20,
+    facing: "left"
+  },
+  {
+    id: 1,
+    name: "Mid-Right Tree Branch",
+    side: "right",
+    topPercent: 50,
+    perchX: 92,
+    perchY: 48,
+    facing: "left"
+  },
+  {
+    id: 2,
+    name: "Bottom-Right Tree Branch",
+    side: "right",
+    topPercent: 78,
+    perchX: 92,
+    perchY: 76,
+    facing: "left"
+  },
+  {
+    id: 3,
+    name: "Top-Left Tree Branch",
+    side: "left",
+    topPercent: 22,
+    perchX: 8,
+    perchY: 20,
+    facing: "right"
+  },
+  {
+    id: 4,
+    name: "Mid-Left Tree Branch",
+    side: "left",
+    topPercent: 50,
+    perchX: 8,
+    perchY: 48,
+    facing: "right"
+  },
+  {
+    id: 5,
+    name: "Bottom-Left Tree Branch",
+    side: "left",
+    topPercent: 78,
+    perchX: 8,
+    perchY: 76,
+    facing: "right"
+  }
 ];
 
 const SCAMPER_DIALOGS = [
-  "Whoops! Scampering out of your way! 🐵💨",
-  "Aha! Leaping to a free branch! 🌿",
-  "Ha-ha! Swinging over so you can click! 🦘",
-  "Curiosity never stops! Exploring over here! 🔭",
-  "Ooh-ooh! Making room for you, Explorer! ✨"
+  "Whoops! Scampering to another branch! 🐵🌿",
+  "Aha! Swinging across to this side! 🌳",
+  "Ha-ha! Perching out of your way! 🦘",
+  "Curiosity never stops! Checking the view from here! 🔭",
+  "Ooh-ooh! Leaping to a free branch! ✨"
 ];
 
 export default function KuppuMascot({
@@ -44,11 +92,7 @@ export default function KuppuMascot({
   onStateChange
 }: KuppuMascotProps) {
   const [state, setState] = useState<KuppuState>("idle");
-  const [pos, setPos] = useState<MascotPosition>({
-    x: 82,
-    y: 75,
-    facing: "left"
-  });
+  const [branchIndex, setBranchIndex] = useState<number>(0);
   const [dialog, setDialog] = useState<string | null>(null);
   const [isBlinking, setIsBlinking] = useState(false);
   const lastScrollY = useRef<number>(0);
@@ -85,42 +129,29 @@ export default function KuppuMascot({
     }
   }, []);
 
-  // 1. Move Kuppu to a new random safe coordinate across the screen
-  const moveToRandomCoordinate = useCallback(
+  // 1. Scamper / Jump to a different branch on the sides of the dashboard
+  const jumpToAnotherBranch = useCallback(
     (reason: "click" | "roam" | "scroll" = "roam") => {
-      setPos((prev) => {
-        // Pick a coordinate that is sufficiently different from current position
-        const candidates = SAFE_EXPLORATION_ZONES.filter(
-          (z) => Math.abs(z.x - prev.x) > 15 || Math.abs(z.y - prev.y) > 15
-        );
-        const nextZone =
-          candidates[Math.floor(Math.random() * candidates.length)] ||
-          SAFE_EXPLORATION_ZONES[0];
-
-        const nextFacing: "left" | "right" =
-          nextZone.x > prev.x ? "right" : "left";
-
-        return {
-          x: nextZone.x,
-          y: nextZone.y,
-          facing: nextFacing
-        };
+      setBranchIndex((prev) => {
+        // Pick any branch different from the current one
+        const candidates = CAMPUS_BRANCHES.map((_, idx) => idx).filter((idx) => idx !== prev);
+        return candidates[Math.floor(Math.random() * candidates.length)] || 0;
       });
 
       if (reason === "click") {
-        playInteractionAudio(640, 920);
+        playInteractionAudio(680, 960);
         notifyStateChange("scampering");
         const msg =
           SCAMPER_DIALOGS[Math.floor(Math.random() * SCAMPER_DIALOGS.length)];
         setDialog(msg);
         setTimeout(() => setDialog(null), 3500);
       } else {
-        notifyStateChange("crawling");
+        notifyStateChange("scampering");
       }
 
       setTimeout(() => {
         notifyStateChange("idle");
-      }, 1400);
+      }, 950);
     },
     [notifyStateChange, playInteractionAudio]
   );
@@ -129,12 +160,12 @@ export default function KuppuMascot({
   const handleScamper = useCallback(
     (e?: React.MouseEvent | React.TouchEvent) => {
       if (e) e.stopPropagation();
-      moveToRandomCoordinate("click");
+      jumpToAnotherBranch("click");
     },
-    [moveToRandomCoordinate]
+    [jumpToAnotherBranch]
   );
 
-  // 3. Scroll Listener: When user scrolls, Kuppu climbs smoothly
+  // 3. Scroll Listener: When user scrolls, Kuppu climbs smoothly along his branch
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -146,7 +177,7 @@ export default function KuppuMascot({
         if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
         scrollTimeoutRef.current = setTimeout(() => {
           notifyStateChange("idle");
-        }, 800);
+        }, 750);
       } else {
         lastScrollY.current = currentScrollY;
       }
@@ -159,34 +190,34 @@ export default function KuppuMascot({
     };
   }, [state, notifyStateChange]);
 
-  // 4. Free-roaming interval: Kuppu crawls to a new spot every 12 seconds so he feels truly alive!
+  // 4. Free-roaming interval: Kuppu swings to a new branch every 15 seconds so he feels lively!
   useEffect(() => {
     const interval = setInterval(() => {
       if (state === "idle") {
-        moveToRandomCoordinate("roam");
+        jumpToAnotherBranch("roam");
       }
-    }, 12000);
+    }, 15000);
     return () => clearInterval(interval);
-  }, [state, moveToRandomCoordinate]);
+  }, [state, jumpToAnotherBranch]);
 
   // 5. Authentic monkey blinking animation
   useEffect(() => {
     const blinkInterval = setInterval(() => {
       setIsBlinking(true);
       setTimeout(() => setIsBlinking(false), 180);
-    }, 4500);
+    }, 4200);
     return () => clearInterval(blinkInterval);
   }, []);
+
+  const currentBranch = CAMPUS_BRANCHES[branchIndex];
 
   // Determine dynamic animation classes based on current state
   const getContainerAnimation = () => {
     switch (state) {
       case "scampering":
-        return "scale-110 -translate-y-6 rotate-12 transition-all duration-1000 ease-in-out";
-      case "crawling":
-        return "scale-100 -translate-y-2 rotate-3 transition-all duration-[1400ms] ease-in-out";
+        return "scale-110 -translate-y-8 rotate-12 transition-all duration-900 ease-in-out";
       case "climbing":
-        return "scale-105 -translate-y-4 -rotate-6 transition-all duration-500 ease-out";
+        return "scale-105 -translate-y-3 -rotate-6 transition-all duration-500 ease-out";
       case "idle":
       default:
         return "scale-100 translate-y-0 rotate-0 transition-all duration-700 ease-in-out";
@@ -197,34 +228,109 @@ export default function KuppuMascot({
     /*
       FULL-SCREEN FREE OVERLAY
       pointer-events: none globally so clicks fall through to dashboard cards & buttons.
-      pointer-events: auto explicitly on Kuppu so he can be clicked to scamper away!
+      pointer-events: auto explicitly on Kuppu and side branches!
     */
     <div className="fixed inset-0 z-[100] pointer-events-none overflow-hidden select-none">
+      
+      {/* =========================================================================
+          1. DECORATIVE SIDE TREE BRANCHES ON LEFT & RIGHT DASHBOARD EDGES
+          ========================================================================= */}
+      {CAMPUS_BRANCHES.map((branch) => {
+        const isLeft = branch.side === "left";
+        return (
+          <div
+            key={branch.id}
+            style={{
+              top: `${branch.topPercent}%`,
+              left: isLeft ? "0px" : "auto",
+              right: !isLeft ? "0px" : "auto"
+            }}
+            className="absolute pointer-events-none -translate-y-1/2 z-10"
+          >
+            {/* SVG Tree Branch with Green Leaves extending from Left or Right edge */}
+            <div
+              style={{
+                transform: isLeft ? "scaleX(1)" : "scaleX(-1)"
+              }}
+              className="w-28 sm:w-36 md:w-44 h-12 sm:h-16 opacity-90 transition-all duration-300"
+            >
+              <svg
+                viewBox="0 0 200 80"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-full h-full overflow-visible"
+              >
+                {/* Main Wooden Branch Log */}
+                <path
+                  d="M 0 50 C 45 45, 90 55, 140 45 C 165 40, 185 35, 195 30"
+                  stroke="#5D4037"
+                  strokeWidth="14"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M 0 50 C 45 45, 90 55, 140 45 C 165 40, 185 35, 195 30"
+                  stroke="#795548"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                />
+                {/* Smaller wooden twig forking upwards */}
+                <path
+                  d="M 110 48 Q 135 30, 155 20"
+                  stroke="#6D4C41"
+                  strokeWidth="7"
+                  strokeLinecap="round"
+                />
+                {/* Lush Green Campus Leaves */}
+                <path
+                  d="M 60 48 C 65 35, 80 32, 75 50 Z"
+                  fill="#22C55E"
+                />
+                <path
+                  d="M 125 45 C 130 28, 148 25, 140 46 Z"
+                  fill="#16A34A"
+                />
+                <path
+                  d="M 155 22 C 162 10, 178 12, 168 28 Z"
+                  fill="#4ADE80"
+                />
+                <path
+                  d="M 180 34 C 192 20, 205 28, 192 40 Z"
+                  fill="#22C55E"
+                />
+              </svg>
+            </div>
+          </div>
+        );
+      })}
+
+      {/* =========================================================================
+          2. KUPPU MONKEY MASCOT PERCHED ON HIS CURRENT BRANCH
+          ========================================================================= */}
       <div
         style={{
-          left: `${pos.x}%`,
-          top: `${pos.y}%`,
+          left: `${currentBranch.perchX}%`,
+          top: `${currentBranch.perchY}%`,
           transform: "translate(-50%, -50%)"
         }}
-        className={`absolute pointer-events-auto cursor-pointer group flex flex-col items-center ${getContainerAnimation()}`}
+        className={`absolute pointer-events-auto cursor-pointer group flex flex-col items-center z-20 ${getContainerAnimation()}`}
         onClick={handleScamper}
         onTouchStart={handleScamper}
         role="button"
         tabIndex={0}
-        aria-label="Kuppu the Monkey Mascot - Click to make him scamper freely around the screen"
-        title="Click Kuppu to make him scamper out of your way!"
+        aria-label="Kuppu the Monkey Mascot - Click to make him scamper to a different branch"
+        title="Click Kuppu to make him leap to another side branch!"
       >
         {/* Floating AI Assistant Speech or Scamper Dialogue Bubble */}
         {(aiSpeech || dialog) && (
           <div
             className={`absolute bottom-full mb-3 w-64 bg-white/95 backdrop-blur-md rounded-2xl p-3.5 shadow-2xl border-2 border-[#143867] animate-in fade-in zoom-in-95 duration-200 z-50 text-left ${
-              pos.x > 50 ? "right-0" : "left-0"
+              currentBranch.perchX > 50 ? "right-0" : "left-0"
             }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between gap-1 mb-1">
               <span className="px-2 py-0.5 bg-amber-100 text-[#143867] text-[10px] font-black rounded-full uppercase tracking-wider">
-                {aiSpeech ? "🐵 Kuppu AI Guide" : "🐵 Kuppu Scampering! 💨"}
+                {aiSpeech ? "🐵 Kuppu AI Guide" : "🐵 Kuppu on the Branch! 🌿"}
               </span>
               <button
                 onClick={(e) => {
@@ -245,11 +351,11 @@ export default function KuppuMascot({
         {/* 
           AUTHENTIC, CUTE CARTOON MONKEY / LANGUR ILLUSTRATION (SVG)
           Zero square boxes, zero circle borders, zero geometric robot parts.
-          Smooth, organic curves, fluffy ears, expressive face, hands with fingers, and curling tail!
+          Tail is FIRMLY and SOLIDLY attached to the lower torso (never spinning off!).
         */}
         <div
           style={{
-            transform: pos.facing === "left" ? "scaleX(1)" : "scaleX(-1)"
+            transform: currentBranch.facing === "left" ? "scaleX(1)" : "scaleX(-1)"
           }}
           className={`relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 transition-transform duration-300 group-hover:scale-110 ${
             state === "idle" ? "animate-pulse" : ""
@@ -261,24 +367,23 @@ export default function KuppuMascot({
             xmlns="http://www.w3.org/2000/svg"
             className="w-full h-full drop-shadow-[0_12px_24px_rgba(0,0,0,0.35)] overflow-visible"
           >
-            {/* ==================== 1. LONG SWISHING CARTOON MONKEY TAIL ==================== */}
+            {/* ==================== 1. LONG SWISHING CARTOON MONKEY TAIL (FIRMLY ATTACHED - NO SPIN) ==================== */}
             <path
-              d="M 50 115 C 20 125, 5 95, 22 75 C 38 58, 55 75, 45 95"
+              d="M 60 115 C 30 130, 10 100, 25 78 C 40 58, 55 75, 45 98"
               stroke="#5D4037"
               strokeWidth="11"
               strokeLinecap="round"
               fill="none"
-              className={state === "crawling" || state === "scampering" ? "animate-spin" : ""}
             />
             <path
-              d="M 50 115 C 20 125, 5 95, 22 75 C 38 58, 55 75, 45 95"
+              d="M 60 115 C 30 130, 10 100, 25 78 C 40 58, 55 75, 45 98"
               stroke="#8D6E63"
               strokeWidth="7"
               strokeLinecap="round"
               fill="none"
             />
 
-            {/* ==================== 2. BACK FOOT WITH CLIMBING TOES ==================== */}
+            {/* ==================== 2. BACK FOOT PERCHED ON THE TREE BRANCH ==================== */}
             <path
               d="M 58 115 C 50 130, 35 135, 30 132 C 28 130, 32 125, 40 120"
               fill="#795548"
@@ -298,7 +403,7 @@ export default function KuppuMascot({
               fill="#FFE0B2"
             />
 
-            {/* ==================== 4. FRONT FOOT WITH CLIMBING TOES ==================== */}
+            {/* ==================== 4. FRONT FOOT PERCHED ON THE TREE BRANCH ==================== */}
             <path
               d="M 92 120 C 98 135, 112 138, 118 136 C 120 134, 116 128, 108 122"
               fill="#795548"
@@ -327,7 +432,6 @@ export default function KuppuMascot({
               strokeWidth="10"
               strokeLinecap="round"
             />
-            {/* Cute palm and 4 little fingers */}
             <circle cx="44" cy="46" r="6" fill="#FFE0B2" />
             <circle cx="38" cy="44" r="3" fill="#8D6E63" />
             <circle cx="42" cy="40" r="3" fill="#8D6E63" />
@@ -341,7 +445,6 @@ export default function KuppuMascot({
               strokeWidth="10"
               strokeLinecap="round"
             />
-            {/* Cute palm and 4 little fingers */}
             <circle cx="116" cy="44" r="6" fill="#FFE0B2" />
             <circle cx="110" cy="40" r="3" fill="#8D6E63" />
             <circle cx="115" cy="38" r="3" fill="#8D6E63" />
@@ -394,7 +497,6 @@ export default function KuppuMascot({
                 <circle cx="72.5" cy="47.5" r="0.8" fill="#FFFFFF" />
               </>
             )}
-            {/* Cute Curved Eyebrow */}
             <path
               d="M 66 39 Q 71 36, 76 39"
               stroke="#5D4037"
@@ -417,7 +519,6 @@ export default function KuppuMascot({
                 <circle cx="90.5" cy="47.5" r="0.8" fill="#FFFFFF" />
               </>
             )}
-            {/* Cute Curved Eyebrow */}
             <path
               d="M 84 39 Q 89 36, 94 39"
               stroke="#5D4037"
@@ -427,11 +528,9 @@ export default function KuppuMascot({
             />
 
             {/* ==================== 9. BUTTON NOSE & HAPPY SMILING MOUTH WITH TONGUE ==================== */}
-            {/* Adorable little oval monkey nose */}
             <ellipse cx="80" cy="53" rx="3.5" ry="2.2" fill="#6D4C41" />
             <circle cx="79" cy="52.2" r="0.8" fill="#FFE0B2" opacity="0.6" />
 
-            {/* Cheerful wide cartoon smile */}
             <path
               d="M 72 58 Q 80 65, 88 58"
               stroke="#5D4037"
@@ -439,7 +538,6 @@ export default function KuppuMascot({
               strokeLinecap="round"
               fill="none"
             />
-            {/* Cute pink tongue peeking out */}
             <path
               d="M 77 61 Q 80 65, 83 61 Z"
               fill="#FF8A80"
@@ -453,7 +551,7 @@ export default function KuppuMascot({
 
         {/* Floating playful helper badge on hover */}
         <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 px-3 py-1 bg-[#143867]/95 text-[#ffe16d] text-[10px] font-black rounded-full shadow-lg mt-1 whitespace-nowrap pointer-events-none">
-          Click me to scamper over! 🐵💨
+          Click me to leap to another branch! 🐵🌿
         </span>
       </div>
     </div>
