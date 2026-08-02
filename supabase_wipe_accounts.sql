@@ -5,39 +5,29 @@
 -- This will wipe out all accounts and their data while EXCLUDING ScaryPython692
 -- ==============================================================================
 
--- Get the ID of the admin user to prevent deleting their data
-DO $$
-DECLARE
-  admin_id UUID;
-BEGIN
-  SELECT id INTO admin_id FROM auth.users 
-  WHERE LOWER(email) = 'scarypython692@phone.curiosityolympiad.org' 
-     OR LOWER(email) LIKE '%scarypython692%' 
-  LIMIT 1;
+-- 1. Delete gamification records first (using student_profiles lookup)
+DELETE FROM public.user_gamification
+WHERE id NOT IN (
+  SELECT id FROM public.student_profiles WHERE LOWER(username) = 'scarypython692'
+) AND user_id NOT IN (
+  SELECT id FROM public.student_profiles WHERE LOWER(username) = 'scarypython692'
+);
 
-  -- If no auth user found, try student_profiles
-  IF admin_id IS NULL THEN
-    SELECT id INTO admin_id FROM public.student_profiles 
-    WHERE LOWER(username) = 'scarypython692' 
-    LIMIT 1;
-  END IF;
+-- 2. Delete exam submissions
+DELETE FROM public.exam_submissions
+WHERE user_id NOT IN (
+  SELECT id FROM public.student_profiles WHERE LOWER(username) = 'scarypython692'
+);
 
-  -- 1. Delete gamification records first (using both ID and user_id fields)
-  DELETE FROM public.user_gamification
-  WHERE (id <> admin_id OR user_id <> admin_id) OR admin_id IS NULL;
+-- 3. Delete student profile records
+DELETE FROM public.student_profiles
+WHERE LOWER(username) <> 'scarypython692';
 
-  -- 2. Delete exam submissions
-  DELETE FROM public.exam_submissions
-  WHERE user_id <> admin_id OR admin_id IS NULL;
-
-  -- 3. Delete student profile records
-  DELETE FROM public.student_profiles
-  WHERE id <> admin_id OR admin_id IS NULL;
-
-  -- 4. Remove auth users
-  DELETE FROM auth.users
-  WHERE id <> admin_id OR admin_id IS NULL;
-END $$;
+-- 4. Remove auth users
+DELETE FROM auth.users
+WHERE email NOT IN (
+  'scarypython692@phone.curiosityolympiad.org'
+) AND email NOT LIKE '%scarypython692%';
 
 -- ==============================================================================
 -- 5. CREATE REUSABLE ADMIN RPC FUNCTION FOR WEBHOOKS & API ENDPOINTS
@@ -52,35 +42,31 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  admin_id UUID;
   deleted_count INTEGER;
 BEGIN
-  -- Get the admin user ID
-  SELECT id INTO admin_id FROM public.student_profiles 
-  WHERE LOWER(username) = LOWER(admin_username) 
-  LIMIT 1;
-
-  IF admin_id IS NULL THEN
-    SELECT id INTO admin_id FROM auth.users 
-    WHERE LOWER(email) LIKE '%' || LOWER(admin_username) || '%'
-    LIMIT 1;
-  END IF;
-
   -- 1. Delete gamification
   DELETE FROM public.user_gamification
-  WHERE (id <> admin_id OR user_id <> admin_id) OR admin_id IS NULL;
+  WHERE id NOT IN (
+    SELECT id FROM public.student_profiles WHERE LOWER(username) = LOWER(admin_username)
+  ) AND user_id NOT IN (
+    SELECT id FROM public.student_profiles WHERE LOWER(username) = LOWER(admin_username)
+  );
 
   -- 2. Delete exam submissions
   DELETE FROM public.exam_submissions
-  WHERE user_id <> admin_id OR admin_id IS NULL;
+  WHERE user_id NOT IN (
+    SELECT id FROM public.student_profiles WHERE LOWER(username) = LOWER(admin_username)
+  );
 
   -- 3. Delete student profiles
   DELETE FROM public.student_profiles
-  WHERE id <> admin_id OR admin_id IS NULL;
+  WHERE LOWER(username) <> LOWER(admin_username);
 
   -- 4. Delete auth users
   DELETE FROM auth.users
-  WHERE id <> admin_id OR admin_id IS NULL;
+  WHERE email NOT IN (
+    admin_username || '@phone.curiosityolympiad.org'
+  ) AND email NOT LIKE '%' || admin_username || '%';
   
   GET DIAGNOSTICS deleted_count = ROW_COUNT;
 
@@ -91,4 +77,5 @@ BEGIN
   );
 END;
 $$;
+
 
