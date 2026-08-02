@@ -99,177 +99,216 @@ export function GravityLevel({ recordAction, experimentSubIndex = 0 }: GravityLe
     if (experimentSubIndex === 0) {
       // --- EXPERIMENT 1: CEILING FAN AIRFLOW & BREEZE VELOCITY LAB ---
       const fanSpeedRpm = Math.round(attractorMass * 2 * 60 + launchSpeed);
-      // Faster regulator & airflow speed = faster rotation and faster breeze particles!
       const spinDurationSec = Math.max(0.15, 2.0 / (attractorMass * 1.2));
       const breezeDurationSec = Math.max(0.25, 2.5 - (launchSpeed / 200));
 
       return (
         <div 
           ref={workspaceRef}
-          className="relative w-full h-full bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-950 flex flex-col items-center justify-between p-4 overflow-hidden"
+          className="relative w-full h-full bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-950 flex flex-col items-center justify-between p-3 sm:p-4 overflow-hidden gap-2"
         >
-          {/* Ceiling Suspension Rod */}
-          <div className="relative z-10 w-full flex flex-col items-center">
-            <div className="w-48 h-3 bg-gray-700 border-b-2 border-gray-600 rounded-b-md shadow-md flex justify-center">
-              <div className="w-3 h-10 bg-gray-500 border-x-2 border-gray-400" />
-            </div>
-
-            {/* Ceiling Fan Motor & Perfectly Centered Rotating Hub */}
-            <div className="relative w-64 h-64 flex items-center justify-center -mt-2">
-              
-              {/* Central Fixed Motor Canopy */}
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-700 via-amber-500 to-amber-300 border-4 border-amber-200 shadow-2xl z-20 flex items-center justify-center">
-                <div className="w-6 h-6 rounded-full bg-amber-900 border-2 border-amber-300 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-amber-200 animate-ping" />
-                </div>
-              </div>
-
-              {/* Symmetrically Centered Spinning Blades Container */}
-              <div 
-                className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none origin-center"
-                style={{
-                  animation: `spin ${spinDurationSec}s linear infinite`
-                }}
-              >
-                {Array.from({ length: bladeCount }).map((_, bIdx) => {
-                  const rotDeg = (360 / bladeCount) * bIdx;
-                  return (
-                    <div
-                      key={bIdx}
-                      className="absolute w-28 h-7 bg-gradient-to-r from-amber-700 via-amber-600 to-amber-500 border-2 border-amber-300 rounded-full shadow-xl flex items-center justify-end pr-2"
-                      style={{
-                        transformOrigin: '0% 50%',
-                        transform: `rotate(${rotDeg}deg) translateX(8px)`
-                      }}
-                    >
-                      <div className="w-3 h-3 rounded-full bg-amber-900/40 border border-amber-300/60" />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Dynamic Animated Downward Airflow Breeze Stream Lines */}
-          {showBreezeLines && (
-            <div className="absolute inset-0 flex justify-around pointer-events-none opacity-80 z-0 overflow-hidden">
-              {[1, 2, 3, 4, 5, 6].map((line) => (
-                <div 
-                  key={line}
-                  className="w-1.5 h-full relative flex flex-col justify-around"
-                >
-                  <div 
-                    className="w-full bg-gradient-to-b from-cyan-400 via-sky-300 to-transparent rounded-full shadow-[0_0_12px_#38bdf8] animate-bounce"
-                    style={{ 
-                      height: `${20 + (line % 3) * 15}%`,
-                      animationDuration: `${breezeDurationSec / (0.8 + (line % 3) * 0.2)}s`,
-                      animationIterationCount: 'infinite'
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Bottom Room Seating Silhouette & Velocity Display */}
-          <div className="relative z-20 w-full flex flex-col items-center mb-2">
-            <div className="bg-gray-900/90 px-4 py-2 rounded-2xl border border-gray-700 text-center shadow-lg">
-              <span className="text-xs font-bold text-cyan-300">
-                🌀 Fan Speed: {fanSpeedRpm} RPM • Breeze Velocity: {Math.round(launchSpeed / 10)} km/h
-              </span>
-              <p className="text-[11px] text-gray-400">
-                {bladeCount === 3 ? "3-Blade Indian Tropical Fan: High RPM & Maximum Air Displacement" : `${bladeCount}-Blade Fan: Quiet Low-Speed Circulation`}
-              </p>
-            </div>
-          </div>
-
-          {/* Control Buttons */}
-          <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-gray-900/90 p-2 rounded-xl border border-gray-700 text-xs">
-            <span className="text-gray-300 font-bold">Fan Blades:</span>
+          {/* Responsive Control Toolbar (No more absolute overlap on mobile!) */}
+          <div className="w-full max-w-lg mx-auto flex flex-wrap items-center justify-center gap-1.5 bg-slate-900/95 p-2 rounded-xl border border-slate-700 text-xs shrink-0 z-20 shadow-md">
+            <span className="text-gray-300 font-bold mr-1">Fan Blades:</span>
             {([3, 4, 5] as const).map((count) => (
               <button
                 key={count}
                 onClick={() => setBladeCount(count)}
-                className={`px-2.5 py-1 rounded text-xs font-bold ${bladeCount === count ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-400'}`}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${bladeCount === count ? 'bg-indigo-600 text-white shadow' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
               >
                 {count} Blades
               </button>
             ))}
             <button
               onClick={() => setShowBreezeLines(prev => !prev)}
-              className={`ml-2 px-2.5 py-1 rounded text-xs font-bold ${showBreezeLines ? 'bg-cyan-600 text-white' : 'bg-gray-800 text-gray-400'}`}
+              className={`ml-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${showBreezeLines ? 'bg-cyan-600 text-white shadow' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
             >
-              {showBreezeLines ? 'Hide Breeze Lines' : 'Show Breeze Lines'}
+              {showBreezeLines ? 'Hide Breeze' : 'Show Breeze'}
             </button>
+          </div>
+
+          {/* Centered Proper Indian Ceiling Fan Simulation Assembly (Top-Down SVG) */}
+          <div className="relative flex-1 w-full flex items-center justify-center my-auto overflow-hidden">
+            <svg
+              viewBox="0 0 280 280"
+              className="w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 overflow-visible z-10"
+            >
+              <defs>
+                <radialGradient id="hubGold" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#fef08a" />
+                  <stop offset="60%" stopColor="#d97706" />
+                  <stop offset="100%" stopColor="#78350f" />
+                </radialGradient>
+                <linearGradient id="bladeWood" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#92400e" />
+                  <stop offset="50%" stopColor="#b45309" />
+                  <stop offset="100%" stopColor="#d97706" />
+                </linearGradient>
+                <linearGradient id="bracketGold" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#f59e0b" />
+                  <stop offset="100%" stopColor="#92400e" />
+                </linearGradient>
+                <filter id="fanShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="8" stdDeviation="5" floodColor="#000000" floodOpacity="0.5" />
+                </filter>
+              </defs>
+
+              {/* Spinning Blades & Brackets Group - Symmetrically rotating around exact center (140, 140) */}
+              <g
+                style={{
+                  transformOrigin: '140px 140px',
+                  animation: `spin ${spinDurationSec}s linear infinite`,
+                }}
+              >
+                {Array.from({ length: bladeCount }).map((_, bIdx) => {
+                  const rotDeg = (360 / bladeCount) * bIdx;
+                  return (
+                    <g key={bIdx} transform={`rotate(${rotDeg}, 140, 140)`}>
+                      {/* Metallic Gold Bracket from Hub (r=22) to Blade (r=42) */}
+                      <rect
+                        x="162"
+                        y="136"
+                        width="22"
+                        height="8"
+                        rx="3"
+                        fill="url(#bracketGold)"
+                        stroke="#fcd34d"
+                        strokeWidth="1"
+                      />
+                      {/* Aerodynamic Indian Tropical Blade from r=40 to r=120 */}
+                      <path
+                        d="M 180,131 C 220,123 255,129 260,139 C 265,149 230,157 180,149 Z"
+                        fill="url(#bladeWood)"
+                        stroke="#fcd34d"
+                        strokeWidth="1.5"
+                        filter="url(#fanShadow)"
+                      />
+                      {/* Decorative balance rivets along the blade */}
+                      <circle cx="192" cy="140" r="2.5" fill="#fef08a" />
+                      <circle cx="245" cy="140" r="2.5" fill="#fef08a" opacity="0.8" />
+                    </g>
+                  );
+                })}
+              </g>
+
+              {/* Central Stationary/Spinning Motor Canopy Hub - EXACTLY centered at (140, 140) */}
+              <g filter="url(#fanShadow)">
+                {/* Outer metallic brown bezel ring */}
+                <circle cx="140" cy="140" r="32" fill="#451a03" stroke="#f59e0b" strokeWidth="3" />
+                {/* Main metallic amber motor canopy */}
+                <circle cx="140" cy="140" r="26" fill="url(#hubGold)" stroke="#fcd34d" strokeWidth="2" />
+                {/* Inner bronze medallion */}
+                <circle cx="140" cy="140" r="14" fill="#78350f" stroke="#fcd34d" strokeWidth="1.5" />
+                {/* Center decorative gold cap */}
+                <circle cx="140" cy="140" r="6" fill="#fef08a" />
+                {/* 4 Symmetric Screw Rivets around the hub */}
+                <circle cx="140" cy="116" r="2" fill="#fcd34d" />
+                <circle cx="140" cy="164" r="2" fill="#fcd34d" />
+                <circle cx="116" cy="140" r="2" fill="#fcd34d" />
+                <circle cx="164" cy="140" r="2" fill="#fcd34d" />
+              </g>
+            </svg>
+
+            {/* Dynamic Animated Airflow Breeze Waves in background */}
+            {showBreezeLines && (
+              <div className="absolute inset-0 flex justify-around pointer-events-none opacity-60 z-0 overflow-hidden">
+                {[1, 2, 3, 4, 5, 6].map((line) => (
+                  <div key={line} className="w-1.5 h-full relative flex flex-col justify-around">
+                    <div
+                      className="w-full bg-gradient-to-b from-cyan-400 via-sky-300 to-transparent rounded-full shadow-[0_0_12px_#38bdf8] animate-bounce"
+                      style={{
+                        height: `${25 + (line % 3) * 15}%`,
+                        animationDuration: `${breezeDurationSec / (0.8 + (line % 3) * 0.2)}s`,
+                        animationIterationCount: 'infinite',
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Responsive Velocity & RPM Display Card (Never cut off!) */}
+          <div className="w-full max-w-lg mx-auto bg-slate-900/95 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-700 text-center shadow-lg shrink-0 z-20">
+            <span className="text-xs sm:text-sm font-bold text-cyan-300 block">
+              🌀 Fan Speed: {fanSpeedRpm} RPM • Breeze Velocity: {Math.round(launchSpeed / 10)} km/h
+            </span>
+            <p className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5">
+              {bladeCount === 3 ? "3-Blade Indian Tropical Fan: High RPM & Maximum Air Displacement" : `${bladeCount}-Blade Fan: Quiet Low-Speed Circulation`}
+            </p>
           </div>
         </div>
       );
     } else if (experimentSubIndex === 1) {
       // --- EXPERIMENT 2: PLANETARY GRAVITY & SATELLITE ORBIT SIMULATOR ---
-      const planetRadiusPx = Math.round(50 * attractorMass);
-      const orbitSpeedSec = Math.max(1, 10 - launchSpeed / 40);
+      // Responsive planet & orbit radius so it never exceeds mobile width!
+      const planetRadiusPx = Math.min(38, Math.round(18 * attractorMass));
+      const orbitSpeedSec = Math.max(1.2, 10 - launchSpeed / 40);
 
       return (
         <div 
           ref={workspaceRef}
-          className="relative w-full h-full bg-[#030712] flex items-center justify-center overflow-hidden"
+          className="relative w-full h-full bg-[#030712] flex flex-col items-center justify-between p-3 sm:p-4 overflow-hidden gap-2"
         >
           {/* Starfield Background */}
           <div className="absolute inset-0 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] bg-[size:16px_16px] opacity-20" />
 
-          {/* Gravitational Field Rings */}
-          <div 
-            className="absolute rounded-full border-2 border-dashed border-cyan-500/30 animate-spin opacity-50"
-            style={{ 
-              width: `${planetRadiusPx * 4}px`, 
-              height: `${planetRadiusPx * 4}px`,
-              animationDuration: '20s'
-            }}
-          />
+          {/* Centered Planet & Orbital Simulation */}
+          <div className="relative flex-1 w-full flex items-center justify-center my-auto">
+            {/* Gravitational Field Rings */}
+            <div 
+              className="absolute rounded-full border-2 border-dashed border-cyan-500/30 animate-spin opacity-50"
+              style={{ 
+                width: `${planetRadiusPx * 5}px`, 
+                height: `${planetRadiusPx * 5}px`,
+                animationDuration: '25s'
+              }}
+            />
 
-          {/* Central Planet Earth / Jupiter */}
-          <div 
-            className="relative z-10 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-slate-900 border-4 border-cyan-300 shadow-[0_0_50px_rgba(56,189,248,0.5)] flex items-center justify-center transition-all duration-300"
-            style={{
-              width: `${planetRadiusPx * 2}px`,
-              height: `${planetRadiusPx * 2}px`
-            }}
-          >
-            <div className="w-full h-full rounded-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-green-400/40 via-transparent to-transparent" />
-            <span className="absolute text-[10px] font-black text-white uppercase tracking-widest shadow-md">
-              {attractorMass > 1.8 ? "JUPITER" : "EARTH"} ({attractorMass.toFixed(1)} M⊕)
-            </span>
-          </div>
-
-          {/* Orbiting Satellite Container */}
-          <div 
-            className="absolute z-20 flex items-center justify-center pointer-events-none"
-            style={{
-              width: `${planetRadiusPx * 4}px`,
-              height: `${planetRadiusPx * 4}px`,
-              animation: `spin ${orbitSpeedSec}s linear infinite`
-            }}
-          >
-            {/* Satellite Orb on Top Orbit Line */}
-            <div className="absolute -top-3 w-8 h-8 bg-amber-400 border-2 border-amber-100 rounded-lg shadow-[0_0_15px_rgba(251,191,36,0.8)] flex items-center justify-center">
-              <span className="material-symbols-outlined text-xs text-amber-950">satellite_alt</span>
+            {/* Central Planet Earth / Jupiter */}
+            <div 
+              className="relative z-10 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-slate-900 border-4 border-cyan-300 shadow-[0_0_40px_rgba(56,189,248,0.5)] flex items-center justify-center transition-all duration-300"
+              style={{
+                width: `${planetRadiusPx * 2.2}px`,
+                height: `${planetRadiusPx * 2.2}px`
+              }}
+            >
+              <div className="w-full h-full rounded-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-green-400/40 via-transparent to-transparent" />
+              <span className="absolute text-[9px] sm:text-[10px] font-black text-white uppercase tracking-widest shadow-md">
+                {attractorMass > 1.8 ? "JUPITER" : "EARTH"} ({attractorMass.toFixed(1)} M⊕)
+              </span>
             </div>
 
-            {/* Velocity Vector Arrow */}
-            {showVelocityVectors && (
-              <div className="absolute -top-3 left-1/2 w-16 h-0.5 bg-green-400 shadow-[0_0_8px_#22c55e]">
-                <div className="w-2 h-2 border-t-2 border-r-2 border-green-400 rotate-45 absolute -right-1 -top-0.5" />
+            {/* Orbiting Satellite Container */}
+            <div 
+              className="absolute z-20 flex items-center justify-center pointer-events-none"
+              style={{
+                width: `${planetRadiusPx * 5}px`,
+                height: `${planetRadiusPx * 5}px`,
+                animation: `spin ${orbitSpeedSec}s linear infinite`
+              }}
+            >
+              <div className="absolute -top-3 w-7 h-7 bg-amber-400 border-2 border-amber-100 rounded-lg shadow-[0_0_15px_rgba(251,191,36,0.8)] flex items-center justify-center">
+                <span className="material-symbols-outlined text-xs text-amber-950">satellite_alt</span>
               </div>
-            )}
+
+              {showVelocityVectors && (
+                <div className="absolute -top-3 left-1/2 w-12 sm:w-16 h-0.5 bg-green-400 shadow-[0_0_8px_#22c55e]">
+                  <div className="w-2 h-2 border-t-2 border-r-2 border-green-400 rotate-45 absolute -right-1 -top-0.5" />
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Control Overlay */}
-          <div className="absolute bottom-4 left-4 z-20 bg-gray-900/90 p-3 rounded-xl border border-gray-700 text-xs text-gray-200 space-y-1">
-            <p className="font-bold text-cyan-300">🪐 Gravity Force: F = G (M · m) / r²</p>
-            <p className="font-bold text-amber-300">🛰️ Orbital Velocity: {(launchSpeed / 30).toFixed(1)} km/s</p>
+          {/* Responsive Bottom Banner (No absolute overlap on mobile!) */}
+          <div className="w-full max-w-lg mx-auto bg-slate-900/95 p-2.5 sm:p-3 rounded-xl border border-slate-700 text-xs text-gray-200 flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0 z-20 shadow-md">
+            <div className="space-y-0.5 text-center sm:text-left">
+              <p className="font-bold text-cyan-300">🪐 Gravity Force: F = G (M · m) / r²</p>
+              <p className="font-bold text-amber-300">🛰️ Orbital Velocity: {(launchSpeed / 30).toFixed(1)} km/s</p>
+            </div>
             <button
               onClick={() => setShowVelocityVectors(prev => !prev)}
-              className="mt-1 px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs"
+              className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shrink-0 transition-all shadow"
             >
               {showVelocityVectors ? 'Hide Vectors' : 'Show Velocity Vectors'}
             </button>
@@ -283,12 +322,12 @@ export function GravityLevel({ recordAction, experimentSubIndex = 0 }: GravityLe
       return (
         <div 
           ref={workspaceRef}
-          className="relative w-full h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-between p-4 overflow-hidden"
+          className="relative w-full h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-between p-3 sm:p-4 overflow-hidden gap-2"
         >
-          {/* Drop Tower Top Frame */}
-          <div className="w-80 h-10 bg-gray-800 border-2 border-gray-600 rounded-t-xl flex items-center justify-between px-6 shadow-md z-10">
-            <span className="text-xs font-bold text-yellow-300">Galileo Drop Tower ({altitudeMeters}m)</span>
-            <div className="flex items-center gap-2">
+          {/* Responsive Drop Tower Top Frame */}
+          <div className="w-full max-w-md h-10 bg-gray-800 border-2 border-gray-600 rounded-t-xl flex items-center justify-between px-3 sm:px-6 shadow-md z-10 shrink-0">
+            <span className="text-xs font-bold text-yellow-300">Galileo Tower ({altitudeMeters}m)</span>
+            <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-bold uppercase text-gray-400">Chamber:</span>
               <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${isVacuumActive ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white'}`}>
                 {isVacuumActive ? 'Vacuum (0 Air)' : 'Atmospheric Air'}
@@ -296,15 +335,15 @@ export function GravityLevel({ recordAction, experimentSubIndex = 0 }: GravityLe
             </div>
           </div>
 
-          {/* Dual Drop Tracks */}
-          <div className="relative w-80 flex-1 bg-gray-900/80 border-x-2 border-gray-700 flex justify-around p-4">
+          {/* Dual Drop Tracks with responsive width and padding */}
+          <div className="relative w-full max-w-md flex-1 bg-gray-900/80 border-x-2 border-gray-700 flex justify-around px-2 sm:px-4 py-4 min-h-[220px]">
             
             {/* Track 1: Cricket Ball */}
-            <div className="relative w-24 h-full border-r border-dashed border-gray-700 flex flex-col items-center justify-between">
-              <span className="text-[10px] font-bold text-red-400 bg-gray-950 px-2 py-0.5 rounded">Heavy Cricket Ball</span>
+            <div className="relative w-24 sm:w-28 h-full border-r border-dashed border-gray-700 flex flex-col items-center justify-between">
+              <span className="text-[10px] font-bold text-red-400 bg-gray-950 px-2 py-0.5 rounded text-center">Heavy Cricket Ball</span>
               <div 
                 className="w-10 h-10 rounded-full bg-red-600 border-2 border-red-200 shadow-lg flex items-center justify-center absolute transition-all duration-75"
-                style={{ top: `${ballProgress}%`, transform: 'translateY(-100%)' }}
+                style={{ top: `${Math.min(85, ballProgress)}%`, transform: 'translateY(-50%)' }}
               >
                 <span className="text-[9px] font-bold text-white">5.5 oz</span>
               </div>
@@ -312,11 +351,11 @@ export function GravityLevel({ recordAction, experimentSubIndex = 0 }: GravityLe
             </div>
 
             {/* Track 2: Feather */}
-            <div className="relative w-24 h-full flex flex-col items-center justify-between">
-              <span className="text-[10px] font-bold text-cyan-400 bg-gray-950 px-2 py-0.5 rounded">Light Feather</span>
+            <div className="relative w-24 sm:w-28 h-full flex flex-col items-center justify-between">
+              <span className="text-[10px] font-bold text-cyan-400 bg-gray-950 px-2 py-0.5 rounded text-center">Light Feather</span>
               <div 
                 className="w-8 h-8 rounded-full bg-sky-200 border-2 border-cyan-400 shadow-lg flex items-center justify-center absolute transition-all duration-75"
-                style={{ top: `${featherProgress}%`, transform: 'translateY(-100%)' }}
+                style={{ top: `${Math.min(85, featherProgress)}%`, transform: 'translateY(-50%)' }}
               >
                 <span className="material-symbols-outlined text-xs text-cyan-900">feather</span>
               </div>
@@ -324,11 +363,11 @@ export function GravityLevel({ recordAction, experimentSubIndex = 0 }: GravityLe
             </div>
           </div>
 
-          {/* Controls Bar */}
-          <div className="w-80 bg-gray-800 p-3 border-2 border-gray-600 rounded-b-xl flex items-center justify-between gap-3 z-10">
+          {/* Responsive Controls Bar (No clipping on mobile!) */}
+          <div className="w-full max-w-md bg-gray-800 p-2.5 sm:p-3 border-2 border-gray-600 rounded-b-xl flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 z-10 shrink-0">
             <button
               onClick={() => setIsVacuumActive(prev => !prev)}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${isVacuumActive ? 'bg-emerald-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all text-center ${isVacuumActive ? 'bg-emerald-600 text-white shadow' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
             >
               {isVacuumActive ? '💨 Open Air Valve' : '🧪 Pump Vacuum Chamber'}
             </button>
@@ -336,7 +375,7 @@ export function GravityLevel({ recordAction, experimentSubIndex = 0 }: GravityLe
             <button
               onClick={triggerDropAnimation}
               disabled={isDropping}
-              className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase shadow-md active:scale-95 disabled:opacity-50"
+              className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase shadow-md active:scale-95 disabled:opacity-50 shrink-0"
             >
               {isDropping ? 'Falling...' : 'Drop Both'}
             </button>

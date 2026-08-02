@@ -15,6 +15,7 @@ interface LeaderboardEntry {
   curiosity_points: number;
   student_profiles: {
     username: string;
+    real_name?: string;
   } | null;
 }
 
@@ -34,6 +35,13 @@ export default function LeaderboardPage() {
 
   const myAvatar = useUserAvatar(userId);
   const [studentRealName, setStudentRealName] = useState("Student Champion");
+
+  useEffect(() => {
+    const storedRealName = localStorage.getItem("curiosity_real_name");
+    if (storedRealName && storedRealName.trim()) {
+      setStudentRealName(storedRealName.trim());
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchLeaderboard() {
@@ -558,7 +566,7 @@ export default function LeaderboardPage() {
       <CertificateModal
         isOpen={isCertModalOpen}
         onClose={() => setIsCertModalOpen(false)}
-        studentRealName={studentRealName || userEntry?.student_profiles?.username || "Student Explorer"}
+        studentRealName={userEntry?.student_profiles?.real_name || studentRealName || userEntry?.student_profiles?.username || "Student Explorer"}
         achievementType={certType}
         awardDate="July 2026"
         isEligible={isPastChampion || userRank === 1}

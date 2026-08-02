@@ -48,11 +48,11 @@ The `useTelemetry` custom hook (`src/components/SandboxEngine/useTelemetry.ts`) 
 A critical technical risk identified during sandbox testing was Supabase Auth's strict free-tier email rate limit (~2 OTP emails/day per recipient), which blocks developer and QA validation.
 
 ### Multi-Layer Mitigation Protocol:
-1. **Developer / QA Sandbox Override (`123456`)**:
-   * In non-production or test environments, entering OTP `123456` bypasses SMTP delivery entirely and authenticates the test session immediately.
-   * Implemented cleanly in `/src/app/(auth)/login/actions.ts`.
-2. **Production SMTP Upgrade (Resend / AWS SES Integration)**:
-   * Production Supabase Auth is configured with a custom Resend SMTP relay, expanding email throughput to 10,000+ daily OTP deliveries with >99.8% inbox deliverability.
+1. **Phase 04(A) - Production OTP Authentication**:
+   * Developer/sandbox bypass override (`123456`) has been removed from `/src/app/(auth)/login/actions.ts`.
+   * Real OTP verification is enforced for both Email and Mobile SMS (pan-India support for parents' mobile numbers).
+2. **Production SMTP & SMS Gateway Upgrade**:
+   * Production Supabase Auth is configured with custom SMTP/SMS relays, expanding throughput for daily OTP deliveries.
 3. **School CSV Roster Linking (`/schools`)**:
    * Eliminates the need for students to generate new email accounts with unique school codes. Students log in via standard OTP and attach their profile to their school's verified roster.
 

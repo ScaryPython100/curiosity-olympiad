@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import SandboxEngine from "@/components/SandboxEngine";
 import { addActivityXP } from "@/app/actions/profile";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { useLanguage } from "@/context/LanguageContext";
 
 export interface Question {
   id: number;
@@ -365,16 +367,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 2,
     experimentIndex: 2,
     module: "Gravity",
-    title: "Galileo Vacuum Chamber Drop",
-    question: "If you repeated the cricket ball vs. feather drop inside a vacuum chamber where all air has been pumped out, how would they fall?",
+    title: "Falling in an Empty Vacuum Chamber",
+    question: "If you repeated the cricket ball vs. feather drop inside an empty glass chamber where all air has been pumped out, what surprising thing would you observe?",
     options: [
-      "The cricket ball still lands first because heavy objects naturally accelerate faster than light ones",
-      "Both objects fall with identical acceleration ($g=9.8\\text{ m/s}^2$) and land at the exact same instant",
+      "The cricket ball still lands first because heavy objects naturally fall faster than light ones",
+      "Both objects fall side-by-side at the exact same speed and hit the ground at the exact same instant",
       "Removing air causes both objects to lose weight and float upward toward the top of the chamber",
-      "The feather falls faster than the ball in a vacuum because zero air drag unleashes its light mass"
+      "The feather falls faster than the ball because removing air drag lets light objects zoom downward"
     ],
     correct: 1,
-    explanation: "Galileo proved that in a vacuum (zero air resistance), gravity accelerates all objects at the exact same rate ($g = 9.8\\text{ m/s}^2$), regardless of their mass or weight!",
+    explanation: "Without air resistance to push back against the feather, gravity pulls all objects downward at the exact same rate! Both the cricket ball and feather fall side-by-side and land together.",
     level: "both"
   },
   {
@@ -525,16 +527,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 3,
     experimentIndex: 2,
     module: "Chemistry",
-    title: "Camphor Sublimation Solid to Gas",
-    question: "When you leave a piece of white camphor or naphthalene ball out in open air, why does it shrink and disappear without leaving any liquid wetness on the floor?",
+    title: "Camphor Disappearing in Open Air",
+    question: "When you leave a piece of white camphor out on a plate, why does it slowly shrink and vanish over a few days without leaving any wet spot or liquid puddle?",
     options: [
-      "Camphor melts into invisible transparent liquid that quickly seeps deep into floor tiles",
-      "Camphor undergoes sublimation, changing directly from a solid into a gas without liquid state",
-      "Microscopic room insects consume camphor solid particles when no one is watching the floor",
-      "Sunlight breaks camphor chemical bonds, converting solid white wax into invisible plastic dust"
+      "Camphor melts into an invisible liquid that immediately soaks into the plate",
+      "Camphor transforms directly from a solid into floating air vapor without ever becoming liquid",
+      "Microscopic dust mites eat the solid camphor particles when the room is dark",
+      "Sunlight turns solid camphor into microscopic white dust that blows away in the breeze"
     ],
     correct: 1,
-    explanation: "Sublimation occurs when a solid turns directly into a gas without melting into a liquid first! Camphor molecules escape straight into air as gas vapor, leaving no wet residue.",
+    explanation: "Some special solids like camphor don't melt into liquid at all! They turn directly from solid into gas vapor that drifts into the air, which is why your plate stays completely dry.",
     level: "level2"
   },
   {
@@ -542,16 +544,16 @@ const PRACTICE_QUESTIONS: Question[] = [
     mockTestId: 3,
     experimentIndex: 2,
     module: "Chemistry",
-    title: "Baking Soda & Vinegar Reaction CO₂ Gas",
-    question: "When you mix kitchen baking soda (Sodium Bicarbonate) with lemon juice or vinegar (Acetic Acid), why does the mixture fizz violently and produce gas bubbles?",
+    title: "Why Baking Soda & Lemon Fizz and Bubble",
+    question: "When you squeeze fresh lemon juice or vinegar onto baking soda in the kitchen, why does the mixture suddenly fizz violently and create lots of bubbles?",
     options: [
-      "Vinegar acid heats baking soda to its boiling point instantly, generating scalding steam bubbles",
-      "An acid-base reaction occurs, producing carbon dioxide gas bubbles, water, and neutral salt",
-      "Baking soda releases trapped atmospheric oxygen bubbles when exposed to liquid acid solution",
-      "Mixing vinegar with baking soda breaks water molecules into explosive hydrogen gas bubbles"
+      "The lemon juice makes the baking soda so hot that it boils and produces scalding steam bubbles",
+      "The two kitchen ingredients react together and release carbon dioxide gas bubbles into the air",
+      "Baking soda contains trapped air sponges that pop open when touched by any liquid",
+      "Vinegar turns baking soda into liquid soap that naturally makes foam and bubbles"
     ],
     correct: 1,
-    explanation: "Mixing baking soda (a base) with vinegar (an acid) triggers an acid-base chemical reaction. Carbon dioxide gas ($CO_2$) is rapidly produced, forming energetic bubbles and fizzing effervescence!",
+    explanation: "When you combine baking soda with a tangy liquid like lemon juice or vinegar, they react together and generate carbon dioxide gas! Those gas bubbles rush to escape, creating fun fizz and foam.",
     level: "both"
   }
 ];
@@ -570,6 +572,7 @@ export interface MockTestResult {
 }
 
 export default function PracticePage() {
+  const { t } = useLanguage();
   const [selectedMockTestId, setSelectedMockTestId] = useState<number>(1);
   const [difficulty, setDifficulty] = useState<"level1" | "level2">("level1");
   const [activeTest, setActiveTest] = useState(false);
@@ -711,43 +714,46 @@ export default function PracticePage() {
           </Link>
           <div>
             <h1 className="text-lg font-black text-[#143867] tracking-tight">
-              Experiential Assessment Practice Lab
+              {t("practice_lab")}
             </h1>
           </div>
         </div>
 
-        {activeTest && (
-          <div className="flex items-center gap-3">
-            {/* Ideal Completion Time Badge */}
-            <div className="hidden sm:flex items-center gap-2 bg-[#eef2f7] border border-[#d1dbe5] px-3 py-1.5 rounded-full text-xs font-bold text-[#143867]">
-              <span className="material-symbols-outlined text-sm text-[#ea580c]">timer</span>
-              <span>Ideal Time: {idealTimeMins}</span>
-            </div>
+        <div className="flex items-center gap-3">
+          <LanguageSelector />
+          {activeTest && (
+            <div className="flex items-center gap-3">
+              {/* Ideal Completion Time Badge */}
+              <div className="hidden sm:flex items-center gap-2 bg-[#eef2f7] border border-[#d1dbe5] px-3 py-1.5 rounded-full text-xs font-bold text-[#143867]">
+                <span className="material-symbols-outlined text-sm text-[#ea580c]">timer</span>
+                <span>Ideal Time: {idealTimeMins}</span>
+              </div>
 
-            {/* Elapsed Timer */}
-            <div className="flex items-center gap-2 bg-[#fff7ed] border border-[#ffedd5] px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-[#ea580c]">
-              <span className="material-symbols-outlined text-sm">schedule</span>
-              <span>{formatTime(elapsedSeconds)}</span>
-            </div>
+              {/* Elapsed Timer */}
+              <div className="flex items-center gap-2 bg-[#fff7ed] border border-[#ffedd5] px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-[#ea580c]">
+                <span className="material-symbols-outlined text-sm">schedule</span>
+                <span>{formatTime(elapsedSeconds)}</span>
+              </div>
 
-            {/* Pause / Resume Button */}
-            {!isSubmitted && (
-              <button
-                onClick={() => setIsPaused(!isPaused)}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs ${
-                  isPaused
-                    ? "bg-green-600 text-white hover:bg-green-700 animate-pulse"
-                    : "bg-[#143867] text-white hover:bg-[#1e4a85]"
-                }`}
-              >
-                <span className="material-symbols-outlined text-sm">
-                  {isPaused ? "play_arrow" : "pause"}
-                </span>
-                <span>{isPaused ? "Resume Test" : "Pause Test"}</span>
-              </button>
-            )}
-          </div>
-        )}
+              {/* Pause / Resume Button */}
+              {!isSubmitted && (
+                <button
+                  onClick={() => setIsPaused(!isPaused)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs ${
+                    isPaused
+                      ? "bg-green-600 text-white hover:bg-green-700 animate-pulse"
+                      : "bg-[#143867] text-white hover:bg-[#1e4a85]"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-sm">
+                    {isPaused ? "play_arrow" : "pause"}
+                  </span>
+                  <span>{isPaused ? "Resume Test" : "Pause Test"}</span>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </header>
 
       {/* Main Container */}

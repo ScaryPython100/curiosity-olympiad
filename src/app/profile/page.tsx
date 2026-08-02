@@ -8,6 +8,7 @@ import { calculateLevelProgress, BADGES } from "@/utils/gamification";
 import { AvatarPickerModal } from "@/components/AvatarPickerModal";
 import { useUserAvatar } from "@/utils/userAvatar";
 import { CuriosityQuotientCard } from "@/components/CuriosityQuotientCard";
+import CertificateModal, { RankCertificateType } from "@/components/CertificateModal";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function ProfilePage() {
   const displayAvatar = useUserAvatar(userId, userStats.avatar_url, userStats.username);
   const [loading, setLoading] = useState(true);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
 
   const { level, progressPercentage, unlockedBadges, nextBadge } = calculateLevelProgress(userStats.xp);
 
@@ -167,6 +169,30 @@ export default function ProfilePage() {
         {/* 📊 NEW: Curiosity Quotient (CQ) Analytics Engine Radar Chart */}
         <CuriosityQuotientCard xp={userStats.xp} username={userStats.username || "Explorer"} />
 
+        {/* 📜 Official Certificate of Excellence Section */}
+        <section className="mb-8">
+          <div className="bg-gradient-to-r from-[#143867] to-[#1e4a85] rounded-3xl p-6 text-white shadow-lg border border-blue-900/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4 text-center sm:text-left">
+              <div className="w-14 h-14 rounded-2xl bg-[#f37021]/20 border border-[#f37021] flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[#f37021] text-3xl">verified</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-black font-serif">Official Certificate of Excellence</h3>
+                <p className="text-xs text-blue-200 mt-0.5">
+                  Download & share your official Agastya certificate with your verified real name.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsCertModalOpen(true)}
+              className="px-5 py-3 bg-[#f37021] hover:bg-[#ea580c] active:scale-95 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-md transition-all flex items-center gap-2 shrink-0"
+            >
+              <span className="material-symbols-outlined text-sm">workspace_premium</span>
+              <span>View & Download Certificate</span>
+            </button>
+          </div>
+        </section>
+
         {/* Badges Section - New Playful UI */}
         <section className="mb-8">
           <div className="flex items-center justify-between mb-2 px-2">
@@ -200,16 +226,28 @@ export default function ProfilePage() {
                   </div>
 
                   {isUnlocked && (
-                    <a
-                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                        `I just unlocked the "${badge.name}" ${badge.icon} badge in the @AgastyaOrg Curiosity Olympiad! 🚀✨ #AahAhaHaha #CuriosityOlympiad`
-                      )}&url=${encodeURIComponent("https://curiosity-olympiad.vercel.app")}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 text-[10px] font-bold px-3 py-1 bg-[#143867] hover:bg-[#1e4a85] text-white rounded-xl flex items-center gap-1 transition-all shadow-xs"
-                    >
-                      <span>𝕏 Share</span>
-                    </a>
+                    <div className="mt-3 flex items-center gap-1.5 flex-wrap justify-center">
+                      <a
+                        href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+                          `I just unlocked the "${badge.name}" ${badge.icon} badge in the @AgastyaOrg Curiosity Olympiad! 🚀✨ https://curiosity-olympiad.vercel.app`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] font-bold px-2.5 py-1 bg-green-600 hover:bg-green-700 text-white rounded-xl flex items-center gap-1 transition-all shadow-xs"
+                      >
+                        <span>💬 WhatsApp</span>
+                      </a>
+                      <a
+                        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                          `I just unlocked the "${badge.name}" ${badge.icon} badge in the @AgastyaOrg Curiosity Olympiad! 🚀✨ #AahAhaHaha #CuriosityOlympiad`
+                        )}&url=${encodeURIComponent("https://curiosity-olympiad.vercel.app")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] font-bold px-2.5 py-1 bg-[#143867] hover:bg-[#1e4a85] text-white rounded-xl flex items-center gap-1 transition-all shadow-xs"
+                      >
+                        <span>𝕏 Share</span>
+                      </a>
+                    </div>
                   )}
                 </div>
               );
@@ -275,6 +313,16 @@ export default function ProfilePage() {
         </Link>
       </nav>
       
+      <CertificateModal
+        isOpen={isCertModalOpen}
+        onClose={() => setIsCertModalOpen(false)}
+        studentRealName={userStats.username || "Student Explorer"}
+        achievementType="Olympiad Champion"
+        awardDate="July 2026"
+        isEligible={true}
+        userRank={1}
+        isCompletedCycle={true}
+      />
     </div>
   );
 }

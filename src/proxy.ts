@@ -18,8 +18,10 @@ export async function proxy(request: NextRequest) {
   const protectedRoutes = ['/dashboard', '/profile', '/tournaments', '/leaderboard']
   const isProtectedRoute = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))
 
+  const descopeSession = request.cookies.get('descope_session')?.value;
+
   if (isProtectedRoute) {
-    if (!user) {
+    if (!user && !descopeSession) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       return NextResponse.redirect(url)

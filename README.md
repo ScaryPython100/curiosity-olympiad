@@ -1,71 +1,36 @@
-# Agastya Curiosity Olympiad 🚀🌿
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-The **Agastya Curiosity Olympiad** is an interactive, gamified science learning platform built for students across India. Designed around Agastya International Foundation's core philosophy—**"Curiosity, Creativity, and Confidence under Care"**—the platform turns science education from passive memorization into active, hands-on exploration.
+## Getting Started
 
-We built this project to make science playful, accessible, and deeply engaging on any device, from school desktops to budget smartphones in rural classrooms.
+First, run the development server:
 
----
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-## What's Inside the Platform?
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### 1. 🔬 The Curiosity Journal & DIY Home Lab
-* **Daily "Why?" Notebook**: True science starts with asking questions. Students log their daily hypotheses and observations in an interactive field notebook.
-* **Community Curiosity Wall**: Scholars can read and applaud fascinating questions shared by peers across schools and campuses.
-* **DIY "Trash-to-Treasure" Experiments**: A zero-cost science kit where students check off items they have at home (like a plastic bottle, balloon, straw, or leaf) and get step-by-step instructions for classic Agastya hands-on experiments (e.g., *Balloon-Powered Bottle Cars*, *Cartesian Divers*, and *Leaf Chromatography*).
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-### 2. 🚌 The Agastya "Mobile Science Van" Progress Highway
-* **Interactive Kuppam Campus Map**: Instead of generic progress bars, students drive an animated Agastya Yellow Mobile Science Van along a winding S-curve road across a lush evergreen forest landscape.
-* **11 Campus Landmarks (0 to 10,000 XP)**: As students earn XP in labs, their van travels from *Campus Entrance* -> *Art & Ecology Center* -> *Robotics Lab* -> *Discovery Center* -> *Planetarium* all the way to *VisionWorks*.
-* **Interactive Honk & Trivia**: Clicking landmarks pops up real-world trivia about the Kuppam Creative Campus, and students can click **"Honk Van! 🎺"** for audio feedback.
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-### 3. 🏆 Leaderboards & Verified Merit Certificates
-* **Official Daily & Weekly Leaderboards**: Competitive live standings with podium highlights and badges.
-* **Rank #1 Verified Certificates**: To protect fairness, official downloadable Merit Certificates are only accessible to the undisputed **#1 Rank Holder** of each Daily or Weekly cycle after the cycle officially concludes at midnight.
-* **Friends Leaderboard**: A relaxed, social leaderboard tab where certificates are hidden so friendly competition among peers stays casual and pressure-free.
+## Learn More
 
-### 4. 🧪 Practice Labs & Mock Tests
-* **Interactive Science Modules**: H5P-inspired interactive assessments, hypothesis testing, and conceptual challenges that build analytical confidence.
-* **XP Rewards & Badges**: Consistent experimentation awards badges (*Rising Genius*, *Logic Master*) and boosts student levels.
+To learn more about Next.js, take a look at the following resources:
 
----
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-## Tech Stack & Architecture
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-* **Framework**: Next.js 16 (App Router, Server Actions, TypeScript)
-* **Styling**: Vanilla Tailwind CSS with custom SVG illustrations and responsive fluid layouts
-* **Database & Auth**: Supabase (Postgres, Row Level Security, Realtime tables)
-* **Build System**: Optimized static and dynamic route generation
+## Deploy on Vercel
 
----
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-## Getting Started Locally
-
-1. **Clone the repository and install dependencies**:
-   ```bash
-   npm install
-   ```
-
-2. **Set up your environment variables**:
-   Create a `.env.local` file with your Supabase project credentials:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
-
-3. **Start the development server**:
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-4. **Verify production build**:
-   ```bash
-   npm run build
-   ```
-
----
-
-## Design Notes
-
-* **Zero Corporate Fluff**: Designed with warm, vibrant colors (#ffe16d Agastya yellow, #143867 deep blue, #f37021 vibrant orange, and lush emerald greens) that feel inviting and child-friendly.
-* **Mobile-First & Lightweight**: Free of heavy 3D canvas libraries so pages load instantly on standard mobile connections.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

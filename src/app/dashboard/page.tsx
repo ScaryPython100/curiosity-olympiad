@@ -8,6 +8,8 @@ import { awardXP } from "@/app/actions/profile";
 import { getBestBadge, BADGES } from "@/utils/gamification";
 import { getUserAvatar, useUserAvatar } from "@/utils/userAvatar";
 import { playLevelUpSound } from "@/utils/audio";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { useLanguage } from "@/context/LanguageContext";
 
 const PARTNER_SCHOOLS = [
   { name: "Global Olympiad Partner Academy", location: "Worldwide", icon: "public", badgeColor: "bg-[#143867] text-white border-[#f37021]", emblem: "🌐" },
@@ -21,6 +23,7 @@ const PARTNER_SCHOOLS = [
 ];
 
 export default function DashboardPage() {
+  const { t } = useLanguage();
   const router = useRouter();
   const { userId, loading: userLoading } = useUser();
   const [isAwarding, setIsAwarding] = useState(false);
@@ -127,11 +130,14 @@ export default function DashboardPage() {
         <div className="flex justify-between items-center px-4 py-2 w-full max-w-7xl mx-auto">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[#143867]">lightbulb</span>
-            <h1 className="text-xl text-[#143867] font-bold tracking-tight">Curiosity Olympiad</h1>
+            <h1 className="text-xl text-[#143867] font-bold tracking-tight">{t("app_title")}</h1>
           </div>
-          <button className="text-gray-600 hover:bg-gray-200 transition-colors p-2 rounded-full active:scale-95 duration-150 ease-in-out">
-            <span className="material-symbols-outlined">logout</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <LanguageSelector />
+            <button className="text-gray-600 hover:bg-gray-200 transition-colors p-2 rounded-full active:scale-95 duration-150 ease-in-out" title={t("logout")}>
+              <span className="material-symbols-outlined">logout</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -141,7 +147,7 @@ export default function DashboardPage() {
         <section className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
           <div className="mb-2 flex items-center justify-between">
             <span className="bg-[#ffe16d] text-[#221b00] px-3 py-1 rounded-full text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(255,215,0,0.2)]">
-              Explorer Dashboard
+              {t("explorer_dashboard")}
             </span>
 
             {/* Gamification Testing Button */}
@@ -151,7 +157,7 @@ export default function DashboardPage() {
               className="flex items-center gap-2 bg-[#143867] text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-[#1d4d8a] transition-all active:scale-95 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-sm">auto_awesome</span>
-              {isAwarding ? "Exploring..." : "Claim Daily XP"}
+              {isAwarding ? "Exploring..." : t("claim_daily_xp")}
             </button>
           </div>
 
@@ -209,40 +215,6 @@ export default function DashboardPage() {
               className="px-6 py-3.5 rounded-full bg-[#143867] hover:bg-[#1e4a85] text-[#ffe16d] font-black text-xs sm:text-sm shadow-md transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shrink-0 border-2 border-[#ffe16d]/30"
             >
               <span>Open Campus Map ➔</span>
-            </Link>
-          </div>
-        </section>
-
-        {/* 🔬 NEW: Playful Invitation to The Agastya Curiosity Journal & DIY Home Lab */}
-        <section className="mb-10">
-          <div className="bg-gradient-to-r from-[#fff7ed] via-[#fffbeb] to-[#fef3c7] rounded-3xl p-6 sm:p-8 border-2 border-amber-300/80 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-            <div className="flex items-center gap-4 relative z-10">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#f37021] to-[#d95e16] flex items-center justify-center text-3xl shadow-md shrink-0">
-                🔬
-              </div>
-              <div>
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f37021] text-white text-[10px] font-black uppercase tracking-wider">
-                    <span>Aah! • Aha! • Ha-ha!</span>
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-200 text-amber-950 text-[10px] font-black uppercase tracking-wider">
-                    <span>Zero-Cost Science Kit</span>
-                  </span>
-                </div>
-                <h3 className="text-lg sm:text-xl font-black text-[#143867] tracking-tight">
-                  The Curiosity Journal &amp; DIY Home Lab
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-600 font-medium">
-                  Log your daily <strong className="text-[#143867]">&ldquo;Why?&rdquo;</strong> hypothesis, applaud discoveries from fellow scholars across India, or build zero-cost experiments at home!
-                </p>
-              </div>
-            </div>
-
-            <Link
-              href="/curiosity-journal"
-              className="px-6 py-3.5 rounded-full bg-[#f37021] hover:bg-[#d95e16] text-white font-black text-xs sm:text-sm shadow-md transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shrink-0 border-2 border-white/40"
-            >
-              <span>Open Curiosity Journal ➔</span>
             </Link>
           </div>
         </section>

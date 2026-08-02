@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { downloadCertificateAsPNG } from "@/utils/certificateCanvas";
 
 export type RankCertificateType = 
   | "Daily Rank 1"
@@ -35,8 +36,20 @@ export default function CertificateModal({
   isCompletedCycle = false,
 }: CertificateModalProps) {
   const [copied, setCopied] = useState(false);
+  const [officialRealName, setOfficialRealName] = useState(studentRealName || "Student Champion");
 
-  const displayName = studentRealName || "Student Champion";
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedName = localStorage.getItem("curiosity_real_name");
+      if (storedName && storedName.trim()) {
+        setOfficialRealName(storedName.trim());
+      } else if (studentRealName && studentRealName.trim()) {
+        setOfficialRealName(studentRealName.trim());
+      }
+    }
+  }, [studentRealName, isOpen]);
+
+  const displayName = officialRealName || "Student Champion";
 
   if (!isOpen) return null;
 
@@ -50,14 +63,22 @@ export default function CertificateModal({
     window.print();
   };
 
-  const shareText = encodeURIComponent(
-    `Proud to earn the ${achievementType} Certificate of Excellence in the @AgastyaOrg Curiosity Olympiad! 🚀✨ Exploring experiential science and discovery. #AahAhaHaha #CuriosityOlympiad`
-  );
+  const handleDownloadPNG = () => {
+    if (!isUnlocked) return;
+    downloadCertificateAsPNG({
+      studentRealName: displayName,
+      achievementType,
+      awardDate,
+      certificateId,
+    });
+  };
 
-  const shareUrl = encodeURIComponent("https://curiosity-olympiad.vercel.app");
+  const shareText = `Proud to earn the ${achievementType} Certificate of Excellence in the @AgastyaOrg Curiosity Olympiad! 🚀✨ Exploring experiential science and discovery. #AahAhaHaha #CuriosityOlympiad`;
+  const shareUrl = "https://curiosity-olympiad.vercel.app";
 
-  const twitterUrl = `https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`;
-  const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`;
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+  const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+  const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + shareUrl)}`;
 
   const handleCopyLink = () => {
     if (!isUnlocked) return;
@@ -236,28 +257,74 @@ export default function CertificateModal({
                   <p className="text-[10px] text-gray-600">{awardDate}</p>
                 </div>
               </div>
+
+              {/* Social Media Sharing Bar */}
+              <div className="pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span className="text-xs font-bold text-gray-600">Share Your Achievement:</span>
+                <div className="flex items-center gap-2 flex-wrap justify-center">
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs"
+                  >
+                    <span>💬 WhatsApp</span>
+                  </a>
+                  <a
+                    href={twitterUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 bg-[#143867] hover:bg-[#1e4a85] text-white font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs"
+                  >
+                    <span>𝕏 Share</span>
+                  </a>
+                  <a
+                    href={linkedInUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 bg-[#0a66c2] hover:bg-[#004182] text-white font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs"
+                  >
+                    <span>in LinkedIn</span>
+                  </a>
+                  <button
+                    onClick={handleCopyLink}
+                    className="px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs"
+                  >
+                    <span>{copied ? "✓ Copied!" : "🔗 Copy Link"}</span>
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
 
         {/* Modal Footer Controls */}
-        <div className="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between gap-2 shrink-0">
+        <div className="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between gap-2 shrink-0 flex-wrap">
           <button
             onClick={onClose}
-            className="flex-1 sm:flex-initial px-4 py-2.5 bg-[#143867] hover:bg-[#1e4a85] active:scale-95 text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm"
+            className="px-4 py-2.5 bg-[#143867] hover:bg-[#1e4a85] active:scale-95 text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm"
           >
             <span className="material-symbols-outlined text-sm">arrow_back</span>
             <span>Back to Leaderboard</span>
           </button>
 
           {isUnlocked && (
-            <button
-              onClick={handlePrint}
-              className="px-4 py-2.5 bg-[#f37021] hover:bg-[#ea580c] text-white font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
-            >
-              <span className="material-symbols-outlined text-sm">print</span>
-              <span>Print / PDF</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleDownloadPNG}
+                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl transition-all flex items-center gap-1.5 shadow-md active:scale-95"
+              >
+                <span className="material-symbols-outlined text-sm">download</span>
+                <span>Download Certificate (PNG Image)</span>
+              </button>
+              <button
+                onClick={handlePrint}
+                className="px-4 py-2.5 bg-[#f37021] hover:bg-[#ea580c] text-white font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
+              >
+                <span className="material-symbols-outlined text-sm">print</span>
+                <span>Print / PDF</span>
+              </button>
+            </div>
           )}
         </div>
       </div>

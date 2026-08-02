@@ -7,7 +7,7 @@ import { signUpAction, signInAction, sendOtpAction, verifyOtpAction, resetPasswo
 
 export default function AuthPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"create_account" | "login">("create_account");
+  const [activeTab, setActiveTab] = useState<"create_account" | "login">("login");
   const isLogin = activeTab === "login";
   const [loginWithOtp, setLoginWithOtp] = useState(false);
   
@@ -28,7 +28,7 @@ export default function AuthPage() {
   // Forgot Password State
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [resetIdentifier, setResetIdentifier] = useState("");
-  const [resetOtp, setResetOtp] = useState("123456");
+  const [resetOtp, setResetOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   
   const [isLoading, setIsLoading] = useState(false);
@@ -428,12 +428,12 @@ export default function AuthPage() {
                       id="resetOtp"
                       type="text"
                       required
-                      placeholder="123456"
+                      placeholder="• • • • • •"
                       value={resetOtp}
                       onChange={(e) => setResetOtp(e.target.value)}
                       className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm font-mono tracking-widest focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
                     />
-                    <p className="text-[10px] text-gray-500 font-medium">Use <span className="font-mono font-bold text-[#f37021]">123456</span> for instant sandbox verification.</p>
+                    <p className="text-[10px] text-gray-500 font-medium">Enter the 6-digit OTP code sent to your registered Email or Mobile Number.</p>
                   </div>
 
                   {/* New Password */}

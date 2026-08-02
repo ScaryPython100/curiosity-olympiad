@@ -1,4 +1,5 @@
 import "./globals.css"; // This import is what hooks up Tailwind!
+import { LanguageProvider } from "@/context/LanguageContext";
 
 export const metadata = {
   title: "Curiosity Olympiad",
@@ -35,7 +36,9 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-[#f7f9fb] dark:bg-gray-900 text-[#191c1e] dark:text-gray-100 antialiased transition-colors duration-300">
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );

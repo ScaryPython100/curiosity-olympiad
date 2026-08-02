@@ -146,7 +146,7 @@ export default function SandboxEngine({
       </div>
 
       {/* Dynamic Physics Level Container */}
-      <div className="w-full rounded-2xl overflow-hidden shadow-2xl border-2 sm:border-4 border-gray-800 bg-gray-900 flex flex-col h-[380px] sm:h-[450px] md:h-[500px]">
+      <div className="w-full rounded-2xl overflow-hidden shadow-2xl border-2 sm:border-4 border-gray-800 bg-gray-900 flex flex-col min-h-[520px] sm:min-h-[560px] md:min-h-[600px] h-auto">
         {renderLevel()}
       </div>
 

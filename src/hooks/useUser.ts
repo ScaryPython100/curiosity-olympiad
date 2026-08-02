@@ -10,12 +10,23 @@ export function useUser() {
   const supabase = createClient()
 
   useEffect(() => {
+    const getDescopeCookieUser = () => {
+      if (typeof document === 'undefined') return null;
+      const match = document.cookie.match(/(^|;)\s*descope_session=([^;]+)/);
+      if (match && match[2]) {
+        const id = decodeURIComponent(match[2]);
+        return { id, email: id } as User;
+      }
+      return null;
+    };
+
     const getUser = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
-        setUser(user)
+        setUser(user || getDescopeCookieUser())
       } catch (error) {
         console.error('Error fetching user:', error)
+        setUser(getDescopeCookieUser())
       } finally {
         setLoading(false)
       }
@@ -25,7 +36,7 @@ export function useUser() {
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setUser(session?.user ?? null)
+        setUser(session?.user ?? getDescopeCookieUser())
         setLoading(false)
       }
     )

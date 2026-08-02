@@ -147,25 +147,28 @@ export async function sendOtpAction(formData: FormData) {
 
   if (isCreateAccount) {
     const supabase = await createClient();
-    const emailToCheck = destination.includes("@")
-      ? destination.trim()
-      : `${destination.replace(/[^0-9]/g, "")}@phone.curiosityolympiad.org`;
 
-    // 1. FIRST: Verify if the Mail ID / Phone Number is registered or not
-    const { data: testSignUpData, error: testSignUpError } = await supabase.auth.signUp({
-      email: emailToCheck,
-      password: "TestUserExistence_TempPass_123!",
-      options: {
-        data: { username: username || "explorer", real_name: username || "explorer" },
-      },
-    });
+    // 1. FIRST: Only check Supabase Auth existence if Descope is NOT configured
+    if (!process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID) {
+      const emailToCheck = destination.includes("@")
+        ? destination.trim()
+        : `${destination.replace(/[^0-9]/g, "")}@phone.curiosityolympiad.org`;
 
-    const isEmailRegistered =
-      testSignUpError?.message?.toLowerCase().includes("already registered") ||
-      (testSignUpData?.user?.identities && testSignUpData.user.identities.length === 0);
+      const { data: testSignUpData, error: testSignUpError } = await supabase.auth.signUp({
+        email: emailToCheck,
+        password: "TestUserExistence_TempPass_123!",
+        options: {
+          data: { username: username || "explorer", real_name: username || "explorer" },
+        },
+      });
 
-    if (isEmailRegistered) {
-      return { error: `🚫 Email ID / Phone Number is already registered! Please navigate to Login Page to sign in.` };
+      const isEmailRegistered =
+        testSignUpError?.message?.toLowerCase().includes("already registered") ||
+        (testSignUpData?.user?.identities && testSignUpData.user.identities.length === 0);
+
+      if (isEmailRegistered) {
+        return { error: `🚫 Email ID / Phone Number is already registered! Please navigate to Login Page to sign in.` };
+      }
     }
 
     // 2. SECOND: If the mail/phone number aren't registered check for the username
@@ -182,124 +185,173 @@ export async function sendOtpAction(formData: FormData) {
     }
   }
 
-  // 3. THIRD: If both checks pass, move ahead to the OTP Page
-  console.log(`[Dev Sandbox OTP] Sent OTP to ${destination} via ${method}. Use code 123456 to bypass.`);
+  // 3. THIRD: Send OTP via Descope Authentication (with Supabase fallback)
+  const supabase = await createClient();
+  const descopeProjectId = process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID;
+
+  if (descopeProjectId) {
+    const isEmail = destination.includes("@");
+    const endpoint = isEmail ? "signup-in/email" : "signup-in/sms";
+    let loginId = destination.trim();
+    if (!isEmail) {
+      loginId = loginId.replace(/[^0-9+]/g, "");
+      if (!loginId.startsWith("+")) {
+        loginId = loginId.length === 10 ? `+91${loginId}` : `+${loginId}`;
+      }
+    }
+
+    try {
+      const res = await fetch(`https://api.descope.com/v1/auth/otp/${endpoint}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${descopeProjectId}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ loginId }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const errMsg = data?.errorDescription || data?.message || data?.errorMessage || `Descope Error (${res.status})`;
+        return { error: `Failed to send OTP via Descope: ${errMsg}` };
+      }
+      return { success: true, message: `6-Digit OTP sent to ${loginId} via Descope!` };
+    } catch (err: any) {
+      return { error: `Network error sending OTP: ${err.message || "Please check your connection."}` };
+    }
+  }
+
+  if (destination.includes("@")) {
+    const { error } = await supabase.auth.signInWithOtp({
+      email: destination.trim(),
+      options: {
+        shouldCreateUser: isCreateAccount,
+        data: isCreateAccount ? { username: username || "Explorer", real_name: username || "Explorer" } : undefined,
+      },
+    });
+
+    if (error && !error.message.toLowerCase().includes("rate limit")) {
+      return { error: `Failed to send OTP to email: ${error.message}` };
+    }
+  } else {
+    let phoneNum = destination.replace(/[^0-9+]/g, "");
+    if (!phoneNum.startsWith("+")) {
+      phoneNum = phoneNum.length === 10 ? `+91${phoneNum}` : `+${phoneNum}`;
+    }
+    const { error } = await supabase.auth.signInWithOtp({
+      phone: phoneNum,
+      options: {
+        shouldCreateUser: isCreateAccount,
+        data: isCreateAccount ? { username: username || "Explorer", real_name: username || "Explorer" } : undefined,
+      },
+    });
+
+    if (error && !error.message.toLowerCase().includes("rate limit")) {
+      return { error: `Failed to send OTP to mobile: ${error.message}` };
+    }
+  }
 
   return { success: true, message: `OTP sent to ${destination} via ${method}` };
 }
 
-// 5. Verify OTP Action with Dev Sandbox Override (123456)
+// 5. Verify OTP Action (Email & Mobile SMS via Descope / Supabase)
 export async function verifyOtpAction(formData: FormData) {
   const destination = formData.get("destination") as string;
   const code = formData.get("code") as string;
   const username = (formData.get("username") as string) || destination.split("@")[0] || "Explorer";
   const realName = (formData.get("realName") as string) || username;
-  const password = (formData.get("password") as string) || "DevSandboxOverridePassword!123";
   const isCreateAccount = formData.get("isCreateAccount") === "true";
 
   const supabase = await createClient();
+  const descopeProjectId = process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID;
 
-  // Dev Sandbox Override: Instant verification without hitting SMS/Email rate limits
-  if (code === "123456") {
-    let email = destination.includes("@") ? destination : `${destination.replace(/[^0-9]/g, "")}@phone.curiosityolympiad.org`;
-    
-    if (isCreateAccount) {
-      // 1. FIRST: Verify if Mail ID / Phone Number is already registered
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { username, real_name: realName },
-        },
-      });
+  let userId: string | null = null;
 
-      const isAlreadyRegistered =
-        signUpError?.message?.toLowerCase().includes("already registered") ||
-        (signUpData?.user?.identities && signUpData.user.identities.length === 0);
-
-      if (isAlreadyRegistered) {
-        return { error: `🚫 Email ID / Phone Number is already registered! Please navigate to Login Page to sign in.` };
-      }
-
-      // 2. SECOND: If Mail ID / Phone Number aren't registered, check for the username
-      if (username && username !== "Explorer") {
-        const { data: existingUser } = await supabase
-          .from("student_profiles")
-          .select("id")
-          .ilike("username", username.trim())
-          .maybeSingle();
-
-        if (existingUser) {
-          return { error: `🚫 Username already taken, please select a different one.` };
-        }
-      }
-
-      if (signUpError) {
-        return { error: `Sandbox sign up failed: ${signUpError.message}` };
-      }
-
-      if (signUpData?.user) {
-        await supabase
-          .from("student_profiles")
-          .upsert([{ id: signUpData.user.id, username }], { onConflict: "id" });
-
-        await supabase
-          .from("user_gamification")
-          .upsert([{ id: signUpData.user.id, user_id: signUpData.user.id, xp: 500, curiosity_points: 500 }], { onConflict: "user_id" });
-      }
-
-      return { success: true };
-    }
-
-    // For Login (when not creating an account), first try signing in
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (signInError) {
-      // If user doesn't exist yet, sign up automatically for instant sandbox testing
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { username, real_name: realName },
-        },
-      });
-
-      if (signUpError && !signUpError.message.toLowerCase().includes("already registered")) {
-        return { error: `Sandbox sign up failed: ${signUpError.message}` };
-      }
-
-      if (signUpData?.user) {
-        await supabase
-          .from("student_profiles")
-          .upsert([{ id: signUpData.user.id, username }], { onConflict: "id" });
-
-        await supabase
-          .from("user_gamification")
-          .upsert([{ id: signUpData.user.id, user_id: signUpData.user.id, xp: 500, curiosity_points: 500 }], { onConflict: "user_id" });
+  if (descopeProjectId) {
+    const isEmail = destination.includes("@");
+    const endpoint = isEmail ? "verify/email" : "verify/sms";
+    let loginId = destination.trim();
+    if (!isEmail) {
+      loginId = loginId.replace(/[^0-9+]/g, "");
+      if (!loginId.startsWith("+")) {
+        loginId = loginId.length === 10 ? `+91${loginId}` : `+${loginId}`;
       }
     }
 
-    return { success: true };
-  }
+    try {
+      const res = await fetch(`https://api.descope.com/v1/auth/otp/${endpoint}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${descopeProjectId}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ loginId, code: code.trim() }),
+      });
 
-  // Production Supabase OTP Verification
-  const { error } = destination.includes("@")
-    ? await supabase.auth.verifyOtp({
-        email: destination,
-        token: code,
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const errMsg = data?.errorDescription || data?.message || data?.errorMessage || "Invalid verification code";
+        return { error: `Verification failed: ${errMsg}. Please check the 6-digit OTP code.` };
+      }
+
+      userId = data?.user?.userId || data?.user?.email || loginId;
+    } catch (err: any) {
+      return { error: `Verification request failed: ${err.message || "Network error"}` };
+    }
+  } else {
+    let error;
+    let data;
+
+    if (destination.includes("@")) {
+      const res = await supabase.auth.verifyOtp({
+        email: destination.trim(),
+        token: code.trim(),
         type: "email",
-      })
-    : await supabase.auth.verifyOtp({
-        phone: destination,
-        token: code,
+      });
+      error = res.error;
+      data = res.data;
+    } else {
+      let phoneNum = destination.replace(/[^0-9+]/g, "");
+      if (!phoneNum.startsWith("+")) {
+        phoneNum = phoneNum.length === 10 ? `+91${phoneNum}` : `+${phoneNum}`;
+      }
+      const res = await supabase.auth.verifyOtp({
+        phone: phoneNum,
+        token: code.trim(),
         type: "sms",
       });
+      error = res.error;
+      data = res.data;
+    }
 
-  if (error) {
-    return { error: `Verification failed: ${error.message}.` };
+    if (error) {
+      return { error: `Verification failed: ${error.message}. Please check the OTP code and try again.` };
+    }
+
+    userId = data?.user?.id || null;
+  }
+
+  // Ensure user profile & gamification records exist upon verification
+  if (userId) {
+    await supabase
+      .from("student_profiles")
+      .upsert([{ id: userId, username, real_name: realName }], { onConflict: "id" });
+
+    await supabase
+      .from("user_gamification")
+      .upsert([{ id: userId, user_id: userId, xp: 500, curiosity_points: 500 }], { onConflict: "user_id" });
+
+    try {
+      const cookieStore = await cookies();
+      cookieStore.set("descope_session", userId, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        httpOnly: false,
+        sameSite: "lax",
+      });
+    } catch (e) {
+      // Ignore cookie errors if headers are read-only
+    }
   }
 
   return { success: true };
@@ -357,40 +409,52 @@ export async function resetPasswordAction(formData: FormData) {
     }
   }
 
-  // Sandbox OTP (123456) or Developer mode override
-  if (code === "123456" || process.env.NODE_ENV === "development") {
-    // 2. Perform password update WITH explicit username metadata preservation
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email: emailToReset,
-      password: newPassword,
-      options: {
-        data: {
-          username: existingUsername,
-        },
-      },
+  // Verify OTP for password recovery
+  let error;
+  if (identifier.includes("@")) {
+    const res = await supabase.auth.verifyOtp({
+      email: identifier.trim(),
+      token: code.trim(),
+      type: "recovery",
     });
-
-    if (signUpError && !signUpError.message.toLowerCase().includes("already registered")) {
-      return { error: `Password update failed: ${signUpError.message}` };
+    error = res.error;
+  } else {
+    let phoneNum = identifier.replace(/[^0-9+]/g, "");
+    if (!phoneNum.startsWith("+")) {
+      phoneNum = phoneNum.length === 10 ? `+91${phoneNum}` : `+${phoneNum}`;
     }
-
-    // 3. Ensure student_profiles preserves the original username!
-    if (signUpData?.user) {
-      await supabase
-        .from("student_profiles")
-        .upsert([{ id: signUpData.user.id, username: existingUsername }], { onConflict: "id" });
-    }
-
-    return {
-      success: true,
-      message: `Password for '${existingUsername}' has been reset to '${newPassword}'. You can now log in!`,
-    };
+    const res = await supabase.auth.verifyOtp({
+      phone: phoneNum,
+      token: code.trim(),
+      type: "sms",
+    });
+    error = res.error;
   }
 
-  const { error: resetError } = await supabase.auth.resetPasswordForEmail(emailToReset);
-  if (resetError) {
-    return { error: resetError.message };
+  if (error) {
+    return { error: `Invalid verification code: ${error.message}` };
   }
 
-  return { success: true, message: "Password reset link sent to your registered email!" };
+  // Once verified, update user password WITH explicit username metadata preservation
+  const { data: updateData, error: updateError } = await supabase.auth.updateUser({
+    password: newPassword,
+    data: {
+      username: existingUsername,
+    },
+  });
+
+  if (updateError) {
+    return { error: `Password update failed: ${updateError.message}` };
+  }
+
+  if (updateData?.user) {
+    await supabase
+      .from("student_profiles")
+      .upsert([{ id: updateData.user.id, username: existingUsername }], { onConflict: "id" });
+  }
+
+  return {
+    success: true,
+    message: `Password for '${existingUsername}' has been reset successfully! You can now log in.`,
+  };
 }

@@ -151,14 +151,14 @@ export async function getLeaderboard(timeframe: 'weekly' | 'daily' | 'friends' =
   const userIds = gamificationData.map((row) => row.user_id);
   const { data: profilesData } = await supabase
     .from("student_profiles")
-    .select("id, username")
+    .select("id, username, real_name")
     .in("id", userIds);
 
-  // Build a lookup map: userId -> { username }
-  const profileMap = new Map<string, { username: string }>();
+  // Build a lookup map: userId -> { username, real_name }
+  const profileMap = new Map<string, { username: string; real_name?: string }>();
   if (profilesData) {
     for (const p of profilesData) {
-      profileMap.set(p.id, { username: p.username });
+      profileMap.set(p.id, { username: p.username, real_name: p.real_name });
     }
   }
 
