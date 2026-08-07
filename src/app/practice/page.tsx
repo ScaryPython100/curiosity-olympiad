@@ -589,8 +589,18 @@ export default function PracticePage() {
 
   // Persistence for completed mock tests
   const [completedMockTests, setCompletedMockTests] = useState<Record<number, MockTestResult>>({});
+  const [unlockedLevelIndices, setUnlockedLevelIndices] = useState<number[]>([0]);
 
   useEffect(() => {
+    // Fetch unlocked levels from backend
+    import('@/app/actions/scoring').then(module => {
+      module.getUnlockedLevels().then(res => {
+        if (res.success && res.unlockedLevels) {
+          setUnlockedLevelIndices(res.unlockedLevels);
+        }
+      });
+    });
+
     if (typeof window !== "undefined") {
       try {
         const stored = localStorage.getItem("curiosity_mock_tests_results");
@@ -598,7 +608,7 @@ export default function PracticePage() {
           setCompletedMockTests(JSON.parse(stored));
         }
       } catch (err) {
-        console.error("Error loading mock test results:", err);
+        console.error(err);
       }
     }
   }, []);
@@ -858,25 +868,28 @@ export default function PracticePage() {
               </div>
 
               <div className="grid grid-cols-1 gap-5">
-                {MOCK_TESTS.map((test) => {
+                {MOCK_TESTS.map((test, index) => {
                   const result = completedMockTests[test.id];
                   const isCompleted = Boolean(result?.completed);
                   const isSelected = selectedMockTestId === test.id;
+                  const isLocked = !unlockedLevelIndices.includes(index);
 
                   return (
                     <div
                       key={test.id}
-                      onClick={() => setSelectedMockTestId(test.id)}
-                      className={`cursor-pointer rounded-3xl p-6 border-2 transition-all bg-white relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 ${
-                        isSelected
-                          ? "border-[#143867] shadow-xl ring-4 ring-[#143867]/10"
-                          : "border-gray-200 hover:border-gray-300 shadow-sm"
+                      onClick={() => !isLocked && setSelectedMockTestId(test.id)}
+                      className={`rounded-3xl p-6 border-2 transition-all relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 ${
+                        isLocked 
+                          ? "opacity-50 cursor-not-allowed bg-gray-50 border-gray-200" 
+                          : isSelected
+                            ? "cursor-pointer border-[#143867] shadow-xl ring-4 ring-[#143867]/10 bg-white"
+                            : "cursor-pointer border-gray-200 hover:border-gray-300 shadow-sm bg-white"
                       }`}
                     >
                       <div className="flex items-start gap-4 max-w-2xl">
-                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-md bg-gradient-to-br ${test.color}`}>
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-md bg-gradient-to-br ${isLocked ? 'from-gray-400 to-gray-500' : test.color}`}>
                           <span className="material-symbols-outlined text-2xl">
-                            {test.icon}
+                            {isLocked ? 'lock' : test.icon}
                           </span>
                         </div>
                         <div className="space-y-1.5">
@@ -885,8 +898,13 @@ export default function PracticePage() {
                               {test.badge}
                             </span>
 
-                            {/* Status Pill: Completed vs Pending */}
-                            {isCompleted ? (
+                            {/* Status Pill: Completed vs Pending vs Locked */}
+                            {isLocked ? (
+                              <span className="inline-flex items-center gap-1 bg-gray-200 text-gray-700 text-xs font-bold px-3 py-0.5 rounded-full border border-gray-300">
+                                <span className="material-symbols-outlined text-sm">lock</span>
+                                Locked (Finish previous level)
+                              </span>
+                            ) : isCompleted ? (
                               <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 text-xs font-black px-3 py-0.5 rounded-full border border-green-300">
                                 <span className="material-symbols-outlined text-sm">check_circle</span>
                                 Completed ({result.score}/{result.total} • {result.percentage}%)

@@ -14,17 +14,40 @@ export interface CQAxis {
 interface CuriosityQuotientCardProps {
   xp?: number;
   username?: string;
+  telemetryLogs?: any[];
 }
 
-export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: CuriosityQuotientCardProps) {
+export function CuriosityQuotientCard({ xp = 450, username = "Explorer", telemetryLogs = [] }: CuriosityQuotientCardProps) {
   // Deterministic calculation based on XP so CQ scores grow realistically as student earns XP
   const baseScore = Math.min(95, Math.max(65, 68 + Math.floor(xp / 300)));
+
+  // Real calculation from telemetry if available
+  const hasData = telemetryLogs && telemetryLogs.length > 0;
+  
+  let spatialScore = baseScore + 4;
+  let patternScore = baseScore + 8;
+  let epistemicScore = baseScore + 2;
+  let deductiveScore = baseScore + 6;
+  let inquiryScore = baseScore + 5;
+
+  if (hasData) {
+    const avgStates = telemetryLogs.reduce((acc, log) => acc + (log.distinct_states_reached || 0), 0) / telemetryLogs.length;
+    const avgTier = telemetryLogs.reduce((acc, log) => acc + (log.tier || 0), 0) / telemetryLogs.length;
+    const avgSubmits = telemetryLogs.reduce((acc, log) => acc + (log.submit_attempts || 1), 0) / telemetryLogs.length;
+    const avgMLScore = telemetryLogs.reduce((acc, log) => acc + (log.ml_score || 0), 0) / telemetryLogs.length;
+    
+    spatialScore = Math.min(99, 50 + (avgStates * 10)); // proxy for positioning accuracy
+    patternScore = Math.min(99, 60 + (telemetryLogs.filter(l => l.comparison_pattern_detected).length * 15));
+    epistemicScore = Math.min(99, 90 - (avgSubmits * 5) + (avgMLScore * 5)); // low submits + good free text
+    deductiveScore = Math.min(99, 65 + (avgMLScore * 10)); 
+    inquiryScore = Math.min(99, 40 + (avgTier * 20)); // Exploration tier reached
+  }
   
   const axes: CQAxis[] = [
     {
       id: "spatial",
       label: "Shape Smarts",
-      score: Math.min(98, baseScore + 4),
+      score: Math.round(Math.min(98, spatialScore)),
       icon: "view_in_ar",
       description: "Seeing how shapes fit together and moving them in your mind.",
       superpowerText: "You are great at picturing how objects move and fit together!"
@@ -32,7 +55,7 @@ export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: Curio
     {
       id: "pattern",
       label: "Finding Patterns",
-      score: Math.min(99, baseScore + 8),
+      score: Math.round(Math.min(99, patternScore)),
       icon: "pattern",
       description: "Spotting things that repeat and guessing what comes next.",
       superpowerText: "You are very fast at seeing how things are connected!"
@@ -40,7 +63,7 @@ export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: Curio
     {
       id: "epistemic",
       label: "Careful Thinking",
-      score: Math.min(96, baseScore + 2),
+      score: Math.round(Math.min(96, epistemicScore)),
       icon: "fact_check",
       description: "Asking good questions and checking if things are really true.",
       superpowerText: "You think like a real scientist by always checking the facts!"
@@ -48,7 +71,7 @@ export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: Curio
     {
       id: "deductive",
       label: "Solving Puzzles",
-      score: Math.min(97, baseScore + 6),
+      score: Math.round(Math.min(97, deductiveScore)),
       icon: "psychology",
       description: "Using clues to figure out the right answer.",
       superpowerText: "You are great at connecting clues to solve mysteries!"
@@ -56,7 +79,7 @@ export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: Curio
     {
       id: "inquiry",
       label: "Testing Ideas",
-      score: Math.min(98, baseScore + 5),
+      score: Math.round(Math.min(98, inquiryScore)),
       icon: "science",
       description: "Trying out new things to see how they work.",
       superpowerText: "You love learning by doing experiments yourself!"
@@ -67,10 +90,21 @@ export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: Curio
   const avgScore = Math.round(axes.reduce((sum, a) => sum + a.score, 0) / axes.length);
   const overallCQ = 100 + Math.round((avgScore - 60) * 0.85);
 
-  // Find brain superpower (highest score)
+  // Find brain superpower (highest score) and weakness (lowest score)
   const superpower = axes.reduce((prev, curr) => (curr.score > prev.score ? curr : prev), axes[0]);
+  const weakness = axes.reduce((prev, curr) => (curr.score < prev.score ? curr : prev), axes[0]);
 
   const [selectedAxis, setSelectedAxis] = useState<CQAxis>(superpower);
+
+  // Determine specific feedback based on the lowest pillar
+  let weaknessFeedback = "";
+  switch(weakness.id) {
+    case "spatial": weaknessFeedback = "You're doing great, but try paying more attention to where objects are placed!"; break;
+    case "pattern": weaknessFeedback = "Try to move things back and forth to see the differences clearly!"; break;
+    case "epistemic": weaknessFeedback = "Try to explain your reasoning more deeply and guess less often!"; break;
+    case "deductive": weaknessFeedback = "Take your time connecting the clues together before submitting an answer!"; break;
+    case "inquiry": weaknessFeedback = "You solved the tasks correctly, but rarely explored the 'what if' options — try clicking those next time!"; break;
+  }
 
   // SVG Radar Chart geometry (5 vertices)
   const size = 260;
@@ -255,6 +289,17 @@ export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: Curio
 
         {/* Right Side: Interactive Skill Axes Breakdown */}
         <div className="lg:col-span-6 space-y-3">
+          {/* Improvement Feedback Area */}
+          <div className="w-full mt-4 bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start gap-3">
+            <span className="material-symbols-outlined text-orange-600 mt-0.5">tips_and_updates</span>
+            <div>
+              <h5 className="font-bold text-orange-900 text-sm mb-1">Growth Area</h5>
+              <p className="text-sm text-orange-800 leading-relaxed">
+                {weaknessFeedback}
+              </p>
+            </div>
+          </div>
+
           {axes.map((axis) => {
             const isSelected = selectedAxis.id === axis.id;
             return (
