@@ -425,15 +425,7 @@ export default function CampusMapPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleHonk}
-              className={`px-5 py-2.5 rounded-full bg-[#ffe16d] hover:bg-yellow-300 text-[#143867] font-black text-xs sm:text-sm shadow-lg transition-all flex items-center gap-2 hover:scale-105 active:scale-95 border-2 border-[#f37021] ${
-                vanHonking ? "animate-bounce ring-4 ring-amber-300" : ""
-              }`}
-              title="Honk the Mobile Science Van!"
-            >
-              <span>{vanHonking ? "BEEP BEEP! 🎺" : "Honk Van! 🎺"}</span>
-            </button>
+
 
             <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#145330] border border-emerald-400/30 shadow-inner">
               <span className="text-xs font-black uppercase text-emerald-200">Total Progress:</span>
@@ -626,19 +618,11 @@ export default function CampusMapPage() {
           }`}
         >
           <div className="relative flex flex-col items-center">
-            <div className="w-16 h-12 sm:w-20 sm:h-14 bg-white rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.5)] border-2 border-[#f37021] overflow-hidden flex items-center justify-center p-1 bg-gradient-to-br from-yellow-300 to-amber-500">
-              <img
-                src="/agastya-science-van.jpg"
-                alt="Agastya Mobile Science Van"
-                className="w-full h-full object-cover rounded-xl"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = "none";
-                }}
-              />
-              <span className="text-2xl sm:text-3xl absolute">🚌</span>
+            <div className="flex items-center justify-center filter drop-shadow-xl transform scale-150 mb-2">
+              <span className="text-5xl sm:text-6xl drop-shadow-2xl inline-block -scale-x-100">🚐</span>
             </div>
-            <span className="px-2.5 py-0.5 bg-[#f37021] text-white text-[10px] font-black rounded-full shadow-md mt-1 whitespace-nowrap border border-white/30">
-              You are here! ({userXp} XP) 🚌
+            <span className="px-3 py-1 bg-[#f37021] text-white text-[11px] font-black rounded-full shadow-lg mt-1 whitespace-nowrap border border-white/30">
+              You are here! ({userXp} XP)
             </span>
           </div>
         </div>

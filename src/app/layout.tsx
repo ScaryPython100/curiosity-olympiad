@@ -35,7 +35,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="bg-[#f7f9fb] dark:bg-gray-900 text-[#191c1e] dark:text-gray-100 antialiased transition-colors duration-300">
+      <body suppressHydrationWarning className="bg-[#f7f9fb] dark:bg-gray-900 text-[#191c1e] dark:text-gray-100 antialiased transition-colors duration-300">
         <LanguageProvider>
           {children}
         </LanguageProvider>

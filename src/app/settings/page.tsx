@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function SettingsPage() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -58,7 +60,7 @@ export default function SettingsPage() {
         >
           <span className="material-symbols-outlined leading-none">arrow_back</span>
         </Link>
-        <h1 className="text-xl font-bold text-[#143867] dark:text-blue-400 transition-colors duration-300">Settings</h1>
+        <h1 className="text-xl font-bold text-[#143867] dark:text-blue-400 transition-colors duration-300">{t("settings") || "Settings"}</h1>
       </header>
 
       {/* Main Content */}
@@ -66,12 +68,12 @@ export default function SettingsPage() {
 
         {/* Account Section */}
         <section className="mb-6">
-          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1 transition-colors duration-300">Account</h2>
+          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1 transition-colors duration-300">{t("account") || "Account"}</h2>
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden transition-colors duration-300">
             <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors active:bg-gray-100 dark:active:bg-gray-700">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[#143867] dark:text-blue-400 transition-colors duration-300">lock</span>
-                <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">Change Password</span>
+                <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">{t("change_password") || "Change Password"}</span>
               </div>
               <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl transition-colors duration-300">chevron_right</span>
             </button>
@@ -79,7 +81,7 @@ export default function SettingsPage() {
             <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors active:bg-gray-100 dark:active:bg-gray-700">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[#143867] dark:text-blue-400 transition-colors duration-300">shield</span>
-                <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">Privacy Settings</span>
+                <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">{t("privacy") || "Privacy Settings"}</span>
               </div>
               <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl transition-colors duration-300">chevron_right</span>
             </button>
@@ -88,14 +90,14 @@ export default function SettingsPage() {
 
         {/* Appearance Section */}
         <section className="mb-6">
-          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1 transition-colors duration-300">Appearance</h2>
+          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1 transition-colors duration-300">{t("appearance") || "Appearance"}</h2>
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden transition-colors duration-300">
             <div className="flex items-center justify-between px-5 py-4">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[#143867] dark:text-blue-400 transition-colors duration-300">
                   {isDarkMode ? "dark_mode" : "light_mode"}
                 </span>
-                <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">Theme</span>
+                <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">{t("theme") || "Theme"}</span>
               </div>
               <button
                 onClick={toggleTheme}
@@ -112,7 +114,7 @@ export default function SettingsPage() {
             </div>
             <div className="px-5 pb-4">
               <span className="text-xs text-gray-400 dark:text-gray-500 font-medium transition-colors duration-300">
-                {isDarkMode ? "Dark mode enabled" : "Light mode enabled"}
+                {isDarkMode ? (t("dark_enabled") || "Dark mode enabled") : (t("light_enabled") || "Light mode enabled")}
               </span>
             </div>
           </div>
@@ -120,17 +122,17 @@ export default function SettingsPage() {
 
         {/* Activity Section */}
         <section className="mb-6">
-          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1 transition-colors duration-300">Activity</h2>
+          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1 transition-colors duration-300">{t("activity") || "Activity"}</h2>
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden p-5 transition-colors duration-300">
             <div className="flex items-center gap-3 mb-4">
               <span className="material-symbols-outlined text-[#143867] dark:text-blue-400 transition-colors duration-300">history</span>
-              <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">Tournament History</span>
+              <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">{t("tournament_history") || "Tournament History"}</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-[#f0f4f8] dark:bg-gray-700 rounded-xl p-4 border border-gray-100 dark:border-gray-600 transition-colors duration-300">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="material-symbols-outlined text-sm text-[#143867] dark:text-blue-400 transition-colors duration-300">science</span>
-                  <span className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">Physics</span>
+                  <span className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">{t("physics") || "Physics"}</span>
                 </div>
                 <p className="text-xs font-bold text-[#143867] dark:text-gray-200 mb-1 transition-colors duration-300">Quantum Physics Mock</p>
                 <div className="flex items-center gap-2">
@@ -143,7 +145,7 @@ export default function SettingsPage() {
               <div className="bg-[#f0f4f8] dark:bg-gray-700 rounded-xl p-4 border border-gray-100 dark:border-gray-600 transition-colors duration-300">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="material-symbols-outlined text-sm text-[#143867] dark:text-blue-400 transition-colors duration-300">calculate</span>
-                  <span className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">Math</span>
+                  <span className="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">{t("math") || "Math"}</span>
                 </div>
                 <p className="text-xs font-bold text-[#143867] dark:text-gray-200 mb-1 transition-colors duration-300">Global Mathematics Cup</p>
                 <div className="flex items-center gap-2">
@@ -159,12 +161,12 @@ export default function SettingsPage() {
 
         {/* Support Section */}
         <section className="mb-6">
-          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1 transition-colors duration-300">Support</h2>
+          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1 transition-colors duration-300">{t("support") || "Support"}</h2>
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden transition-colors duration-300">
             <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors active:bg-gray-100 dark:active:bg-gray-700">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[#143867] dark:text-blue-400 transition-colors duration-300">feedback</span>
-                <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">Send Feedback</span>
+                <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">{t("send_feedback") || "Send Feedback"}</span>
               </div>
               <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl transition-colors duration-300">chevron_right</span>
             </button>
@@ -172,7 +174,7 @@ export default function SettingsPage() {
             <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors active:bg-gray-100 dark:active:bg-gray-700">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[#143867] dark:text-blue-400 transition-colors duration-300">help</span>
-                <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">Help Center</span>
+                <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">{t("help_center") || "Help Center"}</span>
               </div>
               <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl transition-colors duration-300">chevron_right</span>
             </button>
@@ -181,12 +183,12 @@ export default function SettingsPage() {
 
         {/* Legal Section */}
         <section className="mb-6">
-          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1 transition-colors duration-300">Legal</h2>
+          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1 transition-colors duration-300">{t("legal") || "Legal"}</h2>
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden transition-colors duration-300">
             <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors active:bg-gray-100 dark:active:bg-gray-700">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[#143867] dark:text-blue-400 transition-colors duration-300">description</span>
-                <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">Terms of Service</span>
+                <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">{t("terms") || "Terms of Service"}</span>
               </div>
               <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl transition-colors duration-300">open_in_new</span>
             </button>
@@ -194,7 +196,7 @@ export default function SettingsPage() {
             <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors active:bg-gray-100 dark:active:bg-gray-700">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[#143867] dark:text-blue-400 transition-colors duration-300">policy</span>
-                <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">Privacy Policy</span>
+                <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">{t("privacy_policy") || "Privacy Policy"}</span>
               </div>
               <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl transition-colors duration-300">open_in_new</span>
             </button>
@@ -209,7 +211,7 @@ export default function SettingsPage() {
             className="w-full flex items-center justify-center gap-2 px-5 py-4 bg-white dark:bg-gray-800 rounded-2xl border-2 border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 font-bold text-sm hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors active:scale-[0.98] disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-xl">logout</span>
-            {isLoggingOut ? "Logging out..." : "Log Out"}
+            {isLoggingOut ? (t("logging_out") || "Logging out...") : (t("logout") || "Log Out")}
           </button>
         </section>
 

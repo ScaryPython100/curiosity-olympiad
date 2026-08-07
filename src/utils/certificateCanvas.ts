@@ -140,8 +140,8 @@ export function downloadCertificateAsPNG({
   ctx.fillText("Chief Mentor & Founder, Agastya Foundation", 200, footerY + 36);
 
   ctx.beginPath();
-  ctx.moveTo(200, footerY - 15);
-  ctx.lineTo(600, footerY - 15);
+  ctx.moveTo(200, footerY - 40);
+  ctx.lineTo(600, footerY - 40);
   ctx.strokeStyle = "#94a3b8";
   ctx.lineWidth = 2;
   ctx.stroke();
@@ -156,8 +156,8 @@ export function downloadCertificateAsPNG({
   ctx.fillText(`Certificate ID: ${certificateId}`, width - 200, footerY + 36);
 
   ctx.beginPath();
-  ctx.moveTo(width - 600, footerY - 15);
-  ctx.lineTo(width - 200, footerY - 15);
+  ctx.moveTo(width - 600, footerY - 40);
+  ctx.lineTo(width - 200, footerY - 40);
   ctx.strokeStyle = "#94a3b8";
   ctx.lineWidth = 2;
   ctx.stroke();

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { downloadCertificateAsPNG } from "@/utils/certificateCanvas";
+import { updateRealName } from "@/app/actions/profile";
 
 export type RankCertificateType = 
   | "Daily Rank 1"
@@ -37,21 +38,49 @@ export default function CertificateModal({
 }: CertificateModalProps) {
   const [copied, setCopied] = useState(false);
   const [officialRealName, setOfficialRealName] = useState(studentRealName || "Student Champion");
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [hasRegisteredName, setHasRegisteredName] = useState(true); // Default true to avoid hydration flash
+
+  const handleSaveName = async () => {
+    const trimmed = nameInput.trim();
+    if (trimmed) {
+      setOfficialRealName(trimmed);
+      setIsEditingName(false);
+      setHasRegisteredName(true);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("curiosity_real_name", trimmed);
+      }
+      if (onUpdateRealName) {
+        onUpdateRealName(trimmed);
+      }
+      // Save to Supabase for future use
+      try {
+        await updateRealName(trimmed);
+      } catch (err) {
+        console.error("Failed to save real name to database:", err);
+      }
+    }
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedName = localStorage.getItem("curiosity_real_name");
       if (storedName && storedName.trim()) {
         setOfficialRealName(storedName.trim());
-      } else if (studentRealName && studentRealName.trim()) {
-        setOfficialRealName(studentRealName.trim());
+        setHasRegisteredName(true);
+      } else {
+        setHasRegisteredName(false);
+        if (studentRealName && studentRealName.trim()) {
+          setOfficialRealName(studentRealName.trim());
+        }
       }
     }
   }, [studentRealName, isOpen]);
 
   const displayName = officialRealName || "Student Champion";
 
-  if (!isOpen) return null;
+  if (!isOpen) return <div style={{ display: 'none' }} data-testid="certificate-modal-hidden" />;
 
   // Unlocking criteria: Must be Rank #1 AND the cycle MUST be completed (isCompletedCycle)
   const isRankOne = Boolean(isEligible || userRank === 1);
@@ -212,88 +241,130 @@ export default function CertificateModal({
             /* =========================================================
                UNLOCKED FULL MERIT CERTIFICATE (For Rank #1 Champion)
                ========================================================= */
-            <div className="border-4 sm:border-8 border-double border-[#143867] p-4 sm:p-8 rounded-2xl bg-white relative overflow-hidden shadow-inner text-center space-y-4">
-              <div className="space-y-1">
-                <div className="w-12 h-12 mx-auto rounded-full bg-[#fff7ed] border-2 border-[#f37021] p-2">
-                  <img src="/agastya-logo.svg" alt="Agastya Logo" className="w-full h-full object-contain" />
+            <div className="space-y-6">
+              {!hasRegisteredName || isEditingName ? (
+                <div className="bg-white border-2 border-[#143867] p-6 rounded-2xl shadow-sm text-center space-y-4">
+                  <div className="w-12 h-12 mx-auto rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
+                    <span className="material-symbols-outlined text-2xl">person_edit</span>
+                  </div>
+                  <h3 className="text-lg font-black text-[#143867]">Register Your Official Name</h3>
+                  <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                    Your official real name hasn't been registered yet. Please enter exactly how you want your name to appear on the Certificate of Excellence.
+                  </p>
+                  <div className="flex items-center gap-2 max-w-sm mx-auto">
+                    <input
+                      type="text"
+                      value={nameInput}
+                      onChange={(e) => setNameInput(e.target.value)}
+                      placeholder="e.g. Jane Doe"
+                      className="flex-1 border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-[#f37021] focus:ring-1 focus:ring-[#f37021]"
+                    />
+                    <button
+                      onClick={handleSaveName}
+                      disabled={!nameInput.trim()}
+                      className="px-4 py-2 bg-[#143867] hover:bg-[#1e4a85] text-white font-bold text-sm rounded-lg disabled:opacity-50 transition-all"
+                    >
+                      Save
+                    </button>
+                  </div>
                 </div>
-                <h3 className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-500">
-                  Agastya International Foundation • Curiosity Olympiad
-                </h3>
-                <h2 className="text-xl sm:text-3xl font-black text-[#143867] font-serif">
-                  CERTIFICATE OF EXCELLENCE
-                </h2>
-              </div>
+              ) : (
+                <>
+                  <div className="border-4 sm:border-[6px] border-double border-[#143867] p-6 sm:p-10 rounded-xl bg-white relative overflow-hidden shadow-sm text-center space-y-4 antialiased">
+                    <div className="space-y-1">
+                      <div className="w-14 h-14 mx-auto rounded-full bg-[#fff7ed] border-2 border-[#f37021] p-2">
+                        <img src="/agastya-logo.svg" alt="Agastya Logo" className="w-full h-full object-contain" />
+                      </div>
+                      <h3 className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-500 mt-2">
+                        Agastya International Foundation • Curiosity Olympiad
+                      </h3>
+                      <h2 className="text-2xl sm:text-4xl font-black text-[#143867] font-serif tracking-wide pt-1">
+                        CERTIFICATE OF EXCELLENCE
+                      </h2>
+                    </div>
 
-              <div className="py-2 space-y-1">
-                <p className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase">
-                  This formal certificate is proudly presented to
-                </p>
-                <div className="flex items-center justify-center gap-2 max-w-md mx-auto border-b-2 border-[#143867]/30 py-1">
-                  <h1 className="text-2xl sm:text-4xl font-extrabold text-[#143867] font-serif">
-                    {displayName}
-                  </h1>
-                </div>
-              </div>
+                    <div className="py-4 space-y-2">
+                      <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-widest">
+                        This formal certificate is proudly presented to
+                      </p>
+                      <div className="flex items-center justify-center gap-2 max-w-md mx-auto border-b border-[#143867]/30 pb-2 relative group">
+                        <h1 className="text-3xl sm:text-5xl font-extrabold text-[#143867] font-serif">
+                          {displayName}
+                        </h1>
+                        <button 
+                          onClick={() => {
+                            setNameInput(officialRealName);
+                            setIsEditingName(true);
+                          }}
+                          className="absolute -right-8 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-[#f37021] transition-all p-1"
+                          title="Edit Name"
+                        >
+                          <span className="material-symbols-outlined text-sm">edit</span>
+                        </button>
+                      </div>
+                    </div>
 
-              <div className="max-w-md mx-auto space-y-2">
-                <p className="text-xs text-gray-700">
-                  For achieving top standing on the national leaderboard and demonstrating scientific inquiry mastery:
-                </p>
-                <div className="inline-block bg-[#fff7ed] border-2 border-[#f37021] px-4 py-2 rounded-xl">
-                  <span className="text-sm sm:text-lg font-black text-[#f37021] uppercase block">
-                    ★ {achievementType === "Daily Rank 1" ? "DAILY RANK #1 CHAMPION" : "WEEKLY RANK #1 CHAMPION"} ★
-                  </span>
-                </div>
-              </div>
+                    <div className="max-w-md mx-auto space-y-3">
+                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed px-4">
+                        For achieving top standing on the national leaderboard and demonstrating scientific inquiry mastery:
+                      </p>
+                      <div className="inline-block bg-[#fff7ed] border-2 border-[#f37021] px-5 py-2 rounded-xl mt-2 shadow-xs">
+                        <span className="text-sm sm:text-lg font-black text-[#f37021] uppercase tracking-wide block">
+                          ★ {achievementType === "Daily Rank 1" ? "DAILY RANK #1 CHAMPION" : "WEEKLY RANK #1 CHAMPION"} ★
+                        </span>
+                      </div>
+                    </div>
 
-              <div className="pt-4 border-t border-gray-200 flex justify-between items-end text-xs text-left">
-                <div>
-                  <p className="font-bold text-[#143867]">Dr. Ramji Narayanan</p>
-                  <p className="text-[10px] text-gray-500">Agastya Foundation</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-[#143867]">Award Date</p>
-                  <p className="text-[10px] text-gray-600">{awardDate}</p>
-                </div>
-              </div>
+                    <div className="pt-8 flex justify-between items-end text-xs text-left px-2 sm:px-6">
+                      <div className="border-t border-gray-400 pt-2 w-32 sm:w-48">
+                        <p className="font-bold text-[#143867] text-[11px] sm:text-xs">Dr. Ramji Narayanan</p>
+                        <p className="text-[9px] sm:text-[10px] text-gray-500">Chief Mentor, Agastya Foundation</p>
+                      </div>
+                      <div className="text-right border-t border-gray-400 pt-2 w-28 sm:w-40">
+                        <p className="font-bold text-[#143867] text-[11px] sm:text-xs">Award Date</p>
+                        <p className="text-[9px] sm:text-[10px] text-gray-600">{awardDate}</p>
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Social Media Sharing Bar */}
-              <div className="pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <span className="text-xs font-bold text-gray-600">Share Your Achievement:</span>
-                <div className="flex items-center gap-2 flex-wrap justify-center">
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs"
-                  >
-                    <span>💬 WhatsApp</span>
-                  </a>
-                  <a
-                    href={twitterUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1.5 bg-[#143867] hover:bg-[#1e4a85] text-white font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs"
-                  >
-                    <span>𝕏 Share</span>
-                  </a>
-                  <a
-                    href={linkedInUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1.5 bg-[#0a66c2] hover:bg-[#004182] text-white font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs"
-                  >
-                    <span>in LinkedIn</span>
-                  </a>
-                  <button
-                    onClick={handleCopyLink}
-                    className="px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs"
-                  >
-                    <span>{copied ? "✓ Copied!" : "🔗 Copy Link"}</span>
-                  </button>
-                </div>
-              </div>
+                  {/* Social Media Sharing Bar (Moved OUTSIDE Certificate) */}
+                  <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
+                    <span className="text-xs font-bold text-gray-600">Share Your Achievement:</span>
+                    <div className="flex items-center gap-2 flex-wrap justify-center">
+                      <a
+                        href={whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs"
+                      >
+                        <span>💬 WhatsApp</span>
+                      </a>
+                      <a
+                        href={twitterUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 bg-[#143867] hover:bg-[#1e4a85] text-white font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs"
+                      >
+                        <span>𝕏 Share</span>
+                      </a>
+                      <a
+                        href={linkedInUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 bg-[#0a66c2] hover:bg-[#004182] text-white font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs"
+                      >
+                        <span>in LinkedIn</span>
+                      </a>
+                      <button
+                        onClick={handleCopyLink}
+                        className="px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white font-bold text-xs rounded-xl flex items-center gap-1 transition-all shadow-xs"
+                      >
+                        <span>{copied ? "✓ Copied!" : "🔗 Copy Link"}</span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>

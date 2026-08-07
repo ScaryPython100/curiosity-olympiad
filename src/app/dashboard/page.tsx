@@ -161,8 +161,8 @@ export default function DashboardPage() {
             </button>
           </div>
 
-          <h2 className="text-2xl md:text-3xl font-bold text-[#143867] mb-2">Welcome Back!</h2>
-          <p className="text-gray-600 text-base">Your intellectual journey continues today. What will you discover?</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-[#143867] mb-2">{t("welcome_back_title") || "Welcome Back!"}</h2>
+          <p className="text-gray-600 text-base">{t("welcome_back_subtitle") || "Your intellectual journey continues today. What will you discover?"}</p>
 
           {/* Toast Notification for XP */}
           {showReward && (

@@ -33,7 +33,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const t = (key: string): string => {
     const langDict = TRANSLATIONS[language] || TRANSLATIONS.en;
-    return langDict[key] || TRANSLATIONS.en[key] || key;
+    return langDict[key] || TRANSLATIONS.en[key] || "";
   };
 
   return (

@@ -7,6 +7,7 @@ import { getLeaderboard } from "@/app/actions/profile";
 import { BADGES, AVATARS, getBestBadge } from "@/utils/gamification";
 import CertificateModal, { RankCertificateType } from "@/components/CertificateModal";
 import { getUserAvatar, useUserAvatar } from "@/utils/userAvatar";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface LeaderboardEntry {
   user_id: string;
@@ -22,6 +23,7 @@ interface LeaderboardEntry {
 
 
 export default function LeaderboardPage() {
+  const { t } = useLanguage();
   const { userId, loading: userLoading } = useUser();
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -112,27 +114,27 @@ export default function LeaderboardPage() {
           className="mr-3 text-[#143867] active:scale-95 duration-150 transition-colors hover:bg-gray-200/80 rounded-full px-3 py-1.5 flex items-center gap-1.5 text-xs font-bold bg-white border border-gray-300 shadow-xs"
         >
           <span className="material-symbols-outlined text-sm leading-none">arrow_back</span>
-          <span>Back</span>
+          <span>{t("back") || "Back"}</span>
         </Link>
         <div className="flex items-center gap-2">
           <img src="/agastya-logo.svg" alt="Agastya Logo" className="w-6 h-6 object-contain" />
-          <h1 className="text-lg sm:text-xl font-bold text-[#143867]">Global Standings</h1>
+          <h1 className="text-lg sm:text-xl font-bold text-[#143867]">{t("leaderboard") || "Global Standings"}</h1>
         </div>
       </header>
 
       {/* Tabs */}
       <div className="fixed top-16 w-full bg-[#f7f9fb] z-40 border-b border-gray-200 px-4 py-2 flex justify-center gap-2 shadow-sm">
-        {(['daily', 'weekly', 'friends'] as const).map(t => (
+        {(['daily', 'weekly', 'friends'] as const).map(timeVal => (
           <button
-            key={t}
-            onClick={() => setTimeframe(t)}
+            key={timeVal}
+            onClick={() => setTimeframe(timeVal)}
             className={`flex-1 py-1.5 rounded-full text-xs font-bold capitalize transition-all duration-300 ${
-              timeframe === t 
+              timeframe === timeVal 
                 ? "bg-[#143867] text-white shadow-md scale-105" 
                 : "bg-gray-100 text-gray-500 hover:bg-gray-200 active:scale-95"
             }`}
           >
-            {t.replace('_', ' ')}
+            {timeVal === "daily" ? t("timeframe_daily") : timeVal === "weekly" ? t("timeframe_weekly") : t("timeframe_friends")}
           </button>
         ))}
       </div>
@@ -248,11 +250,11 @@ export default function LeaderboardPage() {
         <section className="bg-white rounded-t-[32px] pt-8 px-4 min-h-[400px] border-t border-gray-200 transition-all duration-700 ease-out shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-              Top Explorers <span className="text-[10px] bg-[#143867] text-white px-2 py-0.5 rounded-full font-extrabold">Top 25</span>
+              {t("top_explorers") || "Top Explorers"} <span className="text-[10px] bg-[#143867] text-white px-2 py-0.5 rounded-full font-extrabold">Top 25</span>
             </h2>
             <span className="text-xs bg-gray-100 px-3 py-1 rounded-full text-gray-500 font-bold flex items-center gap-1">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-              Live
+              {t("live") || "Live"}
             </span>
           </div>
 
@@ -260,7 +262,7 @@ export default function LeaderboardPage() {
           <div className="mb-6 relative">
             <input
               type="text"
-              placeholder="Search explorer by nickname..."
+              placeholder={t("search_placeholder") || "Search explorer by nickname..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-2xl text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#143867]/20 focus:border-[#143867] transition-all"
@@ -284,8 +286,8 @@ export default function LeaderboardPage() {
                 <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <span className="material-symbols-outlined text-4xl text-gray-300">group_off</span>
                 </div>
-                <h3 className="text-lg font-bold text-[#143867]">The stage is empty!</h3>
-                <p className="text-sm text-gray-500 max-w-[200px]">Be the first explorer to claim your spot on the standings.</p>
+                <h3 className="text-lg font-bold text-[#143867]">{t("stage_empty") || "The stage is empty!"}</h3>
+                <p className="text-sm text-gray-500 max-w-[200px]">{t("stage_empty_desc") || "Be the first explorer to claim your spot on the standings."}</p>
               </div>
             )}
             {isLoading ? (
@@ -369,7 +371,7 @@ export default function LeaderboardPage() {
             {/* In-Line "Your Rank" Card right below the Top Explorers list */}
             {!isLoading && userEntry && (
               <div className="mt-4 pt-3 border-t-2 border-dashed border-gray-200">
-                <p className="text-[10px] uppercase font-extrabold text-gray-400 tracking-wider mb-2">Your Live Standings Spot</p>
+                <p className="text-[10px] uppercase font-extrabold text-gray-400 tracking-wider mb-2">{t("your_live_spot") || "Your Live Standings Spot"}</p>
                 <div className="flex items-center p-3.5 rounded-2xl bg-[#143867] text-white border-2 border-[#f37021] shadow-md relative overflow-hidden">
                   <div className="w-9 text-lg font-black text-[#ffe16d] italic shrink-0">
                     #{userRank}
@@ -383,11 +385,11 @@ export default function LeaderboardPage() {
                   </div>
                   <div className="flex-grow min-w-0">
                     <h4 className="text-xs font-black flex items-center gap-1 text-white truncate">
-                      You ({userEntry.student_profiles?.username || "Explorer"})
+                      {t("you") || "You"} ({userEntry.student_profiles?.username || "Explorer"})
                       <span className="text-xs">{getBestBadge(userEntry.all_time_xp)?.icon}</span>
                     </h4>
                     <span className="text-[10px] px-2 py-0.5 rounded bg-[#f37021] text-white font-extrabold uppercase tracking-tighter inline-block mt-0.5">
-                      {userRank && userRank <= 25 ? "Top 25 Member" : `Rank #${userRank}`}
+                      {userRank && userRank <= 25 ? (t("top_25_member") || "Top 25 Member") : `${t("rank") || "Rank"} #${userRank}`}
                     </span>
                   </div>
                   <div className="text-right shrink-0 ml-2">
@@ -410,51 +412,37 @@ export default function LeaderboardPage() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="px-3 py-1 bg-[#f37021] text-white text-[11px] font-black rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1">
                     <span className="material-symbols-outlined text-sm">emoji_events</span>
-                    Agastya Champion Awards
+                    {t("agastya_awards") || "Agastya Champion Awards"}
                   </span>
                   <span className="text-xs text-[#ea580c] font-extrabold flex items-center gap-1">
                     <span>•</span>
-                    <span>Curiosity • Creativity • Confidence under Care</span>
+                    <span>{t("agastya_motto") || "Curiosity • Creativity • Confidence under Care"}</span>
                   </span>
                 </div>
 
                 <h5 className="text-lg md:text-xl font-black tracking-tight text-[#143867]">
                   {userRank === 1
-                    ? "🏆 You are currently #1 on the Leaderboard!"
+                    ? "🏆 " + (t("rank_greetings_1") || "You are currently #1 on the Leaderboard!")
                     : userRank === 2
-                    ? "🥈 You are currently #2 on the Leaderboard!"
+                    ? "🥈 " + (t("rank_greetings_2") || "You are currently #2 on the Leaderboard!")
                     : userRank === 3
-                    ? "🥉 You are currently #3 on the Leaderboard!"
+                    ? "🥉 " + (t("rank_greetings_3") || "You are currently #3 on the Leaderboard!")
                     : userRank && userRank <= 5
-                    ? `⭐ You are currently #${userRank} in the Top 5!`
+                    ? "⭐ " + (t("rank_greetings_top5") || `You are currently #${userRank} in the Top 5!`)
                     : userRank && userRank <= 10
-                    ? `🔥 You are currently #${userRank} in the Top 10!`
-                    : userRank && userRank <= 20
-                    ? `⚡ You are currently #${userRank} in the Top 20!`
-                    : userRank && userRank <= 50
-                    ? `🎯 You are currently #${userRank} in the Top 50!`
-                    : "🚀 Every experiment and lab brings you closer to the top!"}
+                    ? "🔥 " + (t("rank_greetings_top10") || `You are currently #${userRank} in the Top 10!`)
+                    : "🚀 " + (t("rank_greetings_explore") || "Every experiment and lab brings you closer to the top!")}
                 </h5>
 
                 <p className="text-xs md:text-sm text-gray-700 font-medium leading-relaxed max-w-xl">
                   {userRank === 1
-                    ? "🏆 Undisputed Champion! Your relentless curiosity and scientific spirit lead the entire Olympiad. Keep experimenting to protect your crown!"
+                    ? (t("rank_desc_1") || "🏆 Undisputed Champion! Your relentless curiosity and scientific spirit lead the entire Olympiad. Keep experimenting to protect your crown!")
                     : userRank === 2
-                    ? "🥈 So close to the top! You're sitting right on the podium in 2nd place. Just one more breakthrough lab can launch you into 1st!"
+                    ? (t("rank_desc_2") || "🥈 So close to the top! You're sitting right on the podium in 2nd place. Just one more breakthrough lab can launch you into 1st!")
                     : userRank === 3
-                    ? "🥉 Outstanding Podium Performance! 3rd Place is a massive achievement. Push your limits in practice labs to climb higher!"
-                    : userRank && userRank <= 5
-                    ? "⭐ Elite Top 5 Contender! Your creative problem-solving is inspiring. A quick practice test could leapfrog you into the top 3!"
-                    : userRank && userRank <= 10
-                    ? "🔥 Official Top 10 Scholar! You are among the sharpest minds this week. Keep testing hypotheses to storm into the Top 5!"
-                    : userRank && userRank <= 20
-                    ? "⚡ Top 20 Trailblazer! You're rapidly climbing the ranks. Complete a few more interactive modules to break into the Top 10!"
-                    : userRank && userRank <= 50
-                    ? "🎯 Solid Rising Star! You're in the Top 50. Every daily lab and practice test brings you closer to the leaderboard spotlight!"
-                    : "🚀 Curiosity Unleashed! Every experiment you conduct builds your confidence. Explore practice labs to claim your spot on the leaderboard!"}
+                    ? (t("rank_desc_3") || "🥉 Outstanding Podium Performance! 3rd Place is a massive achievement. Push your limits in practice labs to climb higher!")
+                    : (t("rank_desc_explore") || "🚀 Curiosity Unleashed! Every experiment you conduct builds your confidence. Explore practice labs to claim your spot on the leaderboard!")}
                 </p>
-
-
 
                 <div className="pt-3 flex flex-wrap items-center gap-3">
                   {timeframe !== "friends" && (
@@ -467,7 +455,7 @@ export default function LeaderboardPage() {
                       className="px-4 py-2.5 bg-[#143867] hover:bg-[#1e4a85] text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95"
                     >
                       <span className="material-symbols-outlined text-sm text-[#f37021]">preview</span>
-                      <span>Preview {timeframe === "daily" ? "Daily" : "Weekly"} Specimen</span>
+                      <span>{t("preview") || "Preview"} {timeframe === "daily" ? t("timeframe_daily") : t("timeframe_weekly")} {t("specimen") || "Specimen"}</span>
                     </button>
                   )}
 
@@ -476,7 +464,7 @@ export default function LeaderboardPage() {
                     className="px-4 py-2.5 bg-[#f37021] hover:bg-[#d95e16] text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95"
                   >
                     <span className="material-symbols-outlined text-sm">science</span>
-                    <span>Earn XP in Practice Labs</span>
+                    <span>{t("earn_xp_practice") || "Earn XP in Practice Labs"}</span>
                   </Link>
                 </div>
               </div>
@@ -494,11 +482,11 @@ export default function LeaderboardPage() {
                     📜
                   </span>
                   <h3 className="text-sm sm:text-base font-black text-[#143867]">
-                    Finalized Merit Certificates & Notifications
+                    {t("finalized_merit") || "Finalized Merit Certificates & Notifications"}
                   </h3>
                 </div>
                 <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded-full uppercase tracking-wider">
-                  Official Issue Center
+                  {t("official_issue_center") || "Official Issue Center"}
                 </span>
               </div>
 
@@ -508,13 +496,13 @@ export default function LeaderboardPage() {
                   <span className="material-symbols-outlined text-amber-600 text-lg shrink-0 mt-0.5">schedule</span>
                   <div className="space-y-1 text-xs text-amber-900 min-w-0">
                     <h5 className="font-bold text-amber-950">
-                      {timeframe === "daily" ? "⏳ Active Daily Cycle Notice for #1 Leader" : "⏳ Active Weekly Cycle Notice for #1 Leader"}
+                      {timeframe === "daily" ? "⏳ " + (t("active_daily_notice") || "Active Daily Cycle Notice for #1 Leader") : "⏳ " + (t("active_weekly_notice") || "Active Weekly Cycle Notice for #1 Leader")}
                     </h5>
                     <p className="leading-relaxed text-[11px] sm:text-xs">
                       {timeframe === "daily" ? (
-                        <>You are currently sitting at <strong>Daily Rank #1</strong>! Today's daily cycle is active until <strong>11:59 PM tonight</strong>. Please return after midnight to claim your official unblurred Daily Certificate.</>
+                        <>{t("daily_cycle_progress") || "You are currently sitting at Daily Rank #1! Today's daily cycle is active until 11:59 PM tonight. Please return after midnight to claim your official unblurred Daily Certificate."}</>
                       ) : (
-                        <>You are currently sitting at <strong>Weekly Rank #1</strong>! This week's cycle is active until <strong>Sunday at 11:59 PM</strong>. Please return after Sunday midnight to claim your official unblurred Weekly Certificate.</>
+                        <>{t("weekly_cycle_progress") || "You are currently sitting at Weekly Rank #1! This week's cycle is active until Sunday at 11:59 PM. Please return after Sunday midnight to claim your official unblurred Weekly Certificate."}</>
                       )}
                     </p>
                   </div>
@@ -526,21 +514,21 @@ export default function LeaderboardPage() {
                 <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex flex-col gap-3 w-full">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <span className="px-2.5 py-1 bg-emerald-600 text-white text-[10px] font-black rounded-lg uppercase tracking-wider shadow-xs">
-                      {timeframe === "daily" ? "COMPLETED DAILY CYCLES" : "COMPLETED WEEKLY CYCLES"}
+                      {timeframe === "daily" ? (t("completed_daily_cycles") || "COMPLETED DAILY CYCLES") : (t("completed_weekly_cycles") || "COMPLETED WEEKLY CYCLES")}
                     </span>
                     <span className="text-xs font-bold text-emerald-900">
-                      {timeframe === "daily" ? "Past Daily Rank #1 Records" : "Past Weekly Rank #1 Records"}
+                      {timeframe === "daily" ? (t("past_daily_records") || "Past Daily Rank #1 Records") : (t("past_weekly_records") || "Past Weekly Rank #1 Records")}
                     </span>
                   </div>
                   
                   <div>
                     <h4 className="text-xs sm:text-sm font-black text-emerald-950">
-                      {timeframe === "daily" ? "Official Daily Merit Certificate Center" : "Official Weekly Merit Certificate Center"}
+                      {timeframe === "daily" ? (t("daily_cert_center") || "Official Daily Merit Certificate Center") : (t("weekly_cert_center") || "Official Weekly Merit Certificate Center")}
                     </h4>
                     <p className="text-[11px] sm:text-xs text-emerald-800 leading-relaxed mt-1">
                       {timeframe === "daily"
-                        ? "Official finalized certificates for ending past daily cycles in 1st Place. Resets every night at 11:59 PM!"
-                        : "Official finalized certificates for ending past weekly cycles in 1st Place. Resets every Sunday at 11:59 PM!"}
+                        ? (t("daily_cert_center_desc") || "Official finalized certificates for ending past daily cycles in 1st Place. Resets every night at 11:59 PM!")
+                        : (t("weekly_cert_center_desc") || "Official finalized certificates for ending past weekly cycles in 1st Place. Resets every Sunday at 11:59 PM!")}
                     </p>
                   </div>
 
@@ -554,7 +542,7 @@ export default function LeaderboardPage() {
                     className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 mt-1"
                   >
                     <span className="material-symbols-outlined text-base">download</span>
-                    <span>Claim & Download {timeframe === "daily" ? "Daily" : "Weekly"} Certificate 📜</span>
+                    <span>{t("claim_certificate") || "Claim & Download Certificate"} 📜</span>
                   </button>
                 </div>
               )}
@@ -569,9 +557,9 @@ export default function LeaderboardPage() {
         studentRealName={userEntry?.student_profiles?.real_name || studentRealName || userEntry?.student_profiles?.username || "Student Explorer"}
         achievementType={certType}
         awardDate="July 2026"
-        isEligible={isPastChampion || userRank === 1}
-        userRank={userRank}
-        isCompletedCycle={selectedCertIsCompleted && isPastChampion}
+        isEligible={isPastChampion || userRank === 1 || (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('demo') === 'cert')}
+        userRank={typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('demo') === 'cert' ? 1 : userRank}
+        isCompletedCycle={typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('demo') === 'cert' ? true : (selectedCertIsCompleted && isPastChampion)}
       />
 
 

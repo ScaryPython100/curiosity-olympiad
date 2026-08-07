@@ -655,3 +655,27 @@ export async function searchUsers(query: string) {
 
   return { data: result };
 }
+
+/**
+ * Updates the user's real name in the student_profiles table.
+ */
+export async function updateRealName(realName: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Not authenticated" };
+  }
+
+  const { error } = await supabase
+    .from("student_profiles")
+    .update({ real_name: realName.trim() })
+    .eq("id", user.id);
+
+  if (error) {
+    console.error("Error updating real name:", error);
+    return { error: error.message };
+  }
+
+  return { success: true };
+}
