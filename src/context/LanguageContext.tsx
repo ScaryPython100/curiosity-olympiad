@@ -4,6 +4,14 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { LanguageCode, SUPPORTED_LANGUAGES, LanguageOption } from "@/utils/translations";
 
 import enDictionary from "../../locales/en.json";
+import hiDictionary from "../../locales/hi.json";
+import teDictionary from "../../locales/te.json";
+import taDictionary from "../../locales/ta.json";
+import knDictionary from "../../locales/kn.json";
+import mlDictionary from "../../locales/ml.json";
+import mrDictionary from "../../locales/mr.json";
+import bnDictionary from "../../locales/bn.json";
+import guDictionary from "../../locales/gu.json";
 
 // We use the English dictionary as the source of truth for types
 export type DictionaryType = typeof enDictionary;
@@ -14,6 +22,18 @@ interface LanguageContextType {
   t: DictionaryType;
   languages: LanguageOption[];
 }
+
+const dictionaries: Record<LanguageCode, DictionaryType> = {
+  en: enDictionary,
+  hi: hiDictionary as unknown as DictionaryType,
+  te: teDictionary as unknown as DictionaryType,
+  ta: taDictionary as unknown as DictionaryType,
+  kn: knDictionary as unknown as DictionaryType,
+  ml: mlDictionary as unknown as DictionaryType,
+  mr: mrDictionary as unknown as DictionaryType,
+  bn: bnDictionary as unknown as DictionaryType,
+  gu: guDictionary as unknown as DictionaryType,
+};
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
@@ -26,32 +46,16 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       const savedLang = (localStorage.getItem("curiosity_language") as LanguageCode) || "en";
       if (SUPPORTED_LANGUAGES.some(l => l.code === savedLang)) {
         setLanguageState(savedLang);
-        if (savedLang !== "en") {
-          import(`../../locales/${savedLang}.json`)
-            .then((mod) => setDictionary(mod.default as unknown as DictionaryType))
-            .catch((err) => {
-              console.error(`Failed to load dictionary for ${savedLang}:`, err);
-              setDictionary(enDictionary);
-            });
-        }
+        setDictionary(dictionaries[savedLang] || enDictionary);
       }
     }
   }, []);
 
   const setLanguage = (lang: LanguageCode) => {
     setLanguageState(lang);
+    setDictionary(dictionaries[lang] || enDictionary);
     if (typeof window !== "undefined") {
       localStorage.setItem("curiosity_language", lang);
-    }
-    if (lang === "en") {
-      setDictionary(enDictionary);
-    } else {
-      import(`../../locales/${lang}.json`)
-        .then((mod) => setDictionary(mod.default as unknown as DictionaryType))
-        .catch((err) => {
-          console.error(`Failed to load dictionary for ${lang}:`, err);
-          setDictionary(enDictionary);
-        });
     }
   };
 
