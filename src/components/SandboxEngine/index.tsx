@@ -7,6 +7,7 @@ import { GravityLevel } from './levels/GravityLevel';
 import { ChemistryLevel } from './levels/ChemistryLevel';
 import { getExperimentConfig, EXPERIMENTS_CONFIG } from '@/config/scoringConfig';
 import { evaluateExperiment, gradeFreeText } from '@/app/actions/scoring';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface SandboxEngineProps {
   onLevelChange?: (index: number) => void;
@@ -26,6 +27,7 @@ export default function SandboxEngine({
   onSubmitComplete
 }: SandboxEngineProps = {}) {
   const { telemetryData, recordAction, resetTelemetry } = useTelemetry();
+  const { t } = useLanguage();
   
   const [internalLevelIndex, setInternalLevelIndex] = useState(0);
   const [levelScores, setLevelScores] = useState<number[]>([]);
@@ -162,9 +164,9 @@ export default function SandboxEngine({
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 px-1">
         <div>
-          <h3 className="text-gray-800 font-bold text-base sm:text-lg">Fun Science Game</h3>
+          <h3 className="text-gray-800 font-bold text-base sm:text-lg">{t.sandbox.title}</h3>
           <div className="flex items-center gap-2 mt-0.5">
-            <p className="text-xs sm:text-sm text-gray-500 font-medium">Game {currentLevelIndex + 1} of {levelsCount}</p>
+            <p className="text-xs sm:text-sm text-gray-500 font-medium">{t.sandbox.game} {currentLevelIndex + 1} {t.sandbox.of} {levelsCount}</p>
             <div className="flex items-center gap-1">
               {[0, 1, 2].map((idx) => (
                 <button
@@ -199,7 +201,7 @@ export default function SandboxEngine({
           <textarea
             className="w-full border border-blue-300 rounded-lg p-2 text-sm text-gray-800 bg-white"
             rows={3}
-            placeholder="Type your answer here in your own words..."
+            placeholder={t.sandbox.type_answer_placeholder}
             value={freeTextResponse}
             onChange={(e) => setFreeTextResponse(e.target.value)}
           />
@@ -214,7 +216,7 @@ export default function SandboxEngine({
             onClick={handleSubmitAnswer}
             className="w-full sm:w-1/3 bg-gray-800 hover:bg-gray-900 text-white py-2 rounded-lg text-sm font-bold transition-colors"
           >
-            Submit Objective
+            {t.sandbox.submit_objective}
           </button>
           
           {/* Middle: Move to next */}
@@ -223,7 +225,7 @@ export default function SandboxEngine({
             disabled={isGrading}
             className="w-full sm:w-1/3 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-1 disabled:opacity-50"
           >
-            {isGrading ? 'Evaluating...' : (isLastLevel ? 'Finish Game' : 'Skip to next question')}
+            {isGrading ? t.sandbox.evaluating : (isLastLevel ? t.sandbox.finish_game : t.sandbox.skip_next)}
           </button>
 
           {/* Right: Curiosity */}

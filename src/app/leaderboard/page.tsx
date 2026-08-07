@@ -114,11 +114,11 @@ export default function LeaderboardPage() {
           className="mr-3 text-[#143867] active:scale-95 duration-150 transition-colors hover:bg-gray-200/80 rounded-full px-3 py-1.5 flex items-center gap-1.5 text-xs font-bold bg-white border border-gray-300 shadow-xs"
         >
           <span className="material-symbols-outlined text-sm leading-none">arrow_back</span>
-          <span>{t("back") || "Back"}</span>
+          <span>{t.leaderboard.back}</span>
         </Link>
         <div className="flex items-center gap-2">
           <img src="/agastya-logo.svg" alt="Agastya Logo" className="w-6 h-6 object-contain" />
-          <h1 className="text-lg sm:text-xl font-bold text-[#143867]">{t("leaderboard") || "Global Standings"}</h1>
+          <h1 className="text-lg sm:text-xl font-bold text-[#143867]">{t.app.leaderboard}</h1>
         </div>
       </header>
 
@@ -134,7 +134,7 @@ export default function LeaderboardPage() {
                 : "bg-gray-100 text-gray-500 hover:bg-gray-200 active:scale-95"
             }`}
           >
-            {timeVal === "daily" ? t("timeframe_daily") : timeVal === "weekly" ? t("timeframe_weekly") : t("timeframe_friends")}
+            {timeVal === "daily" ? t.leaderboard.timeframe_daily : timeVal === "weekly" ? t.leaderboard.timeframe_weekly : t.leaderboard.timeframe_friends}
           </button>
         ))}
       </div>
@@ -250,11 +250,11 @@ export default function LeaderboardPage() {
         <section className="bg-white rounded-t-[32px] pt-8 px-4 min-h-[400px] border-t border-gray-200 transition-all duration-700 ease-out shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-              {t("top_explorers") || "Top Explorers"} <span className="text-[10px] bg-[#143867] text-white px-2 py-0.5 rounded-full font-extrabold">Top 25</span>
+              {t.leaderboard.top_explorers} <span className="text-[10px] bg-[#143867] text-white px-2 py-0.5 rounded-full font-extrabold">Top 25</span>
             </h2>
             <span className="text-xs bg-gray-100 px-3 py-1 rounded-full text-gray-500 font-bold flex items-center gap-1">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-              {t("live") || "Live"}
+              {t.leaderboard.live}
             </span>
           </div>
 
@@ -262,7 +262,7 @@ export default function LeaderboardPage() {
           <div className="mb-6 relative">
             <input
               type="text"
-              placeholder={t("search_placeholder") || "Search explorer by nickname..."}
+              placeholder={t.leaderboard.search_placeholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-2xl text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#143867]/20 focus:border-[#143867] transition-all"
@@ -286,8 +286,8 @@ export default function LeaderboardPage() {
                 <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <span className="material-symbols-outlined text-4xl text-gray-300">group_off</span>
                 </div>
-                <h3 className="text-lg font-bold text-[#143867]">{t("stage_empty") || "The stage is empty!"}</h3>
-                <p className="text-sm text-gray-500 max-w-[200px]">{t("stage_empty_desc") || "Be the first explorer to claim your spot on the standings."}</p>
+                <h3 className="text-lg font-bold text-[#143867]">{t.leaderboard.stage_empty}</h3>
+                <p className="text-sm text-gray-500 max-w-[200px]">{t.leaderboard.stage_empty_desc}</p>
               </div>
             )}
             {isLoading ? (
@@ -371,7 +371,7 @@ export default function LeaderboardPage() {
             {/* In-Line "Your Rank" Card right below the Top Explorers list */}
             {!isLoading && userEntry && (
               <div className="mt-4 pt-3 border-t-2 border-dashed border-gray-200">
-                <p className="text-[10px] uppercase font-extrabold text-gray-400 tracking-wider mb-2">{t("your_live_spot") || "Your Live Standings Spot"}</p>
+                <p className="text-[10px] uppercase font-extrabold text-gray-400 tracking-wider mb-2">{t.leaderboard.your_live_spot}</p>
                 <div className="flex items-center p-3.5 rounded-2xl bg-[#143867] text-white border-2 border-[#f37021] shadow-md relative overflow-hidden">
                   <div className="w-9 text-lg font-black text-[#ffe16d] italic shrink-0">
                     #{userRank}
@@ -385,11 +385,11 @@ export default function LeaderboardPage() {
                   </div>
                   <div className="flex-grow min-w-0">
                     <h4 className="text-xs font-black flex items-center gap-1 text-white truncate">
-                      {t("you") || "You"} ({userEntry.student_profiles?.username || "Explorer"})
+                      {t.leaderboard.you} ({userEntry.student_profiles?.username || "Explorer"})
                       <span className="text-xs">{getBestBadge(userEntry.all_time_xp)?.icon}</span>
                     </h4>
                     <span className="text-[10px] px-2 py-0.5 rounded bg-[#f37021] text-white font-extrabold uppercase tracking-tighter inline-block mt-0.5">
-                      {userRank && userRank <= 25 ? (t("top_25_member") || "Top 25 Member") : `${t("rank") || "Rank"} #${userRank}`}
+                      {userRank && userRank <= 25 ? (t.leaderboard.top_25_member) : `${t.leaderboard.rank} #${userRank}`}
                     </span>
                   </div>
                   <div className="text-right shrink-0 ml-2">
@@ -412,36 +412,36 @@ export default function LeaderboardPage() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="px-3 py-1 bg-[#f37021] text-white text-[11px] font-black rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1">
                     <span className="material-symbols-outlined text-sm">emoji_events</span>
-                    {t("agastya_awards") || "Agastya Champion Awards"}
+                    {t.leaderboard.agastya_awards}
                   </span>
                   <span className="text-xs text-[#ea580c] font-extrabold flex items-center gap-1">
                     <span>•</span>
-                    <span>{t("agastya_motto") || "Curiosity • Creativity • Confidence under Care"}</span>
+                    <span>{t.leaderboard.agastya_motto}</span>
                   </span>
                 </div>
 
                 <h5 className="text-lg md:text-xl font-black tracking-tight text-[#143867]">
                   {userRank === 1
-                    ? "🏆 " + (t("rank_greetings_1") || "You are currently #1 on the Leaderboard!")
+                    ? "🏆 " + (t.leaderboard.rank_greetings_1)
                     : userRank === 2
-                    ? "🥈 " + (t("rank_greetings_2") || "You are currently #2 on the Leaderboard!")
+                    ? "🥈 " + (t.leaderboard.rank_greetings_2)
                     : userRank === 3
-                    ? "🥉 " + (t("rank_greetings_3") || "You are currently #3 on the Leaderboard!")
+                    ? "🥉 " + (t.leaderboard.rank_greetings_3)
                     : userRank && userRank <= 5
-                    ? "⭐ " + (t("rank_greetings_top5") || `You are currently #${userRank} in the Top 5!`)
+                    ? "⭐ " + (t.leaderboard.rank_greetings_top5 || `You are currently #${userRank} in the Top 5!`)
                     : userRank && userRank <= 10
-                    ? "🔥 " + (t("rank_greetings_top10") || `You are currently #${userRank} in the Top 10!`)
-                    : "🚀 " + (t("rank_greetings_explore") || "Every experiment and lab brings you closer to the top!")}
+                    ? "🔥 " + (t.leaderboard.rank_greetings_top10 || `You are currently #${userRank} in the Top 10!`)
+                    : "🚀 " + (t.leaderboard.rank_greetings_explore)}
                 </h5>
 
                 <p className="text-xs md:text-sm text-gray-700 font-medium leading-relaxed max-w-xl">
                   {userRank === 1
-                    ? (t("rank_desc_1") || "🏆 Undisputed Champion! Your relentless curiosity and scientific spirit lead the entire Olympiad. Keep experimenting to protect your crown!")
+                    ? (t.leaderboard.rank_desc_1)
                     : userRank === 2
-                    ? (t("rank_desc_2") || "🥈 So close to the top! You're sitting right on the podium in 2nd place. Just one more breakthrough lab can launch you into 1st!")
+                    ? (t.leaderboard.rank_desc_2)
                     : userRank === 3
-                    ? (t("rank_desc_3") || "🥉 Outstanding Podium Performance! 3rd Place is a massive achievement. Push your limits in practice labs to climb higher!")
-                    : (t("rank_desc_explore") || "🚀 Curiosity Unleashed! Every experiment you conduct builds your confidence. Explore practice labs to claim your spot on the leaderboard!")}
+                    ? (t.leaderboard.rank_desc_3)
+                    : (t.leaderboard.rank_desc_explore)}
                 </p>
 
                 <div className="pt-3 flex flex-wrap items-center gap-3">
@@ -455,7 +455,7 @@ export default function LeaderboardPage() {
                       className="px-4 py-2.5 bg-[#143867] hover:bg-[#1e4a85] text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95"
                     >
                       <span className="material-symbols-outlined text-sm text-[#f37021]">preview</span>
-                      <span>{t("preview") || "Preview"} {timeframe === "daily" ? t("timeframe_daily") : t("timeframe_weekly")} {t("specimen") || "Specimen"}</span>
+                      <span>{t.leaderboard.preview} {timeframe === "daily" ? t.leaderboard.timeframe_daily : t.leaderboard.timeframe_weekly} {t.leaderboard.specimen}</span>
                     </button>
                   )}
 
@@ -464,7 +464,7 @@ export default function LeaderboardPage() {
                     className="px-4 py-2.5 bg-[#f37021] hover:bg-[#d95e16] text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95"
                   >
                     <span className="material-symbols-outlined text-sm">science</span>
-                    <span>{t("earn_xp_practice") || "Earn XP in Practice Labs"}</span>
+                    <span>{t.leaderboard.earn_xp_practice}</span>
                   </Link>
                 </div>
               </div>
@@ -482,11 +482,11 @@ export default function LeaderboardPage() {
                     📜
                   </span>
                   <h3 className="text-sm sm:text-base font-black text-[#143867]">
-                    {t("finalized_merit") || "Finalized Merit Certificates & Notifications"}
+                    {t.leaderboard.finalized_merit}
                   </h3>
                 </div>
                 <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded-full uppercase tracking-wider">
-                  {t("official_issue_center") || "Official Issue Center"}
+                  {t.leaderboard.official_issue_center}
                 </span>
               </div>
 
@@ -496,13 +496,13 @@ export default function LeaderboardPage() {
                   <span className="material-symbols-outlined text-amber-600 text-lg shrink-0 mt-0.5">schedule</span>
                   <div className="space-y-1 text-xs text-amber-900 min-w-0">
                     <h5 className="font-bold text-amber-950">
-                      {timeframe === "daily" ? "⏳ " + (t("active_daily_notice") || "Active Daily Cycle Notice for #1 Leader") : "⏳ " + (t("active_weekly_notice") || "Active Weekly Cycle Notice for #1 Leader")}
+                      {timeframe === "daily" ? "⏳ " + (t.leaderboard.active_daily_notice) : "⏳ " + (t.leaderboard.active_weekly_notice)}
                     </h5>
                     <p className="leading-relaxed text-[11px] sm:text-xs">
                       {timeframe === "daily" ? (
-                        <>{t("daily_cycle_progress") || "You are currently sitting at Daily Rank #1! Today's daily cycle is active until 11:59 PM tonight. Please return after midnight to claim your official unblurred Daily Certificate."}</>
+                        <>{t.leaderboard.daily_cycle_progress}</>
                       ) : (
-                        <>{t("weekly_cycle_progress") || "You are currently sitting at Weekly Rank #1! This week's cycle is active until Sunday at 11:59 PM. Please return after Sunday midnight to claim your official unblurred Weekly Certificate."}</>
+                        <>{t.leaderboard.weekly_cycle_progress}</>
                       )}
                     </p>
                   </div>
@@ -514,21 +514,21 @@ export default function LeaderboardPage() {
                 <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex flex-col gap-3 w-full">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <span className="px-2.5 py-1 bg-emerald-600 text-white text-[10px] font-black rounded-lg uppercase tracking-wider shadow-xs">
-                      {timeframe === "daily" ? (t("completed_daily_cycles") || "COMPLETED DAILY CYCLES") : (t("completed_weekly_cycles") || "COMPLETED WEEKLY CYCLES")}
+                      {timeframe === "daily" ? (t.leaderboard.completed_daily_cycles) : (t.leaderboard.completed_weekly_cycles)}
                     </span>
                     <span className="text-xs font-bold text-emerald-900">
-                      {timeframe === "daily" ? (t("past_daily_records") || "Past Daily Rank #1 Records") : (t("past_weekly_records") || "Past Weekly Rank #1 Records")}
+                      {timeframe === "daily" ? (t.leaderboard.past_daily_records) : (t.leaderboard.past_weekly_records)}
                     </span>
                   </div>
                   
                   <div>
                     <h4 className="text-xs sm:text-sm font-black text-emerald-950">
-                      {timeframe === "daily" ? (t("daily_cert_center") || "Official Daily Merit Certificate Center") : (t("weekly_cert_center") || "Official Weekly Merit Certificate Center")}
+                      {timeframe === "daily" ? (t.leaderboard.daily_cert_center) : (t.leaderboard.weekly_cert_center)}
                     </h4>
                     <p className="text-[11px] sm:text-xs text-emerald-800 leading-relaxed mt-1">
                       {timeframe === "daily"
-                        ? (t("daily_cert_center_desc") || "Official finalized certificates for ending past daily cycles in 1st Place. Resets every night at 11:59 PM!")
-                        : (t("weekly_cert_center_desc") || "Official finalized certificates for ending past weekly cycles in 1st Place. Resets every Sunday at 11:59 PM!")}
+                        ? (t.leaderboard.daily_cert_center_desc)
+                        : (t.leaderboard.weekly_cert_center_desc)}
                     </p>
                   </div>
 
@@ -542,7 +542,7 @@ export default function LeaderboardPage() {
                     className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 mt-1"
                   >
                     <span className="material-symbols-outlined text-base">download</span>
-                    <span>{t("claim_certificate") || "Claim & Download Certificate"} 📜</span>
+                    <span>{t.leaderboard.claim_certificate} 📜</span>
                   </button>
                 </div>
               )}

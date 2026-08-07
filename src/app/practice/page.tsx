@@ -724,7 +724,7 @@ export default function PracticePage() {
           </Link>
           <div>
             <h1 className="text-lg font-black text-[#143867] tracking-tight">
-              {t("practice_lab")}
+              {t.app.practice_lab}
             </h1>
           </div>
         </div>

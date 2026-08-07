@@ -1,4 +1,4 @@
-import "./globals.css"; // This import is what hooks up Tailwind!
+// import "./globals.css"; // This import is what hooks up Tailwind!
 import { LanguageProvider } from "@/context/LanguageContext";
 
 export const metadata = {

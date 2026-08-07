@@ -57,7 +57,7 @@ export function LanguageSelector() {
                 <div className="flex items-center gap-2">
                   <span className="text-sm">{lang.flag}</span>
                   <span>{lang.nativeName}</span>
-                  <span className="text-[10px] text-gray-400">({lang.name})</span>
+                  <span className="text-[10px] text-gray-400">({lang.label})</span>
                 </div>
                 {isSelected && (
                   <span className="material-symbols-outlined text-sm text-[#143867] dark:text-[#ffe16d]">

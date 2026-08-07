@@ -17,7 +17,7 @@ export default function TournamentsPage() {
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </Link>
-          <h1 className="text-xl font-bold text-[#143867]">{t("my_tournaments") || "My Tournaments"}</h1>
+          <h1 className="text-xl font-bold text-[#143867]">{t.common.my_tournaments}</h1>
         </div>
         <button className="text-[#143867] hover:opacity-80 transition-opacity p-2 rounded-full flex items-center justify-center">
           <span className="material-symbols-outlined">more_vert</span>

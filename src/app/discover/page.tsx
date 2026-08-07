@@ -69,7 +69,7 @@ export default function DiscoverPage() {
       <header className="sticky top-0 bg-[#f7f9fb] z-40 px-4 py-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-[#143867] flex items-center gap-2">
           <span className="material-symbols-outlined text-[#ea580c]">travel_explore</span>
-          {t("discover_explorers") || "Discover Explorers"}
+          {t.discover.discover_explorers}
         </h1>
       </header>
 
@@ -83,7 +83,7 @@ export default function DiscoverPage() {
           <input
             type="text"
             className="w-full pl-12 pr-4 py-4 bg-white border-2 border-gray-200 rounded-2xl shadow-sm focus:border-[#143867] focus:ring-4 focus:ring-[#143867]/10 outline-none transition-all text-lg font-medium text-[#143867] placeholder-gray-400"
-            placeholder={t("search_placeholder") || "Search by username..."}
+            placeholder={t.leaderboard.search_placeholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -99,8 +99,8 @@ export default function DiscoverPage() {
           {debouncedQuery.trim().length > 0 && results.length === 0 && !isSearching && (
             <div className="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
               <span className="material-symbols-outlined text-5xl text-gray-300 mb-3">person_search</span>
-              <p className="text-lg font-bold text-gray-500">{t("no_explorers_found") || "No explorers found"}</p>
-              <p className="text-sm text-gray-400 mt-1">{t("try_different_username") || "Try searching for a different username."}</p>
+              <p className="text-lg font-bold text-gray-500">{t.discover.no_explorers_found}</p>
+              <p className="text-sm text-gray-400 mt-1">{t.discover.try_different_username}</p>
             </div>
           )}
 
@@ -109,8 +109,8 @@ export default function DiscoverPage() {
               <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-100">
                 <span className="material-symbols-outlined text-4xl text-blue-300">group_add</span>
               </div>
-              <p className="text-base font-bold text-gray-500">{t("find_your_friends") || "Find your friends"}</p>
-              <p className="text-sm text-gray-400 mt-1">{t("search_explorers_desc") || "Search for other explorers to follow their progress."}</p>
+              <p className="text-base font-bold text-gray-500">{t.discover.find_your_friends}</p>
+              <p className="text-sm text-gray-400 mt-1">{t.discover.search_explorers_desc}</p>
             </div>
           )}
 
