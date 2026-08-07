@@ -37,9 +37,9 @@ export interface MockTestInfo {
 const MOCK_TESTS: MockTestInfo[] = [
   {
     id: 1,
-    title: "Mock Test 1: Light Refraction & Everyday Magnification",
-    subtitle: "Optics, Lens Curvature & Daylight Intensity",
-    description: "Test how curved water bowls, daylight intensity, and glass angles alter light refraction and magnification in daily life.",
+    title: "Game 1: Light and Big Things",
+    subtitle: "Light and Bowls",
+    description: "Play with water bowls and light to see how things look bigger and how rainbows are made.",
     module: "Optics",
     idealTime: { level1: "5 Mins", level2: "10 Mins" },
     idealSeconds: { level1: 300, level2: 600 },
@@ -50,9 +50,9 @@ const MOCK_TESTS: MockTestInfo[] = [
   },
   {
     id: 2,
-    title: "Mock Test 2: Fan Aerodynamics & Planetary Gravitational Physics",
-    subtitle: "Everyday Airflow, RPM & Planetary Gravity Capture",
-    description: "Investigate blade counts in tropical climates, ceiling fan RPM air velocity, sweat evaporation cooling, and orbital mechanics.",
+    title: "Game 2: Fans and Falling Things",
+    subtitle: "Wind and Planets",
+    description: "Play with fans to make wind and drop things to see how they fall on different planets.",
     module: "Gravity",
     idealTime: { level1: "5 Mins", level2: "10 Mins" },
     idealSeconds: { level1: 300, level2: 600 },
@@ -63,9 +63,9 @@ const MOCK_TESTS: MockTestInfo[] = [
   },
   {
     id: 3,
-    title: "Mock Test 3: Kitchen Thermal Physics & Chemical Ecosystems",
-    subtitle: "Thermal Conduction, Evaporation & Oxygen Depletion",
-    description: "Analyze thermal conduction in utensils, liquid convection in hot soups, steam kinetic energy, and oxygen depletion in fires.",
+    title: "Game 3: Hot Soup and Fire",
+    subtitle: "Heat and Air",
+    description: "Play with hot soup to see how spoons get warm and watch how a candle fire needs air to burn.",
     module: "Chemistry",
     idealTime: { level1: "5 Mins", level2: "10 Mins" },
     idealSeconds: { level1: 300, level2: 600 },
@@ -771,13 +771,13 @@ export default function PracticePage() {
               <div className="relative z-10 max-w-2xl space-y-3">
                 <span className="inline-flex items-center gap-1.5 bg-[#ea580c] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                   <span className="material-symbols-outlined text-xs">rocket_launch</span>
-                  Agastya Experiential Assessment Engine
+                  Agastya Science Games
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
                   Interactive Science Mock Tests
                 </h2>
                 <p className="text-sm sm:text-base text-indigo-100 leading-relaxed">
-                  Attempt official science mock tests across Optics, Orbital Physics, and Chemistry. Your live telemetry (hypothesis reversals & variable adjustments) earns you bonus curiosity points!
+                  Play official science games for Optics, Gravity, and Chemistry. Exploring and trying new things will earn you extra curiosity points!
                 </p>
               </div>
             </div>
@@ -785,7 +785,7 @@ export default function PracticePage() {
             {/* Difficulty Tier Selector (Level 1 vs Level 2) */}
             <div className="space-y-4">
               <h3 className="text-lg font-black text-[#143867]">
-                1. Select Difficulty Tier
+                1. Choose Level
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Level 1 Card */}
@@ -802,7 +802,7 @@ export default function PracticePage() {
                       Level 1: Foundation (Grades 6–8)
                     </span>
                     <h4 className="text-base font-black text-[#143867]">
-                      Foundational Science Curiosity
+                      Science for Beginners
                     </h4>
                     <p className="text-xs text-gray-500">
                       Ideal Completion Pace: 5 Mins • Relatable Daily Life Science
@@ -829,10 +829,10 @@ export default function PracticePage() {
                       Level 2: Advanced (Grades 9–12)
                     </span>
                     <h4 className="text-base font-black text-[#143867]">
-                      Advanced Multi-Variable Modeling
+                      Science for Experts
                     </h4>
                     <p className="text-xs text-gray-500">
-                      Ideal Completion Pace: 10 Mins • Boundary Testing & High Index Physics
+                      Ideal Completion Pace: 10 Mins • Fun Science Challenges
                     </p>
                   </div>
                   {difficulty === "level2" && (
@@ -849,10 +849,10 @@ export default function PracticePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-black text-[#143867]">
-                    2. Select Science Mock Test (3 Available)
+                    2. Select Science Game (3 Available)
                   </h3>
                   <p className="text-xs text-gray-500">
-                    Track completion status and earn Curiosity Telemetry XP on each attempt!
+                    Play games and earn Curiosity Points every time!
                   </p>
                 </div>
               </div>
@@ -914,7 +914,7 @@ export default function PracticePage() {
                                 Total XP Earned: +{result.totalXP} XP
                               </span>
                               <span>•</span>
-                              <span>Telemetry Bonus: +{result.telemetryBonusXP} XP</span>
+                              <span>Bonus Points: +{result.telemetryBonusXP} XP</span>
                               <span>•</span>
                               <span>Time Taken: {formatTime(result.timeSecs)}</span>
                             </div>
@@ -948,7 +948,7 @@ export default function PracticePage() {
                           <span className="material-symbols-outlined text-base">
                             {isCompleted ? "refresh" : "play_circle"}
                           </span>
-                          <span>{isCompleted ? `Retake Mock Test ${test.id}` : `Start Mock Test ${test.id}`}</span>
+                          <span>{isCompleted ? `Play Game ${test.id} Again` : `Start Game ${test.id}`}</span>
                         </button>
                       </div>
                     </div>
@@ -977,7 +977,7 @@ export default function PracticePage() {
           </div>
         ) : (
           /* =========================================================
-             ACTIVE ASSESSMENT: SANDBOX LAB + EXPERIENTIAL MCQS
+             ACTIVE GAME: LAB + QUESTIONS
              ========================================================= */
           <div className="space-y-8 relative">
             {/* PAUSED OVERLAY MODAL */}
@@ -1246,7 +1246,7 @@ export default function PracticePage() {
                       {isSubmitted && (
                         <div className="mt-4 p-4 bg-white/80 border border-gray-200 rounded-xl text-xs space-y-1">
                           <span className="font-bold text-[#143867] uppercase tracking-wider block">
-                            Scientific Explanation
+                            Why this happens
                           </span>
                           <p className="text-gray-600 leading-relaxed">
                             {q.explanation}
@@ -1275,7 +1275,7 @@ export default function PracticePage() {
                   <span className="material-symbols-outlined text-base">
                     arrow_back
                   </span>
-                  <span>Exit to Mock Test Selector</span>
+                  <span>Go back to Games</span>
                 </button>
 
                 {!isSubmitted ? (
@@ -1284,7 +1284,7 @@ export default function PracticePage() {
                     className="px-8 py-3.5 rounded-xl bg-green-600 hover:bg-green-700 text-white font-black text-sm uppercase tracking-wider shadow-lg active:scale-95 transition-all flex items-center gap-2"
                   >
                     <span className="material-symbols-outlined">send</span>
-                    <span>Submit Mock Test</span>
+                    <span>Finish Game</span>
                   </button>
                 ) : (
                   <button
@@ -1296,7 +1296,7 @@ export default function PracticePage() {
                     className="px-8 py-3.5 rounded-xl bg-[#143867] hover:bg-[#1e4a85] text-white font-black text-sm uppercase tracking-wider shadow-lg active:scale-95 transition-all flex items-center gap-2"
                   >
                     <span className="material-symbols-outlined">refresh</span>
-                    <span>Retry Mock Test</span>
+                    <span>Play Again</span>
                   </button>
                 )}
               </div>

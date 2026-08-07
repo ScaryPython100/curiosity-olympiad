@@ -106,7 +106,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     claim_certificate: "View & Download Certificate",
 
     // Profile
-    cognitive_profile: "Cognitive Profile",
+    cognitive_profile: "Brain Profile",
     level: "Level",
     level_progress: "Level Progress",
     unlocked_badges: "Academic Badges",

@@ -21,53 +21,52 @@ export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: Curio
   const baseScore = Math.min(95, Math.max(65, 68 + Math.floor(xp / 300)));
   
   const axes: CQAxis[] = [
-    {
-      id: "spatial",
-      label: "Spatial Logic",
+    id: "spatial",
+      label: "Shape Smarts",
       score: Math.min(98, baseScore + 4),
       icon: "view_in_ar",
-      description: "Visualizing 3D structures, molecular geometry & spatial transformations.",
-      superpowerText: "You effortlessly rotate 3D structures in your mind and understand physical geometry!"
+      description: "Seeing how shapes fit together and moving them in your mind.",
+      superpowerText: "You are great at picturing how objects move and fit together!"
     },
     {
       id: "pattern",
-      label: "Pattern Recognition",
+      label: "Finding Patterns",
       score: Math.min(99, baseScore + 8),
       icon: "pattern",
-      description: "Identifying recurring biological cycles, mathematical series & data trends.",
-      superpowerText: "You naturally see hidden connections in scientific data faster than 94% of peers!"
+      description: "Spotting things that repeat and guessing what comes next.",
+      superpowerText: "You are very fast at seeing how things are connected!"
     },
     {
       id: "epistemic",
-      label: "Epistemic Vigilance",
+      label: "Careful Thinking",
       score: Math.min(96, baseScore + 2),
       icon: "fact_check",
-      description: "Questioning assumptions, verifying experimental controls & spotting bias.",
-      superpowerText: "You think like a rigorous scientist—always demanding experimental proof and controls!"
+      description: "Asking good questions and checking if things are really true.",
+      superpowerText: "You think like a real scientist by always checking the facts!"
     },
     {
       id: "deductive",
-      label: "Deductive Reasoning",
+      label: "Solving Puzzles",
       score: Math.min(97, baseScore + 6),
       icon: "psychology",
-      description: "Deriving logical scientific conclusions from evidence and hypotheses.",
-      superpowerText: "You excel at tracing cause and effect from initial premises to accurate discoveries!"
+      description: "Using clues to figure out the right answer.",
+      superpowerText: "You are great at connecting clues to solve mysteries!"
     },
     {
       id: "inquiry",
-      label: "Experimental Inquiry",
+      label: "Testing Ideas",
       score: Math.min(98, baseScore + 5),
       icon: "science",
-      description: "Designing hands-on tests and curiosity-driven lab exploration.",
-      superpowerText: "Your curiosity drives you to test hypotheses rather than just reading about them!"
+      description: "Trying out new things to see how they work.",
+      superpowerText: "You love learning by doing experiments yourself!"
     }
   ];
 
-  // Calculate overall Curiosity Quotient (CQ) — like IQ, where 100 is average and 125+ is Genius
+  // Calculate overall Curiosity Score
   const avgScore = Math.round(axes.reduce((sum, a) => sum + a.score, 0) / axes.length);
   const overallCQ = 100 + Math.round((avgScore - 60) * 0.85);
 
-  // Find cognitive superpower (highest score)
+  // Find brain superpower (highest score)
   const superpower = axes.reduce((prev, curr) => (curr.score > prev.score ? curr : prev), axes[0]);
 
   const [selectedAxis, setSelectedAxis] = useState<CQAxis>(superpower);
@@ -116,13 +115,13 @@ export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: Curio
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f37021] text-white text-[11px] font-black uppercase tracking-wider shadow-xs mb-2">
             <span className="material-symbols-outlined text-sm">radar</span>
-            <span>Agastya Cognitive Profile</span>
+            <span>My Brain Profile</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-[#143867] tracking-tight">
-            The &ldquo;Curiosity Quotient&rdquo; (CQ) Analytics Engine
+            Curiosity Score Board
           </h2>
           <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
-            How {username} thinks — dynamic cognitive profile graded from H5P &amp; Lab Performance.
+            How {username} thinks — based on games and tests.
           </p>
         </div>
 
@@ -131,12 +130,12 @@ export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: Curio
           <span className="material-symbols-outlined text-3xl text-[#ffe16d]">psychology</span>
           <div>
             <div className="text-[10px] uppercase font-bold text-[#ffe16d] tracking-widest">
-              Overall Quotient
+              Total Score
             </div>
             <div className="text-2xl font-black italic tracking-tight flex items-baseline gap-1">
               CQ {overallCQ}
               <span className="text-xs font-bold text-emerald-400 not-italic">
-                {overallCQ >= 125 ? "• Genius Explorer" : overallCQ >= 115 ? "• Master Inquirer" : "• Rising Scholar"}
+                {overallCQ >= 125 ? "• Super Smart" : overallCQ >= 115 ? "• Great Thinker" : "• Good Learner"}
               </span>
             </div>
           </div>
@@ -190,7 +189,7 @@ export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: Curio
                 );
               })}
 
-              {/* Student Cognitive Footprint Polygon */}
+              {/* Student Brain Footprint Polygon */}
               <polygon
                 points={getDataPolygon()}
                 fill="url(#cqPolygonGrad)"
@@ -249,7 +248,7 @@ export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: Curio
           </div>
 
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">
-            Click any vertex or skill axis below to inspect
+            Click any point below to look closer
           </p>
         </div>
 
@@ -302,14 +301,14 @@ export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: Curio
         </div>
       </div>
 
-      {/* Cognitive Superpower Highlight Banner */}
+      {/* Brain Superpower Highlight Banner */}
       <div className="mt-6 p-4 bg-gradient-to-r from-[#143867] to-[#1e4a85] rounded-2xl text-white flex items-center gap-3.5 shadow-md relative z-10">
         <div className="w-10 h-10 rounded-xl bg-[#f37021] text-white flex items-center justify-center shrink-0 shadow-sm">
           <span className="material-symbols-outlined text-xl">auto_awesome</span>
         </div>
         <div className="min-w-0">
           <div className="text-[10px] font-extrabold uppercase text-[#ffe16d] tracking-wider">
-            Cognitive Superpower: {superpower.label}
+            Brain Superpower: {superpower.label}
           </div>
           <p className="text-xs sm:text-sm font-bold text-white leading-relaxed">
             &ldquo;{superpower.superpowerText}&rdquo;
