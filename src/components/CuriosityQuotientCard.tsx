@@ -21,7 +21,8 @@ export function CuriosityQuotientCard({ xp = 450, username = "Explorer" }: Curio
   const baseScore = Math.min(95, Math.max(65, 68 + Math.floor(xp / 300)));
   
   const axes: CQAxis[] = [
-    id: "spatial",
+    {
+      id: "spatial",
       label: "Shape Smarts",
       score: Math.min(98, baseScore + 4),
       icon: "view_in_ar",
