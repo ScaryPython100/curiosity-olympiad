@@ -1,12 +1,17 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { LanguageCode, TRANSLATIONS, SUPPORTED_LANGUAGES, LanguageOption } from "@/utils/translations";
+import { LanguageCode, SUPPORTED_LANGUAGES, LanguageOption } from "@/utils/translations";
+
+import enDictionary from "../../locales/en.json";
+
+// We use the English dictionary as the source of truth for types
+export type DictionaryType = typeof enDictionary;
 
 interface LanguageContextType {
   language: LanguageCode;
   setLanguage: (lang: LanguageCode) => void;
-  t: (key: string) => string;
+  t: DictionaryType;
   languages: LanguageOption[];
 }
 
@@ -14,12 +19,21 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<LanguageCode>("en");
+  const [dictionary, setDictionary] = useState<DictionaryType>(enDictionary);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const savedLang = localStorage.getItem("curiosity_language") as LanguageCode;
-      if (savedLang && TRANSLATIONS[savedLang]) {
+      const savedLang = (localStorage.getItem("curiosity_language") as LanguageCode) || "en";
+      if (SUPPORTED_LANGUAGES.some(l => l.code === savedLang)) {
         setLanguageState(savedLang);
+        if (savedLang !== "en") {
+          import(`../../locales/${savedLang}.json`)
+            .then((mod) => setDictionary(mod.default as unknown as DictionaryType))
+            .catch((err) => {
+              console.error(`Failed to load dictionary for ${savedLang}:`, err);
+              setDictionary(enDictionary);
+            });
+        }
       }
     }
   }, []);
@@ -29,11 +43,16 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.setItem("curiosity_language", lang);
     }
-  };
-
-  const t = (key: string): string => {
-    const langDict = TRANSLATIONS[language] || TRANSLATIONS.en;
-    return langDict[key] || TRANSLATIONS.en[key] || "";
+    if (lang === "en") {
+      setDictionary(enDictionary);
+    } else {
+      import(`../../locales/${lang}.json`)
+        .then((mod) => setDictionary(mod.default as unknown as DictionaryType))
+        .catch((err) => {
+          console.error(`Failed to load dictionary for ${lang}:`, err);
+          setDictionary(enDictionary);
+        });
+    }
   };
 
   return (
@@ -41,7 +60,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       value={{
         language,
         setLanguage,
-        t,
+        t: dictionary,
         languages: SUPPORTED_LANGUAGES,
       }}
     >

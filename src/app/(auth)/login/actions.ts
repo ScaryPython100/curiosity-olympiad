@@ -187,7 +187,7 @@ export async function sendOtpAction(formData: FormData) {
 
   // 3. THIRD: Send OTP via Descope Authentication (with Supabase fallback)
   const supabase = await createClient();
-  const descopeProjectId = process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID;
+  const descopeProjectId = process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID?.replace(/^["']|["']$/g, "");
 
   if (descopeProjectId) {
     const isEmail = destination.includes("@");
@@ -263,7 +263,7 @@ export async function verifyOtpAction(formData: FormData) {
   const isCreateAccount = formData.get("isCreateAccount") === "true";
 
   const supabase = await createClient();
-  const descopeProjectId = process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID;
+  const descopeProjectId = process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID?.replace(/^["']|["']$/g, "");
 
   let userId: string | null = null;
 
