@@ -195,7 +195,7 @@ export default function AuthPage() {
     setIsLoading(false);
   };
 
-  return (
+  console.log("DEBUG SSR:", { typeT: typeof t, typeAuth: typeof t?.auth, typeAppTitle: typeof t?.auth?.app_title, isLanguagesArray: false }); return (
     <div className="min-h-screen flex flex-col justify-center bg-[#f7f9fb] p-6" style={{ fontFamily: 'Montserrat, sans-serif' }}>
       <div className="w-full max-w-md mx-auto flex flex-col gap-6">
         
@@ -210,7 +210,7 @@ export default function AuthPage() {
             <span className="material-symbols-outlined text-3xl">lightbulb</span>
           </div>
           <h1 className="font-extrabold text-3xl text-[#143867] tracking-tight">
-            {t("app_title") || "Curiosity Olympiad"}
+            {t.auth.app_title}
           </h1>
           <p className="text-gray-600 text-xs md:text-sm font-medium">
             Agastya International Foundation • Aah! Aha! Ha-ha!
@@ -229,7 +229,7 @@ export default function AuthPage() {
             }`}
           >
             <span className="material-symbols-outlined text-sm">person_add</span>
-            <span>{t("sign_up") || "Create Account"}</span>
+            <span>{t.auth.sign_up}</span>
           </button>
           <button
             type="button"
@@ -241,7 +241,7 @@ export default function AuthPage() {
             }`}
           >
             <span className="material-symbols-outlined text-sm">login</span>
-            <span>{t("sign_in") || "Login"}</span>
+            <span>{t.auth.sign_in}</span>
           </button>
         </div>
 
@@ -266,7 +266,7 @@ export default function AuthPage() {
               <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="destination">
-                    {t("email_phone") || "Email Address or Mobile Number"}
+                    {t.auth.email_phone}
                   </label>
                   <input
                     id="destination"
@@ -278,37 +278,37 @@ export default function AuthPage() {
                     className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
                   />
                   <p className="text-[11px] text-gray-500 font-medium">
-                    {t("send_otp_disclaimer") || "We will send a 6-digit OTP code. 🚫 Do NOT use your real name to log in."}
+                    {t.auth.send_otp_disclaimer}
                   </p>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="otpRealName">
-                    {t("real_name_req") || "Name of the Student (For Certificates Only)"}
+                    {t.auth.real_name_req}
                   </label>
                   <input
                     id="otpRealName"
                     type="text"
                     required
-                    placeholder={t("real_name_placeholder") || "e.g. Kishan Alamuri (Real Name)"}
+                    placeholder={t.auth.real_name_placeholder}
                     value={otpRealName}
                     onChange={(e) => setOtpRealName(e.target.value)}
                     className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
                   />
                   <p className="text-[11px] text-gray-500 font-medium">
-                    {t("real_name_desc") || "🔒 Stored securely. Used ONLY for official printable certificates."}
+                    {t.auth.real_name_desc}
                   </p>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="otpUsername">
-                    {t("username") || "Username / Nickname (Public Display)"}
+                    {t.auth.username}
                   </label>
                   <input
                     id="otpUsername"
                     type="text"
                     required
-                    placeholder={t("username_placeholder") || "e.g. ScienceWhiz99"}
+                    placeholder={t.auth.username_placeholder}
                     value={otpUsername}
                     onChange={(e) => setOtpUsername(e.target.value)}
                     className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
@@ -316,26 +316,26 @@ export default function AuthPage() {
                   <div className="bg-amber-50 border border-amber-300/80 p-2.5 rounded-xl text-xs text-[#9a3412] font-bold flex items-start gap-1.5 mt-0.5">
                     <span className="material-symbols-outlined text-sm text-[#f37021] shrink-0 mt-0.5">warning</span>
                     <span>
-                      {t("username_warning") || "STRICT WARNING: Do NOT enter your real name here! Use a nickname or alias for public leaderboard display."}
+                      {t.auth.username_warning}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="otpPassword">
-                    {t("password_req") || "Create Password (For Future Login)"}
+                    {t.auth.password_req}
                   </label>
                   <input
                     id="otpPassword"
                     type="password"
                     required
-                    placeholder={t("password_placeholder") || "Create a password (e.g. secret123)"}
+                    placeholder={t.auth.password_placeholder}
                     value={otpPassword}
                     onChange={(e) => setOtpPassword(e.target.value)}
                     className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
                   />
                   <p className="text-[11px] text-gray-500 font-medium">
-                    {t("password_desc") || "🔑 You will use this Password along with your Email/Phone/Username when you log in later!"}
+                    {t.auth.password_desc}
                   </p>
                 </div>
 
@@ -345,7 +345,7 @@ export default function AuthPage() {
                   className="mt-2 w-full bg-[#143867] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#1d4d8a] transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <span className="material-symbols-outlined text-sm">send</span>
-                  <span>{isLoading ? (t("sending_otp") || "Sending OTP...") : (t("send_otp") || "Send 6-Digit OTP")}</span>
+                  <span>{isLoading ? (t.auth.sending_otp) : (t.auth.send_otp)}</span>
                 </button>
               </form>
             ) : (
@@ -353,14 +353,14 @@ export default function AuthPage() {
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
                     <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="otpCode">
-                      {t("enter_otp") || "Enter 6-Digit OTP Code"}
+                      {t.auth.enter_otp}
                     </label>
                     <button
                       type="button"
                       onClick={() => setOtpSent(false)}
                       className="text-xs font-bold text-[#143867] hover:underline"
                     >
-                      {t("change_address") || "Change Address"}
+                      {t.auth.change_address}
                     </button>
                   </div>
                   <input
@@ -381,7 +381,7 @@ export default function AuthPage() {
                   className="mt-2 w-full bg-[#143867] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#1d4d8a] transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <span className="material-symbols-outlined text-sm">check_circle</span>
-                  <span>{isLoading ? (t("verifying") || "Verifying...") : (t("verify_create") || "Verify & Create Account")}</span>
+                  <span>{isLoading ? (t.auth.verifying) : (t.auth.verify_create)}</span>
                 </button>
               </form>
             )
@@ -396,25 +396,25 @@ export default function AuthPage() {
                   <div className="flex justify-between items-center border-b border-gray-100 pb-2">
                     <h3 className="font-bold text-sm text-[#143867] flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-base text-[#f37021]">lock_reset</span>
-                      {t("forgot_password") || "Reset Account Password"}
+                      {t.auth.forgot_password}
                     </h3>
                     <button
                       type="button"
                       onClick={() => { setIsForgotPassword(false); setError(""); setSuccessMsg(""); }}
                       className="text-xs font-bold text-gray-400 hover:text-gray-600"
                     >
-                      {t("cancel") || "Cancel"}
+                      {t.auth.cancel}
                     </button>
                   </div>
 
                   <p className="text-xs text-gray-600 font-medium">
-                    {t("enter_registered") || "Enter your Email ID, Mobile Number, or Username below to set a new password for your test account."}
+                    {t.auth.enter_registered}
                   </p>
 
                   {/* Identifier */}
                   <div className="flex flex-col gap-1">
                     <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="resetIdentifier">
-                      {t("email_phone") || "Email ID, Mobile Number or Username"}
+                      {t.auth.email_phone}
                     </label>
                     <input
                       id="resetIdentifier"
@@ -430,7 +430,7 @@ export default function AuthPage() {
                   {/* OTP Code */}
                   <div className="flex flex-col gap-1">
                     <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="resetOtp">
-                      {t("enter_otp") || "6-Digit Verification OTP"}
+                      {t.auth.enter_otp}
                     </label>
                     <input
                       id="resetOtp"
@@ -441,13 +441,13 @@ export default function AuthPage() {
                       onChange={(e) => setResetOtp(e.target.value)}
                       className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm font-mono tracking-widest focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
                     />
-                    <p className="text-[10px] text-gray-500 font-medium">{t("enter_otp_desc") || "Enter the 6-digit OTP code sent to your registered Email or Mobile Number."}</p>
+                    <p className="text-[10px] text-gray-500 font-medium">{t.auth.enter_otp_desc}</p>
                   </div>
 
                   {/* New Password */}
                   <div className="flex flex-col gap-1">
                     <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="newPassword">
-                      {t("password_req") || "Enter New Password"}
+                      {t.auth.password_req}
                     </label>
                     <input
                       id="newPassword"
@@ -466,7 +466,7 @@ export default function AuthPage() {
                     className="mt-2 w-full bg-[#143867] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#1d4d8a] transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     <span className="material-symbols-outlined text-sm">key</span>
-                    <span>{isLoading ? (t("updating_password") || "Updating Password...") : (t("reset_password_btn") || "Reset & Set New Password")}</span>
+                    <span>{isLoading ? (t.auth.updating_password) : (t.auth.reset_password_btn)}</span>
                   </button>
 
                   <div className="text-center pt-2 border-t border-gray-100">
@@ -475,7 +475,7 @@ export default function AuthPage() {
                       onClick={() => { setIsForgotPassword(false); setError(""); }}
                       className="text-xs font-bold text-gray-500 hover:text-[#143867] hover:underline"
                     >
-                      ← {t("back_login") || "Back to Password Login"}
+                      ← {t.auth.back_login}
                     </button>
                   </div>
                 </form>
@@ -484,7 +484,7 @@ export default function AuthPage() {
                   {/* Entry 1: Email ID, Phone Number or Username */}
                   <div className="flex flex-col gap-1">
                     <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="email">
-                      {t("email_phone") || "Email ID, Phone Number or Username"}
+                      {t.auth.email_phone}
                     </label>
                     <input
                       id="email"
@@ -497,7 +497,7 @@ export default function AuthPage() {
                       className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
                     />
                     <p className="text-[11px] text-[#9a3412] font-bold mt-0.5">
-                      {t("login_disclaimer") || "🚫 Note: To log in, you cannot use your Real Name. You can ONLY use your registered Email ID, Phone Number, or Username."}
+                      {t.auth.login_disclaimer}
                     </p>
                   </div>
 
@@ -505,7 +505,7 @@ export default function AuthPage() {
                   <div className="flex flex-col gap-1">
                     <div className="flex justify-between items-center">
                       <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="password">
-                        {t("password") || "Password"}
+                        {t.auth.password}
                       </label>
                       <button
                         type="button"
@@ -517,7 +517,7 @@ export default function AuthPage() {
                         }}
                         className="text-xs font-bold text-[#143867] hover:underline"
                       >
-                        {t("forgot") || "Forgot?"}
+                        {t.auth.forgot}
                       </button>
                     </div>
                     <input
@@ -537,7 +537,7 @@ export default function AuthPage() {
                     disabled={isLoading}
                     className="mt-2 w-full bg-[#143867] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#1d4d8a] transition-all shadow-md active:scale-95 disabled:opacity-50"
                   >
-                    {isLoading ? (t("please_wait") || "Please wait...") : (t("login_btn") || "Login to Olympiad")}
+                    {isLoading ? (t.auth.please_wait) : (t.auth.login_btn)}
                   </button>
 
                   <div className="text-center pt-2 border-t border-gray-100">
@@ -547,7 +547,7 @@ export default function AuthPage() {
                       className="text-xs font-bold text-[#143867] hover:underline inline-flex items-center gap-1"
                     >
                       <span className="material-symbols-outlined text-sm">sms</span>
-                      <span>{t("login_otp_toggle") || "Want to login without a password? Sign in with OTP code →"}</span>
+                      <span>{t.auth.login_otp_toggle}</span>
                     </button>
                   </div>
                 </form>
@@ -557,7 +557,7 @@ export default function AuthPage() {
                   <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
                     <div className="flex flex-col gap-1.5">
                       <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="loginDestination">
-                        {t("email_phone") || "Email Address or Mobile Number"}
+                        {t.auth.email_phone}
                       </label>
                       <input
                         id="loginDestination"
@@ -569,7 +569,7 @@ export default function AuthPage() {
                         className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
                       />
                       <p className="text-[11px] text-gray-500 font-medium">
-                        {t("otp_login_desc") || "We will send a 6-digit OTP code for instant login."}
+                        {t.auth.otp_login_desc}
                       </p>
                     </div>
 
@@ -579,7 +579,7 @@ export default function AuthPage() {
                       className="mt-2 w-full bg-[#143867] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#1d4d8a] transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       <span className="material-symbols-outlined text-sm">send</span>
-                      <span>{isLoading ? (t("sending_otp") || "Sending OTP...") : (t("send_otp") || "Send 6-Digit OTP")}</span>
+                      <span>{isLoading ? (t.auth.sending_otp) : (t.auth.send_otp)}</span>
                     </button>
 
                     <div className="text-center pt-2 border-t border-gray-100">
@@ -588,7 +588,7 @@ export default function AuthPage() {
                         onClick={() => { setLoginWithOtp(false); setError(""); }}
                         className="text-xs font-bold text-gray-500 hover:text-[#143867] hover:underline"
                       >
-                        ← {t("back_login") || "Back to Password Login"}
+                        ← {t.auth.back_login}
                       </button>
                     </div>
                   </form>
@@ -597,14 +597,14 @@ export default function AuthPage() {
                     <div className="flex flex-col gap-1.5">
                       <div className="flex items-center justify-between">
                         <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="loginOtpCode">
-                          {t("enter_otp") || "Enter 6-Digit OTP Code"}
+                          {t.auth.enter_otp}
                         </label>
                         <button
                           type="button"
                           onClick={() => setOtpSent(false)}
                           className="text-xs font-bold text-[#143867] hover:underline"
                         >
-                          {t("change_address") || "Change Address"}
+                          {t.auth.change_address}
                         </button>
                       </div>
                       <input
@@ -625,7 +625,7 @@ export default function AuthPage() {
                       className="mt-2 w-full bg-[#143867] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#1d4d8a] transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       <span className="material-symbols-outlined text-sm">check_circle</span>
-                      <span>{isLoading ? (t("verifying") || "Verifying...") : (t("verify_login") || "Verify & Enter Olympiad")}</span>
+                      <span>{isLoading ? (t.auth.verifying) : (t.auth.verify_login)}</span>
                     </button>
                   </form>
                 )
@@ -641,7 +641,7 @@ export default function AuthPage() {
             className="inline-flex items-center gap-1.5 text-xs font-bold text-[#143867] hover:underline bg-white px-4 py-2 rounded-full border border-gray-200 shadow-xs"
           >
             <span className="material-symbols-outlined text-sm">school</span>
-            <span>{t("school_portal") || "School Admin or Teacher? Bulk CSV Roster Portal →"}</span>
+            <span>{t.auth.school_portal}</span>
           </Link>
         </div>
 
