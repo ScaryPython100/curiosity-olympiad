@@ -97,7 +97,7 @@ export default function SandboxEngine({
       freeTextFeedback: mlFeedback
     });
 
-    const finalScore = evalResult.success ? evalResult.score : 0;
+    const finalScore: number = (evalResult.success && evalResult.score) ? evalResult.score : 0;
     const newScores = [...levelScores, finalScore];
     const newTelemetry = [...allTelemetry, { level: currentLevelIndex, ...telemetryData, mlFeedback }];
 
