@@ -22,7 +22,7 @@ const PARTNER_SCHOOLS = [
   { name: "Young Instructors Academy", location: "Hyderabad", icon: "school", badgeColor: "bg-[#143867] text-white border-blue-300", emblem: "🎓" },
 ];
 
-export default function DashboardPage() {
+export default function DashboardPage() { console.log("DEBUG DASHBOARD PAGE RENDER START"); 
   const { t } = useLanguage();
   const router = useRouter();
   const { userId, loading: userLoading } = useUser();
@@ -130,11 +130,11 @@ export default function DashboardPage() {
         <div className="flex justify-between items-center px-4 py-2 w-full max-w-7xl mx-auto">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[#143867]">lightbulb</span>
-            <h1 className="text-xl text-[#143867] font-bold tracking-tight">{t("app_title")}</h1>
+            <h1 className="text-xl text-[#143867] font-bold tracking-tight">{t.auth.app_title}</h1>
           </div>
           <div className="flex items-center gap-2">
             <LanguageSelector />
-            <button className="text-gray-600 hover:bg-gray-200 transition-colors p-2 rounded-full active:scale-95 duration-150 ease-in-out" title={t("logout")}>
+            <button className="text-gray-600 hover:bg-gray-200 transition-colors p-2 rounded-full active:scale-95 duration-150 ease-in-out" title={t.app.logout}>
               <span className="material-symbols-outlined">logout</span>
             </button>
           </div>
@@ -147,7 +147,7 @@ export default function DashboardPage() {
         <section className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
           <div className="mb-2 flex items-center justify-between">
             <span className="bg-[#ffe16d] text-[#221b00] px-3 py-1 rounded-full text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(255,215,0,0.2)]">
-              {t("explorer_dashboard")}
+              {t.app.explorer_dashboard}
             </span>
 
             {/* Gamification Testing Button */}
@@ -157,12 +157,12 @@ export default function DashboardPage() {
               className="flex items-center gap-2 bg-[#143867] text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-[#1d4d8a] transition-all active:scale-95 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-sm">auto_awesome</span>
-              {isAwarding ? "Exploring..." : t("claim_daily_xp")}
+              {isAwarding ? "Exploring..." : t.dashboard.claim_daily_xp}
             </button>
           </div>
 
-          <h2 className="text-2xl md:text-3xl font-bold text-[#143867] mb-2">{t("welcome_back_title") || "Welcome Back!"}</h2>
-          <p className="text-gray-600 text-base">{t("welcome_back_subtitle") || "Your intellectual journey continues today. What will you discover?"}</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-[#143867] mb-2">{t.dashboard.welcome_back_title}</h2>
+          <p className="text-gray-600 text-base">{t.dashboard.welcome_back_subtitle}</p>
 
           {/* Toast Notification for XP */}
           {showReward && (
