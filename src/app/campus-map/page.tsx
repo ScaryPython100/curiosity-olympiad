@@ -340,7 +340,7 @@ function renderCustomLandmarkIcon(id: number, isUnlocked: boolean) {
 }
 
 export default function CampusMapPage() {
-  const [userXp, setUserXp] = useState(8600);
+  const [userXp, setUserXp] = useState(0);
   const [selectedLandmark, setSelectedLandmark] = useState<CampusLandmark | null>(null);
   const [vanHonking, setVanHonking] = useState(false);
 
@@ -348,7 +348,7 @@ export default function CampusMapPage() {
     async function loadData() {
       const res = await getProfileStats();
       if (res.data) {
-        const fetchedXp = res.data.xp || 8600;
+        const fetchedXp = res.data.xp || 0;
         setUserXp(fetchedXp);
       }
     }

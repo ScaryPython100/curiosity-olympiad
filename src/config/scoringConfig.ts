@@ -73,11 +73,11 @@ export const EXPERIMENTS_CONFIG: Record<string, ExperimentConfig> = {
     ...DIFFICULTY_SCALING.intermediate,
     freeTextRubric: {
       questionId: "optics_2_explain",
-      prompt: "Explain in your own words why the light beam changes color when it hits the prism.",
+      prompt: "Why did the plastic scale make a rainbow in the sunlight?",
       rubricConcepts: [
-        "white light is made of different colors",
-        "the prism bends/refracts the light",
-        "different colors bend at different angles"
+        "sunlight has different colors inside it",
+        "the scale splits the light into colors",
+        "like a rainbow"
       ],
       maxPoints: 3
     }
@@ -99,11 +99,11 @@ export const EXPERIMENTS_CONFIG: Record<string, ExperimentConfig> = {
     ...DIFFICULTY_SCALING.intermediate,
     freeTextRubric: {
       questionId: "gravity_2_explain",
-      prompt: "Why did the moon crash into the planet when you made the planet heavier?",
+      prompt: "Why did the cricket ball fall back to the ground after you hit it?",
       rubricConcepts: [
-        "heavier objects have stronger gravity/pull",
-        "the moon's speed was not fast enough to escape the stronger pull",
-        "gravity pulls things together"
+        "gravity pulls things down",
+        "the earth is heavy and pulls the ball",
+        "what goes up must come down"
       ],
       maxPoints: 3
     }
@@ -125,11 +125,11 @@ export const EXPERIMENTS_CONFIG: Record<string, ExperimentConfig> = {
     ...DIFFICULTY_SCALING.advanced,
     freeTextRubric: {
       questionId: "chemistry_2_explain",
-      prompt: "Why did the reaction happen faster when you added the Platinum catalyst?",
+      prompt: "Why does the water in the clay pot (Matka) become cold, but the metal pot stays warm?",
       rubricConcepts: [
-        "catalysts speed up reactions",
-        "catalysts lower the energy needed to start (activation energy)",
-        "catalysts are not consumed in the reaction"
+        "clay pot has tiny holes",
+        "water leaks out and takes the heat away",
+        "metal pot has no holes"
       ],
       maxPoints: 3
     }

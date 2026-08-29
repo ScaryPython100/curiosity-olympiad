@@ -29,7 +29,7 @@ function ExperimentOne({ recordAction, temperature, stirSpeed }: { recordAction:
             }}
             className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${spoonType === mat ? 'bg-indigo-600 text-white shadow' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
           >
-            {mat === "Wooden" ? "Wood Spoon" : "Metal Spoon"}
+            {mat === "Wooden" ? "Wood Spoon" : "Steel Spoon"}
           </button>
         ))}
       </div>
@@ -66,11 +66,11 @@ function ExperimentOne({ recordAction, temperature, stirSpeed }: { recordAction:
           </div>
 
           {/* Hot Soup Surface */}
-          <div className="w-[85%] h-[70%] bg-gradient-to-br from-amber-600 via-orange-600 to-red-700 rounded-b-2xl border-t-2 border-amber-300 relative overflow-hidden flex items-center justify-center">
+          <div className="w-[85%] h-[70%] bg-gradient-to-br from-yellow-500 via-yellow-600 to-amber-700 rounded-b-2xl border-t-2 border-yellow-300 relative overflow-hidden flex items-center justify-center">
             
             {/* Whirlpool Convection Motion */}
             <div 
-              className="w-[60%] h-[60%] rounded-full border-4 border-dashed border-amber-200/40"
+              className="w-[60%] h-[60%] rounded-full border-4 border-dashed border-yellow-200/40"
               style={{ animation: `spin ${Math.max(0.3, 4 - stirSpeed * 1.2)}s linear infinite` }}
             />
 
@@ -94,11 +94,11 @@ function ExperimentOne({ recordAction, temperature, stirSpeed }: { recordAction:
 
       {/* Responsive Bottom Thermal Info Card */}
       <div className="w-full max-w-lg mx-auto bg-gray-900/95 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-gray-700 text-center shadow-lg shrink-0 z-30">
-        <span className="text-xs sm:text-sm font-bold text-amber-400 block">
-          🌡️ Heat: {temperature}°C • 🥄 Spoon: {spoonType === "Wooden" ? "Wood Spoon" : "Metal Spoon"}
+        <span className="text-xs sm:text-sm font-bold text-yellow-400 block">
+          🔥 Fire & 🥄 Spoon: {spoonType === "Wooden" ? "Wood Spoon" : "Steel Spoon"}
         </span>
         <p className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5">
-          {spoonType === "Steel" ? "Metal lets heat pass through it quickly!" : "Wood blocks heat from passing through!"}
+          {spoonType === "Steel" ? "The steel spoon gets very hot, very fast! Don't touch!" : "The wood spoon stays cool because wood stops the heat."}
         </p>
       </div>
     </div>
@@ -114,7 +114,7 @@ function ExperimentTwo({ recordAction, temperature, stirSpeed }: { recordAction:
 
   const porosityPct = Math.round(temperature * 0.9);
   const humidityPct = Math.round(stirSpeed * 25);
-  const coolingDegree = isMatkaMode ? Math.max(12, 30 - (porosityPct * 0.15) + (humidityPct * 0.05)) : 120;
+  const coolingDegree = isMatkaMode ? Math.max(12, 30 - (porosityPct * 0.15) + (humidityPct * 0.05)) : 35; // Steel pot water stays warm
 
   return (
     <div 
@@ -130,18 +130,18 @@ function ExperimentTwo({ recordAction, temperature, stirSpeed }: { recordAction:
           }}
           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isMatkaMode ? 'bg-amber-600 text-white shadow' : 'bg-slate-700 text-white hover:bg-slate-600'}`}
         >
-          {isMatkaMode ? 'Show Metal Pot' : 'Show Clay Pot'}
+          {isMatkaMode ? 'Change to Metal Pot' : 'Change to Clay Pot (Matka)'}
         </button>
       </div>
 
-      {/* Centered Matka or Pressure Cooker */}
+      {/* Centered Matka or Metal Pot */}
       <div className="relative flex-1 w-full flex items-center justify-center my-auto">
         {isMatkaMode ? (
           <div className="relative z-10 w-[50%] h-[60%] sm:w-[40%] sm:h-[70%] bg-gradient-to-b from-amber-700 via-amber-800 to-amber-950 rounded-full border-4 border-amber-600 shadow-2xl flex flex-col items-center justify-center">
             
             {/* Clay Neck Rim */}
             <div className="w-[50%] h-[10%] bg-amber-600 border-2 border-amber-400 rounded-full absolute -top-[5%] shadow-md flex items-center justify-center">
-              <span className="text-[9px] sm:text-[10px] font-black text-amber-950">POT TOP</span>
+              <span className="text-[9px] sm:text-[10px] font-black text-amber-950">MATKA</span>
             </div>
 
             {/* Microscopic Pores Seepage Particles */}
@@ -152,25 +152,16 @@ function ExperimentTwo({ recordAction, temperature, stirSpeed }: { recordAction:
             {/* Water Content Level */}
             <div className="w-[85%] h-[55%] bg-gradient-to-b from-cyan-400/60 to-blue-600/80 rounded-b-full border-t border-cyan-200 shadow-inner flex flex-col items-center justify-center p-2 text-center absolute bottom-0">
               <span className="text-xs sm:text-sm font-black text-white shadow-md">
-                Water Heat: {coolingDegree.toFixed(1)}°C
-              </span>
-              <span className="text-[9px] sm:text-[10px] text-cyan-100 font-bold mt-1">
-                (Leaks: {porosityPct}% • Air Wetness: {humidityPct}%)
+                Water is Cold!
               </span>
             </div>
           </div>
         ) : (
-          /* Pressure Cooker Mode Visual */
+          /* Steel Pot Mode Visual */
           <div className="relative z-10 w-[50%] h-[50%] sm:w-[40%] sm:h-[60%] bg-gradient-to-b from-slate-300 via-slate-400 to-slate-600 rounded-b-3xl border-4 border-slate-200 shadow-2xl flex flex-col items-center justify-center p-4 text-center">
-            {/* Lid & Safety Valve */}
-            <div className="w-[110%] h-[15%] bg-slate-800 border-2 border-slate-500 rounded-t-xl absolute -top-[15%] flex items-center justify-center shadow-lg">
-              <div className="w-[10%] h-[80%] bg-amber-500 rounded-t-sm animate-bounce flex items-center justify-center">
-                <span className="text-[7px] sm:text-[8px] font-black text-amber-950">LID</span>
-              </div>
-            </div>
             <span className="text-sm sm:text-base font-black text-slate-900 uppercase">Metal Pot</span>
             <span className="text-[10px] sm:text-xs font-bold text-red-700 bg-red-100 px-3 py-1 rounded-full mt-2">
-              Very Hot Water: 120°C!
+              Water is Warm!
             </span>
           </div>
         )}
@@ -179,10 +170,10 @@ function ExperimentTwo({ recordAction, temperature, stirSpeed }: { recordAction:
       {/* Bottom Responsive Evaporative Info Card */}
       <div className="w-full max-w-lg mx-auto bg-gray-900/95 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-gray-700 text-center shadow-lg shrink-0 z-30">
         <span className="text-xs sm:text-sm font-bold text-cyan-300 block">
-          {isMatkaMode ? `🏺 Clay Pot cools water: ${coolingDegree.toFixed(1)}°C` : '♨️ Metal Pot traps heat: 120°C'}
+          {isMatkaMode ? `🏺 Matka (Clay Pot) makes water cold!` : `♨️ Metal Pot keeps water warm!`}
         </span>
         <p className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5">
-          {isMatkaMode ? "Water leaks out and takes the heat away." : "The lid traps the air, making the water very hot."}
+          {isMatkaMode ? "Water slowly leaks out through tiny holes in the clay and takes the heat away with it into the air." : "Metal has no holes, so the water stays warm."}
         </p>
       </div>
     </div>
@@ -195,23 +186,16 @@ function ExperimentTwo({ recordAction, temperature, stirSpeed }: { recordAction:
 function ExperimentThree({ recordAction, temperature, stirSpeed }: { recordAction: any, temperature: number, stirSpeed: number }) {
   const [candleLit, setCandleLit] = useState(true);
   const [oxygenLevel, setOxygenLevel] = useState(21); // 21% normal air
-  const [showEffervescence, setShowEffervescence] = useState(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
 
   const jarVolumeMl = Math.round(temperature * 10);
-
-  const triggerChemicalEffervescence = () => {
-    recordAction('triggered_baking_soda_vinegar_reaction');
-    setShowEffervescence(true);
-    setTimeout(() => setShowEffervescence(false), 3000);
-  };
 
   return (
     <div 
       ref={workspaceRef}
       className="relative w-full h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-between p-3 sm:p-4 overflow-hidden gap-2"
     >
-      {/* Centered Inverted Glass Jar & Candle Assembly */}
+      {/* Centered Inverted Glass Jar & Diya Assembly */}
       <div className="relative flex-1 w-full flex items-center justify-center my-auto">
         <div 
           className="relative z-10 border-4 border-cyan-200/50 bg-cyan-400/10 backdrop-blur-xs rounded-t-3xl shadow-2xl flex flex-col items-center justify-end pb-4 transition-all duration-300"
@@ -220,23 +204,16 @@ function ExperimentThree({ recordAction, temperature, stirSpeed }: { recordActio
             height: `${Math.min(280, Math.max(180, jarVolumeMl / 2.5))}px`
           }}
         >
-          {/* Effervescence Gas Bubbles Overlay */}
-          {showEffervescence && (
-            <div className="absolute inset-0 bg-white/20 rounded-t-3xl overflow-hidden flex items-center justify-center">
-              <div className="w-full h-full bg-[radial-gradient(#ffffff_4px,transparent_4px)] bg-[size:16px_16px] animate-ping" />
-              <span className="absolute text-xs font-black text-emerald-950 bg-emerald-300 px-3 py-1 rounded-full shadow-lg">
-                Bubbles!
-              </span>
-            </div>
-          )}
 
-          {/* Candle Base & Wax */}
-          <div className="w-14 sm:w-16 h-24 sm:h-28 bg-gradient-to-b from-amber-100 to-amber-200 border-2 border-amber-300 rounded-t-md shadow-md relative flex flex-col items-center">
+          {/* Diya Base & Oil */}
+          <div className="w-16 h-8 bg-orange-700 border-2 border-orange-900 rounded-b-full shadow-md relative flex flex-col items-center mt-20">
+            {/* Oil */}
+            <div className="w-14 h-2 bg-yellow-500 rounded-full absolute -top-1 opacity-80" />
             
             {/* Wick */}
-            <div className="w-1 h-4 bg-gray-900 absolute -top-4" />
+            <div className="w-1 h-3 bg-gray-900 absolute -top-3" />
 
-            {/* Candle Flame */}
+            {/* Diya Flame */}
             {candleLit && oxygenLevel > 10 ? (
               <div 
                 className="w-8 h-12 bg-gradient-to-t from-orange-500 via-yellow-400 to-amber-100 rounded-full shadow-[0_0_30px_rgba(251,191,36,0.9)] absolute -top-14 animate-pulse flex items-center justify-center"
@@ -249,17 +226,13 @@ function ExperimentThree({ recordAction, temperature, stirSpeed }: { recordActio
               </div>
             )}
           </div>
-
-          <span className="text-[10px] font-bold text-cyan-200 mt-3 bg-gray-900/80 px-2.5 py-0.5 rounded shadow">
-            Jar Size: {jarVolumeMl} mL
-          </span>
         </div>
       </div>
 
       {/* Responsive Bottom Controls Toolbar (Wraps cleanly on mobile!) */}
       <div className="w-full max-w-lg mx-auto bg-gray-900/95 p-2.5 sm:p-3 rounded-xl border border-gray-700 text-xs text-gray-200 flex flex-wrap items-center justify-center sm:justify-between gap-2 shrink-0 z-30 shadow-md">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-emerald-400">Air ({oxygenLevel}%):</span>
+          <span className="font-bold text-emerald-400">Air Amount:</span>
           <input
             type="range"
             min="0"
@@ -283,14 +256,7 @@ function ExperimentThree({ recordAction, temperature, stirSpeed }: { recordActio
             }}
             className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs shadow transition-all"
           >
-            Light Fire
-          </button>
-
-          <button
-            onClick={triggerChemicalEffervescence}
-            className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow transition-all"
-          >
-            + Add Baking Soda
+            Light Diya
           </button>
         </div>
       </div>
@@ -312,36 +278,36 @@ export function ChemistryLevel({ recordAction, experimentSubIndex = 0 }: Chemist
 
   const expInfo = [
     {
-      title: "Heat Experiment",
-      objective: "Change the heat and see what happens to the spoon.",
-      slider1Label: "Heat",
-      slider1Val: `${temperature}°C`,
+      title: "Cooking Dal Game",
+      objective: "Turn on the stove and see what happens to the spoon.",
+      slider1Label: "Stove Heat",
+      slider1Val: "",
       slider2Label: "Stir Speed",
-      slider2Val: stirSpeed === 1 ? "Slow" : stirSpeed === 2 ? "Medium" : "Fast"
+      slider2Val: ""
     },
     {
-      title: "Cooling Pot Experiment",
-      objective: "Change how much water leaks to see how it cools down.",
-      slider1Label: "Pot Holes",
-      slider1Val: `${Math.round(temperature * 0.9)}%`,
+      title: "Cooling Water Game",
+      objective: "Change the pot to see which one makes the water cold.",
+      slider1Label: "Summer Heat",
+      slider1Val: "",
       slider2Label: "Air Wetness",
-      slider2Val: `${Math.round(stirSpeed * 25)}%`
+      slider2Val: ""
     },
     {
-      title: "Fire and Air Experiment",
-      objective: "Change jar size and air to see how the fire burns.",
-      slider1Label: "Jar Size",
-      slider1Val: `${Math.round(temperature * 10)} mL`,
+      title: "Diya and Glass Game",
+      objective: "Put a glass jar over the Diya and take away the air to see what happens.",
+      slider1Label: "Glass Size",
+      slider1Val: "",
       slider2Label: "Air Amount",
-      slider2Val: `${stirSpeed * 10}%`
+      slider2Val: ""
     }
   ][experimentSubIndex] || {
-    title: "Heat Experiment",
-    objective: "Change the heat and see what happens to the spoon.",
-    slider1Label: "Heat",
-    slider1Val: `${temperature}°C`,
+    title: "Cooking Dal Game",
+    objective: "Turn on the stove and see what happens to the spoon.",
+    slider1Label: "Stove Heat",
+    slider1Val: "",
     slider2Label: "Stir Speed",
-    slider2Val: stirSpeed === 1 ? "Slow" : stirSpeed === 2 ? "Medium" : "Fast"
+    slider2Val: ""
   };
 
   const handleTempChange = (val: number) => {
@@ -360,7 +326,7 @@ export function ChemistryLevel({ recordAction, experimentSubIndex = 0 }: Chemist
       <div className="bg-gray-800 p-3 border-b border-gray-700 flex flex-wrap justify-between items-center gap-2 shrink-0 z-20">
         <div className="flex-1 pr-4">
           <h2 className="text-base md:text-lg font-bold text-gray-100 flex items-center gap-2">
-             <span className="bg-indigo-600 text-xs px-2 py-0.5 rounded text-white uppercase tracking-wider">Experiment {experimentSubIndex + 1}</span>
+             <span className="bg-indigo-600 text-xs px-2 py-0.5 rounded text-white uppercase tracking-wider">Game {experimentSubIndex + 1}</span>
              {expInfo.title}
           </h2>
           <p className="text-xs text-indigo-200 mt-0.5">
@@ -372,7 +338,7 @@ export function ChemistryLevel({ recordAction, experimentSubIndex = 0 }: Chemist
       {/* Interactive Simulation Variables Toolbar */}
       <div className="bg-gray-900/90 border-b border-gray-700/80 px-4 py-2 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-300 shrink-0 z-20">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">{expInfo.slider1Label}: {expInfo.slider1Val}</span>
+          <span className="font-bold text-indigo-300">{expInfo.slider1Label}</span>
           <input
             type="range"
             min="10"
@@ -385,7 +351,7 @@ export function ChemistryLevel({ recordAction, experimentSubIndex = 0 }: Chemist
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">{expInfo.slider2Label}: {expInfo.slider2Val}</span>
+          <span className="font-bold text-indigo-300">{expInfo.slider2Label}</span>
           <input
             type="range"
             min="1"

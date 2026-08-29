@@ -90,7 +90,7 @@ export default function DashboardPage() { console.log("DEBUG DASHBOARD PAGE REND
     if (isAwarding) return;
     setIsAwarding(true);
     try {
-      const result = await awardXP(500, "Daily Exploration Bonus");
+      const result = await awardXP(500, "daily_login");
       if (result.success) {
         const newXp = result.newXp || xp + 500;
         const oldBadge = getBestBadge(xp);

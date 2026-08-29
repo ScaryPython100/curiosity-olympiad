@@ -3,13 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.12",
+    "@ai-sdk/groq": "^4.0.28",
+    "@ai-sdk/react": "^4.0.69",
     "@aws-sdk/client-s3": "^3.1078.0",
     "@ducanh2912/next-pwa": "^10.2.9",
     "@supabase/ssr": "^0.12.0",

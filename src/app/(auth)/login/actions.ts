@@ -85,7 +85,7 @@ export async function signUpAction(formData: FormData) {
     // Initialize gamification data
     const { error: gamificationError } = await supabase
       .from("user_gamification")
-      .upsert([{ id: data.user.id, user_id: data.user.id, xp: 500, curiosity_points: 500 }], { onConflict: "user_id" });
+      .upsert([{ id: data.user.id, user_id: data.user.id, xp: 0, curiosity_points: 0 }], { onConflict: "user_id" });
 
     if (gamificationError) return { error: gamificationError.message };
   }
@@ -138,7 +138,6 @@ export async function signInAction(formData: FormData) {
   return { success: true };
 }
 
-// 4. Send OTP Action (Email & Mobile SMS via Resend / Firebase Phone / Dev Sandbox)
 export async function sendOtpAction(formData: FormData) {
   const destination = formData.get("destination") as string;
   const method = formData.get("method") as string; // 'email' | 'phone'
@@ -148,28 +147,8 @@ export async function sendOtpAction(formData: FormData) {
   if (isCreateAccount) {
     const supabase = await createClient();
 
-    // 1. FIRST: Only check Supabase Auth existence if Descope is NOT configured
-    if (!process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID) {
-      const emailToCheck = destination.includes("@")
-        ? destination.trim()
-        : `${destination.replace(/[^0-9]/g, "")}@phone.curiosityolympiad.org`;
-
-      const { data: testSignUpData, error: testSignUpError } = await supabase.auth.signUp({
-        email: emailToCheck,
-        password: "TestUserExistence_TempPass_123!",
-        options: {
-          data: { username: username || "explorer", real_name: username || "explorer" },
-        },
-      });
-
-      const isEmailRegistered =
-        testSignUpError?.message?.toLowerCase().includes("already registered") ||
-        (testSignUpData?.user?.identities && testSignUpData.user.identities.length === 0);
-
-      if (isEmailRegistered) {
-        return { error: `🚫 Email ID / Phone Number is already registered! Please navigate to Login Page to sign in.` };
-      }
-    }
+    // 1. We skip Supabase Auth email existence check because it creates ghost accounts
+    // Descope will handle OTP, and verifyOtpAction will handle existing users safely.
 
     // 2. SECOND: If the mail/phone number aren't registered check for the username
     if (username && username !== "Explorer") {
@@ -254,18 +233,19 @@ export async function sendOtpAction(formData: FormData) {
   return { success: true, message: `OTP sent to ${destination} via ${method}` };
 }
 
-// 5. Verify OTP Action (Email & Mobile SMS via Descope / Supabase)
 export async function verifyOtpAction(formData: FormData) {
   const destination = formData.get("destination") as string;
   const code = formData.get("code") as string;
   const username = (formData.get("username") as string) || destination.split("@")[0] || "Explorer";
   const realName = (formData.get("realName") as string) || username;
+  const password = (formData.get("password") as string) || "DevSandboxOverridePassword!123";
   const isCreateAccount = formData.get("isCreateAccount") === "true";
 
   const supabase = await createClient();
   const descopeProjectId = process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID?.replace(/^["']|["']$/g, "");
 
   let userId: string | null = null;
+  let descopeVerified = false;
 
   if (descopeProjectId) {
     const isEmail = destination.includes("@");
@@ -293,8 +273,8 @@ export async function verifyOtpAction(formData: FormData) {
         const errMsg = data?.errorDescription || data?.message || data?.errorMessage || "Invalid verification code";
         return { error: `Verification failed: ${errMsg}. Please check the 6-digit OTP code.` };
       }
-
-      userId = data?.user?.userId || data?.user?.email || loginId;
+      
+      descopeVerified = true;
     } catch (err: any) {
       return { error: `Verification request failed: ${err.message || "Network error"}` };
     }
@@ -331,130 +311,48 @@ export async function verifyOtpAction(formData: FormData) {
     userId = data?.user?.id || null;
   }
 
-  // Ensure user profile & gamification records exist upon verification
-  if (userId) {
-    await supabase
-      .from("student_profiles")
-      .upsert([{ id: userId, username, real_name: realName }], { onConflict: "id" });
+  // HYBRID LOGIC: If Descope verified them, we MUST silently create/login them in Supabase Auth!
+  if (descopeVerified) {
+    const emailToCheck = destination.includes("@")
+      ? destination.trim()
+      : `${destination.replace(/[^0-9]/g, "")}@phone.curiosityolympiad.org`;
 
-    await supabase
-      .from("user_gamification")
-      .upsert([{ id: userId, user_id: userId, xp: 500, curiosity_points: 500 }], { onConflict: "user_id" });
+    // Try to login if they already exist
+    let authRes = await supabase.auth.signInWithPassword({
+      email: emailToCheck,
+      password: password,
+    });
 
-    try {
-      const cookieStore = await cookies();
-      cookieStore.set("descope_session", userId, {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 30, // 30 days
-        httpOnly: false,
-        sameSite: "lax",
+    // If login fails (because user doesn't exist), sign them up
+    if (authRes.error && isCreateAccount) {
+      authRes = await supabase.auth.signUp({
+        email: emailToCheck,
+        password: password,
+        options: {
+          data: { username: username || "explorer", real_name: realName },
+        },
       });
-    } catch (e) {
-      // Ignore cookie errors if headers are read-only
+    } else if (authRes.error && !isCreateAccount) {
+        return { error: `Could not sync session with database: ${authRes.error.message}` };
+    }
+
+    if (authRes.error) {
+      return { error: `Descope verified, but Supabase sync failed: ${authRes.error.message}` };
+    }
+
+    userId = authRes.data?.user?.id || null;
+  }
+
+  // User profile & gamification records are now perfectly handled automatically 
+  // by the Postgres trigger `handle_new_user` directly on the database side!
+  if (userId) {
+    if (isCreateAccount && password && !descopeProjectId) {
+      const { error: pwdError } = await supabase.auth.updateUser({ password });
+      if (pwdError) {
+        console.error("Failed to save password during OTP signup:", pwdError);
+      }
     }
   }
 
   return { success: true };
-}
-
-// 6. Reset Password Action
-export async function resetPasswordAction(formData: FormData) {
-  const identifier = ((formData.get("identifier") as string) || "").trim();
-  const code = ((formData.get("code") as string) || "").trim();
-  const newPassword = ((formData.get("newPassword") as string) || "").trim();
-
-  if (!identifier) {
-    return { error: "Please enter your Email ID, Mobile Number, or Username." };
-  }
-  if (!newPassword || newPassword.length < 6) {
-    return { error: "Please enter a new password (at least 6 characters)." };
-  }
-
-  const supabase = await createClient();
-
-  // 1. Determine existing username & email to reset
-  let emailToReset = identifier;
-  let existingUsername = identifier;
-
-  if (identifier.includes("@")) {
-    emailToReset = identifier;
-    const { data: profile } = await supabase
-      .from("student_profiles")
-      .select("id, username")
-      .ilike("username", identifier.split("@")[0])
-      .maybeSingle();
-
-    if (profile?.username) {
-      existingUsername = profile.username;
-    } else {
-      existingUsername = identifier.split("@")[0];
-    }
-  } else if (/^[\d\s\-\+\(\)]+$/.test(identifier) && identifier.replace(/[^0-9]/g, "").length >= 7) {
-    emailToReset = `${identifier.replace(/[^0-9]/g, "")}@phone.curiosityolympiad.org`;
-    existingUsername = `Explorer_${identifier.slice(-4)}`;
-  } else {
-    // Identifier is a Username (e.g., "Raghu.alamuri")
-    existingUsername = identifier;
-    emailToReset = `${identifier.toLowerCase()}@username.curiosityolympiad.org`;
-    
-    // Verify if profile exists to preserve exact casing
-    const { data: profile } = await supabase
-      .from("student_profiles")
-      .select("id, username")
-      .ilike("username", identifier)
-      .maybeSingle();
-
-    if (profile?.username) {
-      existingUsername = profile.username;
-    }
-  }
-
-  // Verify OTP for password recovery
-  let error;
-  if (identifier.includes("@")) {
-    const res = await supabase.auth.verifyOtp({
-      email: identifier.trim(),
-      token: code.trim(),
-      type: "recovery",
-    });
-    error = res.error;
-  } else {
-    let phoneNum = identifier.replace(/[^0-9+]/g, "");
-    if (!phoneNum.startsWith("+")) {
-      phoneNum = phoneNum.length === 10 ? `+91${phoneNum}` : `+${phoneNum}`;
-    }
-    const res = await supabase.auth.verifyOtp({
-      phone: phoneNum,
-      token: code.trim(),
-      type: "sms",
-    });
-    error = res.error;
-  }
-
-  if (error) {
-    return { error: `Invalid verification code: ${error.message}` };
-  }
-
-  // Once verified, update user password WITH explicit username metadata preservation
-  const { data: updateData, error: updateError } = await supabase.auth.updateUser({
-    password: newPassword,
-    data: {
-      username: existingUsername,
-    },
-  });
-
-  if (updateError) {
-    return { error: `Password update failed: ${updateError.message}` };
-  }
-
-  if (updateData?.user) {
-    await supabase
-      .from("student_profiles")
-      .upsert([{ id: updateData.user.id, username: existingUsername }], { onConflict: "id" });
-  }
-
-  return {
-    success: true,
-    message: `Password for '${existingUsername}' has been reset successfully! You can now log in.`,
-  };
 }

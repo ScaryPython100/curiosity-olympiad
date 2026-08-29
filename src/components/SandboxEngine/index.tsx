@@ -71,7 +71,7 @@ export default function SandboxEngine({
 
   const handleCuriosity = () => {
     recordAction('trigger_activated');
-    setFeedbackMsg("What if? Try doing something silly and see what happens!");
+    setFeedbackMsg("Hint: Try moving the sliders around to see what changes!");
   };
 
   const handleNextOrSubmit = async () => {
@@ -190,7 +190,7 @@ export default function SandboxEngine({
       </div>
 
       {/* Dynamic Physics Level Container - Fluid Aspect Ratio */}
-      <div className="w-full rounded-xl overflow-hidden shadow-md border-2 border-gray-800 bg-gray-900 flex flex-col aspect-video relative">
+      <div className="w-full rounded-xl overflow-hidden shadow-md border-2 border-gray-800 bg-gray-900 flex flex-col min-h-[450px] flex-1 relative">
         {renderLevel()}
       </div>
       
@@ -228,12 +228,12 @@ export default function SandboxEngine({
             {isGrading ? t.sandbox.evaluating : (isLastLevel ? t.sandbox.finish_game : t.sandbox.skip_next)}
           </button>
 
-          {/* Right: Curiosity */}
+          {/* Right: Hint */}
           <button 
             onClick={handleCuriosity}
             className="w-full sm:w-1/3 bg-gray-800 hover:bg-gray-900 text-white py-2 rounded-lg text-sm font-bold transition-colors"
           >
-            Curiosity
+            Get a Hint 💡
           </button>
         </div>
         

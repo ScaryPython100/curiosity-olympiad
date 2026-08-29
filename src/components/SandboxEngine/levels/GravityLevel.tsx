@@ -109,10 +109,10 @@ function ExperimentOne({ attractorMass, launchSpeed, recordAction }: any) {
 
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-slate-900/95 px-3 py-2 rounded-xl border border-slate-700 text-center shadow-lg z-20">
         <span className="text-xs sm:text-sm font-bold text-cyan-300 block">
-          🌀 Spin: {fanSpeedRpm} RPM • Air: {Math.round(launchSpeed / 10)} km/h
+          🌀 Fast Wind!
         </span>
         <p className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5">
-          {bladeCount === 3 ? "3 blades spin very fast and push lots of air." : `${bladeCount} blades spin slower but push air quietly.`}
+          {bladeCount === 3 ? "3 blades spin very fast and push lots of air." : `${bladeCount} blades push air quietly.`}
         </p>
       </div>
     </div>
@@ -120,72 +120,86 @@ function ExperimentOne({ attractorMass, launchSpeed, recordAction }: any) {
 }
 
 function ExperimentTwo({ attractorMass, launchSpeed, recordAction }: any) {
-  const [showVelocityVectors, setShowVelocityVectors] = useState(true);
+  const [isHit, setIsHit] = useState(false);
+  const [ballPosition, setBallPosition] = useState({ x: 10, y: 80 });
 
-  // Responsive planet & orbit radius using percentages instead of pixels
-  const planetRadiusPct = Math.min(25, Math.max(10, 8 * attractorMass));
-  const orbitSpeedSec = Math.max(1.2, 10 - launchSpeed / 40);
+  const hitBall = () => {
+    if (isHit) return;
+    setIsHit(true);
+    recordAction('hit_cricket_ball');
+    
+    const power = launchSpeed / 10; // 10 to 50
+    const angle = (attractorMass) * 30; // 15 to 75 degrees
+    const radian = angle * (Math.PI / 180);
+    
+    let t = 0;
+    const interval = setInterval(() => {
+      t += 0.15;
+      const x = 10 + (power * Math.cos(radian) * t);
+      // y = v*t - 0.5*g*t^2
+      const y = 80 - (power * Math.sin(radian) * t) + (0.5 * 9.8 * t * t);
+      
+      if (y > 80 || x > 100) {
+        clearInterval(interval);
+        setTimeout(() => {
+          setIsHit(false);
+          setBallPosition({ x: 10, y: 80 });
+        }, 1000);
+      } else {
+        setBallPosition({ x, y });
+      }
+    }, 50);
+  };
 
   return (
-    <div className="relative w-full h-full bg-[#030712] flex flex-col items-center justify-between p-3 overflow-hidden gap-2">
-      <div className="absolute inset-0 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] bg-[size:16px_16px] opacity-20" />
+    <div className="relative w-full h-full bg-gradient-to-b from-sky-400 via-sky-300 to-green-500 flex flex-col items-center justify-between p-3 overflow-hidden gap-2">
+      {/* Sun */}
+      <div className="absolute top-5 right-5 w-16 h-16 bg-yellow-400 rounded-full shadow-[0_0_30px_#facc15]"></div>
 
-      <div className="relative flex-1 w-full flex items-center justify-center my-auto aspect-square max-h-full">
-        {/* Gravitational Field Rings */}
+      {/* Clouds */}
+      <div className="absolute top-10 left-10 w-20 h-8 bg-white rounded-full opacity-80"></div>
+      <div className="absolute top-16 right-32 w-24 h-10 bg-white rounded-full opacity-70"></div>
+
+      {/* Ground */}
+      <div className="absolute bottom-0 w-full h-[25%] bg-green-600 border-t-4 border-green-700"></div>
+      
+      {/* Pitch */}
+      <div className="absolute bottom-[10%] left-[10%] w-[30%] h-8 bg-amber-200 border border-amber-300"></div>
+      
+      {/* Stumps */}
+      <div className="absolute bottom-[10%] left-[10%] flex gap-0.5">
+        <div className="w-1 h-8 bg-orange-800"></div>
+        <div className="w-1 h-8 bg-orange-800"></div>
+        <div className="w-1 h-8 bg-orange-800"></div>
+      </div>
+
+      <div className="relative flex-1 w-full flex items-center justify-center my-auto">
         <div 
-          className="absolute rounded-full border-2 border-dashed border-cyan-500/30 animate-spin opacity-50"
-          style={{ 
-            width: `${planetRadiusPct * 3.5}%`, 
-            height: `${planetRadiusPct * 3.5}%`,
-            animationDuration: '25s'
-          }}
-        />
-
-        {/* Central Planet Earth / Jupiter */}
-        <div 
-          className="relative z-10 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-slate-900 border-4 border-cyan-300 shadow-[0_0_40px_rgba(56,189,248,0.5)] flex items-center justify-center transition-all duration-300"
-          style={{
-            width: `${planetRadiusPct}%`,
-            height: `${planetRadiusPct}%`
-          }}
-        >
-          <div className="w-full h-full rounded-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-green-400/40 via-transparent to-transparent" />
-          <span className="absolute text-[8px] font-black text-white uppercase tracking-widest shadow-md whitespace-nowrap">
-            {attractorMass > 1.8 ? "BIG PLANET" : "EARTH"}
-          </span>
-        </div>
-
-        {/* Orbiting Satellite Container */}
-        <div 
-          className="absolute z-20 flex items-center justify-center pointer-events-none"
-          style={{
-            width: `${planetRadiusPct * 3.5}%`,
-            height: `${planetRadiusPct * 3.5}%`,
-            animation: `spin ${orbitSpeedSec}s linear infinite`
-          }}
-        >
-          <div className="absolute -top-3 w-6 h-6 bg-amber-400 border-2 border-amber-100 rounded-lg shadow-[0_0_15px_rgba(251,191,36,0.8)] flex items-center justify-center">
-            <span className="material-symbols-outlined text-[10px] text-amber-950">satellite_alt</span>
-          </div>
-
-          {showVelocityVectors && (
-            <div className="absolute -top-2 left-1/2 w-10 sm:w-16 h-0.5 bg-green-400 shadow-[0_0_8px_#22c55e]">
-              <div className="w-1.5 h-1.5 border-t-2 border-r-2 border-green-400 rotate-45 absolute -right-0.5 -top-[2px]" />
-            </div>
-          )}
-        </div>
+          className="absolute w-4 h-4 rounded-full bg-red-600 border border-white shadow-lg z-20"
+          style={{ left: `${ballPosition.x}%`, top: `${ballPosition.y}%`, transition: 'left 0.05s linear, top 0.05s linear' }}
+        ></div>
+        {/* Bat */}
+        {!isHit && (
+           <div className="absolute w-2 h-16 bg-orange-300 border border-orange-700 origin-bottom shadow-lg z-10"
+                style={{ left: `9%`, top: `70%`, transform: `rotate(${isHit ? -45 : 0}deg)` }}>
+           </div>
+        )}
       </div>
 
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-slate-900/95 px-3 py-2 rounded-xl border border-slate-700 text-center shadow-lg z-20">
-        <span className="text-xs sm:text-sm font-bold text-cyan-300 block">
-          🛰️ Speed: {(launchSpeed / 30).toFixed(1)} km/s
-        </span>
         <button
-          onClick={() => setShowVelocityVectors(prev => !prev)}
-          className="mt-1 px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] transition-all"
+          onClick={hitBall}
+          disabled={isHit}
+          className="w-full py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg text-sm mb-2 disabled:opacity-50"
         >
-          {showVelocityVectors ? 'Hide Arrow' : 'Show Arrow'}
+          {isHit ? "Ball is flying!" : "HIT BALL"}
         </button>
+        <span className="text-xs sm:text-sm font-bold text-yellow-300 block">
+          🏏 Big Hit!
+        </span>
+        <p className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5">
+          Gravity always pulls the ball back to the ground.
+        </p>
       </div>
     </div>
   );
@@ -224,49 +238,57 @@ function ExperimentThree({ attractorMass, launchSpeed, recordAction }: any) {
   const altitudeMeters = Math.round(launchSpeed * 2);
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-between p-3 overflow-hidden gap-2">
-      <div className="w-full max-w-md h-8 bg-gray-800 border-2 border-gray-600 rounded-t-xl flex items-center justify-between px-3 shadow-md z-10 shrink-0">
-        <span className="text-[10px] font-bold text-yellow-300">Height: {altitudeMeters}m</span>
+    <div className="relative w-full h-full bg-gradient-to-b from-sky-500 via-sky-300 to-green-600 flex flex-col items-center justify-between p-3 overflow-hidden gap-2">
+      
+      {/* Background scenery for school roof */}
+      <div className="absolute bottom-0 w-full h-[20%] bg-green-600"></div>
+      <div className="absolute bottom-[20%] w-[60%] h-[50%] bg-orange-100 border-4 border-orange-300 flex flex-col justify-end">
+        <div className="flex justify-around mb-4">
+          <div className="w-8 h-12 bg-blue-300 border-2 border-blue-400"></div>
+          <div className="w-8 h-12 bg-blue-300 border-2 border-blue-400"></div>
+        </div>
+      </div>
+      <div className="absolute top-[30%] w-[65%] h-4 bg-orange-500"></div>
+
+      <div className="w-full max-w-md h-8 bg-white/90 border-2 border-gray-300 rounded-xl flex items-center justify-between px-3 shadow-md z-10 shrink-0 mt-2">
+        <span className="text-[10px] font-bold text-gray-800">School Roof</span>
         <div className="flex items-center gap-1.5">
-          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${isVacuumActive ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white'}`}>
-            {isVacuumActive ? 'No Air (Space)' : 'Normal Air'}
+          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${isVacuumActive ? 'bg-indigo-600 text-white' : 'bg-sky-500 text-white'}`}>
+            {isVacuumActive ? 'No Air (Vacuum)' : 'Normal Air'}
           </span>
         </div>
       </div>
 
-      <div className="relative w-full max-w-md flex-1 bg-gray-900/80 border-x-2 border-gray-700 flex justify-around px-2 py-4">
-        <div className="relative w-20 sm:w-28 h-full border-r border-dashed border-gray-700 flex flex-col items-center justify-between">
-          <span className="text-[10px] font-bold text-red-400 bg-gray-950 px-1 py-0.5 rounded text-center leading-none">Heavy Ball</span>
+      <div className="relative w-full max-w-md flex-1 flex justify-around px-2 py-4 z-10">
+        <div className="relative w-20 sm:w-28 h-full border-r border-dashed border-gray-400/50 flex flex-col items-center justify-between">
+          <span className="text-[10px] font-bold text-white bg-slate-800 px-2 py-0.5 rounded-full text-center shadow-lg">Heavy Stone</span>
           <div 
-            className="w-8 h-8 rounded-full bg-red-600 border-2 border-red-200 shadow-lg flex items-center justify-center absolute transition-all duration-75"
-            style={{ top: `${Math.min(85, ballProgress)}%`, transform: 'translateY(-50%)' }}
+            className="w-8 h-8 rounded-full bg-gray-600 border-2 border-gray-400 shadow-lg flex items-center justify-center absolute transition-all duration-75"
+            style={{ top: `${Math.min(90, ballProgress)}%`, transform: 'translateY(-50%)' }}
           />
-          <span className="text-[9px] text-gray-500">Floor</span>
         </div>
 
         <div className="relative w-20 sm:w-28 h-full flex flex-col items-center justify-between">
-          <span className="text-[10px] font-bold text-cyan-400 bg-gray-950 px-1 py-0.5 rounded text-center leading-none">Light Feather</span>
+          <span className="text-[10px] font-bold text-white bg-green-800 px-2 py-0.5 rounded-full text-center shadow-lg">Dry Leaf</span>
           <div 
-            className="w-6 h-6 rounded-full bg-sky-200 border-2 border-cyan-400 shadow-lg flex items-center justify-center absolute transition-all duration-75"
-            style={{ top: `${Math.min(85, featherProgress)}%`, transform: 'translateY(-50%)' }}
+            className="w-8 h-4 bg-green-500 border border-green-400 rounded-[50%] shadow-lg flex items-center justify-center absolute transition-all duration-75"
+            style={{ top: `${Math.min(90, featherProgress)}%`, transform: 'translateY(-50%) rotate(15deg)' }}
           >
-            <span className="material-symbols-outlined text-[10px] text-cyan-900">feather</span>
           </div>
-          <span className="text-[9px] text-gray-500">Floor</span>
         </div>
       </div>
 
-      <div className="w-full max-w-md bg-gray-800 p-2 border-2 border-gray-600 rounded-b-xl flex items-center justify-between gap-2 z-10 shrink-0">
+      <div className="w-full max-w-md bg-white p-2 border-2 border-gray-200 rounded-xl flex items-center justify-between gap-2 z-10 shrink-0 shadow-lg mb-2">
         <button
           onClick={() => setIsVacuumActive(prev => !prev)}
-          className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-bold transition-all text-center ${isVacuumActive ? 'bg-emerald-600 text-white shadow' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+          className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-bold transition-all text-center ${isVacuumActive ? 'bg-indigo-600 text-white shadow' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
         >
           {isVacuumActive ? 'Add Air Back' : 'Remove Air'}
         </button>
         <button
           onClick={triggerDropAnimation}
           disabled={isDropping}
-          className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] sm:text-xs uppercase shadow-md active:scale-95 disabled:opacity-50 shrink-0"
+          className="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-black text-[10px] sm:text-xs uppercase shadow-md active:scale-95 disabled:opacity-50 shrink-0"
         >
           {isDropping ? 'Falling...' : 'Drop Both'}
         </button>
@@ -288,36 +310,36 @@ export function GravityLevel({ recordAction, experimentSubIndex = 0 }: GravityLe
 
   const expInfo = [
     {
-      title: "Fan Blades Game",
-      objective: "Change the fan speed and see how blades make a breeze.",
+      title: "Table Fan Game",
+      objective: "Change the fan speed and see how blades make wind.",
       slider1Label: "Fan Speed",
-      slider1Val: `${Math.round(attractorMass * 2)}`,
+      slider1Val: "",
       slider2Label: "Air Speed",
-      slider2Val: `${Math.round(launchSpeed / 10)} km/h`
+      slider2Val: ""
     },
     {
-      title: "Planet Orbit Game",
-      objective: "Change the planet size to see how things spin around it.",
-      slider1Label: "Planet Size",
-      slider1Val: `${attractorMass.toFixed(1)}x`,
-      slider2Label: "Spin Speed",
-      slider2Val: `${(launchSpeed / 30).toFixed(1)} km/s`
+      title: "Cricket Shot Game",
+      objective: "Hit the ball and watch gravity pull it down.",
+      slider1Label: "Bat Angle",
+      slider1Val: "",
+      slider2Label: "Hit Power",
+      slider2Val: ""
     },
     {
-      title: "Falling Things Game",
-      objective: "Drop a heavy ball and light feather to see which hits the ground first.",
-      slider1Label: "Ball Weight",
-      slider1Val: `${(attractorMass * 5).toFixed(1)} kg`,
-      slider2Label: "Drop Height",
-      slider2Val: `${Math.round(launchSpeed * 2)} m`
+      title: "Dropping Things Game",
+      objective: "Drop a stone and a leaf from the roof to see which hits the ground first.",
+      slider1Label: "Stone Weight",
+      slider1Val: "",
+      slider2Label: "Roof Height",
+      slider2Val: ""
     }
   ][experimentSubIndex] || {
-    title: "Fan Blades Game",
-    objective: "Change the fan speed and see how blades make a breeze.",
+    title: "Table Fan Game",
+    objective: "Change the fan speed and see how blades make wind.",
     slider1Label: "Fan Speed",
-    slider1Val: `${Math.round(attractorMass * 2)}`,
+    slider1Val: "",
     slider2Label: "Air Speed",
-    slider2Val: `${Math.round(launchSpeed / 10)} km/h`
+    slider2Val: ""
   };
 
   return (
@@ -338,7 +360,7 @@ export function GravityLevel({ recordAction, experimentSubIndex = 0 }: GravityLe
       {/* Interactive Toolbar */}
       <div className="bg-gray-900/90 border-b border-gray-700/80 px-4 py-2 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-300 shrink-0 z-30 relative">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">{expInfo.slider1Label}: {expInfo.slider1Val}</span>
+          <span className="font-bold text-indigo-300">{expInfo.slider1Label}</span>
           <input
             type="range"
             min="0.5"
@@ -354,7 +376,7 @@ export function GravityLevel({ recordAction, experimentSubIndex = 0 }: GravityLe
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">{expInfo.slider2Label}: {expInfo.slider2Val}</span>
+          <span className="font-bold text-indigo-300">{expInfo.slider2Label}</span>
           <input
             type="range"
             min="100"

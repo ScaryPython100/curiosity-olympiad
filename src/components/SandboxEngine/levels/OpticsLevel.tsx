@@ -8,7 +8,7 @@ function ExperimentOne({ refractiveIndex, beamIntensity, useRedPrism, recordActi
   const [lemonBaseSize, setLemonBaseSize] = useState<"Small" | "Medium" | "Large">("Medium");
   const magnificationFactor = refractiveIndex;
   
-  // Convert pixels to responsive percentages (relative to a 800x400 aspect ratio)
+  // Convert pixels to responsive percentages
   const basePercent = lemonBaseSize === "Small" ? 15 : lemonBaseSize === "Medium" ? 22 : 30;
   const lemonSizePct = basePercent * (0.8 + (magnificationFactor - 1) * 1.5);
   const bgOpacity = beamIntensity / 100;
@@ -20,12 +20,6 @@ function ExperimentOne({ refractiveIndex, beamIntensity, useRedPrism, recordActi
       <div className="absolute bottom-0 w-full h-[30%] bg-gradient-to-t from-amber-950 to-amber-900 border-t-4 border-amber-700/50 flex items-center justify-center">
         <span className="text-amber-200/30 text-xs font-bold uppercase tracking-widest">Table</span>
       </div>
-
-      {/* Light Rays Background (Responsive SVG) */}
-      <svg viewBox="0 0 800 400" className="absolute inset-0 w-full h-full pointer-events-none opacity-40">
-        <line x1="12.5%" y1="12.5%" x2="50%" y2="62.5%" stroke={useRedPrism ? "#f97316" : "#fef08a"} strokeWidth="4" strokeDasharray="6 6" />
-        <line x1="87.5%" y1="12.5%" x2="50%" y2="62.5%" stroke={useRedPrism ? "#f97316" : "#fef08a"} strokeWidth="4" strokeDasharray="6 6" />
-      </svg>
 
       {/* Toolbar */}
       <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm flex flex-wrap items-center justify-center gap-1.5 bg-gray-900/95 p-2 rounded-xl border border-gray-700 text-xs z-20 shadow-md">
@@ -58,10 +52,10 @@ function ExperimentOne({ refractiveIndex, beamIntensity, useRedPrism, recordActi
       {/* Bottom Info */}
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-gray-900/95 px-3 py-2 rounded-xl border border-gray-700 text-center shadow-lg z-20">
         <span className="text-xs sm:text-sm font-bold text-cyan-200 block">
-          Looks {(magnificationFactor * 1.5).toFixed(1)}x bigger!
+          Looks bigger!
         </span>
         <p className="text-[10px] text-gray-400 mt-0.5">
-          Water bends the light, making the lemon look much larger than it really is.
+          Water makes the lemon look big like a magnifying glass!
         </p>
       </div>
     </div>
@@ -69,14 +63,14 @@ function ExperimentOne({ refractiveIndex, beamIntensity, useRedPrism, recordActi
 }
 
 function ExperimentTwo({ refractiveIndex, beamIntensity, useRedPrism, recordAction }: any) {
-  const [laserColor, setLaserColor] = useState<"White" | "Red" | "Green" | "Blue">("White");
+  const [laserColor, setLaserColor] = useState<"Sunlight" | "Red" | "Green" | "Blue">("Sunlight");
   const prismAngleDeg = Math.round(refractiveIndex * 30);
 
   return (
     <div className="relative w-full h-full bg-[#080d1a] flex flex-col items-center justify-between p-3 overflow-hidden gap-2">
       <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm flex flex-wrap items-center justify-center gap-1.5 bg-gray-900/95 p-2 rounded-xl border border-gray-700 text-xs z-20 shadow-md">
-        <span className="text-gray-300 font-bold mr-1">Light Color:</span>
-        {(["White", "Red", "Green", "Blue"] as const).map((col) => (
+        <span className="text-gray-300 font-bold mr-1">Light Type:</span>
+        {(["Sunlight", "Red", "Green", "Blue"] as const).map((col) => (
           <button
             key={col}
             onClick={() => setLaserColor(col)}
@@ -88,11 +82,10 @@ function ExperimentTwo({ refractiveIndex, beamIntensity, useRedPrism, recordActi
       </div>
 
       <div className="relative flex-1 w-full flex items-center justify-center my-auto">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293d_1px,transparent_1px),linear-gradient(to_bottom,#1f293d_1px,transparent_1px)] bg-[size:10%_10%] opacity-20" />
         
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full z-0 pointer-events-none">
-          <line x1="5" y1="50" x2="50" y2="50" stroke={laserColor === "White" ? "#ffffff" : laserColor.toLowerCase()} strokeWidth="1" strokeLinecap="round" />
-          {laserColor === "White" ? (
+          <line x1="5" y1="50" x2="50" y2="50" stroke={laserColor === "Sunlight" ? "#ffffff" : laserColor.toLowerCase()} strokeWidth="1" strokeLinecap="round" />
+          {laserColor === "Sunlight" ? (
             <>
               <line x1="50" y1="50" x2="95" y2="25" stroke="#ef4444" strokeWidth="1" opacity="0.9" />
               <line x1="50" y1="50" x2="95" y2="35" stroke="#f97316" strokeWidth="1" opacity="0.9" />
@@ -108,28 +101,27 @@ function ExperimentTwo({ refractiveIndex, beamIntensity, useRedPrism, recordActi
 
         <div className="absolute left-[5%] z-10 flex items-center gap-1">
           <div className="w-[10vw] max-w-[60px] h-8 bg-gray-700 border-2 border-gray-500 rounded-lg flex items-center justify-center shadow-lg">
-            <span className="text-[10px] font-black text-gray-200">LIGHT</span>
+            <span className="text-[10px] font-black text-yellow-200">SUN</span>
           </div>
         </div>
 
-        <div className="relative z-10 transition-transform duration-300 ease-out cursor-pointer w-[25%] max-w-[150px] aspect-square" style={{ transform: `rotate(${prismAngleDeg - 45}deg)` }}>
-          <div className="w-full h-full bg-gradient-to-tr from-cyan-400/30 via-sky-200/40 to-white/60 border-4 border-cyan-200/80 backdrop-blur-md shadow-2xl flex items-center justify-center"
-               style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}>
-            <span className="text-[10px] font-bold text-gray-900 bg-white/80 px-1 rounded shadow-sm">Glass</span>
+        <div className="relative z-10 transition-transform duration-300 ease-out cursor-pointer w-[35%] max-w-[200px] aspect-[1/3]" style={{ transform: `rotate(${prismAngleDeg - 45}deg)` }}>
+          <div className="w-full h-full bg-gradient-to-tr from-cyan-400/30 via-sky-200/40 to-white/60 border-2 border-cyan-200/80 backdrop-blur-sm flex items-center justify-center">
+            <span className="text-[10px] font-bold text-gray-900 bg-white/80 px-1 rounded shadow-sm rotate-90">Plastic Scale</span>
           </div>
         </div>
 
         <div className="absolute right-[5%] z-10 w-[3%] h-[60%] bg-gray-200 border-2 border-gray-400 rounded-sm shadow-xl flex flex-col justify-around">
-          {laserColor === "White" && <div className="w-full h-full bg-gradient-to-b from-red-500 via-yellow-400 via-green-500 via-blue-500 to-purple-600 opacity-90 shadow-md" />}
+          {laserColor === "Sunlight" && <div className="w-full h-full bg-gradient-to-b from-red-500 via-yellow-400 via-green-500 via-blue-500 to-purple-600 opacity-90 shadow-md" />}
         </div>
       </div>
 
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-gray-900/95 px-3 py-2 rounded-xl border border-gray-700 text-center shadow-lg z-20">
         <span className="text-xs sm:text-sm font-bold text-amber-300 block">
-          🌈 Prism Angle: {prismAngleDeg}°
+          🌈 Beautiful Rainbow!
         </span>
         <p className="text-[10px] text-gray-400 mt-0.5">
-          {laserColor === "White" ? "White light splits into a beautiful rainbow!" : `The ${laserColor} light does not split because it is only one color.`}
+          {laserColor === "Sunlight" ? "Sunlight hits the scale and splits into a beautiful rainbow!" : `The ${laserColor} light does not split because it is only one color.`}
         </p>
       </div>
     </div>
@@ -137,7 +129,7 @@ function ExperimentTwo({ refractiveIndex, beamIntensity, useRedPrism, recordActi
 }
 
 function ExperimentThree({ refractiveIndex, beamIntensity, useRedPrism, recordAction }: any) {
-  const [shadowSourceType, setShadowSourceType] = useState<"Tubelight" | "LED">("Tubelight");
+  const [shadowSourceType, setShadowSourceType] = useState<"Morning" | "Afternoon">("Morning");
   
   const sunAngleDeg = Math.round(refractiveIndex * 45);
   // relative height from 10% to 50%
@@ -152,57 +144,58 @@ function ExperimentThree({ refractiveIndex, beamIntensity, useRedPrism, recordAc
   const shadowLengthPct = Math.min(45, Math.max(5, poleHeightPct / Math.tan(sunRad)));
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-b from-sky-900 via-sky-800 to-slate-900 flex flex-col items-center justify-between p-3 overflow-hidden gap-2">
-      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm flex flex-wrap items-center justify-center gap-1.5 bg-gray-900/95 p-2 rounded-xl border border-gray-700 text-xs z-20 shadow-md">
-        <span className="text-gray-300 font-bold mr-1">Light Type:</span>
-        {(["Tubelight", "LED"] as const).map((src) => (
+    <div className="relative w-full h-full bg-gradient-to-b from-sky-400 via-sky-300 to-sky-200 flex flex-col items-center justify-between p-3 overflow-hidden gap-2">
+      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm flex flex-wrap items-center justify-center gap-1.5 bg-white/90 p-2 rounded-xl border border-gray-300 text-xs z-20 shadow-md">
+        <span className="text-gray-800 font-bold mr-1">Time of Day:</span>
+        {(["Morning", "Afternoon"] as const).map((src) => (
           <button
             key={src}
             onClick={() => setShadowSourceType(src)}
-            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${shadowSourceType === src ? 'bg-indigo-600 text-white shadow' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${shadowSourceType === src ? 'bg-indigo-600 text-white shadow' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
           >
-            {src === "Tubelight" ? "Soft Light" : "Hard Light"}
+            {src}
           </button>
         ))}
       </div>
 
       <div className="relative flex-1 w-full flex flex-col justify-end h-full">
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full z-0 pointer-events-none">
-          <line x1={`${sunXPct}%`} y1={`${sunYPct}%`} x2="50%" y2={`${80 - poleHeightPct}%`} stroke="#fde047" strokeWidth="0.5" strokeDasharray="2 2" opacity="0.8" />
-          <line x1={`${sunXPct}%`} y1={`${sunYPct}%`} x2={`${50 + shadowLengthPct}%`} y2="80%" stroke="#fde047" strokeWidth="0.5" strokeDasharray="1 1" opacity="0.6" />
+          <line x1={`${sunXPct}%`} y1={`${sunYPct}%`} x2="50%" y2={`${80 - poleHeightPct}%`} stroke="#facc15" strokeWidth="0.5" strokeDasharray="2 2" opacity="0.8" />
         </svg>
 
         <div 
-          className="absolute z-10 w-[12%] max-w-[60px] aspect-square rounded-full bg-yellow-300 shadow-[0_0_20px_rgba(253,224,71,0.9)] border-2 border-yellow-100 flex items-center justify-center transition-all duration-300 -translate-x-1/2 -translate-y-1/2"
+          className="absolute z-10 w-[12%] max-w-[60px] aspect-square rounded-full bg-yellow-400 shadow-[0_0_40px_rgba(253,224,71,1)] border-2 border-yellow-200 flex items-center justify-center transition-all duration-300 -translate-x-1/2 -translate-y-1/2"
           style={{ left: `${sunXPct}%`, top: `${sunYPct}%` }}
         >
-          <span className="text-[10px] font-black text-amber-950">{sunAngleDeg}°</span>
+          <span className="text-[10px] font-black text-amber-950">Sun</span>
         </div>
 
-        <div className="absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-full z-20 flex items-end">
-          <div className="w-[10px] bg-gradient-to-t from-slate-400 to-slate-200 border border-slate-600 rounded-t-sm shadow-md"
+        {/* Tree Trunk */}
+        <div className="absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-full z-20 flex flex-col items-center">
+          <div className="w-16 h-16 bg-green-600 rounded-full border-4 border-green-700 absolute -top-12 z-30"></div>
+          <div className="w-24 h-16 bg-green-500 rounded-full border-4 border-green-600 absolute -top-8 z-20"></div>
+          <div className="w-6 bg-amber-800 border-2 border-amber-950 rounded-t-sm shadow-md"
                style={{ height: `${poleHeightPct}vh` }}>
-             <div className="w-4 h-4 bg-red-600 absolute -top-1 -right-4 rounded shadow-sm" />
           </div>
         </div>
 
         {/* Shadow Div */}
         <div 
-          className={`absolute top-[80%] left-1/2 h-2 bg-gray-950 rounded-r-full transition-all duration-200 origin-left ${shadowSourceType === "Tubelight" ? "opacity-60 blur-[2px]" : "opacity-90"}`}
+          className={`absolute top-[80%] left-1/2 h-4 bg-black/30 rounded-r-full transition-all duration-200 origin-left ${shadowSourceType === "Morning" ? "blur-[2px]" : "opacity-90 blur-[1px]"}`}
           style={{ width: `${shadowLengthPct}%` }}
         />
 
-        <div className="absolute top-[80%] w-full h-[20%] bg-gradient-to-t from-emerald-950 to-emerald-900 border-t-2 border-emerald-700/60 flex items-center justify-center z-10 shrink-0">
-          <span className="text-emerald-300/30 text-xs font-bold uppercase tracking-widest">Ground</span>
+        <div className="absolute top-[80%] w-full h-[20%] bg-green-500 border-t-4 border-green-600 flex items-center justify-center z-10 shrink-0">
+          <span className="text-green-800 text-xs font-bold uppercase tracking-widest">Ground</span>
         </div>
       </div>
 
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-gray-900/95 px-3 py-2 rounded-xl border border-gray-700 text-center shadow-lg z-20">
-        <span className="text-xs sm:text-sm font-bold text-yellow-300 block">
-          ☀️ Sun Angle: {sunAngleDeg}° • 📏 Shadow: {Math.round(shadowLengthPct)} steps
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-white/95 px-3 py-2 rounded-xl border border-gray-300 text-center shadow-lg z-20">
+        <span className="text-xs sm:text-sm font-bold text-gray-800 block">
+          ☀️ Sun & Shadow
         </span>
-        <p className="text-[10px] text-gray-400 mt-0.5">
-          {shadowSourceType === "Tubelight" ? "Soft lights make shadows look fuzzy." : "Hard lights make shadows look very sharp."}
+        <p className="text-[10px] text-gray-600 mt-0.5">
+          When the sun is low, the shadow of the tree is very long!
         </p>
       </div>
     </div>
@@ -223,36 +216,36 @@ export function OpticsLevel({ recordAction, experimentSubIndex = 0 }: OpticsLeve
 
   const expInfo = [
     {
-      title: "Water Bowl Game",
-      objective: "Make the bowl bigger and light brighter to see how water makes things look bigger.",
-      slider1Label: "Bowl Size",
-      slider1Val: `${Math.round((refractiveIndex - 1) * 100)}%`,
+      title: "Lemon in Water Game",
+      objective: "Change the glass size to see the lemon get bigger.",
+      slider1Label: "Glass Size",
+      slider1Val: "",
       slider2Label: "Light Brightness",
-      slider2Val: `${beamIntensity}%`
+      slider2Val: ""
     },
     {
-      title: "Rainbow Glass Game",
-      objective: "Turn the glass and pick a color to make a rainbow.",
-      slider1Label: "Glass Turn",
-      slider1Val: `${Math.round(refractiveIndex * 30)}°`,
+      title: "Rainbow Scale Game",
+      objective: "Turn the plastic scale in the sunlight to make a rainbow.",
+      slider1Label: "Scale Turn",
+      slider1Val: "",
       slider2Label: "Light Color",
-      slider2Val: `${Math.round(beamIntensity * 4 + 350)} nm`
+      slider2Val: ""
     },
     {
-      title: "Sun Shadow Game",
-      objective: "Move the sun up and down to see how shadows change size.",
+      title: "Tree Shadow Game",
+      objective: "Move the sun up and down to see the tree's shadow change.",
       slider1Label: "Sun Height",
-      slider1Val: `${Math.round(refractiveIndex * 45)}°`,
-      slider2Label: "Stick Height",
-      slider2Val: `${beamIntensity} cm`
+      slider1Val: "",
+      slider2Label: "Tree Height",
+      slider2Val: ""
     }
   ][experimentSubIndex] || {
-    title: "Water Bowl Game",
-    objective: "Make the bowl bigger and light brighter to see how water makes things look bigger.",
-    slider1Label: "Bowl Size",
-    slider1Val: `${Math.round((refractiveIndex - 1) * 100)}%`,
+    title: "Lemon in Water Game",
+    objective: "Change the glass size to see the lemon get bigger.",
+    slider1Label: "Glass Size",
+    slider1Val: "",
     slider2Label: "Light Brightness",
-    slider2Val: `${beamIntensity}%`
+    slider2Val: ""
   };
 
   const toggleOptionalTool = () => {
@@ -273,18 +266,12 @@ export function OpticsLevel({ recordAction, experimentSubIndex = 0 }: OpticsLeve
             <strong>Goal:</strong> {expInfo.objective}
           </p>
         </div>
-        <button 
-          onClick={toggleOptionalTool}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${useRedPrism ? 'bg-orange-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
-        >
-          {useRedPrism ? 'Normal Light' : 'Try Sunset Light!'}
-        </button>
       </div>
 
       {/* Interactive Toolbar */}
       <div className="bg-gray-900/90 border-b border-gray-700/80 px-4 py-2 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-300 shrink-0 z-30 relative">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">{expInfo.slider1Label}: {expInfo.slider1Val}</span>
+          <span className="font-bold text-indigo-300">{expInfo.slider1Label}</span>
           <input
             type="range"
             min="1.0"
@@ -300,7 +287,7 @@ export function OpticsLevel({ recordAction, experimentSubIndex = 0 }: OpticsLeve
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">{expInfo.slider2Label}: {expInfo.slider2Val}</span>
+          <span className="font-bold text-indigo-300">{expInfo.slider2Label}</span>
           <input
             type="range"
             min="20"

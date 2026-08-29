@@ -28,8 +28,7 @@ export default function AuthPage() {
   const [username, setUsername] = useState("");
   const [realName, setRealName] = useState("");
   
-  // Forgot Password State
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
+
   const [resetIdentifier, setResetIdentifier] = useState("");
   const [resetOtp, setResetOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -37,6 +36,22 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+
+  const getPasswordStrength = (pwd: string) => {
+    if (!pwd) return null;
+    let score = 0;
+    if (pwd.length > 5) score += 1;
+    if (pwd.length > 8) score += 1;
+    if (/[A-Z]/.test(pwd)) score += 1;
+    if (/[0-9]/.test(pwd)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
+
+    if (score <= 2) return { label: "Weak - Please make it stronger", barColor: "bg-red-400", textColor: "text-red-500", width: "w-1/3" };
+    if (score <= 4) return { label: "Medium", barColor: "bg-yellow-400", textColor: "text-yellow-600", width: "w-2/3" };
+    return { label: "Strong", barColor: "bg-green-500", textColor: "text-green-600", width: "w-full" };
+  };
+  const strength = getPasswordStrength(otpPassword);
+
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,34 +120,6 @@ export default function AuthPage() {
     } catch (err: any) {
       if (err.message === "NEXT_REDIRECT" || (err.digest && err.digest.includes("NEXT_REDIRECT"))) throw err;
       setError(err.message || "Verification error.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleResetPasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-    setSuccessMsg("");
-
-    try {
-      const formData = new FormData();
-      formData.append("identifier", resetIdentifier);
-      formData.append("code", resetOtp);
-      formData.append("newPassword", newPassword);
-
-      const res = await resetPasswordAction(formData);
-      if (res?.error) {
-        setError(res.error);
-      } else if (res?.success) {
-        setSuccessMsg(res.message || "Password updated successfully! You can now log in.");
-        setIsForgotPassword(false);
-        setPassword(newPassword);
-        if (resetIdentifier) setEmail(resetIdentifier);
-      }
-    } catch (err: any) {
-      setError(err.message || "Error resetting password.");
     } finally {
       setIsLoading(false);
     }
@@ -272,13 +259,39 @@ export default function AuthPage() {
                     id="destination"
                     type="text"
                     required
-                    placeholder="student@school.edu or +91 98765 43210"
+                    placeholder="Email or Mobile Number"
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
                     className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
                   />
                   <p className="text-[11px] text-gray-500 font-medium">
                     {t.auth.send_otp_disclaimer}
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="otpPassword">
+                    {t.auth.password_req}
+                  </label>
+                  <input
+                    id="otpPassword"
+                    type="password"
+                    required
+                    placeholder={t.auth.password_placeholder}
+                    value={otpPassword}
+                    onChange={(e) => setOtpPassword(e.target.value)}
+                    className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
+                  />
+                  {strength && (
+                    <div className="mt-1 flex flex-col gap-1">
+                      <div className="flex gap-1 h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                        <div className={`h-full ${strength.barColor} ${strength.width} transition-all duration-300`}></div>
+                      </div>
+                      <p className={`text-[10px] font-bold ${strength.textColor}`}>{strength.label}</p>
+                    </div>
+                  )}
+                  <p className="text-[11px] text-gray-500 font-medium">
+                    {t.auth.password_desc}
                   </p>
                 </div>
 
@@ -290,9 +303,11 @@ export default function AuthPage() {
                     id="otpRealName"
                     type="text"
                     required
+                    pattern="^[^0-9]+$"
+                    title="Numbers are not allowed in your Real Name"
                     placeholder={t.auth.real_name_placeholder}
                     value={otpRealName}
-                    onChange={(e) => setOtpRealName(e.target.value)}
+                    onChange={(e) => setOtpRealName(e.target.value.replace(/[0-9]/g, ''))}
                     className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
                   />
                   <p className="text-[11px] text-gray-500 font-medium">
@@ -321,23 +336,6 @@ export default function AuthPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="otpPassword">
-                    {t.auth.password_req}
-                  </label>
-                  <input
-                    id="otpPassword"
-                    type="password"
-                    required
-                    placeholder={t.auth.password_placeholder}
-                    value={otpPassword}
-                    onChange={(e) => setOtpPassword(e.target.value)}
-                    className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
-                  />
-                  <p className="text-[11px] text-gray-500 font-medium">
-                    {t.auth.password_desc}
-                  </p>
-                </div>
 
                 <button
                   type="submit"
@@ -390,96 +388,6 @@ export default function AuthPage() {
           {/* SECTION 2: LOGIN */}
           {activeTab === "login" && (
             <div className="space-y-4">
-              {isForgotPassword ? (
-                /* Forgot Password View */
-                <form onSubmit={handleResetPasswordSubmit} className="flex flex-col gap-4">
-                  <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-                    <h3 className="font-bold text-sm text-[#143867] flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-base text-[#f37021]">lock_reset</span>
-                      {t.auth.forgot_password}
-                    </h3>
-                    <button
-                      type="button"
-                      onClick={() => { setIsForgotPassword(false); setError(""); setSuccessMsg(""); }}
-                      className="text-xs font-bold text-gray-400 hover:text-gray-600"
-                    >
-                      {t.auth.cancel}
-                    </button>
-                  </div>
-
-                  <p className="text-xs text-gray-600 font-medium">
-                    {t.auth.enter_registered}
-                  </p>
-
-                  {/* Identifier */}
-                  <div className="flex flex-col gap-1">
-                    <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="resetIdentifier">
-                      {t.auth.email_phone}
-                    </label>
-                    <input
-                      id="resetIdentifier"
-                      type="text"
-                      required
-                      placeholder="e.g. student@school.edu or ScaryPython692"
-                      value={resetIdentifier}
-                      onChange={(e) => setResetIdentifier(e.target.value)}
-                      className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
-                    />
-                  </div>
-
-                  {/* OTP Code */}
-                  <div className="flex flex-col gap-1">
-                    <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="resetOtp">
-                      {t.auth.enter_otp}
-                    </label>
-                    <input
-                      id="resetOtp"
-                      type="text"
-                      required
-                      placeholder="• • • • • •"
-                      value={resetOtp}
-                      onChange={(e) => setResetOtp(e.target.value)}
-                      className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm font-mono tracking-widest focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
-                    />
-                    <p className="text-[10px] text-gray-500 font-medium">{t.auth.enter_otp_desc}</p>
-                  </div>
-
-                  {/* New Password */}
-                  <div className="flex flex-col gap-1">
-                    <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="newPassword">
-                      {t.auth.password_req}
-                    </label>
-                    <input
-                      id="newPassword"
-                      type="password"
-                      required
-                      placeholder="At least 6 characters"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="mt-2 w-full bg-[#143867] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#1d4d8a] transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-sm">key</span>
-                    <span>{isLoading ? (t.auth.updating_password) : (t.auth.reset_password_btn)}</span>
-                  </button>
-
-                  <div className="text-center pt-2 border-t border-gray-100">
-                    <button
-                      type="button"
-                      onClick={() => { setIsForgotPassword(false); setError(""); }}
-                      className="text-xs font-bold text-gray-500 hover:text-[#143867] hover:underline"
-                    >
-                      ← {t.auth.back_login}
-                    </button>
-                  </div>
-                </form>
-              ) : !loginWithOtp ? (
                 <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4">
                   {/* Entry 1: Email ID, Phone Number or Username */}
                   <div className="flex flex-col gap-1">
@@ -491,7 +399,7 @@ export default function AuthPage() {
                       name="email"
                       type="text"
                       required
-                      placeholder="e.g. student@school.edu, +91 98765 43210, or ScienceWhiz99"
+                      placeholder="Email or Mobile Number"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
@@ -507,18 +415,12 @@ export default function AuthPage() {
                       <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="password">
                         {t.auth.password}
                       </label>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsForgotPassword(true);
-                          setResetIdentifier(email || destination);
-                          setError("");
-                          setSuccessMsg("");
-                        }}
-                        className="text-xs font-bold text-[#143867] hover:underline"
+                      <Link
+                        href="/forgot-password"
+                        className="text-xs font-bold text-[#143867] hover:underline transition-colors focus:outline-none"
                       >
                         {t.auth.forgot}
-                      </button>
+                      </Link>
                     </div>
                     <input
                       id="password"
@@ -539,97 +441,7 @@ export default function AuthPage() {
                   >
                     {isLoading ? (t.auth.please_wait) : (t.auth.login_btn)}
                   </button>
-
-                  <div className="text-center pt-2 border-t border-gray-100">
-                    <button
-                      type="button"
-                      onClick={() => { setLoginWithOtp(true); setError(""); setSuccessMsg(""); }}
-                      className="text-xs font-bold text-[#143867] hover:underline inline-flex items-center gap-1"
-                    >
-                      <span className="material-symbols-outlined text-sm">sms</span>
-                      <span>{t.auth.login_otp_toggle}</span>
-                    </button>
-                  </div>
                 </form>
-              ) : (
-                /* Alternate: OTP Login */
-                !otpSent ? (
-                  <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="loginDestination">
-                        {t.auth.email_phone}
-                      </label>
-                      <input
-                        id="loginDestination"
-                        type="text"
-                        required
-                        placeholder="student@school.edu or +91 98765 43210"
-                        value={destination}
-                        onChange={(e) => setDestination(e.target.value)}
-                        className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
-                      />
-                      <p className="text-[11px] text-gray-500 font-medium">
-                        {t.auth.otp_login_desc}
-                      </p>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="mt-2 w-full bg-[#143867] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#1d4d8a] transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      <span className="material-symbols-outlined text-sm">send</span>
-                      <span>{isLoading ? (t.auth.sending_otp) : (t.auth.send_otp)}</span>
-                    </button>
-
-                    <div className="text-center pt-2 border-t border-gray-100">
-                      <button
-                        type="button"
-                        onClick={() => { setLoginWithOtp(false); setError(""); }}
-                        className="text-xs font-bold text-gray-500 hover:text-[#143867] hover:underline"
-                      >
-                        ← {t.auth.back_login}
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center justify-between">
-                        <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="loginOtpCode">
-                          {t.auth.enter_otp}
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => setOtpSent(false)}
-                          className="text-xs font-bold text-[#143867] hover:underline"
-                        >
-                          {t.auth.change_address}
-                        </button>
-                      </div>
-                      <input
-                        id="loginOtpCode"
-                        type="text"
-                        required
-                        maxLength={6}
-                        placeholder="• • • • • •"
-                        value={otpCode}
-                        onChange={(e) => setOtpCode(e.target.value)}
-                        className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-center text-xl font-mono tracking-widest font-bold focus:outline-none focus:border-[#143867] focus:ring-2 focus:ring-[#143867] text-gray-900 transition-all"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="mt-2 w-full bg-[#143867] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#1d4d8a] transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      <span className="material-symbols-outlined text-sm">check_circle</span>
-                      <span>{isLoading ? (t.auth.verifying) : (t.auth.verify_login)}</span>
-                    </button>
-                  </form>
-                )
-              )}
             </div>
           )}
         </div>
