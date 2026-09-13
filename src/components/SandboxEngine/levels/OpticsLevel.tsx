@@ -1,335 +1,386 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
+import { OptionalToolsDrawer } from '../OptionalToolsDrawer';
 
 // --- SUB-COMPONENTS FOR STRICT CONDITIONAL RENDERING ---
 
-function ExperimentOne({ refractiveIndex, beamIntensity, useRedPrism, recordAction }: any) {
-  const [lemonBaseSize, setLemonBaseSize] = useState<"Small" | "Medium" | "Large">("Medium");
-  const magnificationFactor = refractiveIndex;
-  
-  // Convert pixels to responsive percentages
-  const basePercent = lemonBaseSize === "Small" ? 15 : lemonBaseSize === "Medium" ? 22 : 30;
-  const lemonSizePct = basePercent * (0.8 + (magnificationFactor - 1) * 1.5);
-  const bgOpacity = beamIntensity / 100;
+function ExperimentOne({ recordAction }: { recordAction: (actionType: string, actionDetails?: any) => void }) {
+  const [roomLight, setRoomLight] = useState(10);
+  const [tvBrightness, setTvBrightness] = useState(80);
+  const [tvShow, setTvShow] = useState<"Cartoon" | "Sports" | "News">("Cartoon");
+
+  const isEyeStrain = roomLight < 30 && tvBrightness >= 40;
+  const isGlare = roomLight > 70 && tvBrightness < 60;
+  const isComfortable = !isEyeStrain && !isGlare;
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden transition-all duration-300"
-         style={{ backgroundColor: useRedPrism ? '#2a1205' : `rgba(15, 23, 42, ${0.4 + bgOpacity * 0.6})` }}>
-      {/* Table Surface */}
-      <div className="absolute bottom-0 w-full h-[30%] bg-gradient-to-t from-amber-950 to-amber-900 border-t-4 border-amber-700/50 flex items-center justify-center">
-        <span className="text-amber-200/30 text-xs font-bold uppercase tracking-widest">Table</span>
-      </div>
-
-      {/* Toolbar */}
-      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm flex flex-wrap items-center justify-center gap-1.5 bg-gray-900/95 p-2 rounded-xl border border-gray-700 text-xs z-20 shadow-md">
-        <span className="text-gray-300 font-bold mr-1">Lemon Size:</span>
-        {(["Small", "Medium", "Large"] as const).map((sz) => (
-          <button
-            key={sz}
-            onClick={() => setLemonBaseSize(sz)}
-            className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${lemonBaseSize === sz ? 'bg-indigo-600 text-white shadow' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
-          >
-            {sz}
-          </button>
-        ))}
-      </div>
-
-      {/* Glass Water Bowl Container */}
-      <div className="relative flex-1 flex items-center justify-center w-[50%] max-w-[300px] aspect-square rounded-full border-8 border-cyan-200/60 bg-gradient-to-b from-cyan-400/20 via-sky-300/30 to-blue-600/40 backdrop-blur-md shadow-2xl overflow-hidden ring-4 ring-cyan-400/20 my-auto z-10 mt-[15%]">
-        <div className="absolute top-[10%] w-full h-[5%] bg-cyan-200/30 border-b border-cyan-100/40 animate-pulse" />
-        {/* Magnified Lemon */}
-        <div 
-          className="transition-all duration-200 ease-out rounded-full bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500 shadow-inner flex items-center justify-center border-2 border-yellow-200 relative group cursor-pointer"
-          style={{ width: `${Math.min(90, lemonSizePct)}%`, height: `${Math.min(90, lemonSizePct * 0.8)}%` }}
-        >
-          <span className="text-[10px] sm:text-xs font-black text-amber-950 uppercase tracking-wider opacity-80 select-none">
-            Lemon
-          </span>
-        </div>
-      </div>
-
-      {/* Bottom Info */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-gray-900/95 px-3 py-2 rounded-xl border border-gray-700 text-center shadow-lg z-20">
-        <span className="text-xs sm:text-sm font-bold text-cyan-200 block">
-          Looks bigger!
-        </span>
-        <p className="text-[10px] text-gray-400 mt-0.5">
-          Water makes the lemon look big like a magnifying glass!
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function ExperimentTwo({ refractiveIndex, beamIntensity, useRedPrism, recordAction }: any) {
-  const [laserColor, setLaserColor] = useState<"Sunlight" | "Red" | "Green" | "Blue">("Sunlight");
-  const prismAngleDeg = Math.round(refractiveIndex * 30);
-
-  return (
-    <div className="relative w-full h-full bg-[#080d1a] flex flex-col items-center justify-between p-3 overflow-hidden gap-2">
-      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm flex flex-wrap items-center justify-center gap-1.5 bg-gray-900/95 p-2 rounded-xl border border-gray-700 text-xs z-20 shadow-md">
-        <span className="text-gray-300 font-bold mr-1">Light Type:</span>
-        {(["Sunlight", "Red", "Green", "Blue"] as const).map((col) => (
-          <button
-            key={col}
-            onClick={() => setLaserColor(col)}
-            className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${laserColor === col ? 'bg-indigo-600 text-white shadow' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
-          >
-            {col}
-          </button>
-        ))}
-      </div>
-
-      <div className="relative flex-1 w-full flex items-center justify-center my-auto">
-        
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full z-0 pointer-events-none">
-          <line x1="5" y1="50" x2="50" y2="50" stroke={laserColor === "Sunlight" ? "#ffffff" : laserColor.toLowerCase()} strokeWidth="1" strokeLinecap="round" />
-          {laserColor === "Sunlight" ? (
-            <>
-              <line x1="50" y1="50" x2="95" y2="25" stroke="#ef4444" strokeWidth="1" opacity="0.9" />
-              <line x1="50" y1="50" x2="95" y2="35" stroke="#f97316" strokeWidth="1" opacity="0.9" />
-              <line x1="50" y1="50" x2="95" y2="45" stroke="#eab308" strokeWidth="1" opacity="0.9" />
-              <line x1="50" y1="50" x2="95" y2="55" stroke="#22c55e" strokeWidth="1" opacity="0.9" />
-              <line x1="50" y1="50" x2="95" y2="65" stroke="#06b6d4" strokeWidth="1" opacity="0.9" />
-              <line x1="50" y1="50" x2="95" y2="75" stroke="#a855f7" strokeWidth="1" opacity="0.9" />
-            </>
-          ) : (
-            <line x1="50" y1="50" x2="95" y2={50 + (refractiveIndex - 1) * 20} stroke={laserColor.toLowerCase()} strokeWidth="1" opacity="0.9" />
-          )}
-        </svg>
-
-        <div className="absolute left-[5%] z-10 flex items-center gap-1">
-          <div className="w-[10vw] max-w-[60px] h-8 bg-gray-700 border-2 border-gray-500 rounded-lg flex items-center justify-center shadow-lg">
-            <span className="text-[10px] font-black text-yellow-200">SUN</span>
+    <div className="flex flex-col h-full w-full">
+      {/* Interactive Toolbar: Stacks vertically on mobile (<768px), horizontal row on desktop */}
+      <div id="sandbox-slider-row" className="bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
+        {/* Room Light Slider */}
+        <div className="flex flex-col gap-1 w-full md:w-auto md:flex-1">
+          <div className="flex justify-between items-center">
+            <span className="font-bold text-amber-400">Room Light</span>
+            <span className="text-[11px] font-mono text-gray-400">{roomLight}%</span>
           </div>
-        </div>
-
-        <div className="relative z-10 transition-transform duration-300 ease-out cursor-pointer w-[35%] max-w-[200px] aspect-[1/3]" style={{ transform: `rotate(${prismAngleDeg - 45}deg)` }}>
-          <div className="w-full h-full bg-gradient-to-tr from-cyan-400/30 via-sky-200/40 to-white/60 border-2 border-cyan-200/80 backdrop-blur-sm flex items-center justify-center">
-            <span className="text-[10px] font-bold text-gray-900 bg-white/80 px-1 rounded shadow-sm rotate-90">Plastic Scale</span>
-          </div>
-        </div>
-
-        <div className="absolute right-[5%] z-10 w-[3%] h-[60%] bg-gray-200 border-2 border-gray-400 rounded-sm shadow-xl flex flex-col justify-around">
-          {laserColor === "Sunlight" && <div className="w-full h-full bg-gradient-to-b from-red-500 via-yellow-400 via-green-500 via-blue-500 to-purple-600 opacity-90 shadow-md" />}
-        </div>
-      </div>
-
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-gray-900/95 px-3 py-2 rounded-xl border border-gray-700 text-center shadow-lg z-20">
-        <span className="text-xs sm:text-sm font-bold text-amber-300 block">
-          🌈 Beautiful Rainbow!
-        </span>
-        <p className="text-[10px] text-gray-400 mt-0.5">
-          {laserColor === "Sunlight" ? "Sunlight hits the scale and splits into a beautiful rainbow!" : `The ${laserColor} light does not split because it is only one color.`}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function ExperimentThree({ refractiveIndex, beamIntensity, useRedPrism, recordAction }: any) {
-  const [shadowSourceType, setShadowSourceType] = useState<"Morning" | "Afternoon">("Morning");
-  
-  const sunAngleDeg = Math.round(refractiveIndex * 45);
-  // relative height from 10% to 50%
-  const poleHeightPct = Math.max(10, Math.min(50, beamIntensity / 2)); 
-  const sunRad = (sunAngleDeg * Math.PI) / 180;
-  
-  // Percentages for SVG positioning
-  const sunXPct = 50 - Math.cos(sunRad) * 35;
-  const sunYPct = 80 - Math.sin(sunRad) * 60;
-  
-  // Shadow length as percentage of width
-  const shadowLengthPct = Math.min(45, Math.max(5, poleHeightPct / Math.tan(sunRad)));
-
-  return (
-    <div className="relative w-full h-full bg-gradient-to-b from-sky-400 via-sky-300 to-sky-200 flex flex-col items-center justify-between p-3 overflow-hidden gap-2">
-      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm flex flex-wrap items-center justify-center gap-1.5 bg-white/90 p-2 rounded-xl border border-gray-300 text-xs z-20 shadow-md">
-        <span className="text-gray-800 font-bold mr-1">Time of Day:</span>
-        {(["Morning", "Afternoon"] as const).map((src) => (
-          <button
-            key={src}
-            onClick={() => setShadowSourceType(src)}
-            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${shadowSourceType === src ? 'bg-indigo-600 text-white shadow' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
-          >
-            {src}
-          </button>
-        ))}
-      </div>
-
-      <div className="relative flex-1 w-full flex flex-col justify-end h-full">
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full z-0 pointer-events-none">
-          <line x1={`${sunXPct}%`} y1={`${sunYPct}%`} x2="50%" y2={`${80 - poleHeightPct}%`} stroke="#facc15" strokeWidth="0.5" strokeDasharray="2 2" opacity="0.8" />
-        </svg>
-
-        <div 
-          className="absolute z-10 w-[12%] max-w-[60px] aspect-square rounded-full bg-yellow-400 shadow-[0_0_40px_rgba(253,224,71,1)] border-2 border-yellow-200 flex items-center justify-center transition-all duration-300 -translate-x-1/2 -translate-y-1/2"
-          style={{ left: `${sunXPct}%`, top: `${sunYPct}%` }}
-        >
-          <span className="text-[10px] font-black text-amber-950">Sun</span>
-        </div>
-
-        {/* Tree Trunk */}
-        <div className="absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-full z-20 flex flex-col items-center">
-          <div className="w-16 h-16 bg-green-600 rounded-full border-4 border-green-700 absolute -top-12 z-30"></div>
-          <div className="w-24 h-16 bg-green-500 rounded-full border-4 border-green-600 absolute -top-8 z-20"></div>
-          <div className="w-6 bg-amber-800 border-2 border-amber-950 rounded-t-sm shadow-md"
-               style={{ height: `${poleHeightPct}vh` }}>
-          </div>
-        </div>
-
-        {/* Shadow Div */}
-        <div 
-          className={`absolute top-[80%] left-1/2 h-4 bg-black/30 rounded-r-full transition-all duration-200 origin-left ${shadowSourceType === "Morning" ? "blur-[2px]" : "opacity-90 blur-[1px]"}`}
-          style={{ width: `${shadowLengthPct}%` }}
-        />
-
-        <div className="absolute top-[80%] w-full h-[20%] bg-green-500 border-t-4 border-green-600 flex items-center justify-center z-10 shrink-0">
-          <span className="text-green-800 text-xs font-bold uppercase tracking-widest">Ground</span>
-        </div>
-      </div>
-
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-white/95 px-3 py-2 rounded-xl border border-gray-300 text-center shadow-lg z-20">
-        <span className="text-xs sm:text-sm font-bold text-gray-800 block">
-          ☀️ Sun & Shadow
-        </span>
-        <p className="text-[10px] text-gray-600 mt-0.5">
-          When the sun is low, the shadow of the tree is very long!
-        </p>
-      </div>
-    </div>
-  );
-}
-
-// --- MAIN EXPORT COMPONENT ---
-
-interface OpticsLevelProps {
-  recordAction: (actionType: string, actionDetails?: any) => void;
-  experimentSubIndex?: number;
-}
-
-export function OpticsLevel({ recordAction, experimentSubIndex = 0 }: OpticsLevelProps) {
-  const [useRedPrism, setUseRedPrism] = useState(false);
-  const [refractiveIndex, setRefractiveIndex] = useState(1.5);
-  const [beamIntensity, setBeamIntensity] = useState(100);
-
-  const expInfo = [
-    {
-      title: "Lemon in Water Game",
-      objective: "Change the glass size to see the lemon get bigger.",
-      slider1Label: "Glass Size",
-      slider1Val: "",
-      slider2Label: "Light Brightness",
-      slider2Val: ""
-    },
-    {
-      title: "Rainbow Scale Game",
-      objective: "Turn the plastic scale in the sunlight to make a rainbow.",
-      slider1Label: "Scale Turn",
-      slider1Val: "",
-      slider2Label: "Light Color",
-      slider2Val: ""
-    },
-    {
-      title: "Tree Shadow Game",
-      objective: "Move the sun up and down to see the tree's shadow change.",
-      slider1Label: "Sun Height",
-      slider1Val: "",
-      slider2Label: "Tree Height",
-      slider2Val: ""
-    }
-  ][experimentSubIndex] || {
-    title: "Lemon in Water Game",
-    objective: "Change the glass size to see the lemon get bigger.",
-    slider1Label: "Glass Size",
-    slider1Val: "",
-    slider2Label: "Light Brightness",
-    slider2Val: ""
-  };
-
-  const toggleOptionalTool = () => {
-    recordAction('optional_tool_used');
-    setUseRedPrism(prev => !prev);
-  };
-
-  return (
-    <div className="flex flex-col h-full w-full relative">
-      {/* Level Header */}
-      <div className="bg-gray-800 p-3 border-b border-gray-700 flex flex-wrap justify-between items-center gap-2 shrink-0 z-30 relative">
-        <div className="flex-1 pr-4">
-          <h2 className="text-base md:text-lg font-bold text-gray-100 flex items-center gap-2">
-             <span className="bg-indigo-600 text-xs px-2 py-0.5 rounded text-white uppercase tracking-wider">Game {experimentSubIndex + 1}</span>
-             {expInfo.title}
-          </h2>
-          <p className="text-xs text-indigo-200 mt-0.5">
-            <strong>Goal:</strong> {expInfo.objective}
-          </p>
-        </div>
-      </div>
-
-      {/* Interactive Toolbar */}
-      <div className="bg-gray-900/90 border-b border-gray-700/80 px-4 py-2 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-300 shrink-0 z-30 relative">
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">{expInfo.slider1Label}</span>
           <input
             type="range"
-            min="1.0"
-            max="2.0"
-            step="0.05"
-            value={refractiveIndex}
+            min="0"
+            max="100"
+            step="10"
+            value={roomLight}
             onChange={(e) => {
-              setRefractiveIndex(parseFloat(e.target.value));
-              recordAction('changed_refractive_index', { val: parseFloat(e.target.value) });
+              const val = parseInt(e.target.value);
+              setRoomLight(val);
+              recordAction('changed_room_light', { val });
             }}
-            className="w-24 md:w-32 accent-indigo-500 cursor-pointer"
+            className="w-full accent-amber-500 cursor-pointer h-2 bg-gray-700 rounded-lg"
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-indigo-300">{expInfo.slider2Label}</span>
+        {/* TV Brightness Slider */}
+        <div className="flex flex-col gap-1 w-full md:w-auto md:flex-1">
+          <div className="flex justify-between items-center">
+            <span className="font-bold text-cyan-300">TV Brightness</span>
+            <span className="text-[11px] font-mono text-gray-400">{tvBrightness}%</span>
+          </div>
+          <input
+            type="range"
+            min="10"
+            max="100"
+            step="10"
+            value={tvBrightness}
+            onChange={(e) => {
+              const val = parseInt(e.target.value);
+              setTvBrightness(val);
+              recordAction('changed_tv_brightness', { val });
+            }}
+            className="w-full accent-cyan-500 cursor-pointer h-2 bg-gray-700 rounded-lg"
+          />
+        </div>
+
+        {/* Comfort indicator & Optional Tools Drawer Trigger */}
+        <div className="flex items-center justify-between md:justify-end gap-2 shrink-0 pt-1 md:pt-0 border-t border-gray-800 md:border-t-0">
+          <div className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-lg border border-gray-700">
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Comfort:</span>
+            <span className="text-base">{isComfortable ? "😌" : "😖"}</span>
+          </div>
+          
+          <OptionalToolsDrawer
+            title="TV Channel & Room Settings"
+            description="Switch channels to test contrast differences."
+            triggerLabel="Channels"
+            icon="tv"
+          >
+            <div className="space-y-3">
+              <span className="text-xs font-bold text-gray-300 block">Select TV Broadcast:</span>
+              <div className="grid grid-cols-3 gap-2">
+                {(["Cartoon", "Sports", "News"] as const).map((show) => (
+                  <button
+                    key={show}
+                    type="button"
+                    onClick={() => {
+                      setTvShow(show);
+                      recordAction('changed_tv_show', { val: show });
+                    }}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold transition-all text-center ${
+                      tvShow === show 
+                        ? 'bg-indigo-600 text-white shadow-md' 
+                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                    }`}
+                  >
+                    {show}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </OptionalToolsDrawer>
+        </div>
+      </div>
+
+      {/* Show Selector Inline Bar for Desktop / Quick Access */}
+      <div className="hidden md:flex bg-gray-900/80 border-b border-gray-800 px-3 py-1.5 items-center justify-center gap-2 text-xs shrink-0">
+        <span className="text-gray-400 font-bold text-[11px]">Channel:</span>
+        {(["Cartoon", "Sports", "News"] as const).map((show) => (
+          <button
+            key={show}
+            onClick={() => {
+              setTvShow(show);
+              recordAction('changed_tv_show', { val: show });
+            }}
+            className={`px-2.5 py-0.5 rounded text-[11px] font-bold transition-all ${
+              tvShow === show ? 'bg-indigo-600 text-white shadow' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+            }`}
+          >
+            {show}
+          </button>
+        ))}
+      </div>
+
+      {/* Visual Canvas */}
+      <div 
+        className="relative flex-1 min-h-[220px] flex flex-col items-center justify-center overflow-hidden transition-all duration-500 p-2 sm:p-4"
+        style={{ backgroundColor: `hsl(220, ${roomLight / 2}%, ${roomLight / 1.5 + 5}%)` }}
+      >
+        {roomLight > 30 && (
+          <div className="absolute top-0 w-full h-full opacity-30 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(255,255,255,0.2) 0%, transparent 70%)' }} />
+        )}
+
+        {/* TV Set */}
+        <div className="relative w-full max-w-[220px] xs:max-w-[270px] sm:max-w-[340px] aspect-video bg-gray-900 border-4 border-gray-800 rounded-lg shadow-2xl flex items-center justify-center overflow-hidden">
+          <div 
+            className="absolute inset-0 transition-opacity duration-300 flex items-center justify-center"
+            style={{ 
+              opacity: tvBrightness / 100,
+              backgroundColor: tvShow === "Cartoon" ? "#3b82f6" : tvShow === "Sports" ? "#22c55e" : "#eab308"
+            }}
+          >
+            <span className="text-white/90 font-black text-xl sm:text-2xl tracking-widest mix-blend-overlay">{tvShow.toUpperCase()}</span>
+          </div>
+
+          {isGlare && (
+            <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] flex items-center justify-center pointer-events-none">
+              <span className="text-gray-900 font-black text-[10px] bg-white/90 px-2 py-1 rounded shadow uppercase">Reflected Light (Glare)</span>
+            </div>
+          )}
+
+          {isEyeStrain && (
+            <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_50px_rgba(255,255,255,0.5)] flex items-end justify-center pb-2">
+              <span className="text-white font-bold text-[10px] bg-red-600/90 px-2 py-0.5 rounded uppercase animate-pulse">Too bright for dark room! (Eye Strain)</span>
+            </div>
+          )}
+        </div>
+        {/* TV Stand */}
+        <div className="w-20 h-3 bg-gray-800 rounded-b shadow" />
+      </div>
+
+      {/* Dedicated Bottom Observation Strip */}
+      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+        <span className="text-xs sm:text-sm font-bold block" style={{ color: isComfortable ? '#67e8f9' : '#fca5a5' }}>
+          {isComfortable ? "😌 Comfortable TV watching!" : isGlare ? "😖 Too much glare on the screen!" : "😖 Ouch! TV is too bright for a dark room!"}
+        </span>
+        <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
+          {isComfortable ? "The TV brightness matches the room light nicely." : isGlare ? "When the room is very bright, the TV screen reflects the light." : "A super bright TV in a pitch black room causes eye strain."}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ExperimentTwo({ recordAction }: { recordAction: (actionType: string, actionDetails?: any) => void }) {
+  const [scaleAngle, setScaleAngle] = useState(45);
+  const [laserColor, setLaserColor] = useState<"Sunlight" | "Red Laser">("Sunlight");
+
+  const isRainbow = laserColor === "Sunlight" && scaleAngle > 20 && scaleAngle < 70;
+  const spread = isRainbow ? 20 : 2; 
+
+  return (
+    <div className="flex flex-col h-full w-full">
+      {/* Interactive Toolbar: Stacks vertically on mobile (<768px), horizontal row on desktop */}
+      <div className="bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
+        <div className="flex flex-col gap-1 w-full md:w-auto md:flex-1">
+          <div className="flex justify-between items-center">
+            <span className="font-bold text-fuchsia-400">Scale Angle</span>
+            <span className="text-[11px] text-gray-400 font-mono">{scaleAngle}°</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="90"
+            step="5"
+            value={scaleAngle}
+            onChange={(e) => {
+              const val = parseInt(e.target.value);
+              setScaleAngle(val);
+              recordAction('changed_scale_angle', { val });
+            }}
+            className="w-full accent-fuchsia-500 cursor-pointer h-2 bg-gray-700 rounded-lg"
+          />
+        </div>
+        <div className="flex items-center justify-between md:justify-end gap-2 shrink-0 pt-1 md:pt-0 border-t border-gray-800 md:border-t-0">
+          <span className="font-bold text-fuchsia-400 text-[11px]">Light Source:</span>
+          <div className="flex gap-1.5">
+            {(["Sunlight", "Red Laser"] as const).map(color => (
+              <button 
+                key={color}
+                type="button"
+                onClick={() => {
+                  setLaserColor(color);
+                  recordAction('changed_light_source', { val: color });
+                }}
+                className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                  laserColor === color ? (color === "Sunlight" ? 'bg-amber-500 text-amber-950 font-black shadow' : 'bg-red-600 text-white font-black shadow') : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}
+              >
+                {color}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Visual Canvas */}
+      <div className="relative flex-1 min-h-[220px] flex flex-col items-center justify-center overflow-hidden bg-gray-950 p-4">
+        {/* Light Beam */}
+        <div 
+          className={`absolute left-1/2 top-0 h-1/2 w-3 -translate-x-1/2 origin-top ${
+            laserColor === 'Sunlight' ? 'bg-white/80 shadow-[0_0_20px_rgba(255,255,255,0.6)]' : 'bg-red-500/90 shadow-[0_0_20px_rgba(255,0,0,0.8)]'
+          }`}
+        />
+
+        {/* Plastic Scale */}
+        <div 
+          className="relative z-10 w-44 sm:w-56 h-6 bg-white/20 backdrop-blur-sm border border-white/40 rounded-sm shadow-[0_0_15px_rgba(255,255,255,0.1)] flex items-center justify-center"
+          style={{ transform: `rotate(${scaleAngle}deg)` }}
+        >
+          <div className="flex gap-1">
+            {[...Array(10)].map((_, i) => <div key={i} className="w-[1px] h-3 bg-white/50" />)}
+          </div>
+        </div>
+
+        {/* Refracted Beam */}
+        <div className="absolute left-1/2 top-1/2 h-1/2 flex -translate-x-1/2 origin-top" style={{ transform: `rotate(${-(scaleAngle - 45) * 0.5}deg)` }}>
+          {isRainbow ? (
+            <div className="flex h-full" style={{ width: `${spread * 4}px` }}>
+              <div className="flex-1 h-full bg-red-500/80 blur-[2px]" />
+              <div className="flex-1 h-full bg-orange-500/80 blur-[2px]" />
+              <div className="flex-1 h-full bg-yellow-500/80 blur-[2px]" />
+              <div className="flex-1 h-full bg-green-500/80 blur-[2px]" />
+              <div className="flex-1 h-full bg-blue-500/80 blur-[2px]" />
+              <div className="flex-1 h-full bg-indigo-500/80 blur-[2px]" />
+              <div className="flex-1 h-full bg-purple-500/80 blur-[2px]" />
+            </div>
+          ) : (
+            <div className={`h-full ${laserColor === 'Sunlight' ? 'bg-white/60 blur-[1px]' : 'bg-red-500/80 blur-[1px]'}`} style={{ width: `${spread * 4}px` }} />
+          )}
+        </div>
+      </div>
+
+      {/* Dedicated Bottom Observation Strip */}
+      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+        <span className="text-xs sm:text-sm font-bold text-amber-300 block">{isRainbow ? "🌈 Beautiful Rainbow!" : "No rainbow."}</span>
+        <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
+          {laserColor === "Sunlight" 
+            ? "Sunlight hits the scale and splits into colors at the right angle!" 
+            : `The ${laserColor} light does not split into a rainbow because it is pure monochromatic single-wavelength light.`}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ExperimentThree({ recordAction }: { recordAction: (actionType: string, actionDetails?: any) => void }) {
+  const [sunHeight, setSunHeight] = useState(45);
+  const [treeHeight, setTreeHeight] = useState(30);
+  
+  const sunRad = (sunHeight * Math.PI) / 180;
+  const shadowLengthPct = Math.min(45, Math.max(5, treeHeight / Math.tan(sunRad)));
+  const isNoon = sunHeight === 90;
+
+  return (
+    <div className="flex flex-col h-full w-full">
+      {/* Interactive Toolbar: Stacks vertically on mobile (<768px), horizontal row on desktop */}
+      <div className="bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
+        {/* Sun Elevation Slider */}
+        <div className="flex flex-col gap-1 w-full md:w-auto md:flex-1">
+          <div className="flex justify-between items-center">
+            <span className="font-bold text-indigo-300">Sun Elevation</span>
+            <span className="text-[11px] text-gray-400 font-mono">{sunHeight}°</span>
+          </div>
+          <input
+            type="range"
+            min="10"
+            max="90"
+            step="5"
+            value={sunHeight}
+            onChange={(e) => {
+              const val = parseInt(e.target.value);
+              setSunHeight(val);
+              recordAction('changed_sun_height', { val });
+            }}
+            className="w-full accent-indigo-500 cursor-pointer h-2 bg-gray-700 rounded-lg"
+          />
+        </div>
+
+        {/* Tree Height Slider */}
+        <div className="flex flex-col gap-1 w-full md:w-auto md:flex-1">
+          <div className="flex justify-between items-center">
+            <span className="font-bold text-indigo-300">Tree Height</span>
+            <span className="text-[11px] text-gray-400 font-mono">{treeHeight}m</span>
+          </div>
           <input
             type="range"
             min="20"
-            max="100"
+            max="60"
             step="5"
-            value={beamIntensity}
+            value={treeHeight}
             onChange={(e) => {
-              setBeamIntensity(parseInt(e.target.value));
-              recordAction('changed_beam_intensity', { val: parseInt(e.target.value) });
+              const val = parseInt(e.target.value);
+              setTreeHeight(val);
+              recordAction('changed_tree_height', { val });
             }}
-            className="w-24 md:w-32 accent-indigo-500 cursor-pointer"
+            className="w-full accent-indigo-500 cursor-pointer h-2 bg-gray-700 rounded-lg"
           />
         </div>
       </div>
 
-      {/* Strict Conditional Rendering Container */}
-      <div className="flex-1 w-full relative overflow-hidden bg-gray-950">
-        {experimentSubIndex === 0 && (
-          <ExperimentOne 
-            refractiveIndex={refractiveIndex} 
-            beamIntensity={beamIntensity} 
-            useRedPrism={useRedPrism} 
-            recordAction={recordAction} 
+      {/* Visual Canvas */}
+      <div className="relative flex-1 min-h-[220px] flex flex-col justify-end overflow-hidden bg-gradient-to-b from-sky-400 to-amber-100 p-4">
+        {/* Sun */}
+        <div 
+          className="absolute w-10 h-10 bg-yellow-400 rounded-full shadow-[0_0_30px_#facc15] transition-all duration-300"
+          style={{ 
+            left: `${50 - Math.cos(sunRad) * 35}%`,
+            top: `${70 - Math.sin(sunRad) * 55}%`,
+            transform: 'translate(-50%, -50%)'
+          }}
+        />
+
+        {/* Ground */}
+        <div className="w-full h-10 bg-amber-800/80 relative flex items-center justify-center">
+          {/* Shadow */}
+          <div 
+            className="absolute bottom-6 bg-black/40 rounded-full blur-[1px] transition-all duration-300"
+            style={{ 
+              width: `${shadowLengthPct * 3.5}px`,
+              height: '8px',
+              left: `calc(50% + ${Math.cos(sunRad) * 20}px)`
+            }}
           />
-        )}
-        {experimentSubIndex === 1 && (
-          <ExperimentTwo 
-            refractiveIndex={refractiveIndex} 
-            beamIntensity={beamIntensity} 
-            useRedPrism={useRedPrism} 
-            recordAction={recordAction} 
-          />
-        )}
-        {experimentSubIndex === 2 && (
-          <ExperimentThree 
-            refractiveIndex={refractiveIndex} 
-            beamIntensity={beamIntensity} 
-            useRedPrism={useRedPrism} 
-            recordAction={recordAction} 
-          />
-        )}
+        </div>
+
+        {/* Tree */}
+        <div 
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center transition-all duration-300 pointer-events-none"
+          style={{ height: `${treeHeight * 2.5}px` }}
+        >
+          <div className="w-16 sm:w-20 h-16 sm:h-20 bg-emerald-600 rounded-full -mb-4 shadow-lg border-2 border-emerald-700" />
+          <div className="w-3 sm:w-4 flex-1 bg-amber-900 rounded-b" />
+        </div>
       </div>
+
+      {/* Dedicated Bottom Observation Strip */}
+      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+        <span className="text-xs sm:text-sm font-bold text-amber-300 block">
+          {isNoon ? "☀️ Midday Sun (Shortest Shadow!)" : "Sun casting a long shadow"}
+        </span>
+        <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
+          {isNoon 
+            ? "When the sun is highest in the sky and feeling hottest, the shadow is at its very shortest!" 
+            : "Notice how the shadow shrinks as the sun climbs higher in the sky."}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function OpticsLevel({ recordAction, experimentSubIndex = 0 }: any) {
+  return (
+    <div className="flex-1 w-full relative overflow-hidden bg-gray-950 flex flex-col">
+      {experimentSubIndex === 0 && <ExperimentOne recordAction={recordAction} />}
+      {experimentSubIndex === 1 && <ExperimentTwo recordAction={recordAction} />}
+      {experimentSubIndex === 2 && <ExperimentThree recordAction={recordAction} />}
     </div>
   );
 }

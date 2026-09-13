@@ -8,8 +8,8 @@ export type RankCertificateType =
   | "Daily Rank 1"
   | "Weekly Rank 1" 
   | "Monthly Rank 1" 
-  | "Olympiad Champion" 
-  | "National Finalist";
+  | "Practice Lab Top Performer" 
+  | "Practice Series Finalist";
 
 interface CertificateModalProps {
   isOpen: boolean;
@@ -102,7 +102,7 @@ export default function CertificateModal({
     });
   };
 
-  const shareText = `Proud to earn the ${achievementType} Certificate of Excellence in the @AgastyaOrg Curiosity Olympiad! 🚀✨ Exploring experiential science and discovery. #AahAhaHaha #CuriosityOlympiad`;
+  const shareText = `Proud to earn the ${achievementType} Certificate of Excellence in the @AgastyaOrg Curiosity Practice Lab! 🚀✨ Exploring experiential science and discovery. #AahAhaHaha #CuriosityLab`;
   const shareUrl = "https://curiosity-olympiad.vercel.app";
 
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
@@ -176,7 +176,7 @@ export default function CertificateModal({
                   </div>
                   
                   <h4 className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
-                    Agastya Curiosity Olympiad
+                    Agastya Curiosity Practice Lab
                   </h4>
                   
                   <h3 className="text-base sm:text-xl font-black text-[#143867] font-serif">
@@ -276,7 +276,7 @@ export default function CertificateModal({
                         <img src="/agastya-logo.svg" alt="Agastya Logo" className="w-full h-full object-contain" />
                       </div>
                       <h3 className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-500 mt-2">
-                        Agastya International Foundation • Curiosity Olympiad
+                        Agastya International Foundation • Curiosity Practice Lab Series
                       </h3>
                       <h2 className="text-2xl sm:text-4xl font-black text-[#143867] font-serif tracking-wide pt-1">
                         CERTIFICATE OF EXCELLENCE
@@ -306,11 +306,11 @@ export default function CertificateModal({
 
                     <div className="max-w-md mx-auto space-y-3">
                       <p className="text-xs sm:text-sm text-gray-700 leading-relaxed px-4">
-                        For achieving top standing on the national leaderboard and demonstrating scientific inquiry mastery:
+                        For demonstrating exceptional scientific inquiry and completing the Curiosity Practice Tournament Series with distinction:
                       </p>
                       <div className="inline-block bg-[#fff7ed] border-2 border-[#f37021] px-5 py-2 rounded-xl mt-2 shadow-xs">
                         <span className="text-sm sm:text-lg font-black text-[#f37021] uppercase tracking-wide block">
-                          ★ {achievementType === "Daily Rank 1" ? "DAILY RANK #1 CHAMPION" : "WEEKLY RANK #1 CHAMPION"} ★
+                          ★ {achievementType.toUpperCase()} ★
                         </span>
                       </div>
                     </div>

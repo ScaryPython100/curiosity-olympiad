@@ -679,3 +679,33 @@ export async function updateRealName(realName: string) {
 
   return { success: true };
 }
+
+/**
+ * Fetches user telemetry logs from exam submissions
+ */
+export async function getUserTelemetry(targetUserId?: string) {
+  try {
+    const supabase = await createClient();
+    let uid = targetUserId;
+    if (!uid) {
+      const { data: { user } } = await supabase.auth.getUser();
+      uid = user?.id;
+    }
+    if (!uid) return { success: false, data: [] };
+
+    const { data, error } = await supabase
+      .from("exam_submissions")
+      .select("exam_id, score, max_score, telemetry_data, submitted_at")
+      .eq("user_id", uid);
+
+    if (error) {
+      console.warn("getUserTelemetry error:", error);
+      return { success: false, data: [] };
+    }
+
+    return { success: true, data: data || [] };
+  } catch (err) {
+    console.error("getUserTelemetry exception:", err);
+    return { success: false, data: [] };
+  }
+}

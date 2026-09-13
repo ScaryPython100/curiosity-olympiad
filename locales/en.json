@@ -65,8 +65,14 @@
     "forgot": "Forgot?",
     "please_wait": "Please wait...",
     "otp_login_desc": "We will send a 6-digit OTP code for instant login.",
-    "verify_login": "Verify & Enter Olympiad",
-    "school_portal": "School Admin or Teacher? Bulk CSV Roster Portal →"
+    "verify_login": "Verify & Enter Practice Lab",
+    "school_portal": "School Admin or Teacher? Bulk CSV Roster Portal →",
+    "school_code_label": "School Code (Required)",
+    "school_code_placeholder": "e.g. AGS-KUPPAM-101",
+    "school_code_guidance_title": "Don't have a School Code?",
+    "school_code_guidance_body": "Ask your science teacher or school lab coordinator. All participating schools are assigned an Agastya School Code (e.g. AGS-KUPPAM-101) to link your lab results to your institution.",
+    "consent_checkbox_label": "I have parental/teacher consent to participate in the Curiosity Practice Lab",
+    "consent_subtext": "Under our student privacy and safety policy, students under 18 must confirm guardian or educator permission before creating an account."
   },
   "dashboard": {
     "welcome_back_title": "Welcome Back!",

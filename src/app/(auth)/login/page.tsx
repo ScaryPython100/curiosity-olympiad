@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signUpAction, signInAction, sendOtpAction, verifyOtpAction, resetPasswordAction } from "./actions";
@@ -11,6 +11,15 @@ export default function AuthPage() {
   const { t } = useLanguage();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"create_account" | "login">("login");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("mode") === "signup" || params.get("tab") === "signup") {
+        setActiveTab("create_account");
+      }
+    }
+  }, []);
   const isLogin = activeTab === "login";
   const [loginWithOtp, setLoginWithOtp] = useState(false);
   
@@ -28,6 +37,9 @@ export default function AuthPage() {
   const [username, setUsername] = useState("");
   const [realName, setRealName] = useState("");
   
+  // School Code & Parental Consent State (Required for all self-serve signups)
+  const [schoolCode, setSchoolCode] = useState("");
+  const [hasConsent, setHasConsent] = useState(false);
 
   const [resetIdentifier, setResetIdentifier] = useState("");
   const [resetOtp, setResetOtp] = useState("");
@@ -47,15 +59,34 @@ export default function AuthPage() {
     if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
 
     if (score <= 2) return { label: "Weak - Please make it stronger", barColor: "bg-red-400", textColor: "text-red-500", width: "w-1/3" };
-    if (score <= 4) return { label: "Medium", barColor: "bg-yellow-400", textColor: "text-yellow-600", width: "w-2/3" };
-    return { label: "Strong", barColor: "bg-green-500", textColor: "text-green-600", width: "w-full" };
+    if (score <= 4) return { label: "Medium", barColor: "bg-amber-400", textColor: "text-amber-600", width: "w-2/3" };
+    return { label: "Strong", barColor: "bg-emerald-500", textColor: "text-emerald-600", width: "w-full" };
   };
   const strength = getPasswordStrength(otpPassword);
 
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!destination) return;
+    if (!destination.trim()) {
+      setError("Please enter your mobile number or email address.");
+      return;
+    }
+
+    if (activeTab === "create_account") {
+      if (!schoolCode.trim()) {
+        setError("🚫 School Code is required. Please enter your school's code (e.g. AGS-KUPPAM-101) or ask your science teacher.");
+        return;
+      }
+      if (schoolCode.trim().length < 3) {
+        setError("🚫 Invalid School Code. Please check the code provided by your school.");
+        return;
+      }
+      if (!hasConsent) {
+        setError("🚫 Parental or teacher consent is required to create a Practice Lab account.");
+        return;
+      }
+    }
+
     setIsLoading(true);
     setError("");
     setSuccessMsg("");
@@ -67,6 +98,13 @@ export default function AuthPage() {
           localStorage.setItem("curiosity_username", otpUsername);
           localStorage.setItem("curiosity_login_" + otpUsername.toLowerCase().trim(), destination.trim());
         }
+        if (schoolCode) {
+          localStorage.setItem("curiosity_school_code", schoolCode.trim().toUpperCase());
+        }
+        if (hasConsent) {
+          localStorage.setItem("curiosity_parental_consent", "true");
+          localStorage.setItem("curiosity_consent_timestamp", new Date().toISOString());
+        }
       }
 
       const formData = new FormData();
@@ -75,6 +113,8 @@ export default function AuthPage() {
       if (activeTab === "create_account") {
         formData.append("isCreateAccount", "true");
         if (otpUsername) formData.append("username", otpUsername);
+        formData.append("schoolCode", schoolCode.trim().toUpperCase());
+        formData.append("parentalConsent", "true");
       }
       
       const res = await sendOtpAction(formData);
@@ -109,6 +149,12 @@ export default function AuthPage() {
       formData.append("password", otpPassword || "DevSandboxOverridePassword!123");
       if (activeTab === "create_account") {
         formData.append("isCreateAccount", "true");
+        formData.append(
+          "schoolCode",
+          schoolCode.trim().toUpperCase() ||
+            (typeof window !== "undefined" ? localStorage.getItem("curiosity_school_code") || "" : "")
+        );
+        formData.append("parentalConsent", "true");
       }
 
       const res = await verifyOtpAction(formData);
@@ -142,11 +188,36 @@ export default function AuthPage() {
       }
     }
 
-    if (!isLogin && typeof window !== "undefined") {
-      if (realName) localStorage.setItem("curiosity_real_name", realName);
-      if (username) {
-        localStorage.setItem("curiosity_username", username);
-        localStorage.setItem("curiosity_login_" + username.toLowerCase().trim(), email.trim());
+    if (!isLogin) {
+      if (!schoolCode.trim()) {
+        setError("🚫 School Code is required. Please enter your school's code (e.g. AGS-KUPPAM-101) or ask your science teacher.");
+        setIsLoading(false);
+        return;
+      }
+      if (schoolCode.trim().length < 3) {
+        setError("🚫 Invalid School Code. Please check the code provided by your school.");
+        setIsLoading(false);
+        return;
+      }
+      if (!hasConsent) {
+        setError("🚫 Parental or teacher consent is required to create a Practice Lab account.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (typeof window !== "undefined") {
+        if (realName) localStorage.setItem("curiosity_real_name", realName);
+        if (username) {
+          localStorage.setItem("curiosity_username", username);
+          localStorage.setItem("curiosity_login_" + username.toLowerCase().trim(), email.trim());
+        }
+        if (schoolCode) {
+          localStorage.setItem("curiosity_school_code", schoolCode.trim().toUpperCase());
+        }
+        if (hasConsent) {
+          localStorage.setItem("curiosity_parental_consent", "true");
+          localStorage.setItem("curiosity_consent_timestamp", new Date().toISOString());
+        }
       }
     }
 
@@ -156,6 +227,8 @@ export default function AuthPage() {
     if (!isLogin) {
       formData.append("identifier", username);
       formData.append("realName", realName);
+      formData.append("schoolCode", schoolCode.trim().toUpperCase());
+      if (hasConsent) formData.append("parentalConsent", "true");
     } else {
       if (typeof window !== "undefined") {
         const resolved = localStorage.getItem("curiosity_login_" + email.toLowerCase().trim());
@@ -182,67 +255,70 @@ export default function AuthPage() {
     setIsLoading(false);
   };
 
-  console.log("DEBUG SSR:", { typeT: typeof t, typeAuth: typeof t?.auth, typeAppTitle: typeof t?.auth?.app_title, isLanguagesArray: false }); return (
-    <div className="min-h-screen flex flex-col justify-center bg-[#f7f9fb] p-6" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-      <div className="w-full max-w-md mx-auto flex flex-col gap-6">
+  return (
+    <div className="min-h-screen flex flex-col justify-center bg-[#f7f9fb] p-4 sm:p-6 font-['Montserrat'] antialiased">
+      <div className="w-full max-w-md mx-auto flex flex-col gap-5 sm:gap-6">
         
         {/* Language Selector at Top Right */}
         <div className="flex justify-end">
           <LanguageSelector />
         </div>
 
-        {/* Header */}
+        {/* Brand Header */}
         <div className="flex flex-col items-center text-center space-y-2">
-          <div className="w-14 h-14 bg-[#143867] text-[#ffe16d] rounded-2xl flex items-center justify-center shadow-lg mb-1">
-            <span className="material-symbols-outlined text-3xl">lightbulb</span>
+          <div className="w-14 h-14 bg-[#143867] text-amber-300 rounded-2xl flex items-center justify-center shadow-2xs mb-1">
+            <span className="material-symbols-outlined text-3xl">science</span>
           </div>
-          <h1 className="font-extrabold text-3xl text-[#143867] tracking-tight">
-            {t.auth.app_title}
+          <h1 className="font-black text-2xl sm:text-3xl text-[#143867] tracking-tight">
+            {t.auth.app_title || "Curiosity Olympiad"}
           </h1>
-          <p className="text-gray-600 text-xs md:text-sm font-medium">
+          <p className="text-gray-500 text-xs sm:text-sm font-semibold">
             Agastya International Foundation • Aah! Aha! Ha-ha!
           </p>
         </div>
 
         {/* 2-Section Switcher: Create Account vs Login */}
-        <div className="flex bg-gray-200/80 rounded-xl p-1 border border-gray-300/60">
+        <div className="flex bg-[#e2e8f0]/80 rounded-2xl p-1 border border-gray-200 shadow-2xs">
           <button
             type="button"
+            id="tab-sign-up"
             onClick={() => { setActiveTab("create_account"); setError(""); setSuccessMsg(""); }}
-            className={`flex-1 py-2.5 text-center rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 min-h-[44px] text-center rounded-xl font-black text-xs sm:text-sm transition-transform duration-100 ease-out active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === "create_account"
-                ? "bg-white shadow-sm text-[#143867]"
+                ? "bg-white shadow-xs text-[#143867]"
                 : "text-gray-600 hover:text-[#143867]"
             }`}
           >
-            <span className="material-symbols-outlined text-sm">person_add</span>
+            <span className="material-symbols-outlined text-base">person_add</span>
             <span>{t.auth.sign_up}</span>
           </button>
           <button
             type="button"
+            id="tab-sign-in"
             onClick={() => { setActiveTab("login"); setError(""); setSuccessMsg(""); }}
-            className={`flex-1 py-2.5 text-center rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 min-h-[44px] text-center rounded-xl font-black text-xs sm:text-sm transition-transform duration-100 ease-out active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === "login"
-                ? "bg-white shadow-sm text-[#143867]"
+                ? "bg-white shadow-xs text-[#143867]"
                 : "text-gray-600 hover:text-[#143867]"
             }`}
           >
-            <span className="material-symbols-outlined text-sm">login</span>
+            <span className="material-symbols-outlined text-base">login</span>
             <span>{t.auth.sign_in}</span>
           </button>
         </div>
 
-        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-gray-100">
+        {/* Form Card */}
+        <div className="bg-white rounded-3xl p-5 sm:p-7 md:p-8 shadow-sm border border-gray-200">
           {error && (
-            <div className="bg-red-50 text-red-500 border border-red-200 p-3 rounded-xl text-xs font-semibold mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm">error</span>
-              <span>{error}</span>
+            <div className="bg-red-50 text-red-700 border border-red-200 p-3.5 rounded-2xl text-xs font-bold mb-4 flex items-start gap-2.5">
+              <span className="material-symbols-outlined text-base shrink-0 mt-0.5 text-red-500">error</span>
+              <span className="leading-relaxed">{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="bg-green-50 text-green-600 border border-green-200 p-3 rounded-xl text-xs font-semibold mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm">check_circle</span>
+            <div className="bg-emerald-50 text-emerald-800 border border-emerald-200 p-3.5 rounded-2xl text-xs font-bold mb-4 flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-base shrink-0 text-emerald-600">check_circle</span>
               <span>{successMsg}</span>
             </div>
           )}
@@ -250,9 +326,9 @@ export default function AuthPage() {
           {/* SECTION 1: CREATE ACCOUNT */}
           {activeTab === "create_account" && (
             !otpSent ? (
-              <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
+              <form noValidate onSubmit={handleSendOtp} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="destination">
+                  <label className="font-black text-[11px] sm:text-xs uppercase tracking-wider text-[#143867]" htmlFor="destination">
                     {t.auth.email_phone}
                   </label>
                   <input
@@ -262,15 +338,54 @@ export default function AuthPage() {
                     placeholder="Email or Mobile Number"
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
-                    className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
+                    className="w-full bg-[#f8fafc] border border-gray-300 rounded-xl px-4 py-3 min-h-[44px] text-sm focus:outline-none focus:border-[#143867] focus:ring-2 focus:ring-[#143867]/20 text-gray-900 transition-all font-medium placeholder:text-gray-400"
                   />
                   <p className="text-[11px] text-gray-500 font-medium">
                     {t.auth.send_otp_disclaimer}
                   </p>
                 </div>
 
+                {/* Entry 2: School Code (Required) */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="otpPassword">
+                  <div className="flex items-center justify-between">
+                    <label className="font-black text-[11px] sm:text-xs uppercase tracking-wider text-[#143867]" htmlFor="schoolCode">
+                      {t.auth.school_code_label || "School Code (Required)"}
+                    </label>
+                    <span className="text-[10px] font-bold text-[#ea580c] uppercase tracking-wider bg-orange-50 px-2 py-0.5 rounded-md border border-orange-200">
+                      Required
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                      school
+                    </span>
+                    <input
+                      id="schoolCode"
+                      type="text"
+                      required
+                      placeholder={t.auth.school_code_placeholder || "e.g. AGS-KUPPAM-101"}
+                      value={schoolCode}
+                      onChange={(e) => setSchoolCode(e.target.value.toUpperCase())}
+                      className="w-full bg-[#f8fafc] border border-gray-300 rounded-xl pl-10 pr-4 py-3 min-h-[44px] text-sm focus:outline-none focus:border-[#143867] focus:ring-2 focus:ring-[#143867]/20 text-gray-900 transition-all font-mono font-bold uppercase placeholder:font-sans placeholder:normal-case placeholder:text-gray-400"
+                    />
+                  </div>
+                  <div className="bg-[#f0f9ff] border border-[#bae6fd] p-3 rounded-xl text-xs text-[#0369a1] flex items-start gap-2.5 mt-0.5">
+                    <span className="material-symbols-outlined text-base text-[#0284c7] shrink-0 mt-0.5">
+                      help_outline
+                    </span>
+                    <div className="space-y-1">
+                      <p className="font-bold text-[11px] leading-tight">
+                        {t.auth.school_code_guidance_title || "Don't have a School Code?"}
+                      </p>
+                      <p className="text-[11px] text-gray-600 leading-snug">
+                        {t.auth.school_code_guidance_body || "Ask your science teacher or school lab coordinator. All participating schools are assigned an Agastya School Code (e.g. AGS-KUPPAM-101) to link your lab results to your institution."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-black text-[11px] sm:text-xs uppercase tracking-wider text-[#143867]" htmlFor="otpPassword">
                     {t.auth.password_req}
                   </label>
                   <input
@@ -280,12 +395,12 @@ export default function AuthPage() {
                     placeholder={t.auth.password_placeholder}
                     value={otpPassword}
                     onChange={(e) => setOtpPassword(e.target.value)}
-                    className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
+                    className="w-full bg-[#f8fafc] border border-gray-300 rounded-xl px-4 py-3 min-h-[44px] text-sm focus:outline-none focus:border-[#143867] focus:ring-2 focus:ring-[#143867]/20 text-gray-900 transition-all font-medium placeholder:text-gray-400"
                   />
                   {strength && (
                     <div className="mt-1 flex flex-col gap-1">
-                      <div className="flex gap-1 h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-                        <div className={`h-full ${strength.barColor} ${strength.width} transition-all duration-300`}></div>
+                      <div className="flex gap-1.5 h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                        <div className={`h-full ${strength.barColor} ${strength.width} transition-all duration-300 rounded-full`}></div>
                       </div>
                       <p className={`text-[10px] font-bold ${strength.textColor}`}>{strength.label}</p>
                     </div>
@@ -296,7 +411,7 @@ export default function AuthPage() {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="otpRealName">
+                  <label className="font-black text-[11px] sm:text-xs uppercase tracking-wider text-[#143867]" htmlFor="otpRealName">
                     {t.auth.real_name_req}
                   </label>
                   <input
@@ -308,15 +423,16 @@ export default function AuthPage() {
                     placeholder={t.auth.real_name_placeholder}
                     value={otpRealName}
                     onChange={(e) => setOtpRealName(e.target.value.replace(/[0-9]/g, ''))}
-                    className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
+                    className="w-full bg-[#f8fafc] border border-gray-300 rounded-xl px-4 py-3 min-h-[44px] text-sm focus:outline-none focus:border-[#143867] focus:ring-2 focus:ring-[#143867]/20 text-gray-900 transition-all font-medium placeholder:text-gray-400"
                   />
-                  <p className="text-[11px] text-gray-500 font-medium">
-                    {t.auth.real_name_desc}
-                  </p>
+                  <div className="bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-xs text-blue-900 font-medium flex items-start gap-2 mt-0.5">
+                    <span className="material-symbols-outlined text-sm text-blue-600 shrink-0 mt-0.5">verified_user</span>
+                    <span className="leading-snug">{t.auth.real_name_desc}</span>
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="otpUsername">
+                  <label className="font-black text-[11px] sm:text-xs uppercase tracking-wider text-[#143867]" htmlFor="otpUsername">
                     {t.auth.username}
                   </label>
                   <input
@@ -326,23 +442,42 @@ export default function AuthPage() {
                     placeholder={t.auth.username_placeholder}
                     value={otpUsername}
                     onChange={(e) => setOtpUsername(e.target.value)}
-                    className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
+                    className="w-full bg-[#f8fafc] border border-gray-300 rounded-xl px-4 py-3 min-h-[44px] text-sm focus:outline-none focus:border-[#143867] focus:ring-2 focus:ring-[#143867]/20 text-gray-900 transition-all font-medium placeholder:text-gray-400"
                   />
-                  <div className="bg-amber-50 border border-amber-300/80 p-2.5 rounded-xl text-xs text-[#9a3412] font-bold flex items-start gap-1.5 mt-0.5">
-                    <span className="material-symbols-outlined text-sm text-[#f37021] shrink-0 mt-0.5">warning</span>
-                    <span>
-                      {t.auth.username_warning}
-                    </span>
+                  <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-xs text-amber-900 font-medium flex items-start gap-2 mt-0.5">
+                    <span className="material-symbols-outlined text-sm text-[#ea580c] shrink-0 mt-0.5">badge</span>
+                    <span className="leading-snug">{t.auth.username_warning}</span>
                   </div>
                 </div>
 
+                {/* Entry 6: Parental/Teacher Consent Checkbox (Required) */}
+                <div className="bg-gray-50 border border-gray-200 p-3.5 rounded-2xl">
+                  <label className="flex items-start gap-3 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      id="parentalConsent"
+                      required
+                      checked={hasConsent}
+                      onChange={(e) => setHasConsent(e.target.checked)}
+                      className="mt-1 w-5 h-5 rounded-md border-2 border-gray-400 text-[#143867] focus:ring-[#143867] focus:ring-offset-0 transition-all cursor-pointer accent-[#143867]"
+                    />
+                    <div className="space-y-0.5">
+                      <span className="font-bold text-xs sm:text-sm text-gray-800 leading-snug block">
+                        {t.auth.consent_checkbox_label || "I have parental/teacher consent to participate in the Curiosity Practice Lab"} <span className="text-[#ea580c] font-black">*</span>
+                      </span>
+                      <p className="text-[11px] text-gray-500 leading-tight">
+                        {t.auth.consent_subtext || "Under our student privacy and safety policy, students under 18 must confirm guardian or educator permission before creating an account."}
+                      </p>
+                    </div>
+                  </label>
+                </div>
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="mt-2 w-full bg-[#143867] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#1d4d8a] transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="mt-2 w-full min-h-[48px] bg-[#143867] hover:bg-[#1e4a85] text-white py-3 px-4 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider shadow-xs active:scale-[0.98] transition-transform duration-100 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-sm">send</span>
+                  <span className="material-symbols-outlined text-base">send</span>
                   <span>{isLoading ? (t.auth.sending_otp) : (t.auth.send_otp)}</span>
                 </button>
               </form>
@@ -350,13 +485,13 @@ export default function AuthPage() {
               <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="otpCode">
+                    <label className="font-black text-[11px] sm:text-xs uppercase tracking-wider text-[#143867]" htmlFor="otpCode">
                       {t.auth.enter_otp}
                     </label>
                     <button
                       type="button"
                       onClick={() => setOtpSent(false)}
-                      className="text-xs font-bold text-[#143867] hover:underline"
+                      className="text-xs font-bold text-[#ea580c] hover:underline cursor-pointer"
                     >
                       {t.auth.change_address}
                     </button>
@@ -369,16 +504,19 @@ export default function AuthPage() {
                     placeholder="• • • • • •"
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value)}
-                    className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-center text-xl font-mono tracking-widest font-bold focus:outline-none focus:border-[#143867] focus:ring-2 focus:ring-[#143867] text-gray-900 transition-all"
+                    className="w-full bg-[#f8fafc] border border-gray-300 rounded-xl px-4 py-3 min-h-[48px] text-center text-2xl font-mono tracking-widest font-black focus:outline-none focus:border-[#143867] focus:ring-2 focus:ring-[#143867]/20 text-gray-900 transition-all"
                   />
+                  <p className="text-[11px] text-gray-500 font-medium">
+                    {t.auth.enter_otp_desc || "Enter the 6-digit verification code sent to your registered address."}
+                  </p>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="mt-2 w-full bg-[#143867] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#1d4d8a] transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="mt-2 w-full min-h-[48px] bg-[#143867] hover:bg-[#1e4a85] text-white py-3 px-4 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider shadow-xs active:scale-[0.98] transition-transform duration-100 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-sm">check_circle</span>
+                  <span className="material-symbols-outlined text-base">check_circle</span>
                   <span>{isLoading ? (t.auth.verifying) : (t.auth.verify_create)}</span>
                 </button>
               </form>
@@ -388,60 +526,62 @@ export default function AuthPage() {
           {/* SECTION 2: LOGIN */}
           {activeTab === "login" && (
             <div className="space-y-4">
-                <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4">
-                  {/* Entry 1: Email ID, Phone Number or Username */}
-                  <div className="flex flex-col gap-1">
-                    <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="email">
-                      {t.auth.email_phone}
+              <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4">
+                {/* Entry 1: Email ID, Phone Number or Username */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-black text-[11px] sm:text-xs uppercase tracking-wider text-[#143867]" htmlFor="email">
+                    {t.auth.email_phone}
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="text"
+                    required
+                    placeholder="Email or Mobile Number"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-[#f8fafc] border border-gray-300 rounded-xl px-4 py-3 min-h-[44px] text-sm focus:outline-none focus:border-[#143867] focus:ring-2 focus:ring-[#143867]/20 text-gray-900 transition-all font-medium placeholder:text-gray-400"
+                  />
+                  <div className="flex items-center gap-1.5 text-[11px] text-amber-800 font-bold bg-amber-50 border border-amber-200 rounded-lg p-2 mt-0.5">
+                    <span className="material-symbols-outlined text-xs text-[#ea580c] shrink-0">info</span>
+                    <span>{t.auth.login_disclaimer || "Note: Use your registered Mobile, Email, or Username (not Real Name)."}</span>
+                  </div>
+                </div>
+
+                {/* Entry 2: Password */}
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex justify-between items-center">
+                    <label className="font-black text-[11px] sm:text-xs uppercase tracking-wider text-[#143867]" htmlFor="password">
+                      {t.auth.password}
                     </label>
-                    <input
-                      id="email"
-                      name="email"
-                      type="text"
-                      required
-                      placeholder="Email or Mobile Number"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
-                    />
-                    <p className="text-[11px] text-[#9a3412] font-bold mt-0.5">
-                      {t.auth.login_disclaimer}
-                    </p>
+                    <Link
+                      href="/forgot-password"
+                      className="text-xs font-bold text-[#ea580c] hover:underline transition-colors focus:outline-none"
+                    >
+                      {t.auth.forgot || "Forgot?"}
+                    </Link>
                   </div>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-[#f8fafc] border border-gray-300 rounded-xl px-4 py-3 min-h-[44px] text-sm focus:outline-none focus:border-[#143867] focus:ring-2 focus:ring-[#143867]/20 text-gray-900 transition-all font-medium placeholder:text-gray-400"
+                  />
+                </div>
 
-                  {/* Entry 2: Password */}
-                  <div className="flex flex-col gap-1">
-                    <div className="flex justify-between items-center">
-                      <label className="font-bold text-xs uppercase tracking-wider text-[#143867]" htmlFor="password">
-                        {t.auth.password}
-                      </label>
-                      <Link
-                        href="/forgot-password"
-                        className="text-xs font-bold text-[#143867] hover:underline transition-colors focus:outline-none"
-                      >
-                        {t.auth.forgot}
-                      </Link>
-                    </div>
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      required
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full bg-[#f7f9fb] border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#143867] focus:ring-1 focus:ring-[#143867] text-gray-900 transition-all font-medium"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="mt-2 w-full bg-[#143867] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#1d4d8a] transition-all shadow-md active:scale-95 disabled:opacity-50"
-                  >
-                    {isLoading ? (t.auth.please_wait) : (t.auth.login_btn)}
-                  </button>
-                </form>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="mt-2 w-full min-h-[48px] bg-[#143867] hover:bg-[#1e4a85] text-white py-3 px-4 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider shadow-xs active:scale-[0.98] transition-transform duration-100 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-base">login</span>
+                  <span>{isLoading ? (t.auth.please_wait) : (t.auth.login_btn)}</span>
+                </button>
+              </form>
             </div>
           )}
         </div>
@@ -450,9 +590,9 @@ export default function AuthPage() {
         <div className="text-center">
           <Link
             href="/schools"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#143867] hover:underline bg-white px-4 py-2 rounded-full border border-gray-200 shadow-xs"
+            className="min-h-[44px] inline-flex items-center gap-2 text-xs font-bold text-[#143867] hover:text-[#1e4a85] bg-white hover:bg-gray-50 px-5 py-2.5 rounded-full border border-gray-200 shadow-2xs active:scale-95 transition-all"
           >
-            <span className="material-symbols-outlined text-sm">school</span>
+            <span className="material-symbols-outlined text-base text-[#ea580c]">school</span>
             <span>{t.auth.school_portal}</span>
           </Link>
         </div>

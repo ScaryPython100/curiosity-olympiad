@@ -69,7 +69,7 @@ export function downloadCertificateAsPNG({
   ctx.fillStyle = "#64748b"; // Gray font
   ctx.font = "bold 26px 'Montserrat', sans-serif, Arial";
   ctx.textAlign = "center";
-  ctx.fillText("AGASTYA INTERNATIONAL FOUNDATION • CURIOSITY OLYMPIAD 2026", width / 2, 170);
+  ctx.fillText("AGASTYA INTERNATIONAL FOUNDATION • CURIOSITY PRACTICE LAB SERIES", width / 2, 170);
 
   // 7. Main Title - CERTIFICATE OF EXCELLENCE
   ctx.fillStyle = "#143867";
@@ -107,7 +107,7 @@ export function downloadCertificateAsPNG({
   ctx.fillStyle = "#334155";
   ctx.font = "34px 'Montserrat', sans-serif, Arial";
   ctx.fillText("For demonstrating exceptional scientific inquiry, experiential problem-solving,", width / 2, 675);
-  ctx.fillText("and achieving national top standing in the Agastya Curiosity Olympiad:", width / 2, 725);
+  ctx.fillText("and completing the Curiosity Practice Tournament Series with distinction:", width / 2, 725);
 
   // 11. Highlighted Badge Box - ACHIEVEMENT TYPE
   const badgeText = `★ ${achievementType.toUpperCase()} ★`;

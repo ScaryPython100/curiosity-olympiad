@@ -9,10 +9,12 @@ import { z } from "zod";
 export async function evaluateExperiment(payload: {
   experimentId: string;
   telemetry: any;
-  objectiveCompleted: boolean; // Did they actually solve it?
+  objectiveCompleted: boolean;
   freeTextResponse?: string;
   freeTextScore?: number;
   freeTextFeedback?: string;
+  epistemicDepth?: number;
+  inquiryStage?: string;
 }) {
   try {
     const supabase = await createClient();
@@ -25,72 +27,61 @@ export async function evaluateExperiment(payload: {
     const config = EXPERIMENTS_CONFIG[payload.experimentId];
     if (!config) return { success: false, error: "Invalid experiment ID" };
 
-    // 1. Base Correctness (60% objective, 40% efficiency)
-    let baseScore = 0;
-    if (payload.objectiveCompleted) {
-      const objPoints = config.basePts * 0.6;
-      
-      // Efficiency calculation based on submit attempts
-      // 1 or 2 attempts = full efficiency credit. >2 attempts = scaled down
-      const attempts = Math.max(1, payload.telemetry.submitAttempts || 1);
-      const effRatio = attempts <= 2 ? 1 : Math.max(0, 1 - ((attempts - 2) * 0.25));
-      const effPoints = config.basePts * 0.4 * effRatio;
-      
-      baseScore = objPoints + effPoints;
-    }
+    // 1. Base Correctness (6 Points for Objective)
+    let baseScore = config.basePts;
 
-    // 2. Exploration (Curiosity) Depth-Gradient Model
-    let explorationScore = 0;
-    let tierReached = 0;
-
-    const hasTrigger = payload.telemetry.triggerActivated;
+    // 2. Ambient Exploration (Curiosity) - max 4 points
+    let telemetryPoints = 0;
+    
+    // Evaluate unprompted trials: total user interactions with the variables
+    const trials = (payload.telemetry.clickCount || 0) + (payload.telemetry.dragCount || 0);
+    const reversals = payload.telemetry.reversals || 0;
+    const triggerActivated = Boolean(payload.telemetry.triggerActivated);
     const distinctStates = payload.telemetry.distinctStatesReached || 0;
-    const hasPattern = payload.telemetry.comparisonPatternDetected || false;
-    const entropy = payload.telemetry.dragEntropyScore || 0;
-    const dwellAvg = payload.telemetry.averageDwellTime || 0;
 
-    if (hasTrigger) {
-      tierReached = 1; // Base activation
-      
-      // If entropy is extremely high (jittery) AND average dwell is very low, flag as restless and cap at Tier 1
-      const isRestless = entropy > 0.8 && dwellAvg < 500;
-      
-      if (!isRestless) {
-        if (distinctStates >= 2) {
-          tierReached = 2;
-        }
-        if (distinctStates >= 3 && hasPattern) {
-          tierReached = 3;
-        }
-      }
-      
-      explorationScore = (tierReached / 3) * config.explorationPts;
+    // Broad parameter exploration
+    if (trials >= 5) {
+      telemetryPoints += 2;
+    } else if (trials >= 2) {
+      telemetryPoints += 1;
     }
 
-    // 3. Optional Free Text ML Score (added to base if present)
-    if (payload.freeTextScore !== undefined) {
-      // Typically, free text overrides the objective completion score or adds to it.
-      // We will add it to the base score, capped at basePts
-      baseScore = Math.min(config.basePts, baseScore + payload.freeTextScore);
+    // Hypothesis testing (reversals) or discovering the physical anomaly trigger
+    if (triggerActivated || reversals >= 2) {
+      telemetryPoints += 1;
     }
 
+    // Diverse states explored
+    if (distinctStates >= 3 && telemetryPoints < 3) {
+      telemetryPoints += 1;
+    }
+
+    // 3. Free Text ML Score (Epistemic Depth from optional thought prompt)
+    const mlScore = payload.freeTextScore || 0;
+
+    // Combined curiosity score
+    const explorationScore = Math.min(config.explorationPts, telemetryPoints + mlScore);
     const totalScore = baseScore + explorationScore;
 
-    // 4. Log to Supabase telemetry_logs table (safe failure if table doesn't exist yet)
+    // 4. Detailed Log to Supabase telemetry_logs table
     const { error: insertError } = await supabase.from('telemetry_logs').insert({
       user_id: user.id,
       experiment_id: payload.experimentId,
-      tier: tierReached,
-      trigger_activated: hasTrigger,
+      base_score: baseScore,
+      exploration_score: explorationScore,
+      total_score: totalScore,
+      voluntary_trials: trials,
+      continue_vs_leave: null,
+      trigger_activated: triggerActivated,
       distinct_states_reached: distinctStates,
-      comparison_pattern_detected: hasPattern,
-      drag_entropy_score: entropy,
+      comparison_pattern_detected: payload.telemetry.comparisonPatternDetected || false,
+      drag_entropy_score: payload.telemetry.dragEntropyScore || 0,
       total_time_seconds: Math.floor((payload.telemetry.totalDwellTime || 0) / 1000),
-      submit_attempts: payload.telemetry.submitAttempts || 1,
-      tab_switch_count: payload.telemetry.tabSwitches || 0,
       idle_time_seconds: payload.telemetry.idleTimeSeconds || 0,
       free_text_response: payload.freeTextResponse || null,
-      ml_score: payload.freeTextScore || null,
+      ml_score: mlScore,
+      epistemic_depth: payload.epistemicDepth || 0,
+      inquiry_stage: payload.inquiryStage || null,
       ml_feedback: payload.freeTextFeedback || null
     });
 
@@ -103,8 +94,7 @@ export async function evaluateExperiment(payload: {
       score: totalScore, 
       maxScore: config.basePts + config.explorationPts,
       baseScore,
-      explorationScore,
-      tierReached
+      explorationScore
     };
   } catch (err) {
     console.error("evaluateExperiment error:", err);
@@ -112,38 +102,43 @@ export async function evaluateExperiment(payload: {
   }
 }
 
-
 export async function gradeFreeText(experimentId: string, studentResponse: string) {
   try {
     const config = EXPERIMENTS_CONFIG[experimentId];
-    if (!config || !config.freeTextRubric) {
+    if (!config || !config.freeTextInquiry) {
       return { success: false, error: "No rubric found for this experiment." };
     }
 
-    const rubric = config.freeTextRubric;
+    const inquiry = config.freeTextInquiry;
 
     const { object } = await generateObject({
       model: google('gemini-1.5-pro'),
       schema: z.object({
-        conceptsHit: z.array(z.string()).describe("The rubric concepts that were semantically present in the student's answer."),
-        conceptsMissed: z.array(z.string()).describe("The rubric concepts that were NOT found in the student's answer."),
-        score: z.number().describe("Partial score out of the maximum points based on concepts hit."),
-        feedback: z.string().describe("A short (<20 words) piece of feedback in age-appropriate, encouraging language.")
+        epistemicDepth: z.number().describe("0 (no inquiry) to 6 (transfer/model-building) based on the Agastya matrix."),
+        inquiryStage: z.string().describe("Notice, Wonder, Predict, Explore, Compare, Explain, Extend"),
+        evidenceGrounding: z.number().describe("0 (none), 1 (implicit), 2 (explicit)"),
+        testability: z.number().describe("0 (none), 1 (partly), 2 (clearly testable)"),
+        causalOrientation: z.number().describe("0 (absent), 1 (partial), 2 (explicit)"),
+        generativity: z.number().describe("0 (restates), 1 (modifies), 2 (new variable/possibility)"),
+        score: z.number().describe(`Curiosity score up to ${inquiry.maxPoints}. Give higher points for depth >= 3, generativity, and testability.`),
+        feedback: z.string().describe("A short (<20 words) piece of feedback validating their curiosity.")
       }),
       prompt: `
-      You are an expert, encouraging science teacher grading a student's short answer.
+      You are evaluating a student's open-ended inquiry for a science experiment using the Agastya Question Matrix.
+      Do NOT grade for grammar or factual correctness. Grade for CURIOSITY and EPISTEMIC DEPTH.
       
-      Question: "${rubric.prompt}"
+      Experiment Prompt: "${inquiry.prompt}"
       Student Answer: "${studentResponse}"
+      Max Points: ${inquiry.maxPoints}
       
-      Rubric Concepts (Max Points: ${rubric.maxPoints}):
-      ${rubric.rubricConcepts.map((c, i) => `${i + 1}. ${c}`).join('\n')}
-      
-      Instructions:
-      1. Identify which rubric concepts are semantically present in the student's answer, regardless of their exact wording or spelling.
-      2. Do not penalize for poor grammar or spelling.
-      3. Award partial points proportionally based on how many concepts were hit.
-      4. Provide a very short, encouraging feedback sentence.
+      Epistemic Depth Levels:
+      0: No identifiable inquiry
+      1: Factual / identification ("Which fan was fastest?")
+      2: Relational / comparative ("Does 4 blades make more air than 3?")
+      3: Explanatory / causal ("Why does changing blade number change airflow?")
+      4: Hypothesis / testable ("If speed stays same, will adding blades increase airflow?")
+      5: Generative / counterfactual ("What if the blades were longer?")
+      6: Transfer / model-building ("Would this apply to an airplane propeller?")
       `
     });
 
@@ -158,7 +153,8 @@ export async function getUnlockedLevels() {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, unlockedLevels: [0] };
+    const allLevels = [0, 1, 2, 3, 4, 5, 6, 7];
+    if (!user) return { success: true, unlockedLevels: allLevels };
 
     const { data, error } = await supabase
       .from('student_levels')
@@ -166,20 +162,19 @@ export async function getUnlockedLevels() {
       .eq('user_id', user.id);
 
     if (error || !data) {
-      // If table doesn't exist yet, gracefully unlock all or just the first
-      return { success: true, unlockedLevels: [0, 1, 2] }; 
+      return { success: true, unlockedLevels: allLevels }; 
     }
 
-    const unlocked = [0]; // Level 0 is always unlocked
+    const unlocked = [...allLevels]; 
     data.forEach((lvl: any) => {
       if (lvl.status === 'unlocked' || lvl.status === 'completed') {
-        unlocked.push(lvl.level_index);
+        if (!unlocked.includes(lvl.level_index)) unlocked.push(lvl.level_index);
       }
     });
 
     return { success: true, unlockedLevels: unlocked };
   } catch (err) {
     console.error("getUnlockedLevels error:", err);
-    return { success: false, unlockedLevels: [0, 1, 2] };
+    return { success: false, unlockedLevels: [0, 1, 2, 3, 4, 5, 6, 7] };
   }
 }

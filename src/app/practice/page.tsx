@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import SandboxEngine from "@/components/SandboxEngine";
+import SandboxEngine, { EXPERIMENT_LABELS } from "@/components/SandboxEngine";
 import { addActivityXP } from "@/app/actions/profile";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
+import { toast } from "sonner";
 
 export interface Question {
   id: number;
   mockTestId: number;
-  experimentIndex: 0 | 1 | 2;
-  module: "Optics" | "Gravity" | "Chemistry";
+  experimentIndex: number;
+  module: "Optics" | "Gravity" | "Chemistry" | "Grades68" | "Grades910" | "Sound" | "Electricity" | "Buoyancy";
   title: string;
   question: string;
   options: string[];
@@ -25,7 +26,7 @@ export interface MockTestInfo {
   title: string;
   subtitle: string;
   description: string;
-  module: "Optics" | "Gravity" | "Chemistry";
+  module: "Optics" | "Gravity" | "Chemistry" | "Grades68" | "Grades910" | "Sound" | "Electricity" | "Buoyancy";
   idealTime: { level1: string; level2: string };
   idealSeconds: { level1: number; level2: number };
   questionCount: number;
@@ -37,527 +38,816 @@ export interface MockTestInfo {
 const MOCK_TESTS: MockTestInfo[] = [
   {
     id: 1,
-    title: "Game 1: Light and Big Things",
-    subtitle: "Light and Bowls",
-    description: "Play with water bowls and light to see how things look bigger and how rainbows are made.",
+    title: "Mock Test 1: Light & Sight",
+    subtitle: "Optics & Reflections",
+    description: "Play with room light, prisms, and shadows to understand how light travels and bends.",
     module: "Optics",
     idealTime: { level1: "5 Mins", level2: "10 Mins" },
     idealSeconds: { level1: 300, level2: 600 },
     questionCount: 9,
-    icon: "search",
+    icon: "emoji_objects",
     badge: "Foundation & Advanced Optics",
     color: "from-[#143867] to-[#1e4a85]"
   },
   {
     id: 2,
-    title: "Game 2: Fans and Falling Things",
-    subtitle: "Wind and Planets",
-    description: "Play with fans to make wind and drop things to see how they fall on different planets.",
+    title: "Mock Test 2: Forces & Motion",
+    subtitle: "Fans, Gravity & Airflow",
+    description: "Discover how blade angles push air, how launch angles affect distance, and how objects fall in a vacuum.",
     module: "Gravity",
     idealTime: { level1: "5 Mins", level2: "10 Mins" },
     idealSeconds: { level1: 300, level2: 600 },
     questionCount: 9,
     icon: "air",
-    badge: "Airflow & Gravitational Dynamics",
+    badge: "Forces, Trajectory & Gravity",
     color: "from-[#ea580c] to-[#f97316]"
   },
   {
     id: 3,
-    title: "Game 3: Hot Soup and Fire",
-    subtitle: "Heat and Air",
-    description: "Play with hot soup to see how spoons get warm and watch how a candle fire needs air to burn.",
+    title: "Mock Test 3: Heat & Fire",
+    subtitle: "Thermodynamics & Combustion",
+    description: "Test metal spoons in hot soup, evaporative cooling in clay matkas, and air volume for candle flames.",
     module: "Chemistry",
     idealTime: { level1: "5 Mins", level2: "10 Mins" },
     idealSeconds: { level1: 300, level2: 600 },
     questionCount: 9,
     icon: "local_fire_department",
-    badge: "Thermodynamics & Reaction Kinetics",
+    badge: "Heat Transfer & Combustion",
     color: "from-[#059669] to-[#10b981]"
+  },
+  {
+    id: 4,
+    title: "Mock Test 4: Sensory Physics (Grades 6–8)",
+    subtitle: "Cooling, Flight & Steam",
+    description: "Compare wet-cloth matka cooling, test kite strings in varying winds, and discover the steam pocket inside puffing chapatis.",
+    module: "Grades68",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    icon: "science",
+    badge: "Concrete & Sensory Inquiry",
+    color: "from-[#7c3aed] to-[#8b5cf6]"
+  },
+  {
+    id: 5,
+    title: "Mock Test 5: Hypothesis Testing (Grades 9–10)",
+    subtitle: "Agronomy, Solar & Bio-Energy",
+    description: "Investigate first-rain soil infiltration, test solar cooker parabolic angles, and uncover seasonal biogas output bottlenecks.",
+    module: "Grades910",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    icon: "biotech",
+    badge: "Systemic Hypothesis Testing",
+    color: "from-[#0284c7] to-[#0ea5e9]"
+  },
+  {
+    id: 6,
+    title: "Mock Test 6: Sound & Vibration",
+    subtitle: "Pitch, Resonance & Echoes",
+    description: "Tap water-filled matkas to discover vibrating air columns, test string phones, and shout into deep wells to find echoes.",
+    module: "Sound",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    icon: "volume_up",
+    badge: "Acoustics & Vibration",
+    color: "from-[#0d9488] to-[#14b8a6]"
+  },
+  {
+    id: 7,
+    title: "Mock Test 7: Electricity & Magnetism",
+    subtitle: "Static Charge, Circuits & Fields",
+    description: "Rub combs on hair in different humidities, inspect broken loops in torches, and test attraction on coins vs. nails.",
+    module: "Electricity",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    icon: "electric_bolt",
+    badge: "Circuits, Charge & Magnetism",
+    color: "from-[#d97706] to-[#f59e0b]"
+  },
+  {
+    id: 8,
+    title: "Mock Test 8: Water & Buoyancy",
+    subtitle: "Displacement, Density & Flotation",
+    description: "Fold paper boats to test water displacement, float eggs across salinity thresholds, and observe density settling in oil and water.",
+    module: "Buoyancy",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    icon: "water_drop",
+    badge: "Fluid Mechanics & Buoyancy",
+    color: "from-[#2563eb] to-[#3b82f6]"
   }
 ];
 
 const PRACTICE_QUESTIONS: Question[] = [
-  // --- MOCK TEST 1 (Optics & Refraction) ---
-  // Experiment 1 (Water Bowl Magnification) -> Questions 1, 2, 3
+  // --- MOCK TEST 1 (Optics) ---
   {
-    id: 1,
-    mockTestId: 1,
-    experimentIndex: 0,
-    module: "Optics",
-    title: "Lemon Magnification in a Water Bowl",
-    question: "Why does the lemon appear larger when you increase the Water Bowl Curvature slider in Experiment 1 above?",
+    id: 1, mockTestId: 1, experimentIndex: 0, module: "Optics",
+    title: "TV Screen Glare",
+    question: "Why can't you see the TV picture clearly when the Room Light is very bright?",
     options: [
-      "Water enters through microscopic pores in the lemon peel, causing it to physically swell and expand",
-      "The curved glass bowl of water acts like a magnifying lens, bending light outward to enlarge its image",
-      "Yellow light reflects strongly off the table surface, projecting a double shadow around the lemon",
-      "Water compresses room air inside the glass bowl, magnifying object reflections toward your eyes"
+      "The TV gets scared of the light.",
+      "Bright room light reflects off the TV screen, washing out the picture with glare.",
+      "The TV drinks the light and turns white.",
+      "The sun breaks the TV colors."
     ],
     correct: 1,
-    explanation: "A curved glass bowl of water acts like an everyday convex magnifying lens. The curved surface refracts (bends) light rays outward, making the submerged lemon look larger to your eyes.",
+    explanation: "When a room is too bright, the light bounces (reflects) off the shiny TV screen. This glare makes it hard to see the dark colors on the screen!",
     level: "both"
   },
   {
-    id: 2,
-    mockTestId: 1,
-    experimentIndex: 0,
-    module: "Optics",
-    title: "Daylight Brightness & Visual Clarity",
-    question: "When you adjust the Daylight Brightness slider in Experiment 1, why does the lemon look clearer and more vibrant in bright light?",
+    id: 2, mockTestId: 1, experimentIndex: 0, module: "Optics",
+    title: "Dark Room Eye Strain",
+    question: "Why do your eyes hurt if you watch a very bright TV in a pitch-black room?",
     options: [
-      "Bright daylight heats up the water, turning it into a clearer transparent liquid for sharper vision",
-      "More reflected light rays enter your eyes from the lemon, giving your retinas stronger visual details",
-      "Sunlight reacts chemically with lemon skin pigments, releasing glowing fluorescent light particles",
-      "Bright light removes microscopic air bubbles from water, reducing scattered shadow blurring inside"
+      "The TV shoots tiny invisible lasers into the room.",
+      "The huge difference in brightness (contrast) makes your eye muscles work too hard.",
+      "The TV eats all the oxygen in the dark.",
+      "The dark air makes the TV heavy."
     ],
     correct: 1,
-    explanation: "We see objects when light rays bounce off them into our eyes. Brighter daylight means more light photons reflect off the lemon's peel into your eyes, forming a sharper image.",
+    explanation: "Your eyes have to constantly adjust between the bright TV and the dark room walls. This huge contrast tires out your eye muscles, causing eye strain!",
     level: "both"
   },
   {
-    id: 3,
-    mockTestId: 1,
-    experimentIndex: 0,
-    module: "Optics",
-    title: "Curved Glass vs. Flat Glass Optics",
-    question: "If you replaced the curved glass bowl in Experiment 1 with a flat, square glass box of water, why wouldn't the lemon look magnified anymore?",
+    id: 3, mockTestId: 1, experimentIndex: 0, module: "Optics",
+    title: "Perfect Picture",
+    question: "What is the best way to watch TV without hurting your eyes?",
     options: [
-      "Flat glass absorbs incoming light rays completely, preventing light from exiting the back side of the box",
-      "Flat glass allows light rays to pass straight through without bending them outward to magnify images",
-      "Water inside flat square containers becomes denser, blocking light rays from stretching outward",
-      "Flat glass reflects 90% of yellow light wavelengths back into water, making images look smaller"
+      "Wear sunglasses while watching TV.",
+      "Turn the TV brightness up and the room light down to zero.",
+      "Match the TV brightness with a soft room light so they are balanced.",
+      "Put the TV outside in the bright sun."
+    ],
+    correct: 2,
+    explanation: "Balancing the TV brightness with a soft, cozy room light means your eyes don't have to work as hard, and you won't get any annoying screen glare!",
+    level: "both"
+  },
+  {
+    id: 4, mockTestId: 1, experimentIndex: 1, module: "Optics",
+    title: "Bending Light",
+    question: "When you rotate the prism angle, what happens to the path of the light ray?",
+    options: [
+      "The light stops completely.",
+      "The light bends at a sharper angle through the glass.",
+      "The light turns into water.",
+      "The light bounces straight backwards."
     ],
     correct: 1,
-    explanation: "Magnification requires a curved lens surface to bend light rays at different angles. A flat glass box lets light pass straight through parallel, so objects remain their normal visual size.",
+    explanation: "As the angle of the glass surface changes relative to the incoming light ray, refraction bends the ray more sharply!",
+    level: "both"
+  },
+  {
+    id: 5, mockTestId: 1, experimentIndex: 1, module: "Optics",
+    title: "Water Illusions",
+    question: "Why does a coin at the bottom of a pool look closer than it really is?",
+    options: [
+      "The water pushes the coin up.",
+      "Light bends when it leaves the water, tricking your eyes.",
+      "Fish push the coin to the top.",
+      "The coin gets lighter in water."
+    ],
+    correct: 1,
+    explanation: "Light bends as it moves from water to air. Your brain thinks light travels straight, so it gets tricked into seeing the coin higher up!",
+    level: "both"
+  },
+  {
+    id: 6, mockTestId: 1, experimentIndex: 1, module: "Optics",
+    title: "Rainbow Colors",
+    question: "Why does Sunlight turn into a beautiful rainbow when it hits the scale?",
+    options: [
+      "The plastic scale is painted with rainbow colors.",
+      "Sunlight has all colors mixed together, and the plastic bends each color differently.",
+      "The scale gets hot and glows in colors.",
+      "The light takes colors from the air."
+    ],
+    correct: 1,
+    explanation: "White sunlight is actually made of all colors! When it goes through the plastic, each color bends a little differently and they spread out into a rainbow.",
+    level: "both"
+  },
+  {
+    id: 7, mockTestId: 1, experimentIndex: 2, module: "Optics",
+    title: "Sun Height",
+    question: "When the Sun Height is very low (like Morning), why is the tree's shadow so long?",
+    options: [
+      "The sun is tired in the morning.",
+      "The sun's light hits the tree from the side, stretching the shadow across the ground.",
+      "The tree grows bigger in the morning.",
+      "The ground is colder in the morning."
+    ],
+    correct: 1,
+    explanation: "When the sun is low in the sky, it shines on the side of the tree, casting a long stretched-out shadow on the ground behind it.",
+    level: "both"
+  },
+  {
+    id: 8, mockTestId: 1, experimentIndex: 2, module: "Optics",
+    title: "Upside Down Shadows",
+    question: "If you look through a tiny hole at a tree, why does it sometimes look upside down?",
+    options: [
+      "The hole has a tiny mirror.",
+      "Light goes in straight lines, so light from the top of the tree hits the bottom of your eye.",
+      "Your brain plays a trick on you.",
+      "The air flips the light over."
+    ],
+    correct: 1,
+    explanation: "Light travels in straight lines! So light from the top of the tree travels straight down through the hole, hitting the bottom of the wall.",
+    level: "both"
+  },
+  {
+    id: 9, mockTestId: 1, experimentIndex: 2, module: "Optics",
+    title: "Fuzzy Shadows",
+    question: "Why do some shadows look fuzzy and blurry on the edges?",
+    options: [
+      "The sun is wearing glasses.",
+      "The sun is big, so light from different sides of the sun makes overlapping shadows.",
+      "The wind blows the shadow around.",
+      "The ground is dusty."
+    ],
+    correct: 1,
+    explanation: "Because the sun is big, light comes from many points. This makes some parts of the shadow darker and the edges lighter and fuzzy!",
     level: "both"
   },
 
-  // Experiment 2 (Prism Refraction & Color Dispersion) -> Questions 4, 5, 6
+  // --- MOCK TEST 2 (Gravity) ---
   {
-    id: 4,
-    mockTestId: 1,
-    experimentIndex: 1,
-    module: "Optics",
-    title: "Glass Prism Light Bending Shift",
-    question: "When you increase the Glass Prism Angle slider in Experiment 2, what happens to the light ray passing through the prism?",
+    id: 10, mockTestId: 2, experimentIndex: 0, module: "Gravity",
+    title: "Fan Speed",
+    question: "When you increase the Fan Speed, why do you feel more wind?",
     options: [
-      "The light ray bends more sharply because a steeper glass angle forces light to change direction more",
-      "The light ray reflects straight backward toward the lamp because dense glass acts like a silver mirror",
-      "The light ray speeds up dramatically inside the glass prism, shooting straight through without turning",
-      "The light ray splits into invisible heat waves that evaporate the outer glass coating of the prism"
+      "The fan makes the air colder.",
+      "The blades spin faster and push more air down towards you.",
+      "The fan sucks air from outside the house.",
+      "The fan creates ice cubes in the air."
+    ],
+    correct: 1,
+    explanation: "Fan blades are tilted! When they spin faster, they slap more air downwards, creating a strong breeze you can feel.",
+    level: "both"
+  },
+  {
+    id: 11, mockTestId: 2, experimentIndex: 0, module: "Gravity",
+    title: "Why Fans Cool Us",
+    question: "Why does the fast wind from the fan make you feel cold on a hot day?",
+    options: [
+      "The fan breaks the heat.",
+      "The moving air dries your sweat faster, which cools down your skin.",
+      "The fan pushes the heat out the window.",
+      "The fan covers you in cold air."
+    ],
+    correct: 1,
+    explanation: "Fans don't actually cool the room; they cool YOU! The breeze helps your sweat evaporate faster, which takes away your body heat.",
+    level: "both"
+  },
+  {
+    id: 12, mockTestId: 2, experimentIndex: 0, module: "Gravity",
+    title: "Number of Blades",
+    question: "Why do we use 3 blades on ceiling fans in hot places instead of 5?",
+    options: [
+      "3 blades can spin much faster and push more air than heavy 5 blades.",
+      "5 blades take too much paint.",
+      "3 blades look prettier.",
+      "5 blades make the air too heavy."
     ],
     correct: 0,
-    explanation: "Light slows down and changes direction when entering glass from air. A steeper prism surface angle forces the light ray to refract (bend) at a sharper angle away from its original path.",
-    level: "level2"
-  },
-  {
-    id: 5,
-    mockTestId: 1,
-    experimentIndex: 1,
-    module: "Optics",
-    title: "Apparent Depth of Submerged Coin",
-    question: "Why does a coin placed at the bottom of a water glass appear shallower and higher up than it actually is?",
-    options: [
-      "Water pressure at the bottom of the glass pushes the metal coin upward closer to the surface",
-      "Light rays bend away as they exit water into air, making your brain trace a shallower image position",
-      "Air bubbles trapped under the glass mirror elevate the coin's visual reflection higher in the water",
-      "Light slows down in water, making the coin appear twice as heavy and floating near the top surface"
-    ],
-    correct: 1,
-    explanation: "Light traveling from the underwater coin speeds up and bends away as it exits water into air. Tracing these bent rays straight back creates an apparent shallower virtual position.",
+    explanation: "In hot climates, we want fast air! 3 blades are lighter and cut through the air easier, allowing the fan to spin very fast.",
     level: "both"
   },
   {
-    id: 6,
-    mockTestId: 1,
-    experimentIndex: 1,
-    module: "Optics",
-    title: "Rainbow Dispersion & Prism Effect",
-    question: "When white sunlight passes through a glass prism in Experiment 2, why does it separate into a spectrum of 7 rainbow colors?",
+    id: 13, mockTestId: 2, experimentIndex: 1, module: "Gravity",
+    title: "Falling Ball",
+    question: "When you hit the cricket ball, why doesn't it go up into space forever?",
     options: [
-      "Glass prisms contain chemical dyes that color white light as it passes through the center glass",
-      "Different colors of light travel at different speeds in glass, bending at slightly different angles",
-      "White light friction against glass molecules creates thermal heat that glows in rainbow colors",
-      "Red light absorbs green and blue wavelengths, leaving only leftover rainbow colors on the screen"
+      "The ball gets tired.",
+      "The Earth's gravity pulls it back down to the ground.",
+      "The wind pushes it down.",
+      "The bat is not strong enough."
     ],
     correct: 1,
-    explanation: "White light is made of all rainbow colors mixed together. Red light bends the least while violet light bends the most inside glass, spreading the colors into a visible rainbow spectrum.",
-    level: "both"
-  },
-
-  // Experiment 3 (Sun Angle & Shadow Tracker) -> Questions 7, 8, 9
-  {
-    id: 7,
-    mockTestId: 1,
-    experimentIndex: 2,
-    module: "Optics",
-    title: "Sun Elevation Angle & Shadow Length",
-    question: "In Experiment 3, when the Sun Elevation Angle slider is set low near sunrise/sunset, why are shadows on the ground extremely long?",
-    options: [
-      "Sunlight carries less energy near sunset, allowing ground shadows to expand and stretch outward",
-      "Low sun angles strike objects at a shallow slant, projecting light rays far across the ground surface",
-      "The atmosphere acts like a giant lens at dusk, magnifying the physical height of objects and shadows",
-      "Ground temperature drops at sunset, preventing Earth's surface from absorbing black shadow rays"
-    ],
-    correct: 1,
-    explanation: "When the Sun is low in the sky, light rays strike objects at a shallow angle. The object blocks light over a wider stretch of ground, casting a longer geometric shadow.",
-    level: "level2"
-  },
-  {
-    id: 8,
-    mockTestId: 1,
-    experimentIndex: 2,
-    module: "Optics",
-    title: "Pinhole Camera Image Inversion",
-    question: "Why does a simple pinhole camera form an inverted (upside down) image of a distant tree on its screen?",
-    options: [
-      "Air pressure inside the dark camera box flips light rays upside down before hitting the back screen",
-      "Light travels in straight lines through the small hole, so top rays land at the bottom of the screen",
-      "The glass screen contains magnetic poles that pull red light rays to the top and blue rays to the bottom",
-      "Light reflects off the inner box walls twice, reversing top and bottom positions on the image screen"
-    ],
-    correct: 1,
-    explanation: "Light travels in straight lines! Rays from the top of the tree pass through the tiny pinhole and continue straight down to the bottom of the screen, creating an inverted image.",
+    explanation: "Gravity is an invisible force from the Earth that pulls everything down. No matter how hard you hit the ball, gravity will bring it back!",
     level: "both"
   },
   {
-    id: 9,
-    mockTestId: 1,
-    experimentIndex: 2,
-    module: "Optics",
-    title: "Shadow Softness & Penumbra Effects",
-    question: "Why does a long tubelight produce soft, blurry shadow edges (penumbra) while a tiny LED produces sharp, crisp shadows?",
+    id: 14, mockTestId: 2, experimentIndex: 1, module: "Gravity",
+    title: "Space Station",
+    question: "Why doesn't the Space Station fall down to Earth?",
     options: [
-      "Long tubelights emit cooler light waves that soften shadow edges, whereas flashlights emit hot light",
-      "Extended tubelights emit light from multiple points, creating partial overlap regions with soft edges",
-      "Flashlight beams travel faster through air, blasting away soft penumbra shadows around object edges",
-      "Tubelight glass diffuses air dust particles, casting a blurry gray mist around the shadow border"
+      "It has giant balloons.",
+      "It is moving sideways so fast that it keeps missing the Earth as it falls.",
+      "There is zero gravity in space.",
+      "It has wings like an airplane."
     ],
     correct: 1,
-    explanation: "A tubelight is a wide, extended light source emitting rays from many points. Areas that receive light from some points but not others form a soft gradient shadow edge called a penumbra.",
+    explanation: "The Space Station is actually falling! But because it zooms sideways super fast, the round Earth curves away beneath it, so it never hits the ground.",
+    level: "both"
+  },
+  {
+    id: 15, mockTestId: 2, experimentIndex: 1, module: "Gravity",
+    title: "Hit Power",
+    question: "What happens when you increase the Hit Power for the cricket ball?",
+    options: [
+      "The ball gets heavier.",
+      "The ball gets more energy and flies much further before hitting the ground.",
+      "The ball turns red.",
+      "The ball bounces backwards."
+    ],
+    correct: 1,
+    explanation: "More power means more starting speed (energy!). It takes gravity longer to pull a fast-moving ball down, so it travels further.",
+    level: "both"
+  },
+  {
+    id: 16, mockTestId: 2, experimentIndex: 2, module: "Gravity",
+    title: "Air Push",
+    question: "In normal air, why does a heavy stone land before a light dry leaf?",
+    options: [
+      "Gravity likes heavy things more.",
+      "The air pushes up on the wide leaf and slows it down.",
+      "The leaf forgets to fall.",
+      "The stone has a motor."
+    ],
+    correct: 1,
+    explanation: "Air gets in the way! The wide, light leaf catches a lot of air as it falls, which acts like a parachute and slows it down.",
+    level: "both"
+  },
+  {
+    id: 17, mockTestId: 2, experimentIndex: 2, module: "Gravity",
+    title: "Removing Air (Vacuum)",
+    question: "If you remove ALL the air (a vacuum), what happens when you drop the leaf and stone?",
+    options: [
+      "The stone still lands first.",
+      "They both hit the ground at the exact same time!",
+      "They float up to the ceiling.",
+      "The leaf falls faster."
+    ],
+    correct: 1,
+    explanation: "Without air pushing back, gravity pulls EVERYTHING down at the exact same speed. A feather and a bowling ball would land together!",
+    level: "both"
+  },
+  {
+    id: 18, mockTestId: 2, experimentIndex: 2, module: "Gravity",
+    title: "Stone Weight",
+    question: "If you make the stone heavier, does it fall faster in a vacuum?",
+    options: [
+      "Yes, heavy things fall way faster.",
+      "No, gravity pulls all objects at the same falling speed if there is no air.",
+      "Yes, it breaks the ground.",
+      "No, heavy things fall slower."
+    ],
+    correct: 1,
+    explanation: "Weight doesn't matter in a vacuum! Gravity accelerates all objects identically, so they fall at the exact same speed.",
     level: "both"
   },
 
-  // --- MOCK TEST 2 (Gravity, Motion & Airflow) ---
-  // Experiment 1 (Ceiling Fan Airflow) -> Questions 10, 11, 12
+  // --- MOCK TEST 3 (Chemistry) ---
   {
-    id: 10,
-    mockTestId: 2,
-    experimentIndex: 0,
-    module: "Gravity",
-    title: "Why 3 Fan Blades in Tropical Indian Homes?",
-    question: "In Experiment 1 (Everyday Air & Fan Blades Lab), why do ceiling fans in Indian homes typically use 3 blades instead of 4 or 5 blades used in cooler European countries?",
+    id: 19, mockTestId: 3, experimentIndex: 0, module: "Chemistry",
+    title: "Hot Spoons",
+    question: "Why does the Steel Spoon get too hot to touch in the hot dal, but the Wood Spoon stays cool?",
     options: [
-      "Three blades are lighter and spin at higher RPM, pushing a stronger cooling breeze in hot weather",
-      "Three blades consume much less electricity while creating a partial room vacuum that lowers room temp",
-      "Four blades create air turbulence that traps hot air near the ceiling, preventing room air circulation",
-      "Five-blade fans spin too fast for tropical humidity, causing fan motors to overheat and slow down"
+      "Wood hates the soup.",
+      "Steel is a metal that lets heat travel through it super fast.",
+      "The steel spoon is shorter.",
+      "Wood reflects the heat into the air."
     ],
-    correct: 0,
-    explanation: "In hot climates, 3-blade fans encounter less aerodynamic drag, allowing them to spin faster at higher RPM to push high-velocity air for stronger cooling breezes.",
+    correct: 1,
+    explanation: "Metals like steel are great at conducting (sharing) heat. The heat travels straight up the steel handle to your hand! Wood stops the heat.",
     level: "both"
   },
   {
-    id: 11,
-    mockTestId: 2,
-    experimentIndex: 0,
-    module: "Gravity",
-    title: "Fan Speed Regulator (RPM) & Air Displacement",
-    question: "When you turn up the Fan Speed Regulator slider in Experiment 1, why does the air circulation in the room increase so dramatically?",
+    id: 20, mockTestId: 3, experimentIndex: 0, module: "Chemistry",
+    title: "Stirring the Soup",
+    question: "Why does stirring the hot soup make it cool down faster?",
     options: [
-      "Faster fan blades create magnetic suction waves that draw cooler outdoor air inside the room",
-      "Higher RPM increases blade speed, forcing a larger mass of air molecules downward every second",
-      "Spinning fan blades convert room oxygen into cooler nitrogen gas, lowering air density near the floor",
-      "The electric motor cools room air directly by releasing chilled moisture particles from the blades"
+      "Stirring makes ice.",
+      "Stirring brings the hot soup from the bottom to the top so the heat can escape.",
+      "Stirring breaks the heat.",
+      "The spoon sucks the heat out."
     ],
     correct: 1,
-    explanation: "Ceiling fan blades are angled to push air downward. Turning up the speed regulator multiplies blade RPM, displacing a much greater volume of air molecules toward the floor every second.",
+    explanation: "When you stir, the hot soup at the bottom comes up to the surface. The heat escapes into the air as steam, cooling the soup down!",
     level: "both"
   },
   {
-    id: 12,
-    mockTestId: 2,
-    experimentIndex: 0,
-    module: "Gravity",
-    title: "Airflow Breeze & Skin Evaporation Cooling",
-    question: "Why does moving air from fan blades make your skin feel cooler on a hot afternoon, even though the fan doesn't lower room temperature?",
+    id: 21, mockTestId: 3, experimentIndex: 0, module: "Chemistry",
+    title: "Steam",
+    question: "Why do you see more steam when you turn up the Stove Heat?",
     options: [
-      "Moving air destroys heat energy in the room, physically cooling down ambient air temperature",
-      "Moving air speeds up sweat evaporation from skin, carrying away body heat to make you feel cool",
-      "Fan breezes compress skin pores, preventing internal body heat from escaping onto your forehead",
-      "Fan blades push cold floor air upward, creating a cold air blanket around your upper torso"
+      "The spoon melts into smoke.",
+      "Hot water gets so much energy it flies into the air as steam.",
+      "The heat burns the air.",
+      "The pot catches fire."
     ],
     correct: 1,
-    explanation: "Fans don't cool room air—they cool people! Moving air accelerates sweat evaporation off your skin. Liquid sweat absorbs body heat as it turns to vapor, cooling your body.",
+    explanation: "Heat gives water molecules energy! When they get really hot, they wiggle so fast they pop out of the liquid and turn into steam gas.",
+    level: "both"
+  },
+  {
+    id: 22, mockTestId: 3, experimentIndex: 1, module: "Chemistry",
+    title: "Clay Pot vs Metal",
+    question: "Why does a clay pot (Matka) make water cold, but a metal pot keeps it warm?",
+    options: [
+      "Clay has magic ice rocks inside.",
+      "Water leaks through tiny holes in clay and dries up, taking the heat away.",
+      "Metal gets shy.",
+      "Clay is always cold."
+    ],
+    correct: 1,
+    explanation: "Clay has tiny holes! Water seeps out and evaporates into the air. Evaporation steals heat from the pot, making the water inside cold.",
+    level: "both"
+  },
+  {
+    id: 23, mockTestId: 3, experimentIndex: 1, module: "Chemistry",
+    title: "Air Wetness (Humidity)",
+    question: "If the air is very wet (humid) because it is raining, does the Matka still cool the water well?",
+    options: [
+      "Yes, rain helps it cool.",
+      "No, if the air is wet, the water on the pot can't dry up (evaporate) to cool it down.",
+      "Yes, it gets freezing.",
+      "No, the pot melts."
+    ],
+    correct: 1,
+    explanation: "Cooling needs evaporation! If the air is already full of water (humid), the water on the pot can't evaporate into the air easily.",
+    level: "both"
+  },
+  {
+    id: 24, mockTestId: 3, experimentIndex: 1, module: "Chemistry",
+    title: "Pressure Cooker",
+    question: "Why does a closed pressure cooker cook food so much faster than an open pot?",
+    options: [
+      "It has a motor.",
+      "Trapped steam makes high pressure, so water gets much hotter than normal boiling.",
+      "The food gets scared.",
+      "It makes a loud whistle."
+    ],
+    correct: 1,
+    explanation: "Because the steam can't escape, the pressure inside goes up. High pressure forces the water to get much hotter before it boils, cooking food fast!",
+    level: "both"
+  },
+  {
+    id: 25, mockTestId: 3, experimentIndex: 2, module: "Chemistry",
+    title: "Candle Needs Air",
+    question: "When you put a glass jar over the Diya (candle), why does the fire go out?",
+    options: [
+      "The glass crushes the fire.",
+      "Fire needs oxygen from the air to burn, and the jar traps only a little bit.",
+      "The jar makes it too cold.",
+      "The fire gets scared of the dark."
+    ],
+    correct: 1,
+    explanation: "Fire needs 3 things: Fuel, Heat, and Oxygen! The glass jar stops new air from getting in. Once the fire uses up all the trapped oxygen, it goes out.",
+    level: "both"
+  },
+  {
+    id: 26, mockTestId: 3, experimentIndex: 2, module: "Chemistry",
+    title: "Big Glass vs Small Glass",
+    question: "If you use a much bigger Glass Size over the candle, what happens?",
+    options: [
+      "The candle goes out immediately.",
+      "The candle burns longer because a bigger glass holds more air.",
+      "The candle turns green.",
+      "The glass breaks."
+    ],
+    correct: 1,
+    explanation: "A larger glass traps a lot more air (and oxygen) inside it. The fire has more oxygen to use, so it can burn for a longer time before going out.",
+    level: "both"
+  },
+  {
+    id: 27, mockTestId: 3, experimentIndex: 2, module: "Chemistry",
+    title: "Lemon Juice & Baking Soda",
+    question: "What happens when you mix sour lemon juice and baking soda in the kitchen?",
+    options: [
+      "It gets super hot and boils.",
+      "They react and make lots of fizzy carbon dioxide gas bubbles!",
+      "It turns into hard plastic.",
+      "It freezes into ice."
+    ],
+    correct: 1,
+    explanation: "When you mix an acid (lemon juice) and a base (baking soda), they have a chemical reaction and create a new gas called Carbon Dioxide, making fizzy bubbles!",
     level: "both"
   },
 
-  // Experiment 2 (Planetary Gravity & Orbital Velocity) -> Questions 13, 14, 15
+  // --- MOCK TEST 4 (Grades 6-8) ---
   {
-    id: 13,
-    mockTestId: 2,
-    experimentIndex: 1,
-    module: "Gravity",
-    title: "Planet Mass & Gravitational Pull",
-    question: "In Experiment 2, when you increase the Planet Mass Factor slider, what happens to the gravitational attraction on the orbiting satellite?",
-    options: [
-      "Increasing planet mass increases gravitational pull, requiring faster orbital speed to stay in orbit",
-      "Increasing planet mass creates anti-gravity space waves that push orbiting satellites outward",
-      "Satellite orbital speed depends only on distance, while planet mass has zero effect on gravity pull",
-      "Larger planets absorb space vacuum pressure, causing satellites to float in fixed stationary points"
-    ],
-    correct: 0,
-    explanation: "Gravitational force depends directly on mass. A heavier planet exerts a stronger gravitational pull on nearby satellites, requiring faster sideways speed to avoid crashing.",
-    level: "both"
+    id: 28, mockTestId: 4, experimentIndex: 0, module: "Grades68",
+    title: "Matka Placement",
+    question: "Where did the bare Matka cool the water best?",
+    options: ["In the Sun", "In the Shade", "Inside a box", "On a heater"],
+    correct: 1, explanation: "Shade is naturally cooler!", level: "both"
   },
   {
-    id: 14,
-    mockTestId: 2,
-    experimentIndex: 1,
-    module: "Gravity",
-    title: "Orbital Speed of Low-Earth Satellites",
-    question: "Why don't artificial communication satellites in low Earth orbit crash down to the ground despite Earth's strong gravity?",
-    options: [
-      "Satellites carry helium gas tanks that create upward buoyant force against Earth's gravitational pull",
-      "Satellites travel sideways so fast that as they fall, Earth's curved surface falls away beneath them",
-      "Gravity does not exist at space station altitude, allowing satellites to float without falling",
-      "Rocket engines burn fuel continuously 24 hours a day to hold satellites up against gravity"
-    ],
-    correct: 1,
-    explanation: "Orbiting is continuous free-fall! Satellites travel sideways so fast (~7.8 km/s) that as gravity pulls them down, Earth's round surface curves away beneath them at the exact same rate.",
-    level: "level2"
+    id: 29, mockTestId: 4, experimentIndex: 0, module: "Grades68",
+    title: "The Wet Cloth Anomaly",
+    question: "Why was the wet cloth in the sun cooler than the bare pot in the shade?",
+    options: ["Sunlight makes ice", "Rapid evaporation pulled the heat away", "The cloth blocked the sun", "The water got scared"],
+    correct: 1, explanation: "Evaporation removes heat. Hot sun makes it evaporate fast!", level: "both"
   },
   {
-    id: 15,
-    mockTestId: 2,
-    experimentIndex: 1,
-    module: "Gravity",
-    title: "Tidal Waves & Lunar Gravitational Pull",
-    question: "Why do ocean tides rise and fall twice every day on coastal beaches in India?",
-    options: [
-      "Undersea volcanic heat expands ocean water twice daily, pushing high tides onto coastal shores",
-      "The Moon's gravitational pull attracts ocean water, creating tidal bulges as Earth rotates under them",
-      "Daytime solar heat evaporates coastal seawater, causing low tides that refill during cool night hours",
-      "Ocean wind currents change direction every 12 hours, piling up seawater along beach coastlines"
-    ],
-    correct: 1,
-    explanation: "The Moon's gravity pulls on Earth's oceans, stretching water into two bulges on opposite sides of the planet. As Earth rotates through these bulges every day, beaches experience high tides.",
-    level: "both"
-  },
-
-  // Experiment 3 (Freefall Drag & Air Resistance) -> Questions 16, 17, 18
-  {
-    id: 16,
-    mockTestId: 2,
-    experimentIndex: 2,
-    module: "Gravity",
-    title: "Atmospheric Drag on Falling Objects",
-    question: "In Earth's atmosphere, why does a heavy cricket ball reach the ground faster than a light bird feather dropped from the same balcony height?",
-    options: [
-      "Gravity pulls much stronger on heavy cricket balls than on feathers dropped from the same height",
-      "Air resistance creates an upward drag force that slows down the light feather far more than the ball",
-      "Feathers carry a negative static charge that repels them from Earth's magnetic ground surface",
-      "Heavy objects create downward air vortexes that pull them toward the ground much faster than air"
-    ],
-    correct: 1,
-    explanation: "In air, drag resists falling objects. Because feathers have a large surface area relative to their tiny mass, upward air resistance quickly balances their weight, slowing their drop.",
-    level: "both"
+    id: 30, mockTestId: 4, experimentIndex: 0, module: "Grades68",
+    title: "Plastic vs Clay",
+    question: "Why doesn't the plastic bottle cool water like the Matka?",
+    options: ["Plastic has no tiny holes for water to evaporate", "Plastic likes to be hot", "Plastic drinks the water", "Plastic is too smooth"],
+    correct: 0, explanation: "Evaporation needs pores!", level: "both"
   },
   {
-    id: 17,
-    mockTestId: 2,
-    experimentIndex: 2,
-    module: "Gravity",
-    title: "Falling in an Empty Vacuum Chamber",
-    question: "If you repeated the cricket ball vs. feather drop inside an empty glass chamber where all air has been pumped out, what surprising thing would you observe?",
-    options: [
-      "The cricket ball still lands first because heavy objects naturally fall faster than light ones",
-      "Both objects fall side-by-side at the exact same speed and hit the ground at the exact same instant",
-      "Removing air causes both objects to lose weight and float upward toward the top of the chamber",
-      "The feather falls faster than the ball because removing air drag lets light objects zoom downward"
-    ],
-    correct: 1,
-    explanation: "Without air resistance to push back against the feather, gravity pulls all objects downward at the exact same rate! Both the cricket ball and feather fall side-by-side and land together.",
-    level: "both"
+    id: 31, mockTestId: 4, experimentIndex: 1, module: "Grades68",
+    title: "Kite Angle",
+    question: "What happens if you pull the kite angle too tight in strong wind?",
+    options: ["It flies to space", "It dives down because wind spills off the face", "It turns into a bird", "It stops moving"],
+    correct: 1, explanation: "Too much angle spills the wind!", level: "both"
   },
   {
-    id: 18,
-    mockTestId: 2,
-    experimentIndex: 2,
-    module: "Gravity",
-    title: "Centrifugal Force & Inertia in Bus Turns",
-    question: "When a school bus makes a sharp right turn on a road, why do passengers feel thrown toward the left side of their seats?",
-    options: [
-      "Air pressure inside turning buses shifts toward the outer windows, pushing passengers sideways",
-      "Your body's inertia tries to keep moving in a straight line while the bus turns right underneath you",
-      "Gravity shifts sideways during sharp vehicle turns, pulling passengers toward the left seats",
-      "Turning tires create outward magnetic force fields that push passenger bodies toward the doors"
-    ],
-    correct: 1,
-    explanation: "Inertia is your body's tendency to resist changes in motion. When the bus turns right, your body naturally tries to keep moving straight ahead, making you feel pushed to the left.",
-    level: "both"
-  },
-
-  // --- MOCK TEST 3 (Chemistry & Thermodynamics) ---
-  // Experiment 1 (Soup Conduction & Stirring Convection) -> Questions 19, 20, 21
-  {
-    id: 19,
-    mockTestId: 3,
-    experimentIndex: 0,
-    module: "Chemistry",
-    title: "Wooden vs. Stainless Steel Spoons in Hot Curry",
-    question: "When cooking soup or sambar in Experiment 1, why can you hold a wooden spoon handle without burning your hand, while a stainless steel spoon becomes too hot to touch in seconds?",
-    options: [
-      "Wood destroys heat energy inside its fibers, keeping the handle cool even in boiling liquid",
-      "Steel conducts heat rapidly via free electrons, while wood acts as an insulator trapping air",
-      "Steel absorbs heat because it is heavier, whereas wooden handles reflect 100% of heat rays",
-      "Boiling curry reacts chemically with metal spoons, generating heat energy that burns your hand"
-    ],
-    correct: 1,
-    explanation: "Metals like steel are great thermal conductors—heat travels quickly through free electrons up to the handle. Wood contains trapped air pockets and acts as a natural insulator.",
-    level: "both"
+    id: 32, mockTestId: 4, experimentIndex: 1, module: "Grades68",
+    title: "Low Wind",
+    question: "How do you fly high when wind is low?",
+    options: ["Keep angle moderate and let out string", "Pull it flat", "Drop it", "Cut the string"],
+    correct: 0, explanation: "You need a good surface area to catch light breeze.", level: "both"
   },
   {
-    id: 20,
-    mockTestId: 3,
-    experimentIndex: 0,
-    module: "Chemistry",
-    title: "Effect of Stirring Speed on Hot Soup",
-    question: "When you increase the Stirring Speed slider in Experiment 1 (Kitchen Heat Lab), why does the soup cool down to an even, comfortable eating temperature much faster?",
-    options: [
-      "Stirring creates air friction that freezes water molecules near the surface of the soup bowl",
-      "Stirring brings hot liquid from the bottom up to the surface where heat escapes via steam",
-      "Stirring forces salt to dissolve faster, which chemically lowers the liquid boiling temperature",
-      "Fast spoon movement pushes heat energy into the bowl walls, cooling down the central soup liquid"
-    ],
-    correct: 1,
-    explanation: "Without stirring, only the top layer cools while the bottom stays scalding hot. Stirring creates convection currents, circulating hot soup to the top where heat escapes into the air.",
-    level: "both"
+    id: 33, mockTestId: 4, experimentIndex: 1, module: "Grades68",
+    title: "String Tension",
+    question: "What holds the kite in the air?",
+    options: ["Magic", "The balance between wind push and string pull", "Birds", "Clouds"],
+    correct: 1, explanation: "Wind pushes it up, string holds it against the wind!", level: "both"
   },
   {
-    id: 21,
-    mockTestId: 3,
-    experimentIndex: 0,
-    module: "Chemistry",
-    title: "Soup Temperature & Steam Formation",
-    question: "Why does raising the Soup Temperature (°C) slider in Experiment 1 cause more visible steam clouds to rise from the bowl?",
-    options: [
-      "High heat turns stainless steel spoon molecules into visible white steam rising above the bowl",
-      "Higher temperature gives water molecules extra energy to break liquid bonds and escape as steam",
-      "Steam forms when room air moisture condenses against cold soup liquid surfaces near the top",
-      "Hot soup releases trapped oxygen bubbles that expand into visible steam clouds in open room air"
-    ],
-    correct: 1,
-    explanation: "Temperature measures kinetic energy. Hotter soup means water molecules move faster and gain enough energy to break away from liquid water and evaporate into steam vapor clouds.",
-    level: "both"
-  },
-
-  // Experiment 2 (Matka Evaporative Cooling & Pressure Cooker) -> Questions 22, 23, 24
-  {
-    id: 22,
-    mockTestId: 3,
-    experimentIndex: 1,
-    module: "Chemistry",
-    title: "Pressure Cooker High Boiling Point",
-    question: "Why does food cook in a pressure cooker in 5 minutes, whereas in an open vessel it takes 20 minutes?",
-    options: [
-      "Pressure cookers generate internal microwave radiation that cooks food from the inside out",
-      "Trapped steam increases air pressure, raising water boiling point above 100°C for faster cooking",
-      "Pressure cookers compress food molecules physically, breaking down tough fibers in 5 minutes",
-      "Rubber lid gaskets absorb cold kitchen air, forcing all thermal energy into the cooking liquid"
-    ],
-    correct: 1,
-    explanation: "Trapped steam increases internal pressure inside the sealed cooker. High pressure prevents water from boiling at 100°C, pushing the boiling point up to ~120°C so food cooks 4x faster!",
-    level: "both"
+    id: 34, mockTestId: 4, experimentIndex: 2, module: "Grades68",
+    title: "Chapati Puff",
+    question: "What makes the chapati puff up?",
+    options: ["Air trapped inside turning to steam", "Yeast", "Sugar", "Baking powder"],
+    correct: 0, explanation: "Moisture turns to steam and expands!", level: "both"
   },
   {
-    id: 23,
-    mockTestId: 3,
-    experimentIndex: 1,
-    module: "Chemistry",
-    title: "Earthen Pot / Matka Evaporative Cooling",
-    question: "In Experiment 2, why does drinking water kept inside a porous clay pot (Matka) stay refreshingly cold during hot summer days without any electricity?",
-    options: [
-      "Clay pot walls contain natural mineral ice pockets that cool down internal water without power",
-      "Water seeps through clay pores and evaporates outside, absorbing heat energy from inside water",
-      "Dark terracotta clay reflects 100% of room light, preventing external heat from touching water",
-      "Clay pores absorb oxygen from surrounding air, converting room humidity into cold nitrogen gas"
-    ],
-    correct: 1,
-    explanation: "Evaporation is a cooling process! Small amounts of water seep through tiny clay pores and evaporate off the outer surface. Evaporation requires heat, which it draws from the water inside.",
-    level: "both"
+    id: 35, mockTestId: 4, experimentIndex: 2, module: "Grades68",
+    title: "Thin Chapati Anomaly",
+    question: "Why doesn't a very thin chapati puff on low heat?",
+    options: ["It burns instantly", "It dries out before steam can build up", "It melts", "It shrinks"],
+    correct: 1, explanation: "It becomes a cracker!", level: "both"
   },
   {
-    id: 24,
-    mockTestId: 3,
-    experimentIndex: 1,
-    module: "Chemistry",
-    title: "Clay Porosity & Humidity Effects in Matka",
-    question: "Why does an earthenware Matka cool water much more effectively in dry summer weather (like Rajasthan) than in humid rainy weather (like Kerala)?",
-    options: [
-      "Dry air accelerates water evaporation from clay pores, whereas humid air slows down evaporation",
-      "Humid air turns clay pot walls into solid metal, blocking evaporative cooling during rainy weather",
-      "High humidity makes clay pores shrink tight, preventing water seepage needed for cooling",
-      "Dry desert air contains cold air ions that react with clay minerals to create artificial cooling"
-    ],
-    correct: 0,
-    explanation: "Dry air has low humidity, encouraging rapid water evaporation off the Matka's surface. In humid air already filled with moisture, water cannot evaporate quickly, reducing the cooling effect.",
-    level: "both"
+    id: 36, mockTestId: 4, experimentIndex: 2, module: "Grades68",
+    title: "High Heat",
+    question: "Why is high heat better for puffing?",
+    options: ["It flashes moisture to steam quickly before the dough dries out", "It makes it taste sweet", "It changes the color", "It adds air"],
+    correct: 0, explanation: "Fast steam = big puff!", level: "both"
   },
-
-  // Experiment 3 (Oxygen Depletion & Reaction Kinetics) -> Questions 25, 26, 27
+  // --- MOCK TEST 5 (Grades 9-10) ---
   {
-    id: 25,
-    mockTestId: 3,
-    experimentIndex: 2,
-    module: "Chemistry",
-    title: "Candle Flame Oxygen Depletion in Sealed Jar",
-    question: "In Experiment 3, when you place an inverted glass jar over a burning candle, why does the flame flicker and go out after a few seconds?",
-    options: [
-      "The heavy weight of the glass jar squashes candle flame heat, forcing the wick to go out",
-      "Combustion uses up oxygen inside the jar; once oxygen drops low, the flame reaction stops",
-      "Glass jars absorb flame heat rapidly, freezing candle wax into solid non-flammable liquid",
-      "Carbon dioxide gas inside glass jars catches fire, consuming all flame energy in a few seconds"
-    ],
-    correct: 1,
-    explanation: "Fire requires fuel, heat, and oxygen! Covering a candle with a glass jar traps a limited amount of oxygen. Once the flame consumes the available oxygen, combustion stops and the flame goes out.",
-    level: "both"
+    id: 37, mockTestId: 5, experimentIndex: 0, module: "Grades910",
+    title: "Soil Drainage",
+    question: "Which soil flooded easiest?",
+    options: ["Sandy", "Loamy", "Clay", "Rocks"],
+    correct: 2, explanation: "Clay holds a lot of water!", level: "both"
   },
   {
-    id: 26,
-    mockTestId: 3,
-    experimentIndex: 2,
-    module: "Chemistry",
-    title: "Camphor Disappearing in Open Air",
-    question: "When you leave a piece of white camphor out on a plate, why does it slowly shrink and vanish over a few days without leaving any wet spot or liquid puddle?",
-    options: [
-      "Camphor melts into an invisible liquid that immediately soaks into the plate",
-      "Camphor transforms directly from a solid into floating air vapor without ever becoming liquid",
-      "Microscopic dust mites eat the solid camphor particles when the room is dark",
-      "Sunlight turns solid camphor into microscopic white dust that blows away in the breeze"
-    ],
-    correct: 1,
-    explanation: "Some special solids like camphor don't melt into liquid at all! They turn directly from solid into gas vapor that drifts into the air, which is why your plate stays completely dry.",
-    level: "level2"
+    id: 38, mockTestId: 5, experimentIndex: 0, module: "Grades910",
+    title: "First Rain",
+    question: "Why is Loamy soil best for sowing?",
+    options: ["It's pretty", "It balances drainage and retention", "It's cheap", "It smells good"],
+    correct: 1, explanation: "Not too wet, not too dry!", level: "both"
   },
   {
-    id: 27,
-    mockTestId: 3,
-    experimentIndex: 2,
-    module: "Chemistry",
-    title: "Why Baking Soda & Lemon Fizz and Bubble",
-    question: "When you squeeze fresh lemon juice or vinegar onto baking soda in the kitchen, why does the mixture suddenly fizz violently and create lots of bubbles?",
-    options: [
-      "The lemon juice makes the baking soda so hot that it boils and produces scalding steam bubbles",
-      "The two kitchen ingredients react together and release carbon dioxide gas bubbles into the air",
-      "Baking soda contains trapped air sponges that pop open when touched by any liquid",
-      "Vinegar turns baking soda into liquid soap that naturally makes foam and bubbles"
-    ],
-    correct: 1,
-    explanation: "When you combine baking soda with a tangy liquid like lemon juice or vinegar, they react together and generate carbon dioxide gas! Those gas bubbles rush to escape, creating fun fizz and foam.",
-    level: "both"
+    id: 39, mockTestId: 5, experimentIndex: 0, module: "Grades910",
+    title: "Sandy Soil",
+    question: "What is the problem with sandy soil?",
+    options: ["It drains water too fast, leaving roots dry", "It floods", "It's sticky", "It's heavy"],
+    correct: 0, explanation: "Water slips right through sand.", level: "both"
+  },
+  {
+    id: 40, mockTestId: 5, experimentIndex: 1, module: "Grades910",
+    title: "Solar Cooker Angle",
+    question: "Why did the best angle change in the afternoon?",
+    options: ["The mirror melted", "The sun moved across the sky", "The food got hot", "The wind blew"],
+    correct: 1, explanation: "The sun's position changes!", level: "both"
+  },
+  {
+    id: 41, mockTestId: 5, experimentIndex: 1, module: "Grades910",
+    title: "Reflector Purpose",
+    question: "What does the reflector do?",
+    options: ["Blocks wind", "Bounces more sunlight onto the cooker", "Makes it look nice", "Cools it down"],
+    correct: 1, explanation: "More bounced light = more heat!", level: "both"
+  },
+  {
+    id: 42, mockTestId: 5, experimentIndex: 1, module: "Grades910",
+    title: "Tracking",
+    question: "How do you keep it cooking all day?",
+    options: ["Add fire", "Keep adjusting the angle to track the sun", "Put a blanket on it", "Paint it black"],
+    correct: 1, explanation: "You must follow the sun!", level: "both"
+  },
+  {
+    id: 43, mockTestId: 5, experimentIndex: 2, module: "Grades910",
+    title: "Biogas Temperature",
+    question: "Why did gas output drop in winter?",
+    options: ["The pipe froze", "Bacteria work slower in cold temperatures", "Cows eat less", "Dung gets heavy"],
+    correct: 1, explanation: "Bacteria need warmth to digest dung!", level: "both"
+  },
+  {
+    id: 44, mockTestId: 5, experimentIndex: 2, module: "Grades910",
+    title: "Dung Ratio Anomaly",
+    question: "Why didn't adding more dung fix the winter output?",
+    options: ["It made it too thick", "The process was temperature-limited, not fuel-limited", "It leaked", "It dissolved"],
+    correct: 1, explanation: "If they are too cold to eat, giving them more food doesn't help!", level: "both"
+  },
+  {
+    id: 45, mockTestId: 5, experimentIndex: 2, module: "Grades910",
+    title: "Winter Solution",
+    question: "How can you improve winter biogas output?",
+    options: ["Insulate or bury the tank to keep it warm", "Add ice", "Leave it open", "Add water"],
+    correct: 0, explanation: "Keeping the heat in helps the bacteria!", level: "both"
+  },
+  // --- MOCK TEST 6 (Sound & Vibration) ---
+  {
+    id: 46, mockTestId: 6, experimentIndex: 0, module: "Sound",
+    title: "Matka Pitch",
+    question: "What happened to the sound when the matka had MORE water?",
+    options: ["It got deeper/lower", "It got higher", "It stopped completely", "It sounded like a bell"],
+    correct: 1, explanation: "More water means less air space, making a higher pitch!", level: "both"
+  },
+  {
+    id: 47, mockTestId: 6, experimentIndex: 0, module: "Sound",
+    title: "Vibrating Air",
+    question: "What is actually vibrating to make the sound when you tap?",
+    options: ["The water", "The air column inside the matka", "Your finger", "The table"],
+    correct: 1, explanation: "The empty air space vibrates to make the sound.", level: "both"
+  },
+  {
+    id: 48, mockTestId: 6, experimentIndex: 0, module: "Sound",
+    title: "Empty Matka",
+    question: "Why does an almost empty matka sound so deep?",
+    options: ["It is heavy", "There is a very long column of air to vibrate", "It has a hole", "The water is cold"],
+    correct: 1, explanation: "More air space makes a deeper, lower sound.", level: "both"
+  },
+  {
+    id: 49, mockTestId: 6, experimentIndex: 1, module: "Sound",
+    title: "String Telephone",
+    question: "Why did the sound stop when the string was pinched?",
+    options: ["The string broke", "The pinch stopped the string from vibrating", "The cup fell off", "The wind blew"],
+    correct: 1, explanation: "Sound travels as a vibration. Pinching it kills the vibration!", level: "both"
+  },
+  {
+    id: 50, mockTestId: 6, experimentIndex: 1, module: "Sound",
+    title: "Loose String",
+    question: "What happens if the string is completely loose?",
+    options: ["Sound travels faster", "Sound doesn't travel at all", "It gets louder", "It changes language"],
+    correct: 1, explanation: "A loose string cannot carry vibrations well.", level: "both"
+  },
+  {
+    id: 51, mockTestId: 6, experimentIndex: 1, module: "Sound",
+    title: "How Sound Travels",
+    question: "How does the sound get from one cup to the other?",
+    options: ["It flies through the air", "It travels as a vibration along the tight string", "It uses electricity", "It goes underground"],
+    correct: 1, explanation: "The string physically shakes (vibrates) to carry the sound.", level: "both"
+  },
+  {
+    id: 52, mockTestId: 6, experimentIndex: 2, module: "Sound",
+    title: "Echo in the Field",
+    question: "Why couldn't you hear an echo in the open field?",
+    options: ["The field was too loud", "There were no hard surfaces for the sound to bounce off", "The grass ate the sound", "You didn't shout loud enough"],
+    correct: 1, explanation: "Echoes need a wall or surface to bounce off of!", level: "both"
+  },
+  {
+    id: 53, mockTestId: 6, experimentIndex: 2, module: "Sound",
+    title: "Shallow Well",
+    question: "Why was the echo bad in the shallow well?",
+    options: ["It was too dark", "The sound bounced back too fast and blended with the shout", "The well was dry", "Frogs were croaking"],
+    correct: 1, explanation: "Sound needs enough distance so the bounce comes back AFTER you finish shouting.", level: "both"
+  },
+  {
+    id: 54, mockTestId: 6, experimentIndex: 2, module: "Sound",
+    title: "What is an Echo?",
+    question: "What exactly is an echo?",
+    options: ["A ghost", "Sound waves bouncing off a surface and returning to your ears", "Wind blowing back", "A bird copying you"],
+    correct: 1, explanation: "It's just reflected sound waves!", level: "both"
+  },
+  // --- MOCK TEST 7 (Electricity & Magnetism) ---
+  {
+    id: 55, mockTestId: 7, experimentIndex: 0, module: "Electricity",
+    title: "Comb & Paper",
+    question: "Why didn't the comb pick up paper on a humid (rainy) day?",
+    options: ["The paper was heavy", "Moisture in the air let the static charge leak away", "The comb was broken", "The paper was wet"],
+    correct: 1, explanation: "Water in the humid air carries the static charge away!", level: "both"
+  },
+  {
+    id: 56, mockTestId: 7, experimentIndex: 0, module: "Electricity",
+    title: "Rubbing the Comb",
+    question: "What does rubbing the comb on dry hair do?",
+    options: ["Makes it shiny", "Builds up static electrical charge", "Makes it hot", "Cleans it"],
+    correct: 1, explanation: "Friction transfers tiny electrons, building up a charge.", level: "both"
+  },
+  {
+    id: 57, mockTestId: 7, experimentIndex: 0, module: "Electricity",
+    title: "Best Conditions",
+    question: "When is the best time to do this trick?",
+    options: ["During a thunderstorm", "On a very dry, sunny day", "While taking a bath", "In the rain"],
+    correct: 1, explanation: "Dry air keeps the static charge trapped on the comb.", level: "both"
+  },
+  {
+    id: 58, mockTestId: 7, experimentIndex: 1, module: "Electricity",
+    title: "The Loose Wire",
+    question: "Why did the torch stay dark when there was a gap in the wire?",
+    options: ["The batteries were dead", "Electricity needs a complete, unbroken loop to flow", "The bulb was old", "The batteries were upside down"],
+    correct: 1, explanation: "Even a tiny gap stops the flow of electricity completely.", level: "both"
+  },
+  {
+    id: 59, mockTestId: 7, experimentIndex: 1, module: "Electricity",
+    title: "More Batteries",
+    question: "Did adding a second battery fix the gap?",
+    options: ["Yes, it pushed the electricity across", "No, a gap stops the circuit no matter how much power there is", "It blew up", "It made it flicker"],
+    correct: 1, explanation: "Power can't jump across a broken circuit.", level: "both"
+  },
+  {
+    id: 60, mockTestId: 7, experimentIndex: 1, module: "Electricity",
+    title: "Circuit Definition",
+    question: "What do we call the path that electricity flows through?",
+    options: ["A road", "A circuit", "A wire tube", "A power line"],
+    correct: 1, explanation: "A complete circle for electricity is called a circuit.", level: "both"
+  },
+  {
+    id: 61, mockTestId: 7, experimentIndex: 2, module: "Electricity",
+    title: "Magnet and Coin",
+    question: "Why didn't the magnet attract the ₹5 coin?",
+    options: ["The coin was too heavy", "The coin is made of a metal that isn't magnetic", "The magnet was weak", "The coin was dirty"],
+    correct: 1, explanation: "Not all metals are magnetic! Coins are usually not magnetic.", level: "both"
+  },
+  {
+    id: 62, mockTestId: 7, experimentIndex: 2, module: "Electricity",
+    title: "Magnetic Metals",
+    question: "Which of these metals WILL a magnet attract?",
+    options: ["Gold", "Silver", "Iron/Steel", "Aluminum"],
+    correct: 2, explanation: "Iron, steel, nickel, and cobalt are magnetic.", level: "both"
+  },
+  {
+    id: 63, mockTestId: 7, experimentIndex: 2, module: "Electricity",
+    title: "Visual Test",
+    question: "Can you tell if something is magnetic just by looking at it?",
+    options: ["Yes, if it's shiny", "No, many metals look the same but aren't magnetic", "Yes, if it's gray", "Yes, if it's heavy"],
+    correct: 1, explanation: "You have to test it! A steel nail and aluminum coin can look similar.", level: "both"
+  },
+  // --- MOCK TEST 8 (Water & Buoyancy) ---
+  {
+    id: 64, mockTestId: 8, experimentIndex: 0, module: "Buoyancy",
+    title: "Boat Shape",
+    question: "Why did the flat boat hold more stones than the narrow boat?",
+    options: ["It was made of stronger paper", "It pushed aside (displaced) more water, giving it more lift", "It was lighter", "It had a sail"],
+    correct: 1, explanation: "A wider bottom displaces more water, creating stronger buoyancy.", level: "both"
+  },
+  {
+    id: 65, mockTestId: 8, experimentIndex: 0, module: "Buoyancy",
+    title: "Sinking",
+    question: "What happens when the stones get too heavy?",
+    options: ["The boat pushes aside enough water", "The weight is greater than the buoyant push of the water", "The water gets scared", "The boat shrinks"],
+    correct: 1, explanation: "If weight beats buoyancy, it sinks!", level: "both"
+  },
+  {
+    id: 66, mockTestId: 8, experimentIndex: 0, module: "Buoyancy",
+    title: "Ship Design",
+    question: "Why are heavy cargo ships built very wide?",
+    options: ["To look cool", "To displace a huge amount of water to support their massive weight", "To go faster", "To carry more passengers"],
+    correct: 1, explanation: "Wide hulls displace more water, keeping heavy ships afloat.", level: "both"
+  },
+  {
+    id: 67, mockTestId: 8, experimentIndex: 1, module: "Buoyancy",
+    title: "Floating Egg",
+    question: "Did adding a little bit of salt make the egg float immediately?",
+    options: ["Yes", "No, the water had to reach a specific density threshold first", "It dissolved the egg", "It made it sink faster"],
+    correct: 1, explanation: "It's a threshold! The water must become denser than the egg.", level: "both"
+  },
+  {
+    id: 68, mockTestId: 8, experimentIndex: 1, module: "Buoyancy",
+    title: "Salt Water Density",
+    question: "What does adding salt do to the water?",
+    options: ["Makes it blue", "Makes it denser (heavier for its size)", "Makes it lighter", "Makes it colder"],
+    correct: 1, explanation: "Dissolved salt adds mass, making the water denser.", level: "both"
+  },
+  {
+    id: 69, mockTestId: 8, experimentIndex: 1, module: "Buoyancy",
+    title: "Swimming in the Ocean",
+    question: "Why is it easier to float in the ocean than a swimming pool?",
+    options: ["The ocean has waves", "Ocean water is salty and dense, pushing you up more", "The pool is too small", "The ocean is deep"],
+    correct: 1, explanation: "Saltwater is denser, so it provides more buoyant force!", level: "both"
+  },
+  {
+    id: 70, mockTestId: 8, experimentIndex: 2, module: "Buoyancy",
+    title: "Oil and Water",
+    question: "What happens if you pour oil into the glass FIRST, and then water?",
+    options: ["The water stays on top", "The oil still rises to the top", "They mix into juice", "They explode"],
+    correct: 1, explanation: "Oil is less dense, so it always floats to the top!", level: "both"
+  },
+  {
+    id: 71, mockTestId: 8, experimentIndex: 2, module: "Buoyancy",
+    title: "Stirring Oil and Water",
+    question: "Can you permanently mix the oil and water by stirring vigorously?",
+    options: ["Yes, forever", "No, they will eventually separate again", "Yes, if you use a spoon", "Only if the water is cold"],
+    correct: 1, explanation: "They might look mixed for a minute, but density will separate them again.", level: "both"
+  },
+  {
+    id: 72, mockTestId: 8, experimentIndex: 2, module: "Buoyancy",
+    title: "Density Stacking",
+    question: "If honey is denser than water, where would it go in the glass?",
+    options: ["On top of the oil", "Between the oil and water", "At the very bottom", "It would disappear"],
+    correct: 2, explanation: "Densest liquids sink to the bottom!", level: "both"
   }
 ];
-
 export interface MockTestResult {
   completed: boolean;
   score: number;
@@ -581,15 +871,37 @@ export default function PracticePage() {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [currentExpIndex, setCurrentExpIndex] = useState(0);
+  const [reflections, setReflections] = useState<Record<string, string>>({});
   
   // Telemetry metric tracking
   const [reversalsCount, setReversalsCount] = useState<number>(2);
   const [sliderAdjustments, setSliderAdjustments] = useState<number>(4);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
+  const [activeTelemetry, setActiveTelemetry] = useState<any>({
+    reversals: 2,
+    clickCount: 2,
+    dragCount: 2,
+    triggerActivated: false,
+    distinctStatesReached: 2,
+    optionalActions: 0,
+    voluntaryExplorationTrials: 0
+  });
+
+  const handleTelemetryUpdate = useCallback((data: any) => {
+    if (!data) return;
+    setActiveTelemetry(data);
+    if (typeof data.reversals === "number" && data.reversals > 0) {
+      setReversalsCount(data.reversals);
+    }
+    const totalEdits = (data.clickCount || 0) + (data.dragCount || 0);
+    if (totalEdits > 0) {
+      setSliderAdjustments(totalEdits);
+    }
+  }, []);
 
   // Persistence for completed mock tests
   const [completedMockTests, setCompletedMockTests] = useState<Record<number, MockTestResult>>({});
-  const [unlockedLevelIndices, setUnlockedLevelIndices] = useState<number[]>([0]);
+  const [unlockedLevelIndices, setUnlockedLevelIndices] = useState<number[]>([0, 1, 2, 3, 4, 5, 6, 7]);
 
   useEffect(() => {
     // Fetch unlocked levels from backend
@@ -603,6 +915,22 @@ export default function PracticePage() {
 
     if (typeof window !== "undefined") {
       try {
+        const levelParam = urlParams.get("level");
+        if (levelParam === "level1" || levelParam === "level2") {
+          setDifficulty(levelParam);
+        }
+        if (testIdParam) {
+          const parsed = parseInt(testIdParam, 10);
+          if (!isNaN(parsed) && parsed >= 1 && parsed <= 8) {
+            setSelectedMockTestId(parsed);
+            setCurrentExpIndex(0);
+            if (urlParams.get("start") === "true" || urlParams.get("auto") === "true") {
+              setActiveTest(true);
+            }
+          }
+        } else {
+          setActiveTest(true);
+        }
         const stored = localStorage.getItem("curiosity_mock_tests_results");
         if (stored) {
           setCompletedMockTests(JSON.parse(stored));
@@ -614,6 +942,24 @@ export default function PracticePage() {
   }, []);
 
   const activeMockTest = MOCK_TESTS.find((m) => m.id === selectedMockTestId) || MOCK_TESTS[0];
+
+  // Sync reflections from localStorage scoped to test and experiment: reflection_${mockTestId}_${experimentId}
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const key = `reflection_${selectedMockTestId}_${currentExpIndex}`;
+      const saved = localStorage.getItem(key);
+      if (saved !== null) {
+        setReflections((prev) => ({ ...prev, [key]: saved }));
+      } else {
+        setReflections((prev) => {
+          if (prev[key] === undefined) {
+            return { ...prev, [key]: "" };
+          }
+          return prev;
+        });
+      }
+    }
+  }, [selectedMockTestId, currentExpIndex]);
 
   // Timer logic for practice test
   useEffect(() => {
@@ -695,6 +1041,29 @@ export default function PracticePage() {
     setCompletedMockTests(updated);
     if (typeof window !== "undefined") {
       localStorage.setItem("curiosity_mock_tests_results", JSON.stringify(updated));
+
+      // Persist rich behavioral telemetry record for CQ profile calculations
+      try {
+        const historyRaw = localStorage.getItem("curiosity_telemetry_history");
+        const history = historyRaw ? JSON.parse(historyRaw) : [];
+        const testTelemetry = {
+          mockTestId: selectedMockTestId,
+          title: activeMockTest.title,
+          reversals: reversalsCount,
+          sliderAdjustments: sliderAdjustments,
+          distinctStatesReached: activeTelemetry.distinctStatesReached || 3,
+          triggerActivated: activeTelemetry.triggerActivated || false,
+          voluntaryExplorationTrials: activeTelemetry.voluntaryExplorationTrials || 0,
+          totalDwellTime: elapsedSeconds * 1000,
+          optionalActions: activeTelemetry.optionalActions || 0,
+          timestamp: new Date().toISOString()
+        };
+        const filtered = history.filter((h: any) => h.mockTestId !== selectedMockTestId);
+        filtered.push(testTelemetry);
+        localStorage.setItem("curiosity_telemetry_history", JSON.stringify(filtered));
+      } catch (e) {
+        console.warn("Failed to persist telemetry history:", e);
+      }
     }
 
     setIsSubmitted(true);
@@ -711,36 +1080,35 @@ export default function PracticePage() {
   const idealTimeMins = activeMockTest.idealTime[difficulty];
 
   return (
-    <div className="bg-[#f7f9fb] text-[#191c1e] min-h-screen flex flex-col font-['Montserrat'] antialiased">
-      {/* TopAppBar */}
-      <header className="bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-8 h-16 sticky top-0 z-50 shadow-xs">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/dashboard"
-            className="text-[#143867] hover:bg-gray-100 transition-colors p-2 rounded-full active:scale-95 flex items-center justify-center"
-            aria-label="Go back to dashboard"
-          >
-            <span className="material-symbols-outlined text-[26px]">arrow_back</span>
-          </Link>
-          <div>
-            <h1 className="text-lg font-black text-[#143867] tracking-tight">
+    <div className="bg-[#f7f9fb] text-[#191c1e] min-h-screen w-full max-w-[100vw] overflow-x-hidden flex flex-col font-['Montserrat'] antialiased relative">
+      {/* TopAppBar: Impeccable Responsive Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-xs w-full">
+        {/* Tier 1: Primary Navigation Bar */}
+        <div className="flex items-center justify-between px-3 sm:px-6 md:px-8 py-2 min-h-14 w-full">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 mr-2">
+            <Link
+              href="/dashboard"
+              className="text-[#143867] hover:bg-gray-100 transition-colors p-1.5 sm:p-2 rounded-full active:scale-95 flex items-center justify-center shrink-0"
+              aria-label="Go back to dashboard"
+            >
+              <span className="material-symbols-outlined text-[22px] sm:text-[26px]">arrow_back</span>
+            </Link>
+            <h1 className="text-sm sm:text-base md:text-lg font-black text-[#143867] tracking-tight truncate">
               {t.app.practice_lab}
             </h1>
           </div>
-        </div>
 
-        <div className="flex items-center gap-3">
-          <LanguageSelector />
+          {/* Desktop/Tablet Test Controls (Joined horizontally on md+) */}
           {activeTest && (
-            <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-2.5 shrink-0">
               {/* Ideal Completion Time Badge */}
-              <div className="hidden sm:flex items-center gap-2 bg-[#eef2f7] border border-[#d1dbe5] px-3 py-1.5 rounded-full text-xs font-bold text-[#143867]">
+              <div className="flex items-center gap-1.5 bg-[#eef2f7] border border-[#d1dbe5] px-3 py-1.5 rounded-full text-xs font-bold text-[#143867]">
                 <span className="material-symbols-outlined text-sm text-[#ea580c]">timer</span>
                 <span>Ideal Time: {idealTimeMins}</span>
               </div>
 
               {/* Elapsed Timer */}
-              <div className="flex items-center gap-2 bg-[#fff7ed] border border-[#ffedd5] px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-[#ea580c]">
+              <div className="flex items-center gap-1.5 bg-[#fff7ed] border border-[#ffedd5] px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-[#ea580c]">
                 <span className="material-symbols-outlined text-sm">schedule</span>
                 <span>{formatTime(elapsedSeconds)}</span>
               </div>
@@ -748,26 +1116,69 @@ export default function PracticePage() {
               {/* Pause / Resume Button */}
               {!isSubmitted && (
                 <button
+                  type="button"
                   onClick={() => setIsPaused(!isPaused)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-transform duration-100 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer ${
                     isPaused
-                      ? "bg-green-600 text-white hover:bg-green-700 animate-pulse"
-                      : "bg-[#143867] text-white hover:bg-[#1e4a85]"
+                      ? "bg-green-600 hover:bg-green-700 text-white animate-pulse"
+                      : "bg-[#143867] hover:bg-[#1e4a85] text-white"
                   }`}
+                  aria-label={isPaused ? "Resume Mock Test" : "Pause Mock Test"}
                 >
                   <span className="material-symbols-outlined text-sm">
                     {isPaused ? "play_arrow" : "pause"}
                   </span>
-                  <span>{isPaused ? "Resume Test" : "Pause Test"}</span>
+                  <span>{isPaused ? "Resume" : "Pause Test"}</span>
                 </button>
               )}
             </div>
           )}
+
+          {/* Language Selector */}
+          <div className="flex items-center gap-2 shrink-0">
+            <LanguageSelector />
+          </div>
         </div>
+
+        {/* Tier 2: Dedicated Mobile Assessment Status Strip (< md) */}
+        {activeTest && (
+          <div className="md:hidden border-t border-gray-100 bg-slate-50/95 px-3 py-1.5 flex items-center justify-between gap-2 w-full">
+            {/* Left: Timing Badges */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1 bg-white border border-gray-200/90 px-2 py-1 rounded-full text-[11px] font-bold text-[#143867] shadow-2xs">
+                <span className="material-symbols-outlined text-xs text-[#ea580c]">timer</span>
+                <span>{idealTimeMins}</span>
+              </div>
+              <div className="flex items-center gap-1 bg-[#fff7ed] border border-[#fed7aa] px-2.5 py-1 rounded-full text-[11px] font-mono font-bold text-[#ea580c] shadow-2xs">
+                <span className="material-symbols-outlined text-xs">schedule</span>
+                <span>{formatTime(elapsedSeconds)}</span>
+              </div>
+            </div>
+
+            {/* Right: Pause / Resume Button - Always 100% visible with ample margin */}
+            {!isSubmitted && (
+              <button
+                type="button"
+                onClick={() => setIsPaused(!isPaused)}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-transform duration-100 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer shrink-0 ${
+                  isPaused
+                    ? "bg-green-600 text-white hover:bg-green-700 animate-pulse"
+                    : "bg-[#143867] text-white hover:bg-[#1e4a85]"
+                }`}
+                aria-label={isPaused ? "Resume Mock Test" : "Pause Mock Test"}
+              >
+                <span className="material-symbols-outlined text-xs">
+                  {isPaused ? "play_arrow" : "pause"}
+                </span>
+                <span>{isPaused ? "Resume" : "Pause"}</span>
+              </button>
+            )}
+          </div>
+        )}
       </header>
 
       {/* Main Container */}
-      <main className="flex-grow w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <main className="flex-grow w-full max-w-6xl mx-auto px-3 sm:px-6 pt-4 sm:pt-8 pb-32 space-y-6 sm:space-y-8 overflow-x-hidden">
         {!activeTest ? (
           /* =========================================================
              PRE-LAUNCH: MOCK TEST SELECTOR & STATUS CARDS
@@ -781,13 +1192,13 @@ export default function PracticePage() {
               <div className="relative z-10 max-w-2xl space-y-3">
                 <span className="inline-flex items-center gap-1.5 bg-[#ea580c] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                   <span className="material-symbols-outlined text-xs">rocket_launch</span>
-                  Agastya Science Games
+                  Agastya Science Experiments
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
                   Interactive Science Mock Tests
                 </h2>
                 <p className="text-sm sm:text-base text-indigo-100 leading-relaxed">
-                  Play official science games for Optics, Gravity, and Chemistry. Exploring and trying new things will earn you extra curiosity points!
+                  Play official science experiments for Optics, Gravity, and Chemistry. Exploring and trying new things will earn you extra curiosity points!
                 </p>
               </div>
             </div>
@@ -859,10 +1270,10 @@ export default function PracticePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-black text-[#143867]">
-                    2. Select Science Game (3 Available)
+                    2. Select Science Experiment ({MOCK_TESTS.length} Available)
                   </h3>
                   <p className="text-xs text-gray-500">
-                    Play games and earn Curiosity Points every time!
+                    Play experiments and earn Curiosity Points every time!
                   </p>
                 </div>
               </div>
@@ -872,7 +1283,7 @@ export default function PracticePage() {
                   const result = completedMockTests[test.id];
                   const isCompleted = Boolean(result?.completed);
                   const isSelected = selectedMockTestId === test.id;
-                  const isLocked = !unlockedLevelIndices.includes(index);
+                  const isLocked = false; // All experiments unlocked for practice
 
                   return (
                     <div
@@ -951,6 +1362,7 @@ export default function PracticePage() {
                             e.stopPropagation();
                             setSelectedMockTestId(test.id);
                             setActiveTest(true);
+                            setCurrentExpIndex(0);
                             setElapsedSeconds(0);
                             setSelectedAnswers({});
                             setIsSubmitted(false);
@@ -966,7 +1378,7 @@ export default function PracticePage() {
                           <span className="material-symbols-outlined text-base">
                             {isCompleted ? "refresh" : "play_circle"}
                           </span>
-                          <span>{isCompleted ? `Play Game ${test.id} Again` : `Start Game ${test.id}`}</span>
+                          <span>{isCompleted ? `Play Experiment ${test.id} Again` : `Start Experiment ${test.id}`}</span>
                         </button>
                       </div>
                     </div>
@@ -980,6 +1392,7 @@ export default function PracticePage() {
               <button
                 onClick={() => {
                   setActiveTest(true);
+                  setCurrentExpIndex(0);
                   setElapsedSeconds(0);
                   setSelectedAnswers({});
                   setIsSubmitted(false);
@@ -1093,37 +1506,38 @@ export default function PracticePage() {
               </div>
             )}
 
-            {/* Assessment Header Info & Module Filter Tabs */}
-            <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-200 shadow-xs">
-              <div className="flex items-center gap-3">
-                <span className="bg-[#143867] text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
-                  {activeMockTest.title.split(":")[0]} • {difficulty === "level1" ? "Level 1: Foundation" : "Level 2: Advanced"}
+            {/* Assessment Header Info: Clean Impeccable Design */}
+            <div className="flex items-center justify-between gap-2 bg-white px-4 py-2.5 rounded-2xl border border-gray-200 shadow-2xs">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="bg-[#143867] text-white text-[11px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                  {activeMockTest.title.split(":")[0]}
                 </span>
-                <span className="text-xs font-bold text-gray-500">
-                  Ideal Time: {idealTimeMins}
+                <span className="text-xs text-gray-600 font-bold hidden xs:inline">
+                  {difficulty === "level1" ? "Level 1: Foundation" : "Level 2: Advanced"}
                 </span>
               </div>
 
-              {/* Active Experiment Indicator */}
-              <div className="flex items-center gap-2 bg-[#fff7ed] border border-[#ffedd5] px-3 py-1.5 rounded-xl">
-                <span className="text-xs font-black uppercase text-[#ea580c] tracking-wider">
-                  Linked Module: {activeMockTest.module} ({mockTestQuestions.length} Questions)
+              {/* Active Module Indicator */}
+              <div className="flex items-center gap-1.5 bg-[#fff7ed] border border-[#ffedd5] px-2.5 py-1 rounded-full">
+                <span className="w-2 h-2 rounded-full bg-[#ea580c]" />
+                <span className="text-[11px] sm:text-xs font-bold text-[#ea580c]">
+                  {activeMockTest.module} ({mockTestQuestions.length} Qs)
                 </span>
               </div>
             </div>
 
             {/* LIVE EXPERIENTIAL SANDBOX ENGINE */}
-            <div className="bg-white p-4 sm:p-6 rounded-3xl border border-gray-200 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="bg-white p-3.5 sm:p-6 rounded-3xl border border-gray-200 shadow-sm space-y-4 overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#ea580c]">
+                  <span className="material-symbols-outlined text-[#ea580c] text-xl">
                     science
                   </span>
-                  <h3 className="text-base font-black text-[#143867]">
+                  <h3 className="text-sm sm:text-base font-black text-[#143867]">
                     Live Interactive Simulation Workspace
                   </h3>
                 </div>
-                <span className="text-xs text-gray-500">
+                <span className="text-[11px] sm:text-xs text-gray-500">
                   Experiment with sliders below to discover answers!
                 </span>
               </div>
@@ -1137,6 +1551,7 @@ export default function PracticePage() {
                   onLevelChange={(idx) => setCurrentExpIndex(idx)}
                   level={difficulty === "level2" ? "level2" : "level1"}
                   onSubmitComplete={handleSubmitTest}
+                  onTelemetryUpdate={handleTelemetryUpdate}
                 />
               </div>
             </div>
@@ -1150,28 +1565,28 @@ export default function PracticePage() {
 
                 return (
                   <>
-                    <div className="bg-gradient-to-r from-[#fff7ed] to-[#eff6ff] border-l-4 border-[#ea580c] p-4 rounded-xl my-2 shadow-xs">
+                    <div className="bg-white border-l-4 border-[#ea580c] p-4 rounded-xl border border-gray-200 shadow-2xs">
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <div>
-                          <span className="text-xs font-black uppercase px-2.5 py-0.5 rounded-full bg-[#ea580c] text-white tracking-wide">
+                          <span className="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#ea580c] text-white tracking-wide">
                             Experiment {currentExpIndex + 1} of 3 • Real-Life Questions
                           </span>
-                          <h3 className="text-lg font-black text-[#143867] mt-1.5">
-                            {activeMockTest.title} (Showing {currentExperimentQuestions.length} Questions for Active Experiment {currentExpIndex + 1})
+                          <h3 className="text-base sm:text-lg font-black text-[#143867] mt-1.5">
+                            Questions for {EXPERIMENT_LABELS[selectedMockTestId]?.[currentExpIndex] || `Experiment ${currentExpIndex + 1}`}
                           </h3>
-                          <p className="text-xs text-gray-700 font-medium mt-0.5">
-                            These 3 questions dynamically update when you switch experiments in the simulation above!
+                          <p className="text-xs text-gray-600 font-medium mt-0.5">
+                            Try adjusting the simulation above to see how things react, then pick your answer!
                           </p>
                         </div>
                         {isSubmitted && (
-                          <span className="text-sm font-bold text-[#143867] bg-[#eef2f7] px-4 py-1.5 rounded-full border border-[#d1dbe5]">
-                            Final Score: {calculateScore()} / {mockTestQuestions.length} Correct
+                          <span className="text-xs sm:text-sm font-bold text-[#143867] bg-[#eef2f7] px-3 py-1 rounded-full border border-[#d1dbe5]">
+                            Score: {calculateScore()} / {mockTestQuestions.length} Correct
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6">
+                    <div className="grid grid-cols-1 gap-5">
                       {currentExperimentQuestions.map((q, idx) => {
                         const selectedIdx = selectedAnswers[q.id];
                         const isCorrect = selectedIdx === q.correct;
@@ -1179,35 +1594,35 @@ export default function PracticePage() {
                         return (
                     <div
                       key={q.id}
-                      className={`bg-white rounded-2xl p-6 border-2 transition-all shadow-xs space-y-4 ${
+                      className={`bg-white rounded-2xl p-4 sm:p-6 border-2 transition-all shadow-2xs space-y-3.5 ${
                         isSubmitted
                           ? isCorrect
-                            ? "border-green-300 bg-green-50/30"
-                            : "border-red-300 bg-red-50/30"
+                            ? "border-green-400 bg-green-50/20"
+                            : "border-red-300 bg-red-50/20"
                           : selectedIdx !== undefined
-                          ? "border-[#143867] bg-indigo-50/10"
-                          : "border-gray-200"
+                          ? "border-[#143867] bg-indigo-50/10 shadow-xs"
+                          : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
                       {/* Question Header */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="w-7 h-7 bg-[#143867] text-white rounded-lg flex items-center justify-center text-xs font-bold">
+                          <span className="w-6 h-6 sm:w-7 sm:h-7 bg-[#143867] text-white rounded-lg flex items-center justify-center text-xs font-black shrink-0">
                             Q{idx + 1}
                           </span>
-                          <span className="text-xs font-bold text-[#ea580c] uppercase tracking-wider">
-                            {q.module} Module • {q.title}
+                          <span className="text-[11px] sm:text-xs font-bold text-[#ea580c] uppercase tracking-wider">
+                            {q.title}
                           </span>
                         </div>
                         {isSubmitted && (
                           <span
-                            className={`text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 ${
+                            className={`text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
                               isCorrect
                                 ? "bg-green-100 text-green-800"
                                 : "bg-red-100 text-red-800"
                             }`}
                           >
-                            <span className="material-symbols-outlined text-sm">
+                            <span className="material-symbols-outlined text-xs">
                               {isCorrect ? "check_circle" : "cancel"}
                             </span>
                             {isCorrect ? "Correct" : "Incorrect"}
@@ -1220,17 +1635,18 @@ export default function PracticePage() {
                         {q.question}
                       </p>
 
-                      {/* Options */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                      {/* Options with Letter Badges and Tactile Press */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                         {q.options.map((option, oIdx) => {
                           const isSelected = selectedIdx === oIdx;
+                          const letter = String.fromCharCode(65 + oIdx);
                           let optionStyle =
-                            "bg-[#f7f9fb] border-gray-200 text-gray-700 hover:bg-gray-100";
+                            "bg-gray-50/80 border-gray-200 text-gray-800 hover:bg-gray-100 hover:border-gray-300";
 
                           if (isSubmitted) {
                             if (oIdx === q.correct) {
                               optionStyle =
-                                "bg-green-600 text-white font-bold border-green-700 shadow-md";
+                                "bg-green-600 text-white font-bold border-green-700 shadow-sm";
                             } else if (isSelected && !isCorrect) {
                               optionStyle =
                                 "bg-red-500 text-white font-bold border-red-600";
@@ -1239,19 +1655,29 @@ export default function PracticePage() {
                             }
                           } else if (isSelected) {
                             optionStyle =
-                              "bg-[#143867] text-white font-bold border-[#143867] shadow-md";
+                              "bg-[#143867] text-white font-bold border-[#143867] shadow-sm";
                           }
 
                           return (
                             <button
                               key={oIdx}
+                              type="button"
                               onClick={() => handleSelectOption(q.id, oIdx)}
                               disabled={isSubmitted}
-                              className={`p-4 rounded-xl border text-left text-xs sm:text-sm transition-all flex items-center justify-between gap-2 ${optionStyle}`}
+                              className={`p-3 sm:p-3.5 rounded-xl border text-left text-xs sm:text-sm transition-transform duration-100 active:scale-[0.98] flex items-center justify-between gap-2.5 cursor-pointer min-h-[44px] ${optionStyle}`}
                             >
-                              <span>{option}</span>
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+                                  isSelected || (isSubmitted && oIdx === q.correct)
+                                    ? "bg-white/20 text-white"
+                                    : "bg-gray-200 text-gray-700"
+                                }`}>
+                                  {letter}
+                                </span>
+                                <span className="leading-snug">{option}</span>
+                              </div>
                               {isSelected && !isSubmitted && (
-                                <span className="material-symbols-outlined text-sm">
+                                <span className="material-symbols-outlined text-sm shrink-0">
                                   check
                                 </span>
                               )}
@@ -1262,7 +1688,7 @@ export default function PracticePage() {
 
                       {/* Post-Submit Explanation */}
                       {isSubmitted && (
-                        <div className="mt-4 p-4 bg-white/80 border border-gray-200 rounded-xl text-xs space-y-1">
+                        <div className="mt-3 p-3.5 bg-gray-50 border border-gray-200 rounded-xl text-xs space-y-1">
                           <span className="font-bold text-[#143867] uppercase tracking-wider block">
                             Why this happens
                           </span>
@@ -1274,6 +1700,110 @@ export default function PracticePage() {
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Stationary Quick Scientist's Thought Card with Scoped Storage and Sonner Toast Feedback */}
+              {(() => {
+                const currentReflectionKey = `reflection_${selectedMockTestId}_${currentExpIndex}`;
+                const currentReflectionValue = reflections[currentReflectionKey] ?? "";
+
+                return (
+                  <div className="bg-amber-50/60 border-2 border-amber-200/80 rounded-2xl p-4 sm:p-5 space-y-3 mt-6">
+                    <div className="flex items-start sm:items-center gap-2.5">
+                      <span className="text-xl shrink-0">💡</span>
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-black text-amber-950 uppercase tracking-wide">
+                          Quick Scientist&apos;s Thought (Optional)
+                        </h4>
+                        <p className="text-[11px] sm:text-xs text-amber-900/80">
+                          In one sentence, what surprised you or what else would you test?
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        id="scientist-thought-input"
+                        type="text"
+                        placeholder="e.g. In a pitch dark room, even low brightness strained my eyes..."
+                        value={currentReflectionValue}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setReflections((prev) => ({ ...prev, [currentReflectionKey]: val }));
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem(currentReflectionKey, val);
+                          }
+                        }}
+                        className="flex-1 px-3.5 py-2.5 bg-white border border-amber-300 rounded-xl text-xs sm:text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
+                      />
+                      <button
+                        type="button"
+                        id="save-thought-btn"
+                        onClick={() => {
+                          const text = reflections[currentReflectionKey] || "";
+                          if (text && text.trim()) {
+                            if (typeof window !== "undefined") {
+                              localStorage.setItem(currentReflectionKey, text.trim());
+                            }
+                            toast.success("Scientist's thought saved!", {
+                              description: "Recorded in your science reflection log.",
+                              duration: 2500,
+                            });
+                          } else {
+                            toast.info("Feel free to jot down a one-sentence thought anytime!", {
+                              duration: 2000,
+                            });
+                          }
+                        }}
+                        className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold text-xs rounded-xl shadow-xs transition-colors shrink-0 active:scale-95 cursor-pointer"
+                      >
+                        Save Thought
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Ambient Experiment Stepper Navigation */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-gray-200 mt-6">
+                <button
+                  type="button"
+                  disabled={currentExpIndex === 0}
+                  onClick={() => {
+                    if (currentExpIndex > 0) {
+                      const nextIdx = currentExpIndex - 1;
+                      setCurrentExpIndex(nextIdx);
+                      toast.info(`Switched to Experiment ${nextIdx + 1}`, { duration: 1500 });
+                    }
+                  }}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs sm:text-sm font-bold text-gray-700 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-sm">arrow_back</span>
+                  <span>Previous Experiment</span>
+                </button>
+
+                {currentExpIndex < 2 ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextIdx = currentExpIndex + 1;
+                      setCurrentExpIndex(nextIdx);
+                      toast.info(`Switched to Experiment ${nextIdx + 1}`, { duration: 1500 });
+                    }}
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#143867] hover:bg-[#1e4a85] text-white text-xs sm:text-sm font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
+                  >
+                    <span>Next: Experiment {currentExpIndex + 2}</span>
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSubmitTest}
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm font-bold transition-colors flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
+                  >
+                    <span>Finish & Submit Test</span>
+                    <span className="material-symbols-outlined text-sm">check_circle</span>
+                  </button>
+                )}
               </div>
             </>
           );
@@ -1293,7 +1823,7 @@ export default function PracticePage() {
                   <span className="material-symbols-outlined text-base">
                     arrow_back
                   </span>
-                  <span>Go back to Games</span>
+                  <span>Go back to Experiments</span>
                 </button>
 
                 {!isSubmitted ? (
@@ -1302,7 +1832,7 @@ export default function PracticePage() {
                     className="px-8 py-3.5 rounded-xl bg-green-600 hover:bg-green-700 text-white font-black text-sm uppercase tracking-wider shadow-lg active:scale-95 transition-all flex items-center gap-2"
                   >
                     <span className="material-symbols-outlined">send</span>
-                    <span>Finish Game</span>
+                    <span>Finish Experiment</span>
                   </button>
                 ) : (
                   <button

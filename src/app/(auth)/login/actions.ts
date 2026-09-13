@@ -31,6 +31,15 @@ export async function signUpAction(formData: FormData) {
   const password = ((formData.get("password") as string) || "").trim();
   const username = ((formData.get("identifier") as string) || "Explorer").trim();
   const realName = ((formData.get("realName") as string) || username).trim();
+  const schoolCode = ((formData.get("schoolCode") as string) || "").trim().toUpperCase();
+  const parentalConsent = formData.get("parentalConsent") === "true";
+
+  if (!schoolCode) {
+    return { error: "🚫 School Code is required to register. Please enter your school code or ask your teacher." };
+  }
+  if (!parentalConsent) {
+    return { error: "🚫 Parental or teacher consent is required before creating an account." };
+  }
 
   const supabase = await createClient();
 
@@ -46,6 +55,9 @@ export async function signUpAction(formData: FormData) {
       data: {
         username: username,
         real_name: realName,
+        school_code: schoolCode,
+        parental_consent: parentalConsent,
+        consent_timestamp: new Date().toISOString(),
       },
     },
   });
@@ -143,8 +155,17 @@ export async function sendOtpAction(formData: FormData) {
   const method = formData.get("method") as string; // 'email' | 'phone'
   const isCreateAccount = formData.get("isCreateAccount") === "true";
   const username = ((formData.get("username") as string) || "").trim();
+  const schoolCode = ((formData.get("schoolCode") as string) || "").trim().toUpperCase();
+  const parentalConsent = formData.get("parentalConsent") === "true";
 
   if (isCreateAccount) {
+    if (!schoolCode) {
+      return { error: "🚫 School Code is required to register. Please enter your school code or ask your teacher." };
+    }
+    if (!parentalConsent) {
+      return { error: "🚫 Parental or teacher consent is required before creating an account." };
+    }
+
     const supabase = await createClient();
 
     // 1. We skip Supabase Auth email existence check because it creates ghost accounts
@@ -240,6 +261,17 @@ export async function verifyOtpAction(formData: FormData) {
   const realName = (formData.get("realName") as string) || username;
   const password = (formData.get("password") as string) || "DevSandboxOverridePassword!123";
   const isCreateAccount = formData.get("isCreateAccount") === "true";
+  const schoolCode = ((formData.get("schoolCode") as string) || "").trim().toUpperCase();
+  const parentalConsent = formData.get("parentalConsent") === "true";
+
+  if (isCreateAccount) {
+    if (!schoolCode) {
+      return { error: "🚫 School Code is required to register. Please enter your school code or ask your teacher." };
+    }
+    if (!parentalConsent) {
+      return { error: "🚫 Parental or teacher consent is required before creating an account." };
+    }
+  }
 
   const supabase = await createClient();
   const descopeProjectId = process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID?.replace(/^["']|["']$/g, "");
@@ -329,7 +361,13 @@ export async function verifyOtpAction(formData: FormData) {
         email: emailToCheck,
         password: password,
         options: {
-          data: { username: username || "explorer", real_name: realName },
+          data: {
+            username: username || "explorer",
+            real_name: realName,
+            school_code: schoolCode,
+            parental_consent: parentalConsent,
+            consent_timestamp: new Date().toISOString(),
+          },
         },
       });
     } else if (authRes.error && !isCreateAccount) {

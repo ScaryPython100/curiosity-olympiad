@@ -1,22 +1,27 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 
+export type TelemetryPhase = 'orientation' | 'silent_explore' | 'minimum_met' | 'optional_explore';
+
 export type TelemetryData = {
   clickCount: number;
   dragCount: number;
   totalDwellTime: number;
   averageDwellTime: number;
   reversals: number;
-  optionalActions: number;
+  optionalActions: number; // e.g. hints or optional tools
   tabSwitches: number;
   distinctStatesReached: number;
   dragEntropyScore: number;
   comparisonPatternDetected: boolean;
   idleTimeSeconds: number;
-  triggerActivated: boolean;
+  // New metrics
+  voluntaryExplorationTrials: number; // actions taken during 'optional_explore' phase
+  continueVsLeaveChoice: 'continue' | 'leave' | null;
+  triggerActivated: boolean; // keep for anomaly trigger, NOT for hint button
 };
 
 export function useTelemetry() {
-  const initialState = {
+  const initialState: TelemetryData = {
     clickCount: 0,
     dragCount: 0,
     totalDwellTime: 0,
@@ -28,10 +33,13 @@ export function useTelemetry() {
     dragEntropyScore: 0,
     comparisonPatternDetected: false,
     idleTimeSeconds: 0,
+    voluntaryExplorationTrials: 0,
+    continueVsLeaveChoice: null,
     triggerActivated: false,
   };
   
   const [data, setData] = useState<TelemetryData>(initialState);
+  const [currentPhase, setCurrentPhase] = useState<TelemetryPhase>('orientation');
 
   const lastActionTime = useRef<number>(Date.now());
   const actionHistory = useRef<string[]>([]);
@@ -39,6 +47,9 @@ export function useTelemetry() {
   const stateHistory = useRef<{stateId: string, timestamp: number}[]>([]);
   const totalIdleTime = useRef<number>(0);
   const dragVectors = useRef<{dx: number, dy: number}[]>([]);
+
+  // Last known values of parameters for reversal detection
+  const lastParamValues = useRef<Record<string, { val: number; delta: number; time: number }>>({});
 
   // Browser Proctoring
   useEffect(() => {
@@ -66,14 +77,10 @@ export function useTelemetry() {
     actionHistory.current.push(actionType);
 
     // Dwell rule for distinct states
-    if (actionDetails?.stateId) {
-      // If the pointer was stationary in the LAST state for >= 800ms
-      if (dwell >= 800) {
-        // Add previous state to valid distinct states if not already there
-        const prevState = actionHistory.current.length > 1 ? actionHistory.current[actionHistory.current.length - 2] : null;
-        if (prevState) {
-          stateHistory.current.push({ stateId: prevState, timestamp: now - dwell });
-        }
+    const stateVal = actionDetails?.stateId || (actionDetails?.val !== undefined ? `${actionType}:${actionDetails.val}` : null) || (actionDetails?.waterLevel !== undefined ? `water:${actionDetails.waterLevel}` : null);
+    if (stateVal) {
+      if (dwell >= 300) {
+        stateHistory.current.push({ stateId: String(stateVal), timestamp: now });
       }
     }
 
@@ -84,19 +91,64 @@ export function useTelemetry() {
 
     setData(prev => {
       const isDrag = actionType.startsWith('drag');
-      const isClick = actionType.startsWith('click');
-      const isOptional = actionType === 'optional_tool_used';
-      const isTrigger = actionType === 'trigger_activated';
+      const isClick = actionType.startsWith('click') || actionType.startsWith('tap') || actionType.startsWith('rub') || actionType.startsWith('stir') || actionType.startsWith('add');
+      const isChange = actionType.startsWith('change') || actionType.startsWith('toggle') || actionType.startsWith('reset');
+      const isOptional = actionType === 'optional_tool_used' || actionType.includes('filter') || actionType.includes('catalyst');
       
+      const isAnomalyTrigger = 
+        actionType === 'anomaly_trigger_activated' || 
+        Boolean(actionDetails?.hasEcho) || 
+        Boolean(actionDetails?.isPinched) || 
+        Boolean(actionDetails?.triggerActivated) ||
+        Boolean(actionDetails?.isTrigger) ||
+        actionType.includes('anomaly') ||
+        actionType.includes('trigger');
+
       let reversals = prev.reversals;
       let comparisonPatternDetected = prev.comparisonPatternDetected;
-      
-      // Simple reversal logic: dragging something left, then right shortly after
+      let voluntaryExplorationTrials = prev.voluntaryExplorationTrials;
+
+      // Detect slider reversals (e.g. dragging left then right, or value moving up then down within 2500ms)
+      const numericVal = typeof actionDetails?.val === 'number' 
+        ? actionDetails.val 
+        : typeof actionDetails?.waterLevel === 'number' 
+          ? actionDetails.waterLevel 
+          : typeof actionDetails?.tension === 'number'
+            ? actionDetails.tension
+            : typeof actionDetails?.depth === 'number'
+              ? actionDetails.depth
+              : typeof actionDetails?.refractiveIndex === 'number'
+                ? actionDetails.refractiveIndex
+                : null;
+
+      if (numericVal !== null) {
+        const lastParam = lastParamValues.current[actionType];
+        if (lastParam) {
+          const currentDelta = numericVal - lastParam.val;
+          const timeSince = now - lastParam.time;
+          if (timeSince < 2500 && Math.abs(currentDelta) > 0 && Math.abs(lastParam.delta) > 0) {
+            // Opposite direction indicates hypothesis testing reversal
+            if ((currentDelta > 0 && lastParam.delta < 0) || (currentDelta < 0 && lastParam.delta > 0)) {
+              reversals += 1;
+            }
+          }
+          lastParamValues.current[actionType] = { val: numericVal, delta: currentDelta, time: now };
+        } else {
+          lastParamValues.current[actionType] = { val: numericVal, delta: 0, time: now };
+        }
+      }
+
+      // Drag reversal logic
       if (isDrag && actionHistory.current.length > 1) {
         const prevAction = actionHistory.current[actionHistory.current.length - 2];
         if (prevAction.startsWith('drag') && actionType !== prevAction && dwell < 2000) {
            reversals += 1;
         }
+      }
+
+      // Increment voluntary trials if in optional_explore phase or after minimum engagement
+      if (currentPhase === 'optional_explore' && (isDrag || isClick || isChange)) {
+        voluntaryExplorationTrials += 1;
       }
 
       // Comparison Pattern logic (State A -> State B -> State A)
@@ -113,7 +165,7 @@ export function useTelemetry() {
       const avgDwell = dwellTimes.current.length > 0 ? totalDwell / dwellTimes.current.length : 0;
 
       // Unique states
-      const uniqueStates = new Set(stateHistory.current.map(s => s.stateId)).size;
+      const uniqueStates = Math.max(1, new Set(stateHistory.current.map(s => s.stateId)).size);
 
       // Entropy calculation: sum of distances vs straight line distance
       let dragEntropyScore = 0;
@@ -129,7 +181,6 @@ export function useTelemetry() {
         }
         
         const straightLineLength = Math.sqrt(currentPoint.x * currentPoint.x + currentPoint.y * currentPoint.y);
-        // Ratio of actual path to straight line. If path is very wiggly, ratio > 1. Map to 0-1 range.
         if (straightLineLength > 0) {
            const ratio = totalPathLength / straightLineLength;
            dragEntropyScore = Math.min(1, 1 - (1 / ratio)); 
@@ -139,7 +190,7 @@ export function useTelemetry() {
       return {
         ...prev,
         clickCount: prev.clickCount + (isClick ? 1 : 0),
-        dragCount: prev.dragCount + (isDrag ? 1 : 0),
+        dragCount: prev.dragCount + (isDrag || isChange ? 1 : 0),
         optionalActions: prev.optionalActions + (isOptional ? 1 : 0),
         totalDwellTime: totalDwell,
         averageDwellTime: avgDwell,
@@ -148,20 +199,29 @@ export function useTelemetry() {
         dragEntropyScore,
         comparisonPatternDetected,
         idleTimeSeconds: totalIdleTime.current,
-        triggerActivated: prev.triggerActivated || isTrigger,
+        triggerActivated: prev.triggerActivated || isAnomalyTrigger,
+        voluntaryExplorationTrials
       };
     });
+  }, [currentPhase]);
+
+  const setChoice = useCallback((choice: 'continue' | 'leave') => {
+    setData(prev => ({ ...prev, continueVsLeaveChoice: choice }));
+    if (choice === 'continue') {
+      setCurrentPhase('optional_explore');
+    }
   }, []);
 
   const resetTelemetry = useCallback(() => {
     setData(initialState);
+    setCurrentPhase('orientation');
     lastActionTime.current = Date.now();
     actionHistory.current = [];
     dwellTimes.current = [];
     stateHistory.current = [];
     totalIdleTime.current = 0;
     dragVectors.current = [];
-  }, [initialState]);
+  }, [initialState]); // react-hooks/exhaustive-deps will complain if initialState changes but it's constant above so okay
 
-  return { telemetryData: data, recordAction, resetTelemetry };
+  return { telemetryData: data, currentPhase, setCurrentPhase, recordAction, setChoice, resetTelemetry };
 }

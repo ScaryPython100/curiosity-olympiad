@@ -15,7 +15,7 @@ export const BADGES: Badge[] = [
   { id: 'scholar', name: 'Scholar', icon: '📚', description: '10,000 XP reached', minXp: 10000 },
   { id: 'expert', name: 'Expert Thinker', icon: '🧠', description: '25,000 XP reached', minXp: 25000 },
   { id: 'master', name: 'Logic Master', icon: '👑', description: '50,000 XP reached', minXp: 50000 },
-  { id: 'laureate', name: 'Olympiad Laureate', icon: '🏆', description: '100,000 XP reached', minXp: 100000 },
+  { id: 'laureate', name: 'Master Laureate', icon: '🏆', description: '100,000 XP reached', minXp: 100000 },
   { id: 'grandmaster', name: 'Grandmaster Scientist', icon: '🚀', description: '250,000 XP reached', minXp: 250000 },
 ];
 
@@ -63,9 +63,9 @@ export const XP_MILESTONES: XPMilestone[] = [
   { level: 1, xpRequired: 0, title: "Curious Observer", perk: "Access to Level 1 Practice Labs" },
   { level: 5, xpRequired: 12500, title: "Lab Experimenter", perk: "Access to Level 2 Advanced Practice Labs" },
   { level: 10, xpRequired: 25000, title: "Scientific Inquirer", perk: "Eligible for Weekly Leaderboard Challenges" },
-  { level: 25, xpRequired: 62500, title: "Agastya Fellow", perk: "Eligible for Regional Tournament Seeding" },
-  { level: 50, xpRequired: 125000, title: "Olympiad Laureate", perk: "Direct Qualification for National Olympiad Final" },
-  { level: 100, xpRequired: 250000, title: "Grandmaster Scientist", perk: "National Honor Roll Insignia & Master Mentorship" },
+  { level: 25, xpRequired: 62500, title: "Agastya Fellow", perk: "Advanced Simulation Parameter Access" },
+  { level: 50, xpRequired: 125000, title: "Master Explorer", perk: "Master Explorer Recognition & Practice Lab Distinction" },
+  { level: 100, xpRequired: 250000, title: "Grandmaster Scientist", perk: "Honor Roll Insignia & Master Mentorship" },
 ];
 
 /* =========================================================
@@ -114,10 +114,10 @@ export const REDEMPTION_RULES: RedemptionRule[] = [
  * They are exclusively reserved for students who achieve:
  * - Weekly Rank #1 on the national leaderboard
  * - Monthly Rank #1 on the national leaderboard
- * - Olympiad Champion standing
+ * - Practice Lab Top Performer standing
  */
 export const CERTIFICATE_ELIGIBILITY_POLICY = {
-  allowedRanks: ["Weekly Rank 1", "Monthly Rank 1", "Olympiad Champion", "National Finalist"],
+  allowedRanks: ["Weekly Rank 1", "Monthly Rank 1", "Practice Lab Top Performer", "Practice Series Finalist"],
   allowBadgeCertificates: false,
 };
 
@@ -152,7 +152,7 @@ export const TOURNAMENT_POLICIES: Record<string, TournamentPolicy> = {
   },
   "national-olympiad-final": {
     tournamentId: "national-olympiad-final",
-    name: "National Curiosity Olympiad Grand Final",
+    name: "National Practice Capstone Challenge",
     minLevel: 20,
     minXp: 50000,
     requiresSchoolVerification: true,

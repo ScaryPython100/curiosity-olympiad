@@ -26,11 +26,12 @@ export function LanguageSelector() {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm active:scale-95 text-xs font-bold text-[#143867] dark:text-[#ffe16d]"
+        className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-xs active:scale-95 text-xs font-bold text-[#143867] dark:text-[#ffe16d] shrink-0 whitespace-nowrap"
         aria-label="Select Language"
       >
         <span className="material-symbols-outlined text-sm">translate</span>
-        <span>{currentLang.nativeName}</span>
+        <span className="text-[11px] sm:text-xs hidden min-[400px]:inline">{currentLang.nativeName}</span>
+        <span className="text-[11px] sm:text-xs min-[400px]:hidden uppercase">{currentLang.code}</span>
         <span className="material-symbols-outlined text-xs">expand_more</span>
       </button>
 
