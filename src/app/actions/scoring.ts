@@ -153,7 +153,7 @@ export async function getUnlockedLevels() {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    const allLevels = [0, 1, 2, 3, 4, 5, 6, 7];
+    const allLevels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     if (!user) return { success: true, unlockedLevels: allLevels };
 
     const { data, error } = await supabase
@@ -175,6 +175,6 @@ export async function getUnlockedLevels() {
     return { success: true, unlockedLevels: unlocked };
   } catch (err) {
     console.error("getUnlockedLevels error:", err);
-    return { success: false, unlockedLevels: [0, 1, 2, 3, 4, 5, 6, 7] };
+    return { success: false, unlockedLevels: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] };
   }
 }

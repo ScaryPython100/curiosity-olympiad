@@ -212,3 +212,63 @@ export function playShoutWithEcho(hasEcho: boolean, delaySeconds: number = 0.4) 
     echoOsc.stop(echoTime + 0.34);
   }
 }
+
+/**
+ * 4. HEARTBEAT PULSE SYNTHESIS (Mock Test 10, Experiment 1)
+ * Simulates a realistic acoustic stethoscope "lub-dub" sound.
+ * "Lub" (S1): lower frequency (~65 Hz), slightly longer decay (~0.12s)
+ * "Dub" (S2): slightly higher frequency (~95 Hz), sharper snap (~0.09s)
+ */
+export function playHeartbeat(bpm: number = 72) {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+
+  // --- S1: "Lub" ---
+  const osc1 = ctx.createOscillator();
+  const gain1 = ctx.createGain();
+  const filter1 = ctx.createBiquadFilter();
+
+  osc1.type = "sine";
+  osc1.frequency.setValueAtTime(65, now);
+  osc1.frequency.exponentialRampToValueAtTime(45, now + 0.12);
+
+  filter1.type = "lowpass";
+  filter1.frequency.setValueAtTime(150, now);
+
+  gain1.gain.setValueAtTime(0.001, now);
+  gain1.gain.linearRampToValueAtTime(0.35, now + 0.015);
+  gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+
+  osc1.connect(filter1);
+  filter1.connect(gain1);
+  gain1.connect(ctx.destination);
+
+  osc1.start(now);
+  osc1.stop(now + 0.15);
+
+  // --- S2: "Dub" (approx 140ms after S1) ---
+  const s2Time = now + 0.14;
+  const osc2 = ctx.createOscillator();
+  const gain2 = ctx.createGain();
+  const filter2 = ctx.createBiquadFilter();
+
+  osc2.type = "sine";
+  osc2.frequency.setValueAtTime(95, s2Time);
+  osc2.frequency.exponentialRampToValueAtTime(60, s2Time + 0.09);
+
+  filter2.type = "lowpass";
+  filter2.frequency.setValueAtTime(180, s2Time);
+
+  gain2.gain.setValueAtTime(0.001, s2Time);
+  gain2.gain.linearRampToValueAtTime(0.28, s2Time + 0.01);
+  gain2.gain.exponentialRampToValueAtTime(0.001, s2Time + 0.11);
+
+  osc2.connect(filter2);
+  filter2.connect(gain2);
+  gain2.connect(ctx.destination);
+
+  osc2.start(s2Time);
+  osc2.stop(s2Time + 0.12);
+}

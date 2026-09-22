@@ -69,6 +69,9 @@ export default function CertificateModal({
       if (storedName && storedName.trim()) {
         setOfficialRealName(storedName.trim());
         setHasRegisteredName(true);
+      } else if (studentRealName && studentRealName.trim() && studentRealName !== "Student Champion" && studentRealName !== "Student Explorer") {
+        setOfficialRealName(studentRealName.trim());
+        setHasRegisteredName(true);
       } else {
         setHasRegisteredName(false);
         if (studentRealName && studentRealName.trim()) {
@@ -211,11 +214,11 @@ export default function CertificateModal({
                     <p className="text-[11px] text-gray-200 leading-relaxed">
                       {isPendingCycleEnd
                         ? (achievementType === "Daily Rank 1"
-                            ? "You are currently holding Daily Rank #1! Today's daily cycle closes tonight at 11:59 PM. Please return after midnight to claim your unblurred Daily Certificate!"
-                            : "You are currently holding Weekly Rank #1! This week's cycle closes Sunday at 11:59 PM. Please return after Sunday midnight to claim your unblurred Weekly Certificate!")
+                            ? "You are currently holding Daily Rank #1! Today's daily cycle closes tonight at 11:59 PM. Official certificates become available to preview and download starting at 12:01 AM tomorrow — never live or in real-time during an active period."
+                            : "You are currently holding Weekly Rank #1! This week's cycle closes Sunday at 11:59 PM. Official certificates become available to preview and download starting at 12:01 AM Monday — never live or in real-time during an active period.")
                         : (achievementType === "Daily Rank 1"
-                            ? "Official Daily Rank #1 Certificates unlock EXCLUSIVELY for today's top daily champion after the daily cycle ends at 11:59 PM tonight."
-                            : "Official Weekly Rank #1 Certificates unlock EXCLUSIVELY for the top weekly champion at the end of the week (Sunday 11:59 PM).")}
+                            ? "Official Daily Rank #1 Certificates unlock EXCLUSIVELY starting at 12:01 AM the day after a student finishes #1 for the previous day. Certificates are never issued during an active period."
+                            : "Official Weekly Rank #1 Certificates unlock EXCLUSIVELY starting at 12:01 AM Monday for the student who was ranked #1 for the previous week.")}
                     </p>
                   </div>
                 </div>
@@ -317,8 +320,8 @@ export default function CertificateModal({
 
                     <div className="pt-8 flex justify-between items-end text-xs text-left px-2 sm:px-6">
                       <div className="border-t border-gray-400 pt-2 w-32 sm:w-48">
-                        <p className="font-bold text-[#143867] text-[11px] sm:text-xs">Dr. Ramji Narayanan</p>
-                        <p className="text-[9px] sm:text-[10px] text-gray-500">Chief Mentor, Agastya Foundation</p>
+                        <p className="font-bold text-[#143867] text-[11px] sm:text-xs">Authorized Signatory</p>
+                        <p className="text-[9px] sm:text-[10px] text-gray-500">Agastya International Foundation</p>
                       </div>
                       <div className="text-right border-t border-gray-400 pt-2 w-28 sm:w-40">
                         <p className="font-bold text-[#143867] text-[11px] sm:text-xs">Award Date</p>

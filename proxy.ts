@@ -30,8 +30,9 @@ export async function proxy(request: NextRequest) {
 
   const protectedRoutes = ['/dashboard', '/profile', '/tournaments', '/leaderboard']
   const isProtectedRoute = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))
+  const isReview = request.nextUrl.searchParams.get('review') === 'true';
 
-  if (!user && isProtectedRoute) {
+  if (!user && isProtectedRoute && !isReview) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url) // Absolute URL mutation compliant with Next.js 16 standards

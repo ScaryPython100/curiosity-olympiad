@@ -97,25 +97,42 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
   // 3. Fetch server submission if exists
   let initialSubmission: SubmissionMeta | null = null;
   if (examMeta && user) {
+    const mockNum = parseInt(examId.replace(/\D/g, ""), 10);
+    const mockExamUuid = (mockNum >= 1 && mockNum <= 8)
+      ? `00000000-0000-0000-0000-00000000000${mockNum}`
+      : null;
+    const queryExamIds = [examId];
+    if (mockExamUuid && !queryExamIds.includes(mockExamUuid)) {
+      queryExamIds.push(mockExamUuid);
+    }
+
     const { data: sub } = await supabase
       .from("exam_submissions")
       .select("score, max_score, submitted_at, telemetry_data")
-      .eq("exam_id", examId)
+      .in("exam_id", queryExamIds)
       .eq("user_id", user.id)
+      .order("submitted_at", { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (sub) {
       const percentage = Math.round(
         (sub.score / (sub.max_score || examMeta.questionCount || 9)) * 100
       );
+      const tel = sub.telemetry_data || {};
+      const accuracyXP = tel.accuracyXP ?? (sub.score * 100);
+      const telemetryBonusXP = tel.telemetryBonusXP ?? 210;
+      const totalXP = tel.totalXP ?? (accuracyXP + telemetryBonusXP);
+
       initialSubmission = {
         score: sub.score,
         maxScore: sub.max_score || examMeta.questionCount || 9,
         percentage,
         submittedAt: sub.submitted_at,
         telemetryData: sub.telemetry_data,
-        totalXP: sub.score * 100 + 210,
-        telemetryBonusXP: 210,
+        totalXP,
+        telemetryBonusXP,
+        level: tel.level || "level1",
       };
     }
   }

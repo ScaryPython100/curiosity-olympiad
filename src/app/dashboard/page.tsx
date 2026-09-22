@@ -12,6 +12,7 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
 import { toast } from "sonner";
 import { colors, radii, typography, touchTargets, motion } from "@/design-system/tokens";
+import ComingSoonOlympiadCard from "@/components/ComingSoonOlympiadCard";
 
 const PARTNER_SCHOOLS = [
   { name: "Global Olympiad Partner Academy", location: "Worldwide", icon: "public", badgeColor: "bg-[#143867] text-white border-[#ea580c]", emblem: "🌐" },
@@ -166,9 +167,7 @@ export default function DashboardPage() {
             <button 
               type="button"
               onClick={() => {
-                import("@/utils/supabase/client").then(m => {
-                  m.createClient().auth.signOut().then(() => router.push("/login"));
-                });
+                import("@/utils/auth").then(m => m.logoutUser());
               }}
               className="text-[#143867] hover:bg-gray-100 transition-colors p-2 rounded-full active:scale-95 duration-100 flex items-center justify-center min-w-[44px] min-h-[44px] cursor-pointer" 
               title={t.app.logout}
@@ -208,6 +207,11 @@ export default function DashboardPage() {
           <p className="text-xs sm:text-sm text-gray-600 font-medium">
             {t.dashboard.welcome_back_subtitle}
           </p>
+        </section>
+
+        {/* 🔒 Locked National Olympiad 2026 Card */}
+        <section>
+          <ComingSoonOlympiadCard />
         </section>
 
         {/* 🏆 Practice Tournament Series & Leveled Mock Tests Card */}
@@ -628,6 +632,30 @@ export default function DashboardPage() {
             </button>
           </div>
         </section>
+
+        {/* Educational Footer */}
+        <footer className="pt-8 pb-4 border-t border-gray-200 text-center space-y-2">
+          <div className="flex items-center justify-center gap-4 text-xs font-semibold text-gray-500 flex-wrap">
+            <Link href="/privacy" className="hover:text-[#143867] transition-colors">
+              Student Privacy Policy
+            </Link>
+            <span>•</span>
+            <Link href="/terms" className="hover:text-[#143867] transition-colors">
+              Terms of Service
+            </Link>
+            <span>•</span>
+            <Link href="/schools" className="hover:text-[#143867] transition-colors">
+              Schools &amp; Educators
+            </Link>
+            <span>•</span>
+            <Link href="/settings" className="hover:text-[#143867] transition-colors">
+              Settings
+            </Link>
+          </div>
+          <p className="text-[11px] text-gray-400">
+            © 2026 Agastya International Foundation • Sparking curiosity across India
+          </p>
+        </footer>
       </main>
 
       {/* Streamlined 5-Tab BottomNavBar Component (Mobile Only) */}

@@ -22,28 +22,32 @@ export default function ProfilePage() {
   const displayAvatar = useUserAvatar(userId, userStats.avatar_url, userStats.username);
   const [loading, setLoading] = useState(true);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
-  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
+  const [isCertModalOpen, setIsCertModalOpen] = useState(() => {
+    if (typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search);
+      return p.get("demo") === "sample_cert" || p.get("demo") === "cert" || p.get("open_cert") === "true";
+    }
+    return false;
+  });
+  const [isPastChampion, setIsPastChampion] = useState(false);
+  const [championType, setChampionType] = useState<RankCertificateType>("Daily Rank 1");
 
   const { level, progressPercentage, unlockedBadges, nextBadge } = calculateLevelProgress(userStats.xp);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Read avatar, real name, school code, and username from localStorage
+        // Read avatar, real name, and username from localStorage
         const savedAvatar = typeof window !== "undefined"
           ? localStorage.getItem("curiosity_avatar_url") || ""
           : "";
         const savedRealName = typeof window !== "undefined"
           ? localStorage.getItem("curiosity_real_name") || ""
           : "";
-        const savedSchoolCode = typeof window !== "undefined"
-          ? localStorage.getItem("curiosity_school_code") || ""
-          : "";
         const savedUsername = typeof window !== "undefined"
           ? localStorage.getItem("curiosity_username") || ""
           : "";
         if (savedRealName) setRealName(savedRealName);
-        if (savedSchoolCode) setSchoolCode(savedSchoolCode);
 
         let followersCount = 0;
         let followingCount = 0;
@@ -60,6 +64,7 @@ export default function ProfilePage() {
           } catch (e) {}
 
           if (res?.data) {
+            setSchoolCode(res.data.school_code || "");
             setUserStats({
               xp: res.data.xp,
               points: res.data.points,
@@ -72,13 +77,38 @@ export default function ProfilePage() {
               following: followingCount
             });
           } else {
+            setSchoolCode("");
             setUserStats(prev => ({ 
               ...prev, 
               username: savedUsername || prev.username || "Explorer",
               avatar_url: savedAvatar 
             }));
           }
+
+          // Check if this user is a confirmed past day or past week #1 champion
+          try {
+            const { getLeaderboard } = await import("@/app/actions/profile");
+            const [dailyRes, weeklyRes] = await Promise.all([
+              getLeaderboard("daily"),
+              getLeaderboard("weekly")
+            ]);
+            const isDailyChamp = Boolean(userId && dailyRes?.pastDailyChampionId === userId);
+            const isWeeklyChamp = Boolean(userId && weeklyRes?.pastWeeklyChampionId === userId);
+
+            if (isWeeklyChamp) {
+              setIsPastChampion(true);
+              setChampionType("Weekly Rank 1");
+            } else if (isDailyChamp) {
+              setIsPastChampion(true);
+              setChampionType("Daily Rank 1");
+            } else {
+              setIsPastChampion(false);
+            }
+          } catch (e) {
+            console.warn("Could not check champion standing:", e);
+          }
         } else {
+          setSchoolCode("");
           setUserStats(prev => ({
             ...prev,
             username: savedUsername || prev.username || "Explorer",
@@ -159,9 +189,7 @@ export default function ProfilePage() {
             <button 
               type="button"
               onClick={() => {
-                import("@/utils/supabase/client").then(m => {
-                  m.createClient().auth.signOut().then(() => router.push("/login"));
-                });
+                import("@/utils/auth").then(m => m.logoutUser());
               }}
               className="text-[#143867] hover:bg-gray-100 transition-colors p-2 rounded-xl active:scale-95 duration-100 flex items-center justify-center min-w-[44px] min-h-[44px] cursor-pointer" 
               title={t.app.logout}
@@ -295,24 +323,43 @@ export default function ProfilePage() {
           ))}
         </div>
 
-        {/* Specimen Certificate Preview Action */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Certificate Card */}
+        <div className={`rounded-2xl border p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 transition-all ${
+          isPastChampion ? "bg-emerald-50/80 border-emerald-200" : "bg-white border-gray-200"
+        }`}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
+            <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${
+              isPastChampion ? "bg-emerald-100 border-emerald-300 text-emerald-700" : "bg-amber-50 border-amber-200 text-amber-600"
+            }`}>
               <span className="material-symbols-outlined text-xl">workspace_premium</span>
             </div>
             <div>
-              <h3 className="text-sm font-black text-[#143867]">Curiosity Practice Lab Certificate</h3>
-              <p className="text-xs text-gray-500 font-medium">Preview your verified performance credential and specimen certificate</p>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-black text-[#143867]">Curiosity Practice Lab Certificate</h3>
+                <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                  isPastChampion ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-600 border border-gray-200"
+                }`}>
+                  {isPastChampion ? "Unlocked" : "Specimen Preview"}
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 font-medium mt-0.5">
+                {isPastChampion 
+                  ? "Congratulations! You finished Rank #1 in a completed cycle. Your official certificate is ready."
+                  : "Official certificates unlock at 12:01 AM the day after achieving Rank #1 in a completed daily or weekly cycle."}
+              </p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setIsCertModalOpen(true)}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#143867] text-white text-xs font-bold hover:bg-[#1e4a85] transition-colors active:scale-98 min-h-[44px] flex items-center justify-center gap-2 shrink-0 shadow-xs cursor-pointer"
+            className={`w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-98 min-h-[44px] flex items-center justify-center gap-2 shrink-0 shadow-xs cursor-pointer ${
+              isPastChampion 
+                ? "bg-emerald-600 text-white hover:bg-emerald-700" 
+                : "bg-[#143867] text-white hover:bg-[#1e4a85]"
+            }`}
           >
-            <span className="material-symbols-outlined text-base">visibility</span>
-            View Certificate
+            <span className="material-symbols-outlined text-base">{isPastChampion ? "download" : "visibility"}</span>
+            <span>{isPastChampion ? "Claim Certificate 📜" : "Preview Specimen"}</span>
           </button>
         </div>
 
@@ -370,11 +417,11 @@ export default function ProfilePage() {
         isOpen={isCertModalOpen}
         onClose={() => setIsCertModalOpen(false)}
         studentRealName={realName || userStats.username || "Student Explorer"}
-        achievementType="Practice Lab Top Performer"
-        awardDate="July 2026"
-        isEligible={true}
-        userRank={1}
-        isCompletedCycle={true}
+        achievementType={championType}
+        awardDate="September 2026"
+        isEligible={isPastChampion || (typeof window !== 'undefined' && (new URLSearchParams(window.location.search).get('demo') === 'sample_cert' || new URLSearchParams(window.location.search).get('demo') === 'cert'))}
+        userRank={isPastChampion || (typeof window !== 'undefined' && (new URLSearchParams(window.location.search).get('demo') === 'sample_cert' || new URLSearchParams(window.location.search).get('demo') === 'cert')) ? 1 : null}
+        isCompletedCycle={isPastChampion || (typeof window !== 'undefined' && (new URLSearchParams(window.location.search).get('demo') === 'sample_cert' || new URLSearchParams(window.location.search).get('demo') === 'cert'))}
       />
     </div>
   );

@@ -15,17 +15,34 @@ export async function proxy(request: NextRequest) {
   }
 
   // Define protected routes
-  const protectedRoutes = ['/dashboard', '/profile', '/tournaments', '/leaderboard']
+  const protectedRoutes = [
+    '/dashboard',
+    '/profile',
+    '/tournaments',
+    '/leaderboard',
+    '/practice',
+    '/settings',
+    '/campus-map',
+    '/mock-h5p-content',
+  ]
   const isProtectedRoute = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))
 
   const descopeSession = request.cookies.get('descope_session')?.value;
+  const isReview = request.nextUrl.searchParams.get('review') === 'true';
 
   if (isProtectedRoute) {
-    if (!user && !descopeSession) {
+    if (!user && !descopeSession && !isReview) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       return NextResponse.redirect(url)
     }
+  }
+
+  // If user is already authenticated and visits /login, redirect directly to /dashboard
+  if ((user || descopeSession) && request.nextUrl.pathname === '/login') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
   }
 
   return response

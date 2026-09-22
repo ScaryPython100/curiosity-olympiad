@@ -3,8 +3,8 @@ export interface MockTestItem {
   title: string;
   subtitle: string;
   description: string;
-  module: "Optics" | "Gravity" | "Chemistry" | "Grades68" | "Grades910" | "Sound" | "Electricity" | "Buoyancy";
-  category: "Physics & Optics" | "Mechanics & Sound" | "Chemistry & Thermal" | "Electricity & Fluids" | "Hypothesis Testing";
+  module: "Optics" | "Gravity" | "Chemistry" | "Grades68" | "Grades910" | "Sound" | "Electricity" | "Buoyancy" | "Kitchen" | "Body" | "Plants";
+  category: "Physics & Optics" | "Mechanics & Sound" | "Chemistry & Thermal" | "Electricity & Fluids" | "Hypothesis Testing" | "Sensory & Bio-Physics" | "Botany & Systems";
   idealTime: { level1: string; level2: string };
   idealSeconds: { level1: number; level2: number };
   questionCount: number;
@@ -133,6 +133,51 @@ export const OFFICIAL_MOCK_TESTS: MockTestItem[] = [
     experimentCount: 3,
     icon: "water_drop",
     badge: "Density & Fluid Buoyancy",
+    gradeBand: "Grades 6–10"
+  },
+  {
+    id: 9,
+    title: "Mock Test 9: Kitchen Chemistry",
+    subtitle: "Indicators, Effervescence & Saturation",
+    description: "Explore natural turmeric pH color changes with lemon and soap, inflate balloons with vinegar effervescence, and dissolve sugar up to thermal saturation.",
+    module: "Kitchen",
+    category: "Chemistry & Thermal",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    experimentCount: 3,
+    icon: "science",
+    badge: "Acids, Bases & Solutions",
+    gradeBand: "Grades 6–10"
+  },
+  {
+    id: 10,
+    title: "Mock Test 10: The Human Body",
+    subtitle: "Heartbeat, Lungs & Eye Reflexes",
+    description: "Listen to resting vs. sprint heartbeat audio, pull the rubber diaphragm sheet to inflate balloon lungs, and test pupil constriction in bright torchlight.",
+    module: "Body",
+    category: "Sensory & Bio-Physics",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    experimentCount: 3,
+    icon: "favorite",
+    badge: "Physiology & Biomechanics",
+    gradeBand: "Grades 6–10"
+  },
+  {
+    id: 11,
+    title: "Mock Test 11: Plants & Growth",
+    subtitle: "Photosynthesis, Transpiration & Phototropism",
+    description: "Count oxygen bubbles rising from submerged waterweed under intense light, observe leaf transpiration condensation, and bend growing stems toward light.",
+    module: "Plants",
+    category: "Botany & Systems",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    experimentCount: 3,
+    icon: "psychiatry",
+    badge: "Plant Biology & Phototropism",
     gradeBand: "Grades 6–10"
   }
 ];

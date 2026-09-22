@@ -7,6 +7,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { OFFICIAL_MOCK_TESTS, MockTestItem } from "@/data/mockTestsData";
 import { colors, radii, typography, touchTargets, motion } from "@/design-system/tokens";
+import ComingSoonOlympiadCard from "@/components/ComingSoonOlympiadCard";
 
 const CATEGORIES = [
   "All Modules",
@@ -120,6 +121,11 @@ export default function TournamentsPage() {
               </Link>
             </div>
           </div>
+        </section>
+
+        {/* Locked Coming Soon Card: All-India Curiosity Olympiad 2026 */}
+        <section>
+          <ComingSoonOlympiadCard />
         </section>
 
         {/* Section Header & Filters */}

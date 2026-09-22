@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { signUpAction, signInAction, sendOtpAction, verifyOtpAction, resetPasswordAction } from "./actions";
 import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { initTabSession } from "@/utils/auth";
 
 export default function AuthPage() {
   const { t } = useLanguage();
@@ -73,6 +74,26 @@ export default function AuthPage() {
     }
 
     if (activeTab === "create_account") {
+      if (otpUsername) {
+        const trimmedUser = otpUsername.trim();
+        if (trimmedUser.length < 3 || trimmedUser.length > 24) {
+          setError("🚫 Username must be between 3 and 24 characters.");
+          return;
+        }
+        if (trimmedUser.includes("@") || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedUser)) {
+          setError("🚫 Usernames cannot be an email address for student privacy. Please choose a public explorer nickname (e.g. StarGazer42).");
+          return;
+        }
+        const cleanPhone = trimmedUser.replace(/[\s\-\(\)\+]/g, "");
+        if (/^\d{7,15}$/.test(cleanPhone)) {
+          setError("🚫 Usernames cannot be a phone number for student privacy. Please choose a public explorer nickname (e.g. StarGazer42).");
+          return;
+        }
+        if (!/^[a-zA-Z0-9_.-]+$/.test(trimmedUser)) {
+          setError("🚫 Usernames can only contain letters, numbers, underscores, dots, and hyphens (no spaces or special symbols).");
+          return;
+        }
+      }
       if (!schoolCode.trim()) {
         setError("🚫 School Code is required. Please enter your school's code (e.g. AGS-KUPPAM-101) or ask your science teacher.");
         return;
@@ -93,13 +114,11 @@ export default function AuthPage() {
 
     try {
       if (typeof window !== "undefined") {
+        localStorage.removeItem("curiosity_school_code");
         if (otpRealName) localStorage.setItem("curiosity_real_name", otpRealName);
         if (otpUsername) {
           localStorage.setItem("curiosity_username", otpUsername);
           localStorage.setItem("curiosity_login_" + otpUsername.toLowerCase().trim(), destination.trim());
-        }
-        if (schoolCode) {
-          localStorage.setItem("curiosity_school_code", schoolCode.trim().toUpperCase());
         }
         if (hasConsent) {
           localStorage.setItem("curiosity_parental_consent", "true");
@@ -149,11 +168,7 @@ export default function AuthPage() {
       formData.append("password", otpPassword || "DevSandboxOverridePassword!123");
       if (activeTab === "create_account") {
         formData.append("isCreateAccount", "true");
-        formData.append(
-          "schoolCode",
-          schoolCode.trim().toUpperCase() ||
-            (typeof window !== "undefined" ? localStorage.getItem("curiosity_school_code") || "" : "")
-        );
+        formData.append("schoolCode", schoolCode.trim().toUpperCase());
         formData.append("parentalConsent", "true");
       }
 
@@ -161,6 +176,7 @@ export default function AuthPage() {
       if (res?.error) {
         setError(res.error);
       } else if (res?.success) {
+        initTabSession();
         window.location.href = "/dashboard";
       }
     } catch (err: any) {
@@ -189,6 +205,30 @@ export default function AuthPage() {
     }
 
     if (!isLogin) {
+      if (username) {
+        const trimmedUser = username.trim();
+        if (trimmedUser.length < 3 || trimmedUser.length > 24) {
+          setError("🚫 Username must be between 3 and 24 characters.");
+          setIsLoading(false);
+          return;
+        }
+        if (trimmedUser.includes("@") || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedUser)) {
+          setError("🚫 Usernames cannot be an email address for student privacy. Please choose a public explorer nickname (e.g. StarGazer42).");
+          setIsLoading(false);
+          return;
+        }
+        const cleanPhone = trimmedUser.replace(/[\s\-\(\)\+]/g, "");
+        if (/^\d{7,15}$/.test(cleanPhone)) {
+          setError("🚫 Usernames cannot be a phone number for student privacy. Please choose a public explorer nickname (e.g. StarGazer42).");
+          setIsLoading(false);
+          return;
+        }
+        if (!/^[a-zA-Z0-9_.-]+$/.test(trimmedUser)) {
+          setError("🚫 Usernames can only contain letters, numbers, underscores, dots, and hyphens (no spaces or special symbols).");
+          setIsLoading(false);
+          return;
+        }
+      }
       if (!schoolCode.trim()) {
         setError("🚫 School Code is required. Please enter your school's code (e.g. AGS-KUPPAM-101) or ask your science teacher.");
         setIsLoading(false);
@@ -206,18 +246,25 @@ export default function AuthPage() {
       }
 
       if (typeof window !== "undefined") {
+        localStorage.removeItem("curiosity_school_code");
         if (realName) localStorage.setItem("curiosity_real_name", realName);
         if (username) {
           localStorage.setItem("curiosity_username", username);
           localStorage.setItem("curiosity_login_" + username.toLowerCase().trim(), email.trim());
         }
-        if (schoolCode) {
-          localStorage.setItem("curiosity_school_code", schoolCode.trim().toUpperCase());
-        }
         if (hasConsent) {
           localStorage.setItem("curiosity_parental_consent", "true");
           localStorage.setItem("curiosity_consent_timestamp", new Date().toISOString());
         }
+      }
+    } else {
+      // When logging in as an existing user, clear previous student local caches to prevent cross-account bleed
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("curiosity_school_code");
+        localStorage.removeItem("curiosity_real_name");
+        localStorage.removeItem("curiosity_username");
+        localStorage.removeItem("curiosity_avatar_url");
+        localStorage.removeItem("curiosity_user_id");
       }
     }
 
@@ -241,6 +288,7 @@ export default function AuthPage() {
       if (res?.error) {
         setError(res.error);
       } else if (res?.success) {
+        initTabSession();
         window.location.href = "/dashboard";
       }
     } else {
@@ -248,6 +296,7 @@ export default function AuthPage() {
       if (res?.error) {
         setError(res.error);
       } else if (res?.success) {
+        initTabSession();
         window.location.href = "/dashboard";
       }
     }
@@ -256,7 +305,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center bg-[#f7f9fb] p-4 sm:p-6 font-['Montserrat'] antialiased">
+    <div className="min-h-screen flex flex-col justify-center bg-[#f7f9fb] p-4 sm:p-6 font-['Montserrat'] antialiased overflow-x-hidden w-full max-w-full">
       <div className="w-full max-w-md mx-auto flex flex-col gap-5 sm:gap-6">
         
         {/* Language Selector at Top Right */}
@@ -468,6 +517,17 @@ export default function AuthPage() {
                       <p className="text-[11px] text-gray-500 leading-tight">
                         {t.auth.consent_subtext || "Under our student privacy and safety policy, students under 18 must confirm guardian or educator permission before creating an account."}
                       </p>
+                      <p className="text-[11px] text-gray-500 pt-1 leading-snug">
+                        By registering, you also agree to our{" "}
+                        <Link href="/terms" target="_blank" className="font-bold text-[#143867] underline hover:text-[#ea580c]">
+                          Terms of Service
+                        </Link>{" "}
+                        and{" "}
+                        <Link href="/privacy" target="_blank" className="font-bold text-[#143867] underline hover:text-[#ea580c]">
+                          Privacy Policy
+                        </Link>
+                        .
+                      </p>
                     </div>
                   </label>
                 </div>
@@ -587,13 +647,13 @@ export default function AuthPage() {
         </div>
 
         {/* School Bulk Roster Portal Link */}
-        <div className="text-center">
+        <div className="text-center px-2">
           <Link
             href="/schools"
-            className="min-h-[44px] inline-flex items-center gap-2 text-xs font-bold text-[#143867] hover:text-[#1e4a85] bg-white hover:bg-gray-50 px-5 py-2.5 rounded-full border border-gray-200 shadow-2xs active:scale-95 transition-all"
+            className="min-h-[44px] inline-flex items-center justify-center gap-2 text-[11px] sm:text-xs font-bold text-[#143867] hover:text-[#1e4a85] bg-white hover:bg-gray-50 px-3.5 py-2 rounded-full border border-gray-200 shadow-2xs active:scale-95 transition-all max-w-full text-center"
           >
-            <span className="material-symbols-outlined text-base text-[#ea580c]">school</span>
-            <span>{t.auth.school_portal}</span>
+            <span className="material-symbols-outlined text-base text-[#ea580c] shrink-0">school</span>
+            <span className="truncate sm:whitespace-normal">{t.auth.school_portal}</span>
           </Link>
         </div>
 

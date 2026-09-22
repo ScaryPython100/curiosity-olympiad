@@ -25,15 +25,44 @@ const createClient = async () => {
   );
 };
 
+// Helper: Validate username format to prevent privacy leaks (email/phone)
+export async function validateUsernameFormat(username: string): Promise<{ valid: boolean; error?: string }> {
+  const trimmed = (username || "").trim();
+  if (!trimmed) {
+    return { valid: false, error: "🚫 Username is required." };
+  }
+  if (trimmed.length < 3 || trimmed.length > 24) {
+    return { valid: false, error: "🚫 Username must be between 3 and 24 characters." };
+  }
+  if (trimmed.includes("@") || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+    return { valid: false, error: "🚫 Usernames cannot be an email address for student privacy. Please choose a public explorer nickname (e.g. StarGazer42)." };
+  }
+  const cleanPhone = trimmed.replace(/[\s\-\(\)\+]/g, "");
+  if (/^\d{7,15}$/.test(cleanPhone)) {
+    return { valid: false, error: "🚫 Usernames cannot be a phone number for student privacy. Please choose a public explorer nickname (e.g. StarGazer42)." };
+  }
+  if (!/^[a-zA-Z0-9_.-]+$/.test(trimmed)) {
+    return { valid: false, error: "🚫 Usernames can only contain letters, numbers, underscores, dots, and hyphens (no spaces or special symbols)." };
+  }
+  return { valid: true };
+}
+
 // 2. The Registration Engine
 export async function signUpAction(formData: FormData) {
   const emailOrPhone = ((formData.get("email") as string) || "").trim();
   const password = ((formData.get("password") as string) || "").trim();
-  const username = ((formData.get("identifier") as string) || "Explorer").trim();
+  const username = ((formData.get("identifier") as string) || "").trim();
   const realName = ((formData.get("realName") as string) || username).trim();
   const schoolCode = ((formData.get("schoolCode") as string) || "").trim().toUpperCase();
   const parentalConsent = formData.get("parentalConsent") === "true";
 
+  // 1. Validate Username Format (Disallow emails and phone numbers)
+  const usernameCheck = await validateUsernameFormat(username);
+  if (!usernameCheck.valid) {
+    return { error: usernameCheck.error! };
+  }
+
+  // 2. Validate School Code & Parental Consent
   if (!schoolCode) {
     return { error: "🚫 School Code is required to register. Please enter your school code or ask your teacher." };
   }
@@ -43,11 +72,22 @@ export async function signUpAction(formData: FormData) {
 
   const supabase = await createClient();
 
+  // 3. Enforce Username Uniqueness BEFORE Auth Signup
+  const { data: existingUser } = await supabase
+    .from("student_profiles")
+    .select("id")
+    .ilike("username", username)
+    .maybeSingle();
+
+  if (existingUser) {
+    return { error: "🚫 Username already taken, please choose a different public explorer nickname." };
+  }
+
   const email = emailOrPhone.includes("@")
     ? emailOrPhone
     : `${emailOrPhone.replace(/[^0-9]/g, "")}@phone.curiosityolympiad.org`;
 
-  // 1. FIRST: Verify if the Mail ID / Phone Number is registered or not
+  // 4. Verify if the Mail ID / Phone Number is registered
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -71,19 +111,6 @@ export async function signUpAction(formData: FormData) {
 
   if (data?.user?.identities && data.user.identities.length === 0) {
     return { error: `🚫 Email ID / Phone Number is already registered! Please navigate to Login Page to sign in.` };
-  }
-
-  // 2. SECOND: If the mail/phone number aren't registered check for the username
-  if (username && username !== "Explorer") {
-    const { data: existingUser } = await supabase
-      .from("student_profiles")
-      .select("id")
-      .ilike("username", username)
-      .maybeSingle();
-
-    if (existingUser) {
-      return { error: `🚫 Username already taken, please select a different one.` };
-    }
   }
 
   // Save the unique username to our new table

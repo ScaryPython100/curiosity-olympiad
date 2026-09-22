@@ -10,6 +10,9 @@ import { Grades910Level } from './levels/Grades910Level';
 import { SoundLevel } from './levels/SoundLevel';
 import { ElectricityLevel } from './levels/ElectricityLevel';
 import { BuoyancyLevel } from './levels/BuoyancyLevel';
+import { KitchenChemistryLevel } from './levels/KitchenChemistryLevel';
+import { HumanBodyLevel } from './levels/HumanBodyLevel';
+import { PlantsGrowthLevel } from './levels/PlantsGrowthLevel';
 
 import { EXPERIMENTS_CONFIG } from '@/config/scoringConfig';
 
@@ -31,7 +34,10 @@ export const EXPERIMENT_LABELS: Record<number, string[]> = {
   5: ["First-Rain Soil", "Solar Cooker", "Biogas Plant"],
   6: ["Tapping Matka", "String Telephone", "Well Echoes"],
   7: ["Comb & Paper", "Torch Circuit", "Magnet Test"],
-  8: ["Paper Boat", "Egg in Salt Water", "Oil & Water"]
+  8: ["Paper Boat", "Egg in Salt Water", "Oil & Water"],
+  9: ["Turmeric pH", "Soda & Balloon", "Sugar Saturation"],
+  10: ["Pulse & Heartbeat", "Diaphragm & Lungs", "Pupil Reflex"],
+  11: ["Oxygen Bubbles", "Leaf Transpiration", "Phototropism"]
 };
 
 export default function SandboxEngine({ 
@@ -92,6 +98,12 @@ export default function SandboxEngine({
       return <ElectricityLevel key={`electricity-${currentLevelIndex}`} recordAction={handleRecordAction} experimentSubIndex={currentLevelIndex} />;
     } else if (mockTestId === 8) {
       return <BuoyancyLevel key={`buoyancy-${currentLevelIndex}`} recordAction={handleRecordAction} experimentSubIndex={currentLevelIndex} />;
+    } else if (mockTestId === 9) {
+      return <KitchenChemistryLevel key={`kitchen-${currentLevelIndex}`} recordAction={handleRecordAction} experimentSubIndex={currentLevelIndex} />;
+    } else if (mockTestId === 10) {
+      return <HumanBodyLevel key={`human-${currentLevelIndex}`} recordAction={handleRecordAction} experimentSubIndex={currentLevelIndex} />;
+    } else if (mockTestId === 11) {
+      return <PlantsGrowthLevel key={`plants-${currentLevelIndex}`} recordAction={handleRecordAction} experimentSubIndex={currentLevelIndex} />;
     }
     return null;
   };

@@ -79,6 +79,24 @@ export const LEVELS_CONFIG: Record<number, LevelConfig> = {
     name: "Water & Buoyancy",
     gateType: "attempt_all",
     gateThreshold: 0,
+  },
+  8: {
+    levelIndex: 8,
+    name: "Kitchen Chemistry",
+    gateType: "attempt_all",
+    gateThreshold: 0,
+  },
+  9: {
+    levelIndex: 9,
+    name: "The Human Body",
+    gateType: "attempt_all",
+    gateThreshold: 0,
+  },
+  10: {
+    levelIndex: 10,
+    name: "Plants & Growth",
+    gateType: "attempt_all",
+    gateThreshold: 0,
   }
 };
 
@@ -178,6 +196,42 @@ export const EXPERIMENTS_CONFIG: Record<string, ExperimentConfig> = {
   "buoyancy_3": {
     experimentId: "buoyancy_3", levelIndex: 7, experimentSubIndex: 2, tier: "advanced", ...DIFFICULTY_SCALING.advanced,
     freeTextInquiry: { questionId: "buoyancy_3_q", prompt: "If you had three liquids — water, mustard oil, and honey — all mixed in one glass and left to settle, what order do you think they'd stack in, and why?", maxPoints: 4 }
+  },
+  "kitchen_1": {
+    experimentId: "kitchen_1", levelIndex: 8, experimentSubIndex: 0, tier: "foundation", ...DIFFICULTY_SCALING.foundation,
+    freeTextInquiry: { questionId: "kitchen_1_q", prompt: "What other everyday items in your kitchen do you think would turn turmeric paste red?", maxPoints: 4 }
+  },
+  "kitchen_2": {
+    experimentId: "kitchen_2", levelIndex: 8, experimentSubIndex: 1, tier: "intermediate", ...DIFFICULTY_SCALING.intermediate,
+    freeTextInquiry: { questionId: "kitchen_2_q", prompt: "What gas filled the balloon during the fizzing reaction, and where did it come from?", maxPoints: 4 }
+  },
+  "kitchen_3": {
+    experimentId: "kitchen_3", levelIndex: 8, experimentSubIndex: 2, tier: "advanced", ...DIFFICULTY_SCALING.advanced,
+    freeTextInquiry: { questionId: "kitchen_3_q", prompt: "Why do you think hot water can dissolve so much more sugar than cold water?", maxPoints: 4 }
+  },
+  "human_1": {
+    experimentId: "human_1", levelIndex: 9, experimentSubIndex: 0, tier: "foundation", ...DIFFICULTY_SCALING.foundation,
+    freeTextInquiry: { questionId: "human_1_q", prompt: "Why does your heart beat faster when you sprint compared to when you are reading or resting?", maxPoints: 4 }
+  },
+  "human_2": {
+    experimentId: "human_2", levelIndex: 9, experimentSubIndex: 1, tier: "intermediate", ...DIFFICULTY_SCALING.intermediate,
+    freeTextInquiry: { questionId: "human_2_q", prompt: "What creates the pressure difference that forces air inside your lungs when the diaphragm moves down?", maxPoints: 4 }
+  },
+  "human_3": {
+    experimentId: "human_3", levelIndex: 9, experimentSubIndex: 2, tier: "advanced", ...DIFFICULTY_SCALING.advanced,
+    freeTextInquiry: { questionId: "human_3_q", prompt: "Why does your pupil shrink in bright sunlight and widen in a dim room?", maxPoints: 4 }
+  },
+  "plants_1": {
+    experimentId: "plants_1", levelIndex: 10, experimentSubIndex: 0, tier: "foundation", ...DIFFICULTY_SCALING.foundation,
+    freeTextInquiry: { questionId: "plants_1_q", prompt: "What gas is inside the tiny bubbles that the water plant produces when light shines on it?", maxPoints: 4 }
+  },
+  "plants_2": {
+    experimentId: "plants_2", levelIndex: 10, experimentSubIndex: 1, tier: "intermediate", ...DIFFICULTY_SCALING.intermediate,
+    freeTextInquiry: { questionId: "plants_2_q", prompt: "Where did the water droplets inside the clear plastic bag tied around the leafy branch come from?", maxPoints: 4 }
+  },
+  "plants_3": {
+    experimentId: "plants_3", levelIndex: 10, experimentSubIndex: 2, tier: "advanced", ...DIFFICULTY_SCALING.advanced,
+    freeTextInquiry: { questionId: "plants_3_q", prompt: "How does a plant stem know which direction the sunlight is coming from to bend toward it?", maxPoints: 4 }
   },
 };
 

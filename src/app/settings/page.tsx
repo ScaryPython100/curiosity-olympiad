@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import { logoutUser } from "@/utils/auth";
 
 export default function SettingsPage() {
   const { t } = useLanguage();
@@ -14,19 +15,23 @@ export default function SettingsPage() {
   useEffect(() => {
     // Check initial state
     const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
       setIsDarkMode(true);
       document.documentElement.classList.add("dark");
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove("dark");
     }
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = !isDarkMode;
-    setIsDarkMode(newTheme);
-    if (newTheme) {
+    if (!isDarkMode) {
+      setIsDarkMode(true);
       document.documentElement.classList.add("dark");
       localStorage.setItem("theme", "dark");
     } else {
+      setIsDarkMode(false);
       document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
@@ -35,18 +40,7 @@ export default function SettingsPage() {
   const handleLogout = async () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
-    try {
-      const { createClient } = await import("@/utils/supabase/client");
-      const supabase = createClient();
-      await supabase.auth.signOut();
-      if (typeof document !== "undefined") {
-        document.cookie = "descope_session=; max-age=0; path=/";
-      }
-      router.push("/login");
-    } catch (err) {
-      console.error("Logout failed:", err);
-      setIsLoggingOut(false);
-    }
+    await logoutUser();
   };
 
   return (
@@ -78,13 +72,16 @@ export default function SettingsPage() {
               <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl transition-colors duration-300">chevron_right</span>
             </button>
             <div className="h-px bg-gray-100 dark:bg-gray-700 mx-5 transition-colors duration-300"></div>
-            <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors active:bg-gray-100 dark:active:bg-gray-700">
+            <Link 
+              href="/privacy"
+              className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors active:bg-gray-100 dark:active:bg-gray-700"
+            >
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[#143867] dark:text-blue-400 transition-colors duration-300">shield</span>
                 <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">{t.settings.privacy}</span>
               </div>
               <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl transition-colors duration-300">chevron_right</span>
-            </button>
+            </Link>
           </div>
         </section>
 
@@ -185,21 +182,27 @@ export default function SettingsPage() {
         <section className="mb-6">
           <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1 transition-colors duration-300">{t.settings.legal}</h2>
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden transition-colors duration-300">
-            <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors active:bg-gray-100 dark:active:bg-gray-700">
+            <Link 
+              href="/terms"
+              className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors active:bg-gray-100 dark:active:bg-gray-700"
+            >
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[#143867] dark:text-blue-400 transition-colors duration-300">description</span>
                 <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">{t.settings.terms}</span>
               </div>
-              <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl transition-colors duration-300">open_in_new</span>
-            </button>
+              <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl transition-colors duration-300">chevron_right</span>
+            </Link>
             <div className="h-px bg-gray-100 dark:bg-gray-700 mx-5 transition-colors duration-300"></div>
-            <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors active:bg-gray-100 dark:active:bg-gray-700">
+            <Link 
+              href="/privacy"
+              className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors active:bg-gray-100 dark:active:bg-gray-700"
+            >
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[#143867] dark:text-blue-400 transition-colors duration-300">policy</span>
                 <span className="text-sm font-semibold text-[#143867] dark:text-gray-200 transition-colors duration-300">{t.settings.privacy_policy}</span>
               </div>
-              <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl transition-colors duration-300">open_in_new</span>
-            </button>
+              <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl transition-colors duration-300">chevron_right</span>
+            </Link>
           </div>
         </section>
 

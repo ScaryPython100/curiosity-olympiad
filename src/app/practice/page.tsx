@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import SandboxEngine, { EXPERIMENT_LABELS } from "@/components/SandboxEngine";
 import { addActivityXP } from "@/app/actions/profile";
+import { submitMockTestAttempt, getMockTestAttempts } from "@/app/actions/exams";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
 import { toast } from "sonner";
@@ -26,7 +28,7 @@ export interface MockTestInfo {
   title: string;
   subtitle: string;
   description: string;
-  module: "Optics" | "Gravity" | "Chemistry" | "Grades68" | "Grades910" | "Sound" | "Electricity" | "Buoyancy";
+  module: "Optics" | "Gravity" | "Chemistry" | "Grades68" | "Grades910" | "Sound" | "Electricity" | "Buoyancy" | "Kitchen" | "Body" | "Plants";
   idealTime: { level1: string; level2: string };
   idealSeconds: { level1: number; level2: number };
   questionCount: number;
@@ -139,6 +141,45 @@ const MOCK_TESTS: MockTestInfo[] = [
     icon: "water_drop",
     badge: "Fluid Mechanics & Buoyancy",
     color: "from-[#2563eb] to-[#3b82f6]"
+  },
+  {
+    id: 9,
+    title: "Mock Test 9: Kitchen Chemistry",
+    subtitle: "Indicators, Effervescence & Saturation",
+    description: "Explore natural turmeric pH color changes with lemon and soap, inflate balloons with vinegar effervescence, and dissolve sugar up to thermal saturation.",
+    module: "Kitchen",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    icon: "science",
+    badge: "Acids, Bases & Solutions",
+    color: "from-[#c2410c] to-[#ea580c]"
+  },
+  {
+    id: 10,
+    title: "Mock Test 10: The Human Body",
+    subtitle: "Heartbeat, Lungs & Eye Reflexes",
+    description: "Listen to resting vs. sprint heartbeat audio, pull the rubber diaphragm sheet to inflate balloon lungs, and test pupil constriction in bright torchlight.",
+    module: "Body",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    icon: "favorite",
+    badge: "Physiology & Biomechanics",
+    color: "from-[#be123c] to-[#e11d48]"
+  },
+  {
+    id: 11,
+    title: "Mock Test 11: Plants & Growth",
+    subtitle: "Photosynthesis, Transpiration & Phototropism",
+    description: "Count oxygen bubbles rising from submerged waterweed under intense light, observe leaf transpiration condensation, and bend growing stems toward light.",
+    module: "Plants",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    icon: "psychiatry",
+    badge: "Plant Biology & Phototropism",
+    color: "from-[#047857] to-[#10b981]"
   }
 ];
 
@@ -846,6 +887,198 @@ const PRACTICE_QUESTIONS: Question[] = [
     question: "If honey is denser than water, where would it go in the glass?",
     options: ["On top of the oil", "Between the oil and water", "At the very bottom", "It would disappear"],
     correct: 2, explanation: "Densest liquids sink to the bottom!", level: "both"
+  },
+  // --- MOCK TEST 9 (Kitchen Chemistry) ---
+  {
+    id: 73, mockTestId: 9, experimentIndex: 0, module: "Kitchen",
+    title: "Turmeric Color Shift",
+    question: "What color does turmeric turn when mixed with laundry detergent or soap?",
+    options: ["Bright blue", "Deep crimson red", "Green", "Transparent"],
+    correct: 1, explanation: "Turmeric contains curcumin, which turns deep red in alkaline (basic) solutions!", level: "both"
+  },
+  {
+    id: 74, mockTestId: 9, experimentIndex: 0, module: "Kitchen",
+    title: "Neutralizing Turmeric",
+    question: "What happens when you add lemon juice to turmeric that has turned red from soap?",
+    options: ["It turns green", "It turns back to bright yellow", "It boils violently", "It turns purple"],
+    correct: 1, explanation: "Citric acid neutralizes the alkaline soap, restoring curcumin to its natural yellow state.", level: "both"
+  },
+  {
+    id: 75, mockTestId: 9, experimentIndex: 0, module: "Kitchen",
+    title: "Natural Indicator",
+    question: "What scientific role does turmeric play in this test?",
+    options: ["A preservative", "A natural pH indicator", "A cleaning surfactant", "A flavor enhancer"],
+    correct: 1, explanation: "A pH indicator changes color depending on whether a liquid is acidic or basic.", level: "both"
+  },
+  {
+    id: 76, mockTestId: 9, experimentIndex: 1, module: "Kitchen",
+    title: "Gas in the Balloon",
+    question: "What gas is produced when baking soda reacts with vinegar to inflate the balloon?",
+    options: ["Oxygen", "Carbon Dioxide (CO₂)", "Hydrogen", "Helium"],
+    correct: 1, explanation: "Acetic acid in vinegar reacts with sodium bicarbonate to form carbon dioxide gas!", level: "both"
+  },
+  {
+    id: 77, mockTestId: 9, experimentIndex: 1, module: "Kitchen",
+    title: "Limiting Reactant",
+    question: "Why did adding extra baking soda past 18g stop inflating the balloon further?",
+    options: ["The balloon popped", "All the vinegar acid had already been consumed", "Gas escaped through the rubber", "The flask got too cold"],
+    correct: 1, explanation: "Vinegar was the limiting reactant — once all acid is used up, excess base cannot react.", level: "both"
+  },
+  {
+    id: 78, mockTestId: 9, experimentIndex: 1, module: "Kitchen",
+    title: "Gas Pressure",
+    question: "How does the gas inside the flask physically inflate the rubber balloon?",
+    options: ["By heating the rubber", "By exerting physical gas pressure against the inner walls", "By pulling air from the room", "By generating electricity"],
+    correct: 1, explanation: "Gas molecules collide with the inside walls of the balloon, creating outward pressure.", level: "both"
+  },
+  {
+    id: 79, mockTestId: 9, experimentIndex: 2, module: "Kitchen",
+    title: "Solubility & Heat",
+    question: "Why does hot water dissolve significantly more sugar than cold water?",
+    options: ["Hot water is lighter", "Thermal energy expands spaces and movement between water molecules", "Sugar melts into water", "Cold water destroys sugar crystals"],
+    correct: 1, explanation: "Thermal kinetic energy increases molecular spacing and solvent capacity.", level: "both"
+  },
+  {
+    id: 80, mockTestId: 9, experimentIndex: 2, module: "Kitchen",
+    title: "Saturation Point",
+    question: "What do we call a liquid solution that cannot dissolve any more solute at its current temperature?",
+    options: ["Dilute", "Saturated", "Unstable", "Distilled"],
+    correct: 1, explanation: "A saturated solution holds the maximum possible dissolved solute at that temperature.", level: "both"
+  },
+  {
+    id: 81, mockTestId: 9, experimentIndex: 2, module: "Kitchen",
+    title: "Dissolving Sediment",
+    question: "If you heat a saturated sugar solution that has crystals sitting on the bottom, what happens?",
+    options: ["The sediment crystals dissolve into the liquid", "The crystals turn into ice", "The water evaporates instantly", "More crystals appear"],
+    correct: 0, explanation: "Higher temperatures increase the saturation limit, dissolving the settled sediment.", level: "both"
+  },
+  // --- MOCK TEST 10 (The Human Body) ---
+  {
+    id: 82, mockTestId: 10, experimentIndex: 0, module: "Body",
+    title: "Sprint Pulse Rate",
+    question: "Why does your pulse rate jump when you sprint compared to when sitting at rest?",
+    options: ["To keep your body cool", "Working muscles require much more oxygen and energy transported by blood", "Your lungs shrink during sprinting", "Running slows down digestion"],
+    correct: 1, explanation: "Sprint muscles burn energy rapidly, demanding faster blood flow to supply oxygen.", level: "both"
+  },
+  {
+    id: 83, mockTestId: 10, experimentIndex: 0, module: "Body",
+    title: "Heartbeat Acoustics",
+    question: "What creates the classic 'lub-dub' acoustic sound heard through a stethoscope?",
+    options: ["Air flowing through the trachea", "Heart valves snapping shut during contraction and relaxation", "Blood splashing against ribs", "Lungs expanding"],
+    correct: 1, explanation: "Heart valves closing (AV valves first, then semilunar valves) create the two audible sounds.", level: "both"
+  },
+  {
+    id: 84, mockTestId: 10, experimentIndex: 0, module: "Body",
+    title: "Feeling the Pulse",
+    question: "Where on your body can you easily feel an arterial pulse with your fingertips?",
+    options: ["On your fingernail", "On the inside of your wrist (radial artery) or side of neck (carotid)", "On your kneecap", "On your earlobe"],
+    correct: 1, explanation: "The radial artery at your wrist and carotid in your neck run close to the skin surface.", level: "both"
+  },
+  {
+    id: 85, mockTestId: 10, experimentIndex: 1, module: "Body",
+    title: "Diaphragm Mechanics",
+    question: "What happens inside the chest cavity when the diaphragm muscle pulls downward?",
+    options: ["Chest cavity volume shrinks", "Cavity volume expands and pressure drops, sucking air inside", "Air is squeezed out", "Lungs stop breathing"],
+    correct: 1, explanation: "Lower internal pressure creates a vacuum that atmospheric air rushes in to fill.", level: "both"
+  },
+  {
+    id: 86, mockTestId: 10, experimentIndex: 1, module: "Body",
+    title: "Passive Lungs",
+    question: "Do human lungs have their own muscles to pump air in and out?",
+    options: ["Yes, strong internal lung muscles", "No, they expand passively due to surrounding pressure changes", "Only the left lung has muscles", "Only during exercise"],
+    correct: 1, explanation: "Lungs are passive elastic tissue moved by the diaphragm and rib intercostal muscles.", level: "both"
+  },
+  {
+    id: 87, mockTestId: 10, experimentIndex: 1, module: "Body",
+    title: "Exhalation Driver",
+    question: "What primarily causes exhalation during quiet resting breathing?",
+    options: ["Diaphragm relaxing upward and elastic recoil of the lungs", "Deep coughing", "Swallowing air", "Heart beating against the chest"],
+    correct: 0, explanation: "When the diaphragm relaxes into its dome shape, internal pressure rises and air flows out.", level: "both"
+  },
+  {
+    id: 88, mockTestId: 10, experimentIndex: 2, module: "Body",
+    title: "Pupil Constriction",
+    question: "Why does your pupil shrink when a bright flashlight shines into your eye?",
+    options: ["To focus on far away objects", "To protect the sensitive retina from excessive light and glare", "To turn the light off", "Because the eye is sleeping"],
+    correct: 1, explanation: "The pupillary light reflex constricts the pupil to protect retinal photoreceptors from light damage.", level: "both"
+  },
+  {
+    id: 89, mockTestId: 10, experimentIndex: 2, module: "Body",
+    title: "Eye Iris Muscle",
+    question: "Which anatomical part of the eye contains the colored muscle that adjusts pupil aperture?",
+    options: ["Cornea", "Iris", "Lens", "Retina"],
+    correct: 1, explanation: "The iris contains circular sphincter and radial dilator muscles that regulate pupil aperture.", level: "both"
+  },
+  {
+    id: 90, mockTestId: 10, experimentIndex: 2, module: "Body",
+    title: "Pupil Dilation in Darkness",
+    question: "What happens to your pupils when you step into a dimly lit room?",
+    options: ["They constrict to tiny specks", "They dilate (widen) to capture as much ambient light as possible", "They turn green", "They close completely"],
+    correct: 1, explanation: "In dim light, the pupil widens (dilates) up to 8mm to improve vision.", level: "both"
+  },
+  // --- MOCK TEST 11 (Plants & Growth) ---
+  {
+    id: 91, mockTestId: 11, experimentIndex: 0, module: "Plants",
+    title: "Photosynthesis Bubbles",
+    question: "What gas is inside the tiny bubbles rising from submerged waterweed in bright light?",
+    options: ["Carbon Dioxide", "Oxygen (O₂)", "Nitrogen", "Methane"],
+    correct: 1, explanation: "Photosynthesis splits water molecules ($H_2O$), releasing oxygen gas as a byproduct.", level: "both"
+  },
+  {
+    id: 92, mockTestId: 11, experimentIndex: 0, module: "Plants",
+    title: "Light and Bubbling Rate",
+    question: "What happens to the bubble release rate when you pull the lamp further away from the plant?",
+    options: ["It increases", "It decreases because lower light intensity slows photosynthesis", "It stays exactly the same", "Bubbles turn blue"],
+    correct: 1, explanation: "Light intensity decreases with distance, reducing the rate of photochemical photosynthesis.", level: "both"
+  },
+  {
+    id: 93, mockTestId: 11, experimentIndex: 0, module: "Plants",
+    title: "Green Pigment",
+    question: "What green pigment inside plant cells absorbs sunlight to power photosynthesis?",
+    options: ["Hemoglobin", "Chlorophyll", "Melanin", "Keratin"],
+    correct: 1, explanation: "Chlorophyll absorbs red and blue light wavelengths while reflecting green light.", level: "both"
+  },
+  {
+    id: 94, mockTestId: 11, experimentIndex: 1, module: "Plants",
+    title: "Transpiration Moisture",
+    question: "Where did the water droplets inside the clear plastic bag tied around the branch originate?",
+    options: ["Rain leaked through the bag", "Water vapor evaporated from leaf stomata pores and condensed on the cool bag", "The plastic generated water", "The branch melted"],
+    correct: 1, explanation: "Plants transpire water vapor through stomata, which condenses as liquid droplets on the plastic.", level: "both"
+  },
+  {
+    id: 95, mockTestId: 11, experimentIndex: 1, module: "Plants",
+    title: "Transpiration Suction",
+    question: "Why do plants evaporate so much water through their leaves every day?",
+    options: ["To cool leaf tissues and pull minerals upward from soil via xylem suction", "To cause rainclouds", "Because roots cannot hold water", "To attract birds"],
+    correct: 0, explanation: "Transpiration acts like a suction straw, pulling water and soil nutrients upward through the xylem.", level: "both"
+  },
+  {
+    id: 96, mockTestId: 11, experimentIndex: 1, module: "Plants",
+    title: "Shade Transpiration",
+    question: "Why was there minimal condensation when the plant was kept in deep shade?",
+    options: ["The plant dried out", "Cooler temperatures and dim light cause guard cells to close stomata pores", "Shade removes water from leaves", "Plastic cannot hold fog in shade"],
+    correct: 1, explanation: "Guard cells close stomatal openings in lower light and cooler temperatures to conserve moisture.", level: "both"
+  },
+  {
+    id: 97, mockTestId: 11, experimentIndex: 2, module: "Plants",
+    title: "Auxin Phototropism",
+    question: "Why did the growing seedling stem bend toward the light source placed on the side?",
+    options: ["Light pulled the stem magnetically", "Plant hormone (auxin) accumulated on the shaded side, causing shaded cells to grow longer", "Sunny side cells expanded faster", "Wind pushed the tip"],
+    correct: 1, explanation: "Auxin concentrates on the shaded side, accelerating cell elongation and bending the tip toward light!", level: "both"
+  },
+  {
+    id: 98, mockTestId: 11, experimentIndex: 2, module: "Plants",
+    title: "Growth Response Name",
+    question: "What is this directional growth of a plant stem in response to light called?",
+    options: ["Geotropism", "Phototropism", "Hydrotropism", "Chemotropism"],
+    correct: 1, explanation: "Phototropism describes growth orientation toward (positive) or away from (negative) light.", level: "both"
+  },
+  {
+    id: 99, mockTestId: 11, experimentIndex: 2, module: "Plants",
+    title: "Gravitropism in Roots",
+    question: "Why do plant roots grow downward into dark soil rather than toward the light?",
+    options: ["Roots fear the sun", "Positive gravitropism (sensing Earth's gravity downward)", "Roots follow cold air currents", "Roots have no cells"],
+    correct: 1, explanation: "Roots exhibit positive gravitropism, sensing gravity to anchor and find water underground.", level: "both"
   }
 ];
 export interface MockTestResult {
@@ -862,15 +1095,40 @@ export interface MockTestResult {
 }
 
 export default function PracticePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#f7f9fb] text-[#143867] font-bold">Loading...</div>}>
+      <PracticeContent />
+    </Suspense>
+  );
+}
+
+function PracticeContent() {
   const { t } = useLanguage();
-  const [selectedMockTestId, setSelectedMockTestId] = useState<number>(1);
+  const searchParams = useSearchParams();
+  
+  const initialTestId = (() => {
+    const p = searchParams?.get("mockTestId") || searchParams?.get("testId") || searchParams?.get("id");
+    const val = parseInt(p || "1", 10);
+    return !isNaN(val) && val >= 1 && val <= 11 ? val : 1;
+  })();
+  const initialActive = (() => {
+    const s = searchParams?.get("start") || searchParams?.get("auto");
+    return s === "true";
+  })();
+  const initialExp = (() => {
+    const e = searchParams?.get("exp") || searchParams?.get("expIndex");
+    const val = parseInt(e || "0", 10);
+    return !isNaN(val) && val >= 0 && val <= 2 ? val : 0;
+  })();
+
+  const [selectedMockTestId, setSelectedMockTestId] = useState<number>(initialTestId);
   const [difficulty, setDifficulty] = useState<"level1" | "level2">("level1");
-  const [activeTest, setActiveTest] = useState(false);
+  const [activeTest, setActiveTest] = useState(initialActive);
   const [isPaused, setIsPaused] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [currentExpIndex, setCurrentExpIndex] = useState(0);
+  const [currentExpIndex, setCurrentExpIndex] = useState(initialExp);
   const [reflections, setReflections] = useState<Record<string, string>>({});
   
   // Telemetry metric tracking
@@ -878,14 +1136,23 @@ export default function PracticePage() {
   const [sliderAdjustments, setSliderAdjustments] = useState<number>(4);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
   const [activeTelemetry, setActiveTelemetry] = useState<any>({
-    reversals: 2,
-    clickCount: 2,
-    dragCount: 2,
+    distinctStatesReached: 3,
     triggerActivated: false,
-    distinctStatesReached: 2,
-    optionalActions: 0,
-    voluntaryExplorationTrials: 0
+    voluntaryExplorationTrials: 2,
+    sliderAdjustments: 4,
+    reversals: 2,
+    totalDwellTime: 45000,
+    optionalActions: 1
   });
+
+  const [hoveredExperiment, setHoveredExperiment] = useState<number | null>(null);
+
+  // Sound Engine initial load
+  useEffect(() => {
+    import('@/utils/webAudio').then(module => {
+      module.soundEngine.init();
+    }).catch(err => console.log('Audio Engine fallback:', err));
+  }, []);
 
   const handleTelemetryUpdate = useCallback((data: any) => {
     if (!data) return;
@@ -901,7 +1168,7 @@ export default function PracticePage() {
 
   // Persistence for completed mock tests
   const [completedMockTests, setCompletedMockTests] = useState<Record<number, MockTestResult>>({});
-  const [unlockedLevelIndices, setUnlockedLevelIndices] = useState<number[]>([0, 1, 2, 3, 4, 5, 6, 7]);
+  const [unlockedLevelIndices, setUnlockedLevelIndices] = useState<number[]>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
   useEffect(() => {
     // Fetch unlocked levels from backend
@@ -913,33 +1180,65 @@ export default function PracticePage() {
       });
     });
 
-    if (typeof window !== "undefined") {
-      try {
-        const levelParam = urlParams.get("level");
-        if (levelParam === "level1" || levelParam === "level2") {
-          setDifficulty(levelParam);
-        }
-        if (testIdParam) {
-          const parsed = parseInt(testIdParam, 10);
-          if (!isNaN(parsed) && parsed >= 1 && parsed <= 8) {
-            setSelectedMockTestId(parsed);
-            setCurrentExpIndex(0);
-            if (urlParams.get("start") === "true" || urlParams.get("auto") === "true") {
-              setActiveTest(true);
+    try {
+      const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+      const levelParam = searchParams?.get("level") || urlParams?.get("level");
+      const testIdParam = searchParams?.get("mockTestId") || searchParams?.get("testId") || searchParams?.get("id") || urlParams?.get("mockTestId") || urlParams?.get("testId") || urlParams?.get("id");
+      const startParam = searchParams?.get("start") || searchParams?.get("auto") || urlParams?.get("start") || urlParams?.get("auto");
+
+      if (levelParam === "level1" || levelParam === "level2") {
+        setDifficulty(levelParam);
+      }
+      if (testIdParam) {
+        const parsed = parseInt(testIdParam, 10);
+        if (!isNaN(parsed) && parsed >= 1 && parsed <= 11) {
+          setSelectedMockTestId(parsed);
+          const expParam = searchParams?.get("exp") || searchParams?.get("expIndex") || urlParams?.get("exp") || urlParams?.get("expIndex");
+          if (expParam) {
+            const expParsed = parseInt(expParam, 10);
+            if (!isNaN(expParsed) && expParsed >= 0 && expParsed <= 2) {
+              setCurrentExpIndex(expParsed);
+            } else {
+              setCurrentExpIndex(0);
             }
+          } else {
+            setCurrentExpIndex(0);
           }
-        } else {
-          setActiveTest(true);
+          if (startParam === "true") {
+            setActiveTest(true);
+          }
         }
+      } else {
+        setActiveTest(true);
+      }
+
+      // Hydrate completed mock tests: Supabase is source of truth, localStorage is fallback/cache
+      if (typeof window !== "undefined") {
         const stored = localStorage.getItem("curiosity_mock_tests_results");
         if (stored) {
-          setCompletedMockTests(JSON.parse(stored));
+          try {
+            setCompletedMockTests(JSON.parse(stored));
+          } catch (e) {}
         }
-      } catch (err) {
-        console.error(err);
       }
+
+      getMockTestAttempts().then((res) => {
+        if (res.success && res.data && Object.keys(res.data).length > 0) {
+          setCompletedMockTests((prev) => {
+            const merged = { ...prev, ...res.data };
+            if (typeof window !== "undefined") {
+              localStorage.setItem("curiosity_mock_tests_results", JSON.stringify(merged));
+            }
+            return merged;
+          });
+        }
+      }).catch((err) => {
+        console.warn("Could not sync mock test attempts from Supabase:", err);
+      });
+    } catch (err) {
+      console.error("Error parsing practice URL params:", err);
     }
-  }, []);
+  }, [searchParams]);
 
   const activeMockTest = MOCK_TESTS.find((m) => m.id === selectedMockTestId) || MOCK_TESTS[0];
 
@@ -1039,6 +1338,28 @@ export default function PracticePage() {
     };
 
     setCompletedMockTests(updated);
+    // Prepare comprehensive telemetry & attempt payload
+    const testTelemetry = {
+      mockTestId: selectedMockTestId,
+      title: activeMockTest.title,
+      score,
+      total,
+      percentage,
+      level: difficulty,
+      timeSecs: elapsedSeconds,
+      accuracyXP,
+      telemetryBonusXP,
+      totalXP,
+      reversals: reversalsCount,
+      sliderAdjustments: sliderAdjustments,
+      distinctStatesReached: activeTelemetry.distinctStatesReached || 3,
+      triggerActivated: activeTelemetry.triggerActivated || false,
+      voluntaryExplorationTrials: activeTelemetry.voluntaryExplorationTrials || 0,
+      totalDwellTime: elapsedSeconds * 1000,
+      optionalActions: activeTelemetry.optionalActions || 0,
+      timestamp: new Date().toISOString()
+    };
+
     if (typeof window !== "undefined") {
       localStorage.setItem("curiosity_mock_tests_results", JSON.stringify(updated));
 
@@ -1046,28 +1367,31 @@ export default function PracticePage() {
       try {
         const historyRaw = localStorage.getItem("curiosity_telemetry_history");
         const history = historyRaw ? JSON.parse(historyRaw) : [];
-        const testTelemetry = {
-          mockTestId: selectedMockTestId,
-          title: activeMockTest.title,
-          reversals: reversalsCount,
-          sliderAdjustments: sliderAdjustments,
-          distinctStatesReached: activeTelemetry.distinctStatesReached || 3,
-          triggerActivated: activeTelemetry.triggerActivated || false,
-          voluntaryExplorationTrials: activeTelemetry.voluntaryExplorationTrials || 0,
-          totalDwellTime: elapsedSeconds * 1000,
-          optionalActions: activeTelemetry.optionalActions || 0,
-          timestamp: new Date().toISOString()
-        };
         const filtered = history.filter((h: any) => h.mockTestId !== selectedMockTestId);
         filtered.push(testTelemetry);
         localStorage.setItem("curiosity_telemetry_history", JSON.stringify(filtered));
       } catch (e) {
-        console.warn("Failed to persist telemetry history:", e);
+        console.warn("Failed to persist telemetry history to localStorage:", e);
       }
     }
 
     setIsSubmitted(true);
     setShowTelemetryModal(true);
+
+    // Persist to Supabase: Exam Submission & Telemetry (Source of Truth)
+    try {
+      const subRes = await submitMockTestAttempt(
+        selectedMockTestId,
+        score,
+        total,
+        testTelemetry
+      );
+      if (!subRes?.success) {
+        console.warn("Supabase test submission note:", subRes?.error);
+      }
+    } catch (err) {
+      console.error("Failed to persist test attempt to Supabase:", err);
+    }
 
     // Award XP to profile backend & local state
     try {
@@ -1390,6 +1714,7 @@ export default function PracticePage() {
             {/* Launch Banner CTA */}
             <div className="pt-4 text-center">
               <button
+                data-testid="launch-mock-test-btn"
                 onClick={() => {
                   setActiveTest(true);
                   setCurrentExpIndex(0);
@@ -1784,6 +2109,7 @@ export default function PracticePage() {
                 {currentExpIndex < 2 ? (
                   <button
                     type="button"
+                    data-testid="next-experiment-btn"
                     onClick={() => {
                       const nextIdx = currentExpIndex + 1;
                       setCurrentExpIndex(nextIdx);
@@ -1797,6 +2123,7 @@ export default function PracticePage() {
                 ) : (
                   <button
                     type="button"
+                    data-testid="submit-test-btn"
                     onClick={handleSubmitTest}
                     className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm font-bold transition-colors flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
                   >

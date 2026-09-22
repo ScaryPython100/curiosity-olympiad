@@ -160,9 +160,7 @@ export default function LeaderboardPage() {
             <button 
               type="button"
               onClick={() => {
-                import("@/utils/supabase/client").then(m => {
-                  m.createClient().auth.signOut().then(() => router.push("/login"));
-                });
+                import("@/utils/auth").then(m => m.logoutUser());
               }}
               className="text-[#143867] hover:bg-gray-100 transition-colors p-2 rounded-xl active:scale-95 duration-100 flex items-center justify-center min-w-[44px] min-h-[44px] cursor-pointer" 
               title={t.app.logout}

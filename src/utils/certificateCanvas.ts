@@ -130,14 +130,14 @@ export function downloadCertificateAsPNG({
   // 12. Verification Footer & Signatures
   const footerY = 1120;
 
-  // Left - Dr. Ramji Narayanan Signature Area
+  // Left - Authorized Signatory Area
   ctx.textAlign = "left";
   ctx.fillStyle = "#143867";
   ctx.font = "bold 32px 'Georgia', 'Times New Roman', serif";
-  ctx.fillText("Dr. Ramji Narayanan", 200, footerY);
+  ctx.fillText("Authorized Signatory", 200, footerY);
   ctx.fillStyle = "#64748b";
   ctx.font = "24px 'Montserrat', sans-serif, Arial";
-  ctx.fillText("Chief Mentor & Founder, Agastya Foundation", 200, footerY + 36);
+  ctx.fillText("Agastya International Foundation", 200, footerY + 36);
 
   ctx.beginPath();
   ctx.moveTo(200, footerY - 40);

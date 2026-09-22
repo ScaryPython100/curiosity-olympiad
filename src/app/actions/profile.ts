@@ -388,7 +388,7 @@ export async function getProfileStats() {
   // 1. Fetch user's gamification data
   const { data: gamificationData, error: gamError } = await supabase
     .from("user_gamification")
-    .select("xp, curiosity_points, last_claimed_date")
+    .select("xp, curiosity_points, streak_days, last_claimed_date, daily_xp")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -411,16 +411,18 @@ export async function getProfileStats() {
 
   const rank = countError ? "-" : (count !== null ? count + 1 : 1);
 
-  // 4. Calculate streak (Basic implementation based on last_claimed_date)
-  let streak = 0;
-  if (gamificationData?.last_claimed_date) {
-    const lastClaimed = new Date(gamificationData.last_claimed_date);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - lastClaimed.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays <= 2) {
-      streak = 1; // Basic 1 day streak if claimed recently
-    }
+  // 4. Calculate streak & daily activity status
+  const streakDays = gamificationData?.streak_days || 1;
+  const lastClaimed = gamificationData?.last_claimed_date ? new Date(gamificationData.last_claimed_date) : null;
+  const now = new Date();
+  
+  let hasCompletedActivityToday = false;
+  if (lastClaimed) {
+    const isSameDay = 
+      lastClaimed.getFullYear() === now.getFullYear() &&
+      lastClaimed.getMonth() === now.getMonth() &&
+      lastClaimed.getDate() === now.getDate();
+    hasCompletedActivityToday = isSameDay;
   }
 
   return {
@@ -428,8 +430,11 @@ export async function getProfileStats() {
       xp,
       points: gamificationData?.curiosity_points || 0,
       username: profileData?.username || "Explorer",
+      school_code: (user.user_metadata?.school_code as string) || null,
       rank: `#${rank}`,
-      streak: `${streak} Days`,
+      streak: `${streakDays} Days`,
+      streakCount: streakDays,
+      hasCompletedActivityToday,
       quests: "0" // Placeholder until quests are implemented
     }
   };
