@@ -10,9 +10,7 @@ export function initTabSession() {
   try {
     sessionStorage.setItem("curiosity_tab_session_active", "true");
     sessionStorage.setItem("curiosity_tab_session_time", Date.now().toString());
-  } catch (e) {
-    console.error("Failed to initialize tab session:", e);
-  }
+  } catch {}
 }
 
 /**
@@ -36,9 +34,7 @@ export async function logoutUser() {
   try {
     const supabase = createClient();
     await supabase.auth.signOut();
-  } catch (err) {
-    console.error("Error signing out from Supabase:", err);
-  }
+  } catch {}
 
   try {
     // Clear descope_session cookie
@@ -53,16 +49,12 @@ export async function logoutUser() {
         document.cookie = `${name}=; max-age=0; path=/;`;
       }
     }
-  } catch (err) {
-    console.error("Error clearing auth cookies:", err);
-  }
+  } catch {}
 
   try {
     // Clear tab session
     sessionStorage.clear();
-  } catch (err) {
-    console.error("Error clearing sessionStorage:", err);
-  }
+  } catch {}
 
   try {
     // Clear user-specific storage to prevent cross-account bleed between students
@@ -73,9 +65,7 @@ export async function logoutUser() {
     localStorage.removeItem("curiosity_user_id");
     localStorage.removeItem("curiosity_parental_consent");
     localStorage.removeItem("curiosity_consent_timestamp");
-  } catch (err) {
-    console.error("Error clearing user localStorage on logout:", err);
-  }
+  } catch {}
 
   window.location.href = "/login";
 }

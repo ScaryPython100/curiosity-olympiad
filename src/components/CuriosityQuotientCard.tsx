@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { calculateCQProfile, CQAxis, CQProfileResult, RawTelemetryLog } from "@/utils/cqScoring";
 import { getUserTelemetry } from "@/app/actions/profile";
 
@@ -106,10 +106,13 @@ export function CuriosityQuotientCard({ username = "Explorer", telemetryLogs = [
   const { axes, superpower, growthArea, isTiedOrTooClose } = profileResult;
   const [selectedAxisId, setSelectedAxisId] = useState<string | null>(null);
 
-  const selectedAxis = 
-    axes.find(a => a.id === selectedAxisId) || 
-    axes.find(a => a.id === superpower.id) || 
-    axes[0];
+  const selectedAxis = useMemo(() => {
+    return (
+      axes.find(a => a.id === selectedAxisId) || 
+      axes.find(a => a.id === superpower.id) || 
+      axes[0]
+    );
+  }, [axes, selectedAxisId, superpower.id]);
 
   // SVG Radar Chart geometry (5 vertices)
   const svgWidth = 420;

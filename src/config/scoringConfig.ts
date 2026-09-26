@@ -235,8 +235,12 @@ export const EXPERIMENTS_CONFIG: Record<string, ExperimentConfig> = {
   },
 };
 
+// O(1) Pre-indexed lookup map to eliminate repeated Object.values and .find iterations
+const EXPERIMENT_CONFIG_MAP: Record<string, ExperimentConfig> = Object.values(EXPERIMENTS_CONFIG).reduce((acc, config) => {
+  acc[`${config.levelIndex}_${config.experimentSubIndex}`] = config;
+  return acc;
+}, {} as Record<string, ExperimentConfig>);
+
 export const getExperimentConfig = (levelIndex: number, subIndex: number): ExperimentConfig | undefined => {
-  return Object.values(EXPERIMENTS_CONFIG).find(
-    (c) => c.levelIndex === levelIndex && c.experimentSubIndex === subIndex
-  );
+  return EXPERIMENT_CONFIG_MAP[`${levelIndex}_${subIndex}`];
 };

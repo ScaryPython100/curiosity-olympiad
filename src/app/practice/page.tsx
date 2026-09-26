@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import SandboxEngine, { EXPERIMENT_LABELS } from "@/components/SandboxEngine";
@@ -1240,7 +1240,9 @@ function PracticeContent() {
     }
   }, [searchParams]);
 
-  const activeMockTest = MOCK_TESTS.find((m) => m.id === selectedMockTestId) || MOCK_TESTS[0];
+  const activeMockTest = useMemo(() => {
+    return MOCK_TESTS.find((m) => m.id === selectedMockTestId) || MOCK_TESTS[0];
+  }, [selectedMockTestId]);
 
   // Sync reflections from localStorage scoped to test and experiment: reflection_${mockTestId}_${experimentId}
   useEffect(() => {
@@ -1277,12 +1279,14 @@ function PracticeContent() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Filter questions for the selected mock test & difficulty
-  const mockTestQuestions = PRACTICE_QUESTIONS.filter((q) => {
-    if (q.mockTestId !== selectedMockTestId) return false;
-    if (difficulty === "level1" && q.level === "level2") return false;
-    return true;
-  });
+  // Filter questions for the selected mock test & difficulty (memoized to eliminate repeated iterations on re-renders)
+  const mockTestQuestions = useMemo(() => {
+    return PRACTICE_QUESTIONS.filter((q) => {
+      if (q.mockTestId !== selectedMockTestId) return false;
+      if (difficulty === "level1" && q.level === "level2") return false;
+      return true;
+    });
+  }, [selectedMockTestId, difficulty]);
 
   const handleSelectOption = (qId: number, optionIdx: number) => {
     if (isSubmitted || isPaused) return;

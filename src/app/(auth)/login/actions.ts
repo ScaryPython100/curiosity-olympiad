@@ -3,6 +3,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import crypto from "crypto";
+
+function getSecureFallbackPassword(identifier: string): string {
+  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "agastya_secure_salt";
+  return crypto.createHmac("sha256", secret).update(identifier).digest("hex").slice(0, 24) + "!Aa9";
+}
 
 // 1. Secure Cookie Client Setup
 const createClient = async () => {
@@ -286,7 +292,8 @@ export async function verifyOtpAction(formData: FormData) {
   const code = formData.get("code") as string;
   const username = (formData.get("username") as string) || destination.split("@")[0] || "Explorer";
   const realName = (formData.get("realName") as string) || username;
-  const password = (formData.get("password") as string) || "DevSandboxOverridePassword!123";
+  const providedPassword = (formData.get("password") as string)?.trim();
+  const password = providedPassword || getSecureFallbackPassword(destination.trim().toLowerCase());
   const isCreateAccount = formData.get("isCreateAccount") === "true";
   const schoolCode = ((formData.get("schoolCode") as string) || "").trim().toUpperCase();
   const parentalConsent = formData.get("parentalConsent") === "true";

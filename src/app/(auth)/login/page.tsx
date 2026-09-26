@@ -165,7 +165,9 @@ export default function AuthPage() {
       formData.append("code", otpCode);
       formData.append("username", otpUsername || destination.split("@")[0] || "Explorer");
       formData.append("realName", otpRealName || otpUsername || "Student");
-      formData.append("password", otpPassword || "DevSandboxOverridePassword!123");
+      if (otpPassword) {
+        formData.append("password", otpPassword);
+      }
       if (activeTab === "create_account") {
         formData.append("isCreateAccount", "true");
         formData.append("schoolCode", schoolCode.trim().toUpperCase());

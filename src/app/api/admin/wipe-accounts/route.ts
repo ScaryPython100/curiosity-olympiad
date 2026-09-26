@@ -24,15 +24,27 @@ const createClient = async () => {
 };
 
 export async function GET(req: NextRequest) {
+  // 0. Strict Authorization Guard
+  const authHeader = req.headers.get("authorization");
+  const adminSecret = process.env.ADMIN_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const providedKey = req.nextUrl.searchParams.get("key") || authHeader?.replace(/^Bearer\s+/i, "");
+
+  if (!adminSecret || providedKey !== adminSecret) {
+    return NextResponse.json(
+      { error: "Unauthorized: Missing or invalid administrator authorization key." },
+      { status: 401 }
+    );
+  }
+
   const adminUsername = req.nextUrl.searchParams.get("keep") || "ScaryPython692";
   const logs: string[] = [];
   const descopeProjectId = process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID;
   const descopeMgmtKey = process.env.DESCOPE_MANAGEMENT_KEY;
 
-  // 1. Supabase Deletion via RPC or Service Client
+  // 1. Supabase Deletion via RPC or Batched Deletes
   const supabase = await createClient();
 
-  // Attempt RPC function first (if installed by user with SECURITY DEFINER)
+  // Attempt RPC function first (if installed with SECURITY DEFINER)
   const { data: rpcData, error: rpcError } = await supabase.rpc("wipe_test_accounts", {
     admin_username: adminUsername,
   });
@@ -41,9 +53,9 @@ export async function GET(req: NextRequest) {
     logs.push(`Supabase RPC success: ${JSON.stringify(rpcData)}`);
   } else {
     if (rpcError) {
-      logs.push(`Supabase RPC note (${rpcError.message}), falling back to direct delete...`);
+      logs.push(`Supabase RPC note (${rpcError.message}), falling back to direct batch delete...`);
     }
-    // Fallback: direct table deletions
+    // Fallback: Batched deletes to eliminate N+1 queries and synchronous loops
     try {
       const { data: profiles, error: selectError } = await supabase
         .from("student_profiles")
@@ -55,19 +67,27 @@ export async function GET(req: NextRequest) {
         const toDelete = profiles.filter(
           (p) => p.username?.toLowerCase() !== adminUsername.toLowerCase()
         );
-        for (const p of toDelete) {
-          await supabase.from("exam_submissions").delete().eq("user_id", p.id);
-          await supabase.from("user_gamification").delete().eq("user_id", p.id);
-          await supabase.from("user_gamification").delete().eq("id", p.id);
+        const toDeleteIds = toDelete.map((p) => p.id);
+
+        if (toDeleteIds.length > 0) {
+          // Batch deletes using .in() to avoid N+1 queries
+          await Promise.all([
+            supabase.from("exam_submissions").delete().in("user_id", toDeleteIds),
+            supabase.from("user_gamification").delete().in("user_id", toDeleteIds),
+          ]);
+
           const { error: delErr } = await supabase
             .from("student_profiles")
             .delete()
-            .eq("id", p.id);
+            .in("id", toDeleteIds);
+
           if (delErr) {
-            logs.push(`Error deleting ${p.username} (${p.id}): ${delErr.message}`);
+            logs.push(`Error batch-deleting profiles: ${delErr.message}`);
           } else {
-            logs.push(`Deleted Supabase account: ${p.username} (${p.id})`);
+            logs.push(`Batch deleted ${toDeleteIds.length} Supabase test account(s).`);
           }
+        } else {
+          logs.push("No test accounts found to delete in Supabase.");
         }
       }
     } catch (e: any) {
@@ -75,10 +95,9 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 2. Descope Directory Cleanup via Management API
+  // 2. Descope Directory Cleanup via Management API (Batched with Promise.allSettled)
   if (descopeProjectId && descopeMgmtKey) {
     try {
-      // Step 2a: Search for all users in Descope
       const searchRes = await fetch("https://api.descope.com/v1/mgmt/user/search", {
         method: "POST",
         headers: {
@@ -91,36 +110,37 @@ export async function GET(req: NextRequest) {
       if (searchRes.ok) {
         const searchData = await searchRes.json();
         const users = searchData.users || [];
-        let descopeDeleted = 0;
-        for (const u of users) {
+
+        const targets = users.filter((u: any) => {
           const loginIds: string[] = u.loginIds || [];
-          const isAdmin = loginIds.some(
+          return !loginIds.some(
             (id) =>
               id.toLowerCase().includes(adminUsername.toLowerCase()) ||
               (u.name && u.name.toLowerCase().includes(adminUsername.toLowerCase()))
           );
+        });
 
-          if (!isAdmin) {
+        // Parallel batch deletion to eliminate synchronous I/O loop
+        const deleteResults = await Promise.allSettled(
+          targets.map(async (u: any) => {
+            const loginIds: string[] = u.loginIds || [];
+            const target = loginIds[0] || u.userId;
             const deleteRes = await fetch("https://api.descope.com/v1/mgmt/user/delete", {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${descopeProjectId}:${descopeMgmtKey}`,
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({ loginId: loginIds[0] || u.userId }),
+              body: JSON.stringify({ loginId: target }),
             });
-            if (deleteRes.ok) {
-              descopeDeleted++;
-              logs.push(`Deleted Descope user: ${loginIds.join(", ")} (${u.userId})`);
-            } else {
-              const errText = await deleteRes.text();
-              logs.push(`Descope delete failed for ${loginIds[0]}: ${errText}`);
-            }
-          } else {
-            logs.push(`Kept Descope admin user: ${loginIds.join(", ")}`);
-          }
-        }
-        logs.push(`Descope cleanup complete. Deleted ${descopeDeleted} test user(s).`);
+            return { target, ok: deleteRes.ok };
+          })
+        );
+
+        const succeeded = deleteResults.filter(
+          (r) => r.status === "fulfilled" && r.value.ok
+        ).length;
+        logs.push(`Descope cleanup complete. Batch deleted ${succeeded} test user(s).`);
       } else {
         const errText = await searchRes.text();
         logs.push(`Descope search returned (${searchRes.status}): ${errText}`);

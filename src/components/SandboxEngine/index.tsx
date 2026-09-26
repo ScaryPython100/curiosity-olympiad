@@ -14,8 +14,6 @@ import { KitchenChemistryLevel } from './levels/KitchenChemistryLevel';
 import { HumanBodyLevel } from './levels/HumanBodyLevel';
 import { PlantsGrowthLevel } from './levels/PlantsGrowthLevel';
 
-import { EXPERIMENTS_CONFIG } from '@/config/scoringConfig';
-
 interface SandboxEngineProps {
   onLevelChange?: (index: number) => void;
   level?: "level1" | "level2";

@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { getLeaderboard } from "@/app/actions/profile";
-import { BADGES, AVATARS, getBestBadge } from "@/utils/gamification";
+import { AVATARS, getBestBadge } from "@/utils/gamification";
 import CertificateModal, { RankCertificateType } from "@/components/CertificateModal";
-import { getUserAvatar, useUserAvatar } from "@/utils/userAvatar";
+import { getUserAvatar } from "@/utils/userAvatar";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -36,7 +36,6 @@ export default function LeaderboardPage() {
   const [pastDailyChampionId, setPastDailyChampionId] = useState<string | null>(null);
   const [pastWeeklyChampionId, setPastWeeklyChampionId] = useState<string | null>(null);
 
-  const myAvatar = useUserAvatar(userId);
   const [studentRealName, setStudentRealName] = useState("Student Champion");
 
   useEffect(() => {
