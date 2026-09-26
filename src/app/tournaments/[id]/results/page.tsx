@@ -1,5 +1,4 @@
 import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
 import { OFFICIAL_MOCK_TESTS } from "@/data/mockTestsData";
 import { ResultsClientView, ExamMeta, SubmissionMeta } from "./ResultsClientView";
 

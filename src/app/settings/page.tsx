@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { logoutUser } from "@/utils/auth";
 
 export default function SettingsPage() {
   const { t } = useLanguage();
-  const router = useRouter();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 

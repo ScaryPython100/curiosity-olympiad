@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { calculateCQProfile, CQAxis, CQProfileResult, RawTelemetryLog } from "@/utils/cqScoring";
+import { calculateCQProfile, CQProfileResult, RawTelemetryLog } from "@/utils/cqScoring";
 import { getUserTelemetry } from "@/app/actions/profile";
 
 export type { CQAxis } from "@/utils/cqScoring";

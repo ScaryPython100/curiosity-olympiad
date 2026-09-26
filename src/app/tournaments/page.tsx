@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useLanguage } from "@/context/LanguageContext";
 import { LanguageSelector } from "@/components/LanguageSelector";
-import { OFFICIAL_MOCK_TESTS, MockTestItem } from "@/data/mockTestsData";
-import { colors, radii, typography, touchTargets, motion } from "@/design-system/tokens";
+import { OFFICIAL_MOCK_TESTS } from "@/data/mockTestsData";
 import ComingSoonOlympiadCard from "@/components/ComingSoonOlympiadCard";
 
 const CATEGORIES = [
@@ -19,8 +16,6 @@ const CATEGORIES = [
 ] as const;
 
 export default function TournamentsPage() {
-  const { t } = useLanguage();
-  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string>("All Modules");
 
   const filteredTests = selectedCategory === "All Modules"
