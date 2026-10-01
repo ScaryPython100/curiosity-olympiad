@@ -36,30 +36,6 @@ Tech Stack & Architecture
 
 ---
 
-Getting Started Locally
-
-1. Clone the repository and install dependencies:
-
-`npm install`
-
-1. Set up your environment variables:
-Create a .env.local file with your Supabase project credentials:
-
-`NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url`
-`NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key`
-
-1. Start the development server:
-
-`npm run dev`
-
-1. Open http://localhost:3000 in your browser.
-
-2. To verify the production build:
-
-`npm run build`
-
----
-
 Design Notes
 
 * Zero Corporate Fluff: Designed with warm, vibrant colors (#ffe16d Agastya yellow, #143867 deep blue, #f37021 vibrant orange, and lush emerald greens) that feel inviting and child-friendly.
