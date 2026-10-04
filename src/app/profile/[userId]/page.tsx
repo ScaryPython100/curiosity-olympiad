@@ -4,7 +4,7 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { getUserProfile, getFollowStatus, followUser, unfollowUser, getFollowers, getFollowing } from "@/app/actions/profile";
-import { getBestBadge, BADGES, AVATARS } from "@/utils/gamification";
+import { getBestBadge } from "@/utils/gamification";
 import { useUserAvatar } from "@/utils/userAvatar";
 import Link from "next/link";
 import { CuriosityQuotientCard } from "@/components/CuriosityQuotientCard";
@@ -32,8 +32,6 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userId
         const res = await getUserProfile(userId);
         if (res.data) {
           setProfile(res.data);
-        } else if (res.error) {
-          console.error(res.error);
         }
 
         const followers = await getFollowers(userId);
@@ -42,8 +40,8 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userId
         const following = await getFollowing(userId);
         setFollowingCount(following.count);
 
-      } catch (err) {
-        console.error("Error fetching profile", err);
+      } catch (_err) {
+        // Silently handle profile fetch error
       } finally {
         setLoading(false);
       }
@@ -78,8 +76,8 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userId
           setFollowersCount(prev => prev + 1);
         }
       }
-    } catch (err) {
-      console.error(err);
+    } catch (_err) {
+      // Silently handle follow toggle failure
     } finally {
       setFollowLoading(false);
     }

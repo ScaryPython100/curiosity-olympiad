@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { LanguageCode } from "@/utils/translations";
 
 export function LanguageSelector() {
   const { language, setLanguage, languages } = useLanguage();

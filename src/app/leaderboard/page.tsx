@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { getLeaderboard } from "@/app/actions/profile";
-import { AVATARS, getBestBadge } from "@/utils/gamification";
+import { getBestBadge } from "@/utils/gamification";
 import CertificateModal, { RankCertificateType } from "@/components/CertificateModal";
 import { getUserAvatar } from "@/utils/userAvatar";
 import { LanguageSelector } from "@/components/LanguageSelector";
@@ -59,8 +59,8 @@ export default function LeaderboardPage() {
         if (result.pastWeeklyChampionId !== undefined) {
           setPastWeeklyChampionId(result.pastWeeklyChampionId);
         }
-      } catch (error) {
-        console.error("Failed to fetch leaderboard:", error);
+      } catch (_error) {
+        // Silently handle leaderboard fetch failure
       } finally {
         setLoading(false);
       }

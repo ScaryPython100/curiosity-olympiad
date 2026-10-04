@@ -11,7 +11,6 @@ import { playLevelUpSound } from "@/utils/audio";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
 import { toast } from "sonner";
-import { colors, radii, typography, touchTargets, motion } from "@/design-system/tokens";
 import ComingSoonOlympiadCard from "@/components/ComingSoonOlympiadCard";
 
 const PARTNER_SCHOOLS = [
@@ -52,8 +51,8 @@ export default function DashboardPage() {
         if (activityRes.data) {
           setFriendsActivity(activityRes.data);
         }
-      } catch (err) {
-        console.error("Error fetching streak:", err);
+      } catch (_err) {
+        // Silently handle streak fetch error
       }
     };
     if (!userLoading) fetchStreak();
@@ -117,8 +116,7 @@ export default function DashboardPage() {
       } else if (result.error) {
         toast.error(result.error);
       }
-    } catch (err) {
-      console.error("Failed to claim XP:", err);
+    } catch (_err) {
       toast.error("Could not claim daily XP. Please try again.");
     } finally {
       setIsAwarding(false);

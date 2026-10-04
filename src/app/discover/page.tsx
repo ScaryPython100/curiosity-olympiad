@@ -39,8 +39,8 @@ export default function DiscoverPage() {
         if (res.data) {
           setResults(res.data);
         }
-      } catch (err) {
-        console.error("Error searching users:", err);
+      } catch (_err) {
+        // Silently handle user search error
       } finally {
         setIsSearching(false);
       }

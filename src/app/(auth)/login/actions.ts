@@ -2,7 +2,6 @@
 
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import crypto from "crypto";
 
 function getSecureFallbackPassword(identifier: string): string {

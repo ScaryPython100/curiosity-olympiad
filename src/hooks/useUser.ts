@@ -24,8 +24,7 @@ export function useUser() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         setUser(user || getDescopeCookieUser())
-      } catch (error) {
-        console.error('Error fetching user:', error)
+      } catch (_error) {
         setUser(getDescopeCookieUser())
       } finally {
         setLoading(false)

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
-import { calculateLevelProgress, BADGES } from "@/utils/gamification";
+import { calculateLevelProgress } from "@/utils/gamification";
 import { AvatarPickerModal } from "@/components/AvatarPickerModal";
 import { useUserAvatar } from "@/utils/userAvatar";
 import { CuriosityQuotientCard } from "@/components/CuriosityQuotientCard";
@@ -115,8 +115,8 @@ export default function ProfilePage() {
             avatar_url: savedAvatar
           }));
         }
-      } catch (err) {
-        console.error("Error fetching stats:", err);
+      } catch (_err) {
+        // Silently handle stats fetch failure
       } finally {
         setLoading(false);
       }
