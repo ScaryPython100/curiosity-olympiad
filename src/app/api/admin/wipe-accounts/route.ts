@@ -23,11 +23,28 @@ const createClient = async () => {
   );
 };
 
-export async function GET(req: NextRequest) {
+async function handleWipeAccounts(req: NextRequest) {
   // 0. Strict Authorization Guard
   const authHeader = req.headers.get("authorization");
+  const xAdminKey = req.headers.get("x-admin-key");
   const adminSecret = process.env.ADMIN_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const providedKey = req.nextUrl.searchParams.get("key") || authHeader?.replace(/^Bearer\s+/i, "");
+  
+  let bodyKey: string | null = null;
+  let bodyKeep: string | null = null;
+  if (req.method === "POST" || req.method === "DELETE") {
+    try {
+      const clonedReq = req.clone();
+      const body = await clonedReq.json();
+      bodyKey = body?.key || null;
+      bodyKeep = body?.keep || null;
+    } catch {}
+  }
+
+  const providedKey = 
+    req.nextUrl.searchParams.get("key") || 
+    xAdminKey || 
+    bodyKey || 
+    authHeader?.replace(/^Bearer\s+/i, "");
 
   if (!adminSecret || providedKey !== adminSecret) {
     return NextResponse.json(
@@ -36,7 +53,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const adminUsername = req.nextUrl.searchParams.get("keep") || "ScaryPython692";
+  const adminUsername = req.nextUrl.searchParams.get("keep") || bodyKeep || "ScaryPython692";
   const logs: string[] = [];
   const descopeProjectId = process.env.NEXT_PUBLIC_DESCOPE_PROJECT_ID;
   const descopeMgmtKey = process.env.DESCOPE_MANAGEMENT_KEY;
@@ -157,4 +174,16 @@ export async function GET(req: NextRequest) {
     keep_user: adminUsername,
     logs,
   });
+}
+
+export async function GET(req: NextRequest) {
+  return handleWipeAccounts(req);
+}
+
+export async function POST(req: NextRequest) {
+  return handleWipeAccounts(req);
+}
+
+export async function DELETE(req: NextRequest) {
+  return handleWipeAccounts(req);
 }
