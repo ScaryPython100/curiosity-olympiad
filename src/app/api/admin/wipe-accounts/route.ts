@@ -26,8 +26,7 @@ const createClient = async () => {
 async function handleWipeAccounts(req: NextRequest) {
   // 0. Strict Authorization Guard
   const authHeader = req.headers.get("authorization");
-  const xAdminKey = req.headers.get("x-admin-key");
-  const adminSecret = process.env.ADMIN_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const adminSecret = process.env.ADMIN_SECRET_KEY;
   
   let bodyKey: string | null = null;
   let bodyKeep: string | null = null;

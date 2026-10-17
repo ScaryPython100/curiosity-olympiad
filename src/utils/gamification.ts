@@ -20,8 +20,12 @@ export const BADGES: Badge[] = [
 ];
 
 export const getBestBadge = (xp: number) => {
-  const unlocked = BADGES.filter(b => xp >= b.minXp);
-  return unlocked.length > 0 ? unlocked[unlocked.length - 1] : null;
+  for (let i = BADGES.length - 1; i >= 0; i--) {
+    if (xp >= BADGES[i].minXp) {
+      return BADGES[i];
+    }
+  }
+  return null;
 };
 
 export function calculateLevelProgress(totalXp: number) {
@@ -29,14 +33,24 @@ export function calculateLevelProgress(totalXp: number) {
   const currentLevelXp = totalXp % XP_PER_LEVEL;
   const progressPercentage = (currentLevelXp / XP_PER_LEVEL) * 100;
 
-  const unlockedBadges = BADGES.filter(badge => totalXp >= badge.minXp);
+  const unlockedBadges: Badge[] = [];
+  let nextBadge: Badge | undefined = undefined;
+
+  for (let i = 0; i < BADGES.length; i++) {
+    const badge = BADGES[i];
+    if (totalXp >= badge.minXp) {
+      unlockedBadges.push(badge);
+    } else if (!nextBadge) {
+      nextBadge = badge;
+    }
+  }
 
   return {
     level,
     currentLevelXp,
     progressPercentage,
     unlockedBadges,
-    nextBadge: BADGES.find(badge => totalXp < badge.minXp)
+    nextBadge
   };
 }
 

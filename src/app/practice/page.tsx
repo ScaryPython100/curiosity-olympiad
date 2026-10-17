@@ -1151,7 +1151,7 @@ function PracticeContent() {
   useEffect(() => {
     import('@/utils/webAudio').then(module => {
       module.soundEngine.init();
-    }).catch(err => console.log('Audio Engine fallback:', err));
+    }).catch(() => {});
   }, []);
 
   const handleTelemetryUpdate = useCallback((data: any) => {

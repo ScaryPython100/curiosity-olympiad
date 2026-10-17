@@ -59,6 +59,14 @@ const MOCK_TEST_EXAM_IDS: Record<number, string> = {
   8: "00000000-0000-0000-0000-000000000008",
 };
 
+const REVERSE_EXAM_MAP: Record<string, number> = Object.entries(MOCK_TEST_EXAM_IDS).reduce(
+  (acc, [testId, examUuid]) => {
+    acc[examUuid] = Number(testId);
+    return acc;
+  },
+  {} as Record<string, number>
+);
+
 /**
  * Submits a Mock Test attempt to Supabase exam_submissions
  * Sets up the dedicated Mock Test UUID and persists rich Curiosity Quotient telemetry.
@@ -95,15 +103,10 @@ export async function getMockTestAttempts(): Promise<{ success: boolean; data?: 
       return { success: false, error: error.message };
     }
 
-    const reverseMap: Record<string, number> = {};
-    Object.entries(MOCK_TEST_EXAM_IDS).forEach(([testId, examUuid]) => {
-      reverseMap[examUuid] = Number(testId);
-    });
-
     const attemptsMap: Record<number, any> = {};
     if (data) {
       data.forEach((row) => {
-        const testId = reverseMap[row.exam_id];
+        const testId = REVERSE_EXAM_MAP[row.exam_id];
         if (testId) {
           const telemetry = row.telemetry_data || {};
           const accuracyXP = telemetry.accuracyXP ?? (row.score * 100);

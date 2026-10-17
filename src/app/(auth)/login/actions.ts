@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import crypto from "crypto";
 
 function getSecureFallbackPassword(identifier: string): string {
-  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "agastya_secure_salt";
+  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.AUTH_FALLBACK_SALT || process.env.DESCOPE_MANAGEMENT_KEY || "agastya_private_server_hmac_salt";
   return crypto.createHmac("sha256", secret).update(identifier).digest("hex").slice(0, 24) + "!Aa9";
 }
 

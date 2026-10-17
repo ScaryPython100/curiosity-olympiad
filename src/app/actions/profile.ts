@@ -85,60 +85,49 @@ export async function getLeaderboard(timeframe: 'weekly' | 'daily' | 'friends' =
 
   const fixCutoff = new Date("2026-07-27T00:30:00Z");
 
-  // Determine who finished #1 in the previous completed daily and weekly cycles
+  // Determine past champions and reset expired XP in a single-pass traversal
   let pastDailyChampionId: string | null = null;
   let maxPastDailyXp = -1;
-  for (const row of gamificationData) {
-    const dailyResetRef = row.last_daily_reset || row.last_claimed_date;
-    if (dailyResetRef) {
-      const lastDaily = new Date(dailyResetRef);
-      if (lastDaily < todayStart && (row.daily_xp || 0) > maxPastDailyXp && (row.daily_xp || 0) > 0 && row.daily_xp !== row.xp) {
-        maxPastDailyXp = row.daily_xp;
-        pastDailyChampionId = row.user_id;
-      }
-    }
-  }
-
   let pastWeeklyChampionId: string | null = null;
   let maxPastWeeklyXp = -1;
-  for (const row of gamificationData) {
-    const weeklyResetRef = row.last_weekly_reset || row.last_claimed_date;
-    if (weeklyResetRef) {
-      const lastWeekly = new Date(weeklyResetRef);
-      if (lastWeekly < currentWeekStart && (row.weekly_xp || 0) > maxPastWeeklyXp && (row.weekly_xp || 0) > 0) {
-        maxPastWeeklyXp = row.weekly_xp;
-        pastWeeklyChampionId = row.user_id;
-      }
-    }
-  }
 
-  // Process data locally to reset expired XP
-  let processedData = gamificationData.map((row) => {
+  const processedData = new Array(gamificationData.length);
+
+  for (let i = 0; i < gamificationData.length; i++) {
+    const row = gamificationData[i];
     let rowDaily = row.daily_xp || 0;
     let rowWeekly = row.weekly_xp || 0;
 
     const dailyResetRef = row.last_daily_reset || row.last_claimed_date;
-    if (!dailyResetRef) {
-      rowDaily = 0;
-    } else {
+    if (dailyResetRef) {
       const lastDaily = new Date(dailyResetRef);
-      if (lastDaily < todayStart || lastDaily < fixCutoff || row.daily_xp === row.xp) {
-        rowDaily = 0; // Reset to 0 for today's new cycle
+      if (lastDaily < todayStart && rowDaily > maxPastDailyXp && rowDaily > 0 && rowDaily !== row.xp) {
+        maxPastDailyXp = rowDaily;
+        pastDailyChampionId = row.user_id;
       }
+      if (lastDaily < todayStart || lastDaily < fixCutoff || row.daily_xp === row.xp) {
+        rowDaily = 0;
+      }
+    } else {
+      rowDaily = 0;
     }
 
     const weeklyResetRef = row.last_weekly_reset || row.last_claimed_date;
-    if (!weeklyResetRef) {
-      rowWeekly = 0;
-    } else {
+    if (weeklyResetRef) {
       const lastWeekly = new Date(weeklyResetRef);
-      if (lastWeekly < currentWeekStart) {
-        rowWeekly = 0; // Reset to 0 for the new week
+      if (lastWeekly < currentWeekStart && rowWeekly > maxPastWeeklyXp && rowWeekly > 0) {
+        maxPastWeeklyXp = rowWeekly;
+        pastWeeklyChampionId = row.user_id;
       }
+      if (lastWeekly < currentWeekStart) {
+        rowWeekly = 0;
+      }
+    } else {
+      rowWeekly = 0;
     }
 
-    return { ...row, daily_xp: rowDaily, weekly_xp: rowWeekly };
-  });
+    processedData[i] = { ...row, daily_xp: rowDaily, weekly_xp: rowWeekly };
+  }
 
   // Re-sort after adjusting for time
   if (timeframe === 'daily') {
@@ -536,23 +525,25 @@ export async function getFollowing(userId: string) {
 export async function getUserProfile(userId: string) {
   const supabase = await createClient();
 
-  // 1. Fetch user's gamification data
-  const { data: gamificationData, error: gamError } = await supabase
-    .from("user_gamification")
-    .select("xp, curiosity_points")
-    .eq("user_id", userId)
-    .maybeSingle();
+  // 1 & 2. Concurrently fetch user's gamification data and public profile
+  const [gamRes, profRes] = await Promise.all([
+    supabase
+      .from("user_gamification")
+      .select("xp, curiosity_points")
+      .eq("user_id", userId)
+      .maybeSingle(),
+    supabase
+      .from("student_profiles")
+      .select("username")
+      .eq("id", userId)
+      .maybeSingle(),
+  ]);
 
+  const { data: gamificationData, error: gamError } = gamRes;
   if (gamError) return { error: gamError.message };
   if (!gamificationData) return { error: "User not found" };
 
-  // 2. Fetch user's profile
-  const { data: profileData } = await supabase
-    .from("student_profiles")
-    .select("username")
-    .eq("id", userId)
-    .maybeSingle();
-
+  const profileData = profRes.data;
   const xp = gamificationData.xp;
   
   // 3. Calculate live ranking by counting how many users have more XP

@@ -88,12 +88,9 @@ export default function ProfilePage() {
           // Check if this user is a confirmed past day or past week #1 champion
           try {
             const { getLeaderboard } = await import("@/app/actions/profile");
-            const [dailyRes, weeklyRes] = await Promise.all([
-              getLeaderboard("daily"),
-              getLeaderboard("weekly")
-            ]);
-            const isDailyChamp = Boolean(userId && dailyRes?.pastDailyChampionId === userId);
-            const isWeeklyChamp = Boolean(userId && weeklyRes?.pastWeeklyChampionId === userId);
+            const leaderboardRes = await getLeaderboard("daily");
+            const isDailyChamp = Boolean(userId && leaderboardRes?.pastDailyChampionId === userId);
+            const isWeeklyChamp = Boolean(userId && leaderboardRes?.pastWeeklyChampionId === userId);
 
             if (isWeeklyChamp) {
               setIsPastChampion(true);
