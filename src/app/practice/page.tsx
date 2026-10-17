@@ -14,7 +14,7 @@ export interface Question {
   id: number;
   mockTestId: number;
   experimentIndex: number;
-  module: "Optics" | "Gravity" | "Chemistry" | "Grades68" | "Grades910" | "Sound" | "Electricity" | "Buoyancy";
+  module: "Optics" | "Gravity" | "Chemistry" | "Grades68" | "Grades910" | "Sound" | "Electricity" | "Buoyancy" | "Kitchen" | "Body" | "Plants" | "Seasons" | "Solar";
   title: string;
   question: string;
   options: string[];
@@ -28,7 +28,7 @@ export interface MockTestInfo {
   title: string;
   subtitle: string;
   description: string;
-  module: "Optics" | "Gravity" | "Chemistry" | "Grades68" | "Grades910" | "Sound" | "Electricity" | "Buoyancy" | "Kitchen" | "Body" | "Plants";
+  module: "Optics" | "Gravity" | "Chemistry" | "Grades68" | "Grades910" | "Sound" | "Electricity" | "Buoyancy" | "Kitchen" | "Body" | "Plants" | "Seasons" | "Solar";
   idealTime: { level1: string; level2: string };
   idealSeconds: { level1: number; level2: number };
   questionCount: number;
@@ -180,6 +180,32 @@ const MOCK_TESTS: MockTestInfo[] = [
     icon: "psychiatry",
     badge: "Plant Biology & Phototropism",
     color: "from-[#047857] to-[#10b981]"
+  },
+  {
+    id: 12,
+    title: "Mock Test 12: Day, Night & Earth's Seasons",
+    subtitle: "Rotation, 23.5° Tilt & Sundial Shadows",
+    description: "Spin the globe in front of a sunbeam to create day and night, tilt Earth's axis to trigger summer and winter, and track shadow lengths on an ancient sundial.",
+    module: "Seasons",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    icon: "wb_sunny",
+    badge: "Earth Rotation & Tilt",
+    color: "from-[#d97706] to-[#b45309]"
+  },
+  {
+    id: 13,
+    title: "Mock Test 13: The Solar System Scale",
+    subtitle: "Cricket Ball Sun, Field Pacing & Orbits",
+    description: "Shrink the Sun to a cricket ball to reveal mustard-seed Earth, pace out the vast empty sports field distance to Neptune, and race inner vs. outer planet orbits.",
+    module: "Solar",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    icon: "public",
+    badge: "Cosmic Distances & Planetary Motion",
+    color: "from-[#0369a1] to-[#0284c7]"
   }
 ];
 
@@ -1079,6 +1105,186 @@ const PRACTICE_QUESTIONS: Question[] = [
     question: "Why do plant roots grow downward into dark soil rather than toward the light?",
     options: ["Roots fear the sun", "Positive gravitropism (sensing Earth's gravity downward)", "Roots follow cold air currents", "Roots have no cells"],
     correct: 1, explanation: "Roots exhibit positive gravitropism, sensing gravity to anchor and find water underground.", level: "both"
+  },
+
+  // --- MOCK TEST 12 (Day/Night & Seasons) ---
+  {
+    id: 100, mockTestId: 12, experimentIndex: 0, module: "Seasons",
+    title: "Cause of Day and Night",
+    question: "What actually causes day and night on Earth?",
+    options: [
+      "The Sun orbits around Earth once every 24 hours.",
+      "Earth rotates on its axis, turning one half into sunlight and the other into shadow.",
+      "Thick clouds block sunlight every evening.",
+      "The Sun turns off its light at night."
+    ],
+    correct: 1, explanation: "Earth spins on its axis once every 24 hours, creating day on the side facing the Sun and night on the shaded side.", level: "both"
+  },
+  {
+    id: 101, mockTestId: 12, experimentIndex: 0, module: "Seasons",
+    title: "Sunrise in the East",
+    question: "Why does the Sun appear to rise in the East and set in the West across India?",
+    options: [
+      "The Sun travels from East to West across space.",
+      "Earth rotates from West to East (counter-clockwise viewed from the North Pole).",
+      "Winds push the Sun across the sky.",
+      "India's mountains guide the sunlight."
+    ],
+    correct: 1, explanation: "Because Earth spins toward the East, our eastern horizons roll into sunlight first, making the Sun appear to rise in the East.", level: "both"
+  },
+  {
+    id: 102, mockTestId: 12, experimentIndex: 0, module: "Seasons",
+    title: "Stopping Earth's Spin",
+    question: "If Earth suddenly stopped spinning on its axis, what would happen?",
+    options: [
+      "Gravity would completely disappear.",
+      "One half of Earth would be locked in permanent scorching day, the other in freezing darkness.",
+      "Days would become 12 hours long.",
+      "The oceans would dry up instantly."
+    ],
+    correct: 1, explanation: "Without rotation, the hemisphere facing the Sun would endure perpetual sunlight, while the other side would freeze in eternal night.", level: "both"
+  },
+  {
+    id: 103, mockTestId: 12, experimentIndex: 1, module: "Seasons",
+    title: "Primary Cause of Seasons",
+    question: "What is the true primary reason Earth experiences summer and winter?",
+    options: [
+      "Earth gets millions of kilometers closer to the Sun during summer.",
+      "Earth's 23.5° axial tilt causes sunlight to strike hemispheres directly or at an angle.",
+      "The Sun burns hotter during summer months.",
+      "Ocean waves push heat around the globe."
+    ],
+    correct: 1, explanation: "Earth's 23.5° tilt causes direct concentrated rays in the hemisphere leaning toward the Sun (summer) and shallow spread-out rays in the hemisphere leaning away (winter).", level: "both"
+  },
+  {
+    id: 104, mockTestId: 12, experimentIndex: 1, module: "Seasons",
+    title: "Opposite Seasons",
+    question: "When it is hot summer in New Delhi in June, what season is it in Sydney, Australia?",
+    options: ["Also summer", "Spring", "Cold winter", "Autumn"],
+    correct: 2, explanation: "Australia is in the Southern Hemisphere, which leans away from the Sun in June, receiving shallow rays that cause winter.", level: "both"
+  },
+  {
+    id: 105, mockTestId: 12, experimentIndex: 1, module: "Seasons",
+    title: "Flashlight Angle Experiment",
+    question: "If you shine a flashlight straight down vs. at a sharp angle onto a table, what happens?",
+    options: [
+      "The angled light is smaller and hotter.",
+      "The angled light spreads out into a wider, dimmer patch over a larger area.",
+      "Both patches have identical shape and heat.",
+      "The light turns red."
+    ],
+    correct: 1, explanation: "Slanted light spreads the same energy over a larger area, reducing concentration and creating cooler winter conditions.", level: "both"
+  },
+  {
+    id: 106, mockTestId: 12, experimentIndex: 2, module: "Seasons",
+    title: "Shortest Daily Shadow",
+    question: "At what time of day is an upright stick's shadow the shortest?",
+    options: [
+      "At sunrise (6:00 AM)",
+      "At solar noon (around 12:00 PM), when the Sun is at its highest elevation.",
+      "At 3:00 PM",
+      "At sunset (6:00 PM)"
+    ],
+    correct: 1, explanation: "When the Sun reaches its peak elevation at midday, sunlight strikes from high overhead, casting the shortest shadow.", level: "both"
+  },
+  {
+    id: 107, mockTestId: 12, experimentIndex: 2, module: "Seasons",
+    title: "Morning Shadow Direction",
+    question: "When the morning Sun rises in the East, in which direction does a tree's shadow point?",
+    options: ["East", "West", "North", "South"],
+    correct: 1, explanation: "Shadows always project away from the light source. Sunlight coming from the East casts a shadow toward the West.", level: "both"
+  },
+  {
+    id: 108, mockTestId: 12, experimentIndex: 2, module: "Seasons",
+    title: "Winter vs. Summer Noon Shadows",
+    question: "Why is your shadow at 12:00 noon on a cold December day longer than at 12:00 noon on a hot June day?",
+    options: [
+      "Cold air stretches shadows.",
+      "The winter Sun stays lower on the horizon, striking at a shallower angle.",
+      "Earth spins slower in winter.",
+      "Our eyes perceive winter light differently."
+    ],
+    correct: 1, explanation: "In winter, the Sun's daily arc is much lower in the sky, so even at solar noon, its rays hit at a low angle and produce long shadows.", level: "both"
+  },
+
+  // --- MOCK TEST 13 (The Solar System Scale) ---
+  {
+    id: 109, mockTestId: 13, experimentIndex: 0, module: "Solar",
+    title: "Cricket Ball Earth Scale",
+    question: "If the Sun were scaled down to a 10 cm cricket ball, what everyday object represents Earth's size?",
+    options: [
+      "A basketball",
+      "A lemon",
+      "A marble",
+      "A tiny mustard seed (less than 1 mm across)."
+    ],
+    correct: 3, explanation: "The Sun is 109 times wider than Earth. If the Sun is 10 cm (100 mm), Earth is only ~0.9 mm wide—like a tiny mustard seed!", level: "both"
+  },
+  {
+    id: 110, mockTestId: 13, experimentIndex: 0, module: "Solar",
+    title: "Sun Volume Capacity",
+    question: "Approximately how many Earths could fit inside the hollow interior of the Sun?",
+    options: ["About 100 Earths", "About 5,000 Earths", "About 1.3 million Earths.", "Exactly 10 Earths"],
+    correct: 2, explanation: "Because volume scales with radius cubed, over 1.3 million Earth-sized spheres could fit inside the Sun's volume.", level: "both"
+  },
+  {
+    id: 111, mockTestId: 13, experimentIndex: 0, module: "Solar",
+    title: "Textbook Scale Problem",
+    question: "Why do school science textbooks almost always draw planets much larger and closer than they really are?",
+    options: [
+      "Early scientists did not know real planet sizes.",
+      "If drawn to true scale, the planets would be invisible microscopic specks on miles of empty paper!",
+      "Planets expand during different seasons.",
+      "Space telescopes cannot photograph darkness."
+    ],
+    correct: 1, explanation: "True scale requires immense empty space. Drawing both sizes and distances accurately on a book page is physically impossible.", level: "both"
+  },
+  {
+    id: 112, mockTestId: 13, experimentIndex: 1, module: "Solar",
+    title: "Field Pacing to Neptune",
+    question: "On our cricket ball playground scale where Earth is 11 meters from the Sun, where must you walk to place Neptune?",
+    options: ["At 15 meters", "At 30 meters", "More than 300 meters away (over 3 football fields away!).", "At 20 meters"],
+    correct: 2, explanation: "Neptune is 30 times further from the Sun than Earth ($30 \\times 11\\text{ m} \\approx 324\\text{ m}$), past three full football fields!", level: "both"
+  },
+  {
+    id: 113, mockTestId: 13, experimentIndex: 1, module: "Solar",
+    title: "Sunlight Travel Time",
+    question: "How long does sunlight take to travel across space to reach our eyes on Earth?",
+    options: ["1 second", "It arrives instantaneously", "Approximately 8 minutes and 20 seconds.", "Exactly 24 hours"],
+    correct: 2, explanation: "Light travels at 300,000 km/s. Over the 150,000,000 km distance to Earth, it takes 500 seconds (~8 min 20 sec).", level: "both"
+  },
+  {
+    id: 114, mockTestId: 13, experimentIndex: 1, module: "Solar",
+    title: "Cosmic Emptiness",
+    question: "What makes up more than 99.999% of our solar system's total volume?",
+    options: ["Thick asteroid dust", "Glowing solar gases", "Completely empty, cold vacuum.", "Dark clouds"],
+    correct: 2, explanation: "Space is called 'space' because the overwhelming majority of the universe is sheer empty vacuum separating tiny specks of matter.", level: "both"
+  },
+  {
+    id: 115, mockTestId: 13, experimentIndex: 2, module: "Solar",
+    title: "Earth's Orbital Year",
+    question: "How long does Earth take to make one complete revolution around the Sun?",
+    options: ["24 hours", "30 days", "365.25 days (1 year).", "100 days"],
+    correct: 2, explanation: "Earth's orbital journey around the Sun defines our calendar year of 365.25 days.", level: "both"
+  },
+  {
+    id: 116, mockTestId: 13, experimentIndex: 2, module: "Solar",
+    title: "Neptune's Long Year",
+    question: "Why does Neptune take 165 Earth years to orbit the Sun while Mercury takes only 88 days?",
+    options: [
+      "Neptune is heavy and stops frequently.",
+      "Neptune's orbit is vastly larger, and it travels much slower because the Sun's gravity is weaker at great distances.",
+      "Solar wind blows backward against Neptune.",
+      "Neptune orbits in reverse."
+    ],
+    correct: 1, explanation: "Gravity weakens with distance squared. Far away, Neptune travels at just 5.4 km/s compared to Mercury's 47.4 km/s, and has a vastly larger track.", level: "both"
+  },
+  {
+    id: 117, mockTestId: 13, experimentIndex: 2, module: "Solar",
+    title: "Mercury Birthdays",
+    question: "If an explorer is 12 years old on Earth, about how many birthdays would they have celebrated on Mercury?",
+    options: ["Exactly 12", "Less than 1", "About 50 birthdays (since 1 Mercury year is only 88 days).", "500 birthdays"],
+    correct: 2, explanation: "Because Mercury orbits in only 88 days: $\\frac{12 \\times 365}{88} \\approx 50$ Mercury years!", level: "both"
   }
 ];
 export interface MockTestResult {

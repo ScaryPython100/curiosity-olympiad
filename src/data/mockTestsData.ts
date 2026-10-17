@@ -3,8 +3,8 @@ export interface MockTestItem {
   title: string;
   subtitle: string;
   description: string;
-  module: "Optics" | "Gravity" | "Chemistry" | "Grades68" | "Grades910" | "Sound" | "Electricity" | "Buoyancy" | "Kitchen" | "Body" | "Plants";
-  category: "Physics & Optics" | "Mechanics & Sound" | "Chemistry & Thermal" | "Electricity & Fluids" | "Hypothesis Testing" | "Sensory & Bio-Physics" | "Botany & Systems";
+  module: "Optics" | "Gravity" | "Chemistry" | "Grades68" | "Grades910" | "Sound" | "Electricity" | "Buoyancy" | "Kitchen" | "Body" | "Plants" | "Seasons" | "Solar";
+  category: "Physics & Optics" | "Mechanics & Sound" | "Chemistry & Thermal" | "Electricity & Fluids" | "Hypothesis Testing" | "Sensory & Bio-Physics" | "Botany & Systems" | "Astronomy & Space";
   idealTime: { level1: string; level2: string };
   idealSeconds: { level1: number; level2: number };
   questionCount: number;
@@ -178,6 +178,36 @@ export const OFFICIAL_MOCK_TESTS: MockTestItem[] = [
     experimentCount: 3,
     icon: "psychiatry",
     badge: "Plant Biology & Phototropism",
+    gradeBand: "Grades 6–10"
+  },
+  {
+    id: 12,
+    title: "Mock Test 12: Day, Night & Earth's Seasons",
+    subtitle: "Rotation, 23.5° Tilt & Sundial Shadows",
+    description: "Spin the globe in front of a sunbeam to create day and night, tilt Earth's axis to trigger summer and winter, and track shadow lengths on an ancient sundial.",
+    module: "Seasons",
+    category: "Astronomy & Space",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    experimentCount: 3,
+    icon: "wb_sunny",
+    badge: "Earth Rotation & Tilt",
+    gradeBand: "Grades 6–10"
+  },
+  {
+    id: 13,
+    title: "Mock Test 13: The Solar System Scale",
+    subtitle: "Cricket Ball Sun, Field Pacing & Orbits",
+    description: "Shrink the Sun to a cricket ball to reveal mustard-seed Earth, pace out the vast empty sports field distance to Neptune, and race inner vs. outer planet orbits.",
+    module: "Solar",
+    category: "Astronomy & Space",
+    idealTime: { level1: "5 Mins", level2: "10 Mins" },
+    idealSeconds: { level1: 300, level2: 600 },
+    questionCount: 9,
+    experimentCount: 3,
+    icon: "public",
+    badge: "Cosmic Distances & Planetary Motion",
     gradeBand: "Grades 6–10"
   }
 ];

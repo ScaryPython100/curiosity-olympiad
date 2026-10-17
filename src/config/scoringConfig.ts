@@ -97,6 +97,18 @@ export const LEVELS_CONFIG: Record<number, LevelConfig> = {
     name: "Plants & Growth",
     gateType: "attempt_all",
     gateThreshold: 0,
+  },
+  11: {
+    levelIndex: 11,
+    name: "Day/Night & Seasons",
+    gateType: "attempt_all",
+    gateThreshold: 0,
+  },
+  12: {
+    levelIndex: 12,
+    name: "Solar System Scale",
+    gateType: "attempt_all",
+    gateThreshold: 0,
   }
 };
 
@@ -232,6 +244,30 @@ export const EXPERIMENTS_CONFIG: Record<string, ExperimentConfig> = {
   "plants_3": {
     experimentId: "plants_3", levelIndex: 10, experimentSubIndex: 2, tier: "advanced", ...DIFFICULTY_SCALING.advanced,
     freeTextInquiry: { questionId: "plants_3_q", prompt: "How does a plant stem know which direction the sunlight is coming from to bend toward it?", maxPoints: 4 }
+  },
+  "daynight_1": {
+    experimentId: "daynight_1", levelIndex: 11, experimentSubIndex: 0, tier: "foundation", ...DIFFICULTY_SCALING.foundation,
+    freeTextInquiry: { questionId: "daynight_1_q", prompt: "If you were an astronaut standing on the Moon looking back at Earth, what would day and night look like on our planet?", maxPoints: 4 }
+  },
+  "daynight_2": {
+    experimentId: "daynight_2", levelIndex: 11, experimentSubIndex: 1, tier: "intermediate", ...DIFFICULTY_SCALING.intermediate,
+    freeTextInquiry: { questionId: "daynight_2_q", prompt: "Why do places near Earth's equator stay warm throughout the year while the polar ice caps stay freezing cold?", maxPoints: 4 }
+  },
+  "daynight_3": {
+    experimentId: "daynight_3", levelIndex: 11, experimentSubIndex: 2, tier: "advanced", ...DIFFICULTY_SCALING.advanced,
+    freeTextInquiry: { questionId: "daynight_3_q", prompt: "How did ancient Indian astronomers and travelers tell exact time and find North using only a vertical stick and midday shadows?", maxPoints: 4 }
+  },
+  "solar_1": {
+    experimentId: "solar_1", levelIndex: 12, experimentSubIndex: 0, tier: "foundation", ...DIFFICULTY_SCALING.foundation,
+    freeTextInquiry: { questionId: "solar_1_q", prompt: "If the Sun were scaled down to a cricket ball, how much of your classroom would be empty vacuum versus solid planet material?", maxPoints: 4 }
+  },
+  "solar_2": {
+    experimentId: "solar_2", levelIndex: 12, experimentSubIndex: 1, tier: "intermediate", ...DIFFICULTY_SCALING.intermediate,
+    freeTextInquiry: { questionId: "solar_2_q", prompt: "Why does sunlight take over 8 minutes to reach Earth, and how does this show the staggering scale of cosmic space?", maxPoints: 4 }
+  },
+  "solar_3": {
+    experimentId: "solar_3", levelIndex: 12, experimentSubIndex: 2, tier: "advanced", ...DIFFICULTY_SCALING.advanced,
+    freeTextInquiry: { questionId: "solar_3_q", prompt: "If an astronaut visited Neptune, why would the Sun appear as a cold, bright pinpoint star rather than a warm disk?", maxPoints: 4 }
   },
 };
 

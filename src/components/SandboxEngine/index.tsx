@@ -13,6 +13,8 @@ import { BuoyancyLevel } from './levels/BuoyancyLevel';
 import { KitchenChemistryLevel } from './levels/KitchenChemistryLevel';
 import { HumanBodyLevel } from './levels/HumanBodyLevel';
 import { PlantsGrowthLevel } from './levels/PlantsGrowthLevel';
+import { DayNightSeasonsLevel } from './levels/DayNightSeasonsLevel';
+import { SolarSystemScaleLevel } from './levels/SolarSystemScaleLevel';
 
 interface SandboxEngineProps {
   onLevelChange?: (index: number) => void;
@@ -35,7 +37,9 @@ export const EXPERIMENT_LABELS: Record<number, string[]> = {
   8: ["Paper Boat", "Egg in Salt Water", "Oil & Water"],
   9: ["Turmeric pH", "Soda & Balloon", "Sugar Saturation"],
   10: ["Pulse & Heartbeat", "Diaphragm & Lungs", "Pupil Reflex"],
-  11: ["Oxygen Bubbles", "Leaf Transpiration", "Phototropism"]
+  11: ["Oxygen Bubbles", "Leaf Transpiration", "Phototropism"],
+  12: ["Spinning Globe", "Tilted Axis & Seasons", "Sundial Shadows"],
+  13: ["Cricket Ball Sun", "Field Pacing Scale", "Orbit Speedway"]
 };
 
 export default function SandboxEngine({ 
@@ -102,6 +106,10 @@ export default function SandboxEngine({
       return <HumanBodyLevel key={`human-${currentLevelIndex}`} recordAction={handleRecordAction} experimentSubIndex={currentLevelIndex} />;
     } else if (mockTestId === 11) {
       return <PlantsGrowthLevel key={`plants-${currentLevelIndex}`} recordAction={handleRecordAction} experimentSubIndex={currentLevelIndex} />;
+    } else if (mockTestId === 12) {
+      return <DayNightSeasonsLevel key={`seasons-${currentLevelIndex}`} recordAction={handleRecordAction} experimentSubIndex={currentLevelIndex} />;
+    } else if (mockTestId === 13) {
+      return <SolarSystemScaleLevel key={`solar-${currentLevelIndex}`} recordAction={handleRecordAction} experimentSubIndex={currentLevelIndex} />;
     }
     return null;
   };
