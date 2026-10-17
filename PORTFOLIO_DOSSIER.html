@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Engineering Portfolio Dossier: Agastya Curiosity Olympiad</title>
+<style>
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: #1a1a1a;
+    max-width: 850px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  h1 {
+    color: #0d3b66;
+    font-size: 26pt;
+    border-bottom: 2px solid #0d3b66;
+    padding-bottom: 8px;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 11pt;
+    color: #4a5568;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  h2 {
+    color: #1d3557;
+    font-size: 16pt;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 4px;
+    margin-top: 32px;
+  }
+  h3 {
+    color: #2b6cb0;
+    font-size: 12.5pt;
+    margin-top: 20px;
+    margin-bottom: 6px;
+  }
+  p, li {
+    font-size: 10.5pt;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-size: 9.5pt;
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background-color: #f1f5f9;
+    font-weight: 600;
+    color: #0f172a;
+  }
+  pre {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 9pt;
+    overflow-x: auto;
+    line-height: 1.35;
+    color: #0f172a;
+  }
+  code {
+    background-color: #f1f5f9;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 9.5pt;
+    color: #0f172a;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+  }
+  .math-box {
+    background-color: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    padding: 10px 16px;
+    margin: 14px 0;
+    font-size: 11pt;
+    font-family: 'Cambria Math', 'Times New Roman', serif;
+    font-style: italic;
+  }
+  .highlight {
+    font-weight: 600;
+    color: #1e3a8a;
+  }
+</style>
+</head>
+<body>
+
+<h1>Engineering Portfolio Dossier: Agastya Curiosity Olympiad</h1>
+<div class="subtitle">
+  <strong>Architect &amp; Lead Engineer:</strong> Kishan Alamuri &nbsp;|&nbsp;
+  <strong>Live Production URL:</strong> <a href="https://curiosity-olympiad.vercel.app">curiosity-olympiad.vercel.app</a><br>
+  <strong>Source Code Repository:</strong> <a href="https://github.com/ScaryPython100/curiosity-olympiad">github.com/ScaryPython100/curiosity-olympiad</a><br>
+  <strong>Primary Discipline:</strong> Systems Architecture, Edge Computing, Behavioral Telemetry &amp; Computational Pedagogy
+</div>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+
+<pre>
+                                SYSTEM ARCHITECTURE OVERVIEW
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                CLIENT RUNTIME (BROWSER / PWA)                          │
+│  ┌───────────────────────┐  ┌─────────────────────────┐  ┌───────────────────────────┐ │
+│  │   SandboxEngine       │  │   CQ Telemetry Engine   │  │   Web Audio Synthesizer   │ │
+│  │ (33 Custom Math Sims) │  │  (5-Axis Behavioral Log)│  │ (Procedural Pulse & Waves)│ │
+│  └───────────┬───────────┘  └────────────┬────────────┘  └─────────────┬─────────────┘ │
+└──────────────┼───────────────────────────┼─────────────────────────────┼───────────────┘
+               │                           │                             │
+┌──────────────▼───────────────────────────▼─────────────────────────────▼───────────────┐
+│                               NEXT.JS 16 EDGE RUNTIME                                  │
+│  ┌──────────────────────────────────┐     ┌──────────────────────────────────────────┐ │
+│  │ Next.js App Router & Middleware  │     │ Server Actions & Cryptographic Pipeline  │ │
+│  │ (Session Guard & Edge Proxy)     │     │ (HMAC-SHA256 Salts, Admin Auth Guards)   │ │
+│  └──────────────────┬───────────────┘     └────────────────────┬─────────────────────┘ │
+└─────────────────────┼──────────────────────────────────────────┼───────────────────────┘
+                      │                                          │
+┌─────────────────────▼──────────────────────────────────────────▼───────────────────────┐
+│                          PERSISTENCE & SECURITY (SUPABASE / POSTGRESQL)                │
+│  ┌──────────────────────────────────┐     ┌──────────────────────────────────────────┐ │
+│  │ Row Level Security (RLS) Policies│     │ Remote Procedure Calls (RPCs) & Triggers │ │
+│  │ (School Code Multi-Tenant Scopes)│     │ (Atomic XP Transactions & CQ Profiling)  │ │
+│  └──────────────────────────────────┘     └──────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+</pre>
+
+<h2>1. Executive Summary &amp; Problem Formulation</h2>
+
+<h3>1.1 Context &amp; Educational Problem Space</h3>
+<p>The <strong>Agastya International Foundation</strong> operates the world's largest mobile hands-on science education program, reaching over 15 million children across rural and semi-urban India. In resource-constrained classrooms, STEM education overwhelmingly defaults to rote memorization due to the absence of physical laboratory infrastructure.</p>
+<p>The <strong>Curiosity Olympiad</strong> was conceived to invert this paradigm: converting science education from passive recall into <strong>inquiry-driven, experiential exploration</strong>. Unlike conventional competitive platforms that evaluate students exclusively through multiple-choice speed drills, the platform measures <strong>how</strong> a student learns—tracking hypothesis testing, parameter tinkering, resilience after failure, and conceptual reasoning.</p>
+
+<h3>1.2 Authorship Declaration</h3>
+<p>I served as the <strong>sole systems architect and lead full-stack engineer</strong> for the platform across its entire development lifecycle (100+ commits). I engineered the full stack independently:</p>
+<ul>
+  <li>Mathematical and kinematic simulation models for 33 interactive laboratory experiments.</li>
+  <li>A proprietary 5-axis behavioral telemetry engine calculating a multidimensional <strong>Curiosity Quotient (CQ)</strong>.</li>
+  <li>Edge proxy routing, cryptographic authentication pipelines, and zero-trust certificate release mechanics.</li>
+  <li>A fully relational PostgreSQL schema with Row-Level Security (RLS) policies, idempotent migrations, and atomic state transitions.</li>
+</ul>
+
+<h2>2. Technical Innovations &amp; Platform Capabilities</h2>
+
+<h3>2.1 Physics &amp; Kinetic Sandbox Engine (Zero-Engine Web Simulation)</h3>
+<p>Rather than importing heavy 3D WebGL runtimes (e.g., Three.js, Babylon.js) that trigger thermal throttling and out-of-memory crashes on low-spec mobile chipsets, I designed a <strong>canvas-free, mathematically grounded simulation kernel</strong> rendered entirely using hardware-accelerated SVG coordinates and standard DOM primitives.</p>
+<ul>
+  <li><strong>33 Interactive Laboratory Modules:</strong> Spanning 11 curricular domains—from Snell’s Law optical ray refraction, gravitational orbital velocity perturbations, and acid-base turmeric titration kinetics to acoustic wave resonance and biological phototropism.</li>
+  <li><strong>Parametric State Modeling:</strong> Every simulation exposes real-time independent variables (e.g., refractive indices, planetary mass ratios, thermal dissipation rates) through low-latency pointer interactions.</li>
+  <li><strong>Hardware-Constrained Optimization:</strong> Form-factored and rigorously tested to maintain a steady <strong>60 FPS on budget Android hardware</strong> (360px viewports, Mali/Adreno entry GPUs) with zero horizontal clipping and touch targets strictly &ge; 44px.</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th>Domain</th>
+      <th>Underlying Mathematical Model</th>
+      <th>State Variables</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Optics &amp; Refraction</td>
+      <td>Snell's Law Vector Tracing: <em>n₁ sin(θ₁) = n₂ sin(θ₂)</em></td>
+      <td><em>n₁, n₂, θ₁</em></td>
+    </tr>
+    <tr>
+      <td>Orbital Mechanics</td>
+      <td>Semi-Implicit Euler Step Integration: <em>a = -(GM / r³) · r</em></td>
+      <td><em>G, M, r, v</em></td>
+    </tr>
+    <tr>
+      <td>Acoustic Resonance</td>
+      <td>Standing Wave Harmonic Synthesis: <em>f_n = (n / 2L) · √(T / μ)</em></td>
+      <td><em>L, T, μ, n</em></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>2.2 The 5-Axis Curiosity Quotient (CQ) Telemetry Engine</h3>
+<p>Standard grading rewards raw accuracy. The Curiosity Olympiad platform introduces a quantitative psychometric framework called the <strong>Curiosity Quotient (CQ)</strong>, powered by an active client-side telemetry engine:</p>
+
+<div class="math-box">
+  CQ = w_p · Precision + w_e · Exploration + w_g · Grit + w_r · Reflection + w_s · Speed
+</div>
+
+<ol>
+  <li><strong>Exploration Depth (E):</strong> Measures the breadth and variance of parameter manipulation prior to answering (e.g., testing extrema on a voltage slider or boundary conditions in buoyancy).</li>
+  <li><strong>Resilience / Grit (G):</strong> Tracks recovery trajectories following erroneous predictions, penalizing rapid surrender and rewarding iterative hypothesis revision.</li>
+  <li><strong>Observation &amp; Reflection (R):</strong> Evaluates time spent studying simulation anomalies and the semantic depth of free-text hypothesis articulations.</li>
+  <li><strong>Precision (P):</strong> Quantifies accuracy in targeted objective completions and empirical deductions.</li>
+  <li><strong>Efficiency (S):</strong> Evaluates cognitive economy—distinguishing deliberate, goal-oriented exploration from random jitter.</li>
+</ol>
+<ul>
+  <li><strong>Non-Blocking Telemetry Collection:</strong> Implemented via a lightweight React hook (<code>useTelemetry.ts</code>) that records pointer deltas, slider settlements, tool switches, and simulation resets without incurring React re-render overhead.</li>
+  <li><strong>Collision-Free Dynamic SVG Radar Visualization:</strong> Vector projection engine translates multidimensional telemetry vectors into closed SVG polygon paths with zero third-party chart dependencies.</li>
+</ul>
+
+<h3>2.3 Web Audio API Procedural Sound Synthesis</h3>
+<p>In rural connectivity environments (2G/3G speeds), fetching binary MP3/WAV audio assets introduces latency and packet failure risks.</p>
+<p>To eliminate audio bandwidth consumption entirely, I engineered a <strong>pure procedural audio synthesizer</strong> using the browser's native <strong>Web Audio API</strong> (<code>src/utils/webAudio.ts</code>):</p>
+<ul>
+  <li><strong>Stethoscope Heartbeat Synthesizer:</strong> Chains low-frequency oscillator bursts (45 Hz–60 Hz) through a custom Biquad low-pass filter to procedurally generate variable-BPM cardiac "lub-dub" acoustics.</li>
+  <li><strong>Acoustic Wave Simulations:</strong> Simulates acoustic vibrations for resonance experiments (string telephone, terracotta <em>matka</em> tapping) by modulating triangle/sine wave oscillators and dynamic gain envelopes in real time.</li>
+  <li><strong>Zero Network Payload:</strong> 0 KB network overhead for sound assets across the entire application lifecycle.</li>
+</ul>
+
+<h3>2.4 Kuppam Campus Highway (Progressive SVG Gamification)</h3>
+<p>Replaced sterile percentage bars with a thematic visual highway tracing 11 real-world landmarks of Agastya’s 172-acre Kuppam Creativity Campus (e.g., Discovery Center, Bio-Diversity Park, Planetarium):</p>
+<ul>
+  <li><strong>Parametric S-Curve Spline:</strong> Calculates dynamic SVG path matrices with proportional vehicle orientation angles (<em>θ = arctan2(Δy, Δx)</em>) as student XP progresses from 0 to 10,000 XP.</li>
+  <li><strong>Tiered Competition Architecture:</strong> Separates an <strong>Official Competitive Leaderboard</strong> (tied to merit certification) from a <strong>Friends Leaderboard</strong> (casual, social learning tier) to prevent competitive anxiety among younger students.</li>
+</ul>
+
+<h2>3. Systems Architecture &amp; Deep-Dive Engineering Challenges</h2>
+
+<pre>
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              FULL-STACK DATA & SECURITY FLOW                           │
+│                                                                                        │
+│  [Student Client]                                                                      │
+│         │ (OTP Authentication via Mobile / Email)                                      │
+│         ▼                                                                              │
+│  [Descope Identity Provider] ──(Session Cookie)──► [Next.js Edge Proxy]                │
+│                                                              │ (Validate Session)      │
+│                                                              ▼                         │
+│  [Supabase Auth (Postgres)] ◄──(HMAC-SHA256 Salted Sync)── [Server Actions]            │
+│         │                                                                              │
+│         ├──► [RLS Policy Layer] (Filters records by authenticated user_id)             │
+│         │                                                                              │
+│         ├──► [PostgreSQL Database]                                                     │
+│         │      ├── student_profiles (School code, consent timestamp, real name)        │
+│         │      ├── user_gamification (XP, streaks, unlocked levels)                    │
+│         │      └── exam_submissions (Exam scores, 5-axis CQ telemetry logs)            │
+│         │                                                                              │
+│         └──► [Time-Locked View / RPC]                                                  │
+│                └── Checks: NOW() &gt;= 00:01 AM (D+1) AND user_id = rank_1_user           │
+│                      └── Returns Certificate Authorization Payload                     │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+</pre>
+
+<h3>Challenge 1: Enforcing Zero-Trust Certificate Generation</h3>
+<ul>
+  <li><strong>Problem:</strong> Standard web apps render merit certificates directly on the client once a score threshold is crossed. This presents a critical vulnerability: client-side inspection or network tampering can spoof certificates or claim Rank #1 honors mid-day while the leaderboard is still volatile.</li>
+  <li><strong>Architecture Solution:</strong>
+    <ol>
+      <li>Moved eligibility enforcement entirely into a <strong>time-locked database model</strong>.</li>
+      <li>Implemented strict business logic: A "Top Performer" certificate cannot be viewed or downloaded during the active day. Eligibility unlocks exclusively at <strong>12:01 AM on the subsequent calendar day (D+1)</strong> after the daily/weekly window has formally closed.</li>
+      <li>Rendered on an isolated <strong>HTML5 Canvas pipeline</strong> (<code>src/utils/certificateCanvas.ts</code>) with high-resolution 300 DPI exports, dynamic signature placeholders, specimen security watermarks for unranked previews, and deterministic audit hashes.</li>
+    </ol>
+  </li>
+</ul>
+
+<h3>Challenge 2: Multi-Tenant Data Isolation &amp; Cross-Account Bleed</h3>
+<ul>
+  <li><strong>Problem:</strong> In rural school computer labs, dozens of students share identical low-cost Android tablets or desktop Chromebooks. An early bug revealed that shared browser <code>localStorage</code> could leak cached school codes and user avatar mappings between subsequent student logins.</li>
+  <li><strong>Architecture Solution:</strong>
+    <ol>
+      <li>Completely eradicated client-side profile hydration from local storage; refactored the pipeline to source identity exclusively from authenticated Supabase sessions and JWT metadata.</li>
+      <li>Built <strong>per-account scoped storage isolation</strong> and engineered <code>TabSessionGuard.tsx</code> to detect concurrent tab mutations and purge residual states on session termination.</li>
+      <li>Developed custom unit tests (<code>tests/userAvatar.test.mjs</code>) executing automated assertions against deterministic hashing algorithms (<code>DJB2</code>) to guarantee avatar stability and zero cache bleed across distinct user IDs.</li>
+    </ol>
+  </li>
+</ul>
+
+<h3>Challenge 3: Child Privacy Compliance &amp; Cryptographic Fallback Pipelines</h3>
+<ul>
+  <li><strong>Problem:</strong> Because the platform serves minors across India, collecting or publicly exposing Personally Identifiable Information (PII) violates statutory data privacy standards (DPDP Act / COPPA). Furthermore, students needed an OTP-based login flow that interfaced reliably with Supabase's strict relational auth schema.</li>
+  <li><strong>Architecture Solution:</strong>
+    <ol>
+      <li><strong>Anonymous Deterministic Avatars:</strong> Implemented a DJB2 string hashing utility that converts an abstract user ID into a deterministic mascot assignment, allowing social leaderboard rankings without storing or broadcasting profile images or personal names.</li>
+      <li><strong>Consent Auditing:</strong> Designed explicit parental and teacher consent tracking directly in the database registration transaction (<code>parental_consent_granted_at</code> timestamp).</li>
+      <li><strong>Cryptographically Salted Auth Bridge:</strong> When bridging passwordless Descope OTP sessions to Supabase service-role auth, I eliminated insecure static credentials by engineering an <strong>HMAC-SHA256 salted fallback generator</strong> (<code>getSecureFallbackPassword</code> in <code>actions.ts</code>) utilizing the server's private <code>SUPABASE_SERVICE_ROLE_KEY</code>.</li>
+    </ol>
+  </li>
+</ul>
+
+<h3>Challenge 4: High-Frequency Re-render Optimization</h3>
+<ul>
+  <li><strong>Problem:</strong> During timed 15-minute mock olympiads, the exam interface tracks an elapsed countdown timer ticking every second. Initial profiling indicated that filtering the 99-question question bank and scanning experiment configurations on every clock tick was causing UI stutter on low-power devices.</li>
+  <li><strong>Architecture Solution:</strong>
+    <ol>
+      <li>Converted multi-attribute array scans into pre-indexed <em>O(1)</em> dictionary lookups (<code>EXPERIMENT_CONFIG_MAP</code>).</li>
+      <li>Wrapped high-frequency question filters and active mock test selectors in strict <code>useMemo</code> hooks, decoupling time-counter state propagation from the assessment render tree.</li>
+      <li>Batch-optimized database administration endpoints (<code>wipe-accounts/route.ts</code>), replacing sequential <em>O(N)</em> HTTP/SQL loops with parallelized <code>Promise.allSettled</code> batches and SQL <code>.in("user_id", ids)</code> set operations.</li>
+    </ol>
+  </li>
+</ul>
+
+<h2>4. Technical Stack &amp; Engineering Specifications</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Technologies Used</th>
+      <th>Primary Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Frontend Runtime</td>
+      <td>Next.js 16 (App Router), React 19, TypeScript</td>
+      <td>Server-side rendering, zero-bundle server actions</td>
+    </tr>
+    <tr>
+      <td>Styling &amp; Motion</td>
+      <td>Tailwind CSS, Dynamic SVG, Hardware Transform Matrices</td>
+      <td>Zero-latency, 60fps budget mobile performance</td>
+    </tr>
+    <tr>
+      <td>Audio Synthesis</td>
+      <td>Web Audio API (AudioContext, Oscillators, Biquad Filters)</td>
+      <td>Bandwidth-free procedural sound wave generation</td>
+    </tr>
+    <tr>
+      <td>Edge Routing &amp; Auth</td>
+      <td>Descope OTP, Next.js Middleware, HMAC-SHA256 Cryptographic Salts</td>
+      <td>Passwordless auth, edge session token preservation</td>
+    </tr>
+    <tr>
+      <td>Persistence &amp; Backend</td>
+      <td>Supabase, PostgreSQL 15, Row-Level Security (RLS)</td>
+      <td>Relational integrity, multi-tenant school gating</td>
+    </tr>
+    <tr>
+      <td>Offline Architecture</td>
+      <td>Custom Service Worker (PWA), Cache Storage API</td>
+      <td>Offline caching &amp; asset resilience in rural areas</td>
+    </tr>
+    <tr>
+      <td>Quality Assurance</td>
+      <td>Native Node.js Test Runner (node:test, node:assert/strict)</td>
+      <td>Fast, dependency-free unit verification (75ms)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>5. Verifiable Engineering Artifacts &amp; Source Tree</h2>
+
+<pre>
+curiosity-olympiad/
+├── src/
+│   ├── app/
+│   │   ├── (auth)/login/actions.ts         # HMAC-SHA256 salted auth bridges & OTP verification
+│   │   ├── api/admin/wipe-accounts/        # Batched admin account maintenance (Bearer-protected)
+│   │   ├── practice/page.tsx               # Timed simulation runner with memoized dataset filtering
+│   │   ├── tournaments/                    # Category-filtered competitive tournament engine
+│   │   ├── privacy/ & terms/               # DPDP/COPPA compliance & parental consent documentation
+│   │   └── certificate-sample/             # High-res canvas certificate generator with specimen guard
+│   ├── components/
+│   │   ├── SandboxEngine/                  # 33 interactive physics/chemistry mathematical simulations
+│   │   │   ├── levels/                     # Optics, Gravity, Acoustics, Mechanics, Botany, Chemistry
+│   │   │   └── useTelemetry.ts             # Non-blocking 5-axis user action telemetry recorder
+│   │   ├── CuriosityQuotientCard.tsx       # Mathematical SVG radar projection for student CQ profiles
+│   │   ├── ComingSoonOlympiadCard.tsx      # Final National Olympiad teaser integration
+│   │   └── TabSessionGuard.tsx             # Multi-tab concurrency synchronization guard
+│   ├── config/
+│   │   └── scoringConfig.ts                # O(1) experiment lookup dictionaries & difficulty scaling
+│   ├── utils/
+│   │   ├── cqScoring.ts                    # 5-axis CQ normalization & standard deviation algorithms
+│   │   ├── webAudio.ts                     # Web Audio API procedural acoustic synthesizers
+│   │   ├── userAvatar.ts                   # DJB2 deterministic hashing & cache bleed safeguards
+│   │   └── certificateCanvas.ts            # 300 DPI canvas rendering & security watermark pipeline
+│   └── proxy.ts                            # Edge session validation middleware
+├── tests/
+│   ├── userAvatar.test.mjs                 # DJB2 hashing stability & cross-account bleed unit tests
+│   └── authHook.test.mjs                   # Session parsing, cookie precedence & resilience tests
+└── supabase_migration.sql                  # 450+ lines of idempotent DDL, RLS policies, & RPC functions
+</pre>
+
+<h2>6. Personal Reflection &amp; Next Horizons</h2>
+<p>Building the Agastya Curiosity Olympiad underscored the profound difference between building a conventional CRUD application and engineering a <strong>resilient, real-world educational system</strong>. Designing software for students in rural India forced me to treat every kilobyte of bandwidth, every millisecond of thread execution, and every pixel of viewport width as scarce resources.</p>
+<p>Through this project, I demonstrated that software engineering can redefine how scientific curiosity is quantified and cultivated—proving that world-class, mathematically rigorous digital laboratories can run smoothly on a $50 Android phone in the most remote corners of India.</p>
+<p>In my undergraduate studies, I intend to deepen my research at the intersection of <strong>low-latency edge systems</strong>, <strong>computational physics simulations</strong>, and <strong>automated cognitive telemetry</strong>—designing scalable infrastructure that expands equitable access to computational tools globally.</p>
+
+</body>
+</html>
