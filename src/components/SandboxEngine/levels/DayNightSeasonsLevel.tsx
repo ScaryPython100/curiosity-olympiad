@@ -8,14 +8,9 @@ import React, { useState } from "react";
 function SpinningGlobe({ recordAction }: { recordAction: (actionType: string, actionDetails?: any) => void }) {
   // Earth rotation in hours: 0 to 24 (local time in India)
   const [hour, setHour] = useState(12);
-  const [viewMode, setViewMode] = useState<"side" | "pole">("side");
 
-  // Rotation angle in degrees
-  const rotationDeg = (hour / 24) * 360;
-
-  // India is at ~80°E longitude. When hour is 12 (noon), India faces the sun directly.
   const isIndiaDay = hour >= 6 && hour < 18;
-  // New York is ~74°W longitude (10.5 hours behind India).
+  // New York is ~10 hours behind India.
   const nyHour = (hour - 10 + 24) % 24;
   const isNyDay = nyHour >= 6 && nyHour < 18;
 
@@ -29,149 +24,86 @@ function SpinningGlobe({ recordAction }: { recordAction: (actionType: string, ac
     });
   };
 
+  // Looking down on the North Pole, the Sun is on the left. Earth turns
+  // counter-clockwise, so a place at local noon faces the Sun (left side).
+  const CX = 200;
+  const CY = 110;
+  const R = 78;
+  const placeAt = (localHour: number) => {
+    const a = ((180 - (localHour - 12) * 15) * Math.PI) / 180;
+    return { x: CX + Math.cos(a) * (R - 14), y: CY + Math.sin(a) * (R - 14) };
+  };
+  const india = placeAt(hour);
+  const ny = placeAt(nyHour);
+
   return (
     <div className="flex flex-col h-full w-full">
-      {/* Control Bar */}
-      <div className="bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300 shrink-0 z-20">
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-amber-400">Spin Earth:</span>
-          <input
-            type="range"
-            min="0"
-            max="23"
-            step="1"
-            value={hour}
-            onChange={(e) => handleHourChange(parseInt(e.target.value))}
-            className="w-28 sm:w-40 accent-amber-500 cursor-pointer min-h-[44px]"
-            aria-label="Earth Rotation Hour Slider"
-          />
-          <span className="text-xs font-mono font-bold text-amber-300">
-            {String(hour).padStart(2, "0")}:00 hrs
-          </span>
+      <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col gap-1 text-xs text-gray-300 shrink-0 z-20 w-full">
+        <div className="flex justify-between items-center">
+          <span className="font-bold text-amber-300">🌍 Spin the Earth</span>
+          <span className="text-xs font-mono font-bold text-amber-300">India time {String(hour).padStart(2, "0")}:00</span>
         </div>
-
-        <div className="flex items-center gap-1.5 bg-gray-800 p-1 rounded-lg border border-gray-700">
-          <button
-            onClick={() => setViewMode("side")}
-            className={`px-2.5 py-1 rounded text-[11px] font-bold min-h-[32px] transition-colors ${
-              viewMode === "side" ? "bg-amber-500 text-gray-950" : "text-gray-400 hover:text-white"
-            }`}
-          >
-            Side View
-          </button>
-          <button
-            onClick={() => setViewMode("pole")}
-            className={`px-2.5 py-1 rounded text-[11px] font-bold min-h-[32px] transition-colors ${
-              viewMode === "pole" ? "bg-amber-500 text-gray-950" : "text-gray-400 hover:text-white"
-            }`}
-          >
-            North Pole View
-          </button>
-        </div>
+        <input
+          type="range"
+          min="0"
+          max="23"
+          step="1"
+          value={hour}
+          onChange={(e) => handleHourChange(parseInt(e.target.value))}
+          aria-label="Spin the Earth (India time)"
+        />
       </div>
 
-      {/* Visual Simulation Stage */}
-      <div className="relative flex-1 min-h-[220px] bg-slate-950 overflow-hidden flex flex-col items-center justify-center p-3 select-none">
-        {/* Flashlight Sun Beams on Left */}
-        <div className="absolute left-0 top-0 bottom-0 w-36 sm:w-48 bg-gradient-to-r from-amber-400/35 via-yellow-200/15 to-transparent pointer-events-none" />
+      <div className="relative flex-1 min-h-[220px] bg-slate-950 flex items-end select-none">
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`India has ${isIndiaDay ? "day" : "night"}, New York has ${isNyDay ? "day" : "night"}`}>
+          <defs>
+            <clipPath id="earth-disc"><circle cx={CX} cy={CY} r={R} /></clipPath>
+          </defs>
+          {/* Sun and its light from the left */}
+          <circle cx="26" cy={CY} r="20" fill="#facc15" />
+          <text x="26" y={CY + 36} textAnchor="middle" fontSize="10" fontWeight="800" fill="#fcd34d">SUN</text>
+          {[-50, -20, 10, 40].map((dy) => (
+            <line key={dy} x1="52" y1={CY + dy} x2={CX - R - 6} y2={CY + dy} stroke="#fde047" strokeWidth="2" strokeDasharray="6 5" opacity="0.6" />
+          ))}
 
-        {/* Torch Fixture */}
-        <div className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center gap-1 z-10">
-          <div className="w-8 sm:w-10 h-14 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-l-md border-r-4 border-amber-300 shadow-lg flex items-center justify-center">
-            <span className="material-symbols-outlined text-white text-base">flashlight_on</span>
-          </div>
-          <div className="hidden sm:block text-[10px] font-mono text-amber-300 uppercase tracking-widest rotate-90 origin-left">
-            Sun Rays
-          </div>
-        </div>
+          {/* Earth seen from above the North Pole: day half faces the Sun */}
+          <circle cx={CX} cy={CY} r={R} fill="#0ea5e9" />
+          <g clipPath="url(#earth-disc)">
+            <rect x={CX} y={CY - R} width={R} height={R * 2} fill="#020617" opacity="0.78" />
+          </g>
+          <circle cx={CX} cy={CY} r={R} fill="none" stroke="#7dd3fc" strokeWidth="2" />
+          <circle cx={CX} cy={CY} r="4" fill="#fbbf24" />
+          <text x={CX} y={CY - R - 6} textAnchor="middle" fontSize="9" fontWeight="700" fill="#94a3b8">North Pole view</text>
+          <text x={CX - R / 2} y={CY + R - 10} textAnchor="middle" fontSize="10" fontWeight="800" fill="#fef9c3">DAY</text>
+          <text x={CX + R / 2} y={CY + R - 10} textAnchor="middle" fontSize="10" fontWeight="800" fill="#94a3b8">NIGHT</text>
+          {/* Spin direction */}
+          <path d={`M ${CX + R + 10} ${CY + 20} A ${R + 10} ${R + 10} 0 0 1 ${CX + R + 10} ${CY - 20}`} stroke="#fbbf24" strokeWidth="2" fill="none" />
+          <polygon points={`${CX + R + 4},${CY - 18} ${CX + R + 16},${CY - 18} ${CX + R + 10},${CY - 28}`} fill="#fbbf24" />
 
-        {/* The Earth Globe */}
-        <div className="relative w-40 h-40 sm:w-52 sm:h-52 rounded-full border-2 border-sky-400/30 shadow-2xl overflow-hidden flex items-center justify-center bg-sky-900">
-          {/* Day / Night Terminator Shading */}
-          <div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/85 transition-opacity"
-            style={{ width: "100%", height: "100%" }}
-          />
+          {/* Cities: markers move, labels stay upright */}
+          <circle cx={india.x} cy={india.y} r="7" fill="#22c55e" stroke="#ffffff" strokeWidth="2" style={{ transition: 'all 0.3s' }} />
+          <rect x={india.x - 26} y={india.y - 26} width="52" height="15" rx="7" fill="#052e16" opacity="0.9" style={{ transition: 'all 0.3s' }} />
+          <text x={india.x} y={india.y - 15} textAnchor="middle" fontSize="9" fontWeight="800" fill="#86efac" style={{ transition: 'all 0.3s' }}>India</text>
+          <circle cx={ny.x} cy={ny.y} r="7" fill="#3b82f6" stroke="#ffffff" strokeWidth="2" style={{ transition: 'all 0.3s' }} />
+          <rect x={ny.x - 30} y={ny.y + 10} width="60" height="15" rx="7" fill="#172554" opacity="0.9" style={{ transition: 'all 0.3s' }} />
+          <text x={ny.x} y={ny.y + 21} textAnchor="middle" fontSize="9" fontWeight="800" fill="#93c5fd" style={{ transition: 'all 0.3s' }}>New York</text>
 
-          {/* Continents & Rotation Disc */}
-          <div
-            className="w-full h-full relative transition-transform duration-300 flex items-center justify-center"
-            style={{ transform: `rotate(${rotationDeg}deg)` }}
-          >
-            {/* Equator & Axis Lines */}
-            <div className="absolute inset-x-0 top-1/2 h-0.5 border-t border-dashed border-white/20" />
-            <div className="absolute inset-y-0 left-1/2 w-0.5 border-l border-dashed border-white/20" />
-
-            {/* India Marker */}
-            <div
-              className="absolute flex flex-col items-center"
-              style={{ top: "35%", left: "55%" }}
-            >
-              <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 border border-white flex items-center justify-center animate-pulse shadow-md">
-                <span className="text-[7px] text-white font-black">IN</span>
-              </div>
-              <span className="text-[8px] font-bold text-emerald-300 bg-black/60 px-1 rounded mt-0.5">
-                Kuppam
-              </span>
-            </div>
-
-            {/* New York Marker */}
-            <div
-              className="absolute flex flex-col items-center"
-              style={{ top: "30%", left: "15%" }}
-            >
-              <div className="w-3.5 h-3.5 rounded-full bg-blue-500 border border-white flex items-center justify-center shadow-md">
-                <span className="text-[7px] text-white font-black">US</span>
-              </div>
-              <span className="text-[8px] font-bold text-blue-300 bg-black/60 px-1 rounded mt-0.5">
-                New York
-              </span>
-            </div>
-          </div>
-
-          {/* Central Axis Pin */}
-          <div className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-white z-20 pointer-events-none" />
-        </div>
-
-        {/* Dual City Local Status Badges */}
-        <div className="mt-3 flex flex-wrap items-center justify-center gap-3 z-10">
-          <div
-            className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 transition-colors ${
-              isIndiaDay
-                ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                : "bg-slate-800 text-slate-400 border-slate-700"
-            }`}
-          >
-            <span>🇮🇳 India:</span>
-            <span>{isIndiaDay ? "☀️ Daylight" : "🌙 Night"}</span>
-            <span className="font-mono text-[10px]">({hour}:00)</span>
-          </div>
-
-          <div
-            className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 transition-colors ${
-              isNyDay
-                ? "bg-blue-500/20 text-blue-300 border-blue-500/40"
-                : "bg-slate-800 text-slate-400 border-slate-700"
-            }`}
-          >
-            <span>🇺🇸 New York:</span>
-            <span>{isNyDay ? "☀️ Daylight" : "🌙 Night"}</span>
-            <span className="font-mono text-[10px]">({nyHour}:00)</span>
-          </div>
-        </div>
+          {/* Status */}
+          <text x="12" y="208" fontSize="10" fontWeight="800" fill={isIndiaDay ? "#fcd34d" : "#94a3b8"}>India: {isIndiaDay ? "☀️ day" : "🌙 night"}</text>
+          <text x="328" y="208" textAnchor="end" fontSize="10" fontWeight="800" fill={isNyDay ? "#fcd34d" : "#94a3b8"}>New York: {isNyDay ? "☀️ day" : "🌙 night"}</text>
+        </svg>
       </div>
 
-      {/* Observation Banner */}
       <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
-        <span className="text-xs sm:text-sm font-bold text-amber-300 block">
+        <span className="text-sm font-bold text-amber-300 block">
           {hour === 12
-            ? "Solar Noon in India! Meanwhile, the opposite side of Earth is in midnight darkness."
+            ? "☀️ Noon in India, and night in New York!"
             : isIndiaDay
-            ? "Daylight: India is tilted into the steady beam of the Sun."
-            : "Nighttime: India has spun into Earth's shadow. The Sun hasn't moved!"}
+              ? "☀️ India is facing the Sun: daytime"
+              : "🌙 India has turned away from the Sun: night"}
         </span>
-        <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
-          Earth rotates from West to East every 24 hours. The Sun stays still while we spin through its light.
+        <p className="text-xs text-gray-300 mt-0.5">
+          The Sun does not move. The Earth spins once a day, so each place turns into the light and then into the dark.
         </p>
       </div>
     </div>
@@ -222,7 +154,7 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
   return (
     <div className="flex flex-col h-full w-full">
       {/* Control Bar */}
-      <div className="bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300 shrink-0 z-20">
+      <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300 shrink-0 z-20">
         <div className="flex items-center gap-2">
           <span className="font-bold text-amber-400">Month:</span>
           <input
@@ -241,7 +173,7 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-[11px] text-gray-400">Axial Tilt:</span>
+          <span className="text-xs font-bold text-gray-300">Earth's tilt:</span>
           <div className="flex bg-gray-800 p-0.5 rounded-lg border border-gray-700">
             <button
               onClick={() => toggleTilt(0)}
@@ -249,7 +181,7 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
                 tiltDeg === 0 ? "bg-red-500 text-white" : "text-gray-400 hover:text-white"
               }`}
             >
-              0° (No Tilt)
+              No tilt
             </button>
             <button
               onClick={() => toggleTilt(23.5)}
@@ -257,7 +189,7 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
                 tiltDeg === 23.5 ? "bg-emerald-500 text-white" : "text-gray-400 hover:text-white"
               }`}
             >
-              23.5° (Natural Tilt)
+              Real tilt (23.5°)
             </button>
           </div>
         </div>
@@ -371,17 +303,17 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
 
       {/* Observation Banner */}
       <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
-        <span className="text-xs sm:text-sm font-bold text-amber-300 block">
+        <span className="text-sm font-bold text-amber-300 block">
           {tiltDeg === 0
-            ? "Notice: With 0° tilt, seasons completely disappear! Both hemispheres get identical warmth."
+            ? "🤯 No tilt: no summer and no winter anywhere!"
             : isIndiaSummer
-            ? "June: Earth's North tilts toward the Sun! Direct vertical beams create blistering summer heat."
-            : isIndiaWinter
-            ? "December: Earth's North tilts away from the Sun! Angled, spread-out rays bring cool winter."
-            : "Equinox (March/September): Sun strikes the equator directly, creating equal 12-hour days everywhere."}
+              ? "🔥 June: India leans towards the Sun, so it is summer"
+              : isIndiaWinter
+                ? "❄️ December: India leans away from the Sun, so it is winter"
+                : "🌱 March / September: both halves get the same sunlight"}
         </span>
-        <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
-          Earth is actually 5 million km closer to the Sun in January than July. Distance does not cause our seasons—tilt does!
+        <p className="text-xs text-gray-300 mt-0.5">
+          Seasons come from the Earth's tilt, not its distance. Straight sunlight is hot; slanted sunlight spreads out and is weaker.
         </p>
       </div>
     </div>
@@ -405,8 +337,6 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
   const gnomonHeight = 60; // pixels
   const shadowLength = Math.min(140, Math.round(gnomonHeight / Math.tan((sunElevation * Math.PI) / 180)));
 
-  // Shadow direction: morning Sun is East (left), shadow points West (right); evening opposite
-  const shadowDirectionDeg = (timeProgress - 0.5) * 160;
 
   const handleTimeChange = (val: number) => {
     setTimeHour(val);
@@ -426,9 +356,9 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
   return (
     <div className="flex flex-col h-full w-full">
       {/* Control Bar */}
-      <div className="bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300 shrink-0 z-20">
+      <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300 shrink-0 z-20">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-amber-400">Time of Day:</span>
+          <span className="font-bold text-amber-300">🕑 Time of day</span>
           <input
             type="range"
             min="6"
@@ -446,7 +376,7 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-[11px] text-gray-400">Season:</span>
+          <span className="text-xs font-bold text-gray-300">Month:</span>
           <div className="flex bg-gray-800 p-0.5 rounded-lg border border-gray-700">
             <button
               onClick={() => toggleSeason("june")}
@@ -454,7 +384,7 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
                 season === "june" ? "bg-amber-500 text-gray-950" : "text-gray-400 hover:text-white"
               }`}
             >
-              June (High Sun)
+              ☀️ June
             </button>
             <button
               onClick={() => toggleSeason("december")}
@@ -462,87 +392,63 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
                 season === "december" ? "bg-cyan-500 text-gray-950" : "text-gray-400 hover:text-white"
               }`}
             >
-              December (Low Sun)
+              ❄️ December
             </button>
           </div>
         </div>
       </div>
 
-      {/* Visual Simulation Stage */}
-      <div className="relative flex-1 min-h-[220px] bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-950 overflow-hidden flex flex-col items-center justify-between p-3 select-none">
-        {/* Sky Arc & Moving Sun */}
-        <div className="relative w-full max-w-md h-24 border-b border-dashed border-amber-300/30 flex items-end justify-between px-4">
-          <span className="text-[10px] text-amber-400 font-bold">East (Sunrise)</span>
+      {/* Side view: sun crosses from East (left) to West (right); the stick's shadow falls the other way */}
+      <div className="relative flex-1 min-h-[220px] bg-gradient-to-b from-sky-400 to-sky-200 flex items-end select-none">
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`Shadow is ${shadowLength} centimetres long`}>
+          {(() => {
+            const GROUND = 176;
+            const BASE = 170;
+            const STICK = 50;
+            const elRad = (sunElevation * Math.PI) / 180;
+            const fromEast = timeHour <= 12; // morning sun is in the East (left)
+            const shadowPx = Math.min(150, STICK / Math.tan(elRad));
+            const tipX = fromEast ? BASE + shadowPx : BASE - shadowPx;
+            // Sun drawn along its sky arc
+            const sunX = 30 + timeProgress * 280;
+            const sunY = GROUND - 20 - Math.sin(elRad) * 130;
+            return (
+              <g>
+                <path d={`M 30 ${GROUND - 20} Q 170 ${GROUND - 20 - peakAngle * 3.1} 310 ${GROUND - 20}`} stroke="#ffffff" strokeWidth="1.5" strokeDasharray="4 5" fill="none" opacity="0.8" />
+                <line x1={sunX} y1={sunY} x2={tipX} y2={GROUND} stroke="#facc15" strokeWidth="1.5" strokeDasharray="5 4" />
+                <circle cx={sunX} cy={sunY} r="14" fill="#facc15" stroke="#f59e0b" strokeWidth="2" />
 
-          {/* Animated Sun along Arc */}
-          <div
-            className="absolute transition-all duration-300 flex flex-col items-center"
-            style={{
-              left: `${timeProgress * 85 + 5}%`,
-              bottom: `${(sunElevation / 90) * 60 + 5}px`,
-            }}
-          >
-            <div className="w-8 h-8 rounded-full bg-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.9)] flex items-center justify-center animate-pulse">
-              <span className="material-symbols-outlined text-amber-950 text-sm">wb_sunny</span>
-            </div>
-            <span className="text-[9px] font-mono text-amber-300 font-bold">
-              {Math.round(sunElevation)}° Alt
-            </span>
-          </div>
+                <rect x="0" y={GROUND} width="340" height={220 - GROUND} fill="#a8a29e" />
+                <text x="14" y={GROUND + 18} fontSize="11" fontWeight="800" fill="#44403c">EAST</text>
+                <text x="326" y={GROUND + 18} textAnchor="end" fontSize="11" fontWeight="800" fill="#44403c">WEST</text>
 
-          <span className="text-[10px] text-amber-400 font-bold">West (Sunset)</span>
-        </div>
+                {/* Shadow on the ground */}
+                <polygon points={`${BASE},${GROUND} ${tipX},${GROUND + 2} ${tipX},${GROUND - 2}`} fill="#1f2937" opacity="0.7" stroke="#1f2937" strokeWidth="4" strokeLinejoin="round" />
+                {/* Stick */}
+                <rect x={BASE - 3} y={GROUND - STICK} width="6" height={STICK} rx="2" fill="#92400e" />
+                <circle cx={BASE} cy={GROUND - STICK} r="4" fill="#b45309" />
 
-        {/* Courtyard Ground Plate & Sundial Gnomon */}
-        <div className="relative w-56 sm:w-64 h-28 bg-stone-800 rounded-full border-4 border-stone-600 shadow-2xl flex items-center justify-center overflow-hidden">
-          {/* Compass / Hour markings */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-30 text-[9px] font-mono font-bold text-white">
-            <span className="absolute top-1 font-bold text-amber-400">N (12 PM)</span>
-            <span className="absolute left-2">W (8 AM)</span>
-            <span className="absolute right-2">E (4 PM)</span>
-          </div>
-
-          {/* Cast Shadow */}
-          <div
-            className="absolute bg-black/80 rounded-full origin-bottom blur-[0.8px] transition-all duration-200"
-            style={{
-              width: "6px",
-              height: `${shadowLength}px`,
-              bottom: "50%",
-              transform: `rotate(${shadowDirectionDeg}deg)`,
-            }}
-          />
-
-          {/* Center Vertical Brass Gnomon (Stick) */}
-          <div className="relative z-10 w-3 h-3 rounded-full bg-amber-500 border-2 border-white shadow-lg flex items-center justify-center">
-            <div className="w-1 h-1 rounded-full bg-stone-900" />
-          </div>
-        </div>
-
-        {/* Live Metrics */}
-        <div className="flex items-center gap-4 text-xs font-mono z-10">
-          <span className="text-gray-300">
-            Sun Elevation: <strong className="text-amber-300">{Math.round(sunElevation)}°</strong>
-          </span>
-          <span className="text-gray-300">
-            Shadow Length: <strong className="text-cyan-300">{shadowLength} cm</strong>
-          </span>
-        </div>
+                <rect x={BASE - 52} y={GROUND + 24} width="104" height="18" rx="9" fill="#111827" opacity="0.85" />
+                <text x={BASE} y={GROUND + 37} textAnchor="middle" fontSize="10" fontWeight="800" fill="#ffffff">Shadow: {shadowLength} cm</text>
+              </g>
+            );
+          })()}
+        </svg>
       </div>
 
       {/* Observation Banner */}
       <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
-        <span className="text-xs sm:text-sm font-bold text-amber-300 block">
+        <span className="text-sm font-bold text-amber-300 block">
           {timeHour === 12
-            ? `Solar Noon! The shadow reaches its shortest point (${shadowLength} cm), pointing directly North.`
+            ? `☀️ Noon: the shortest shadow (${shadowLength} cm)!`
             : timeHour < 12
-            ? "Morning: The East sun casts a long shadow stretching Westward."
-            : "Late Afternoon: The West sun casts an elongated shadow pointing Eastward."}
+              ? "🌅 Morning: the sun is in the East, so the shadow points West"
+              : "🌇 Evening: the sun is in the West, so the shadow points East"}
         </span>
-        <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
+        <p className="text-xs text-gray-300 mt-0.5">
           {season === "june"
-            ? "June Noon Shadow: Extremely short because the high summer sun shines from 84° overhead."
-            : "December Noon Shadow: Noticeably longer! Even at midday, the winter sun only climbs to 44°."}
+            ? "In June the noon sun is almost straight above, so the shadow is tiny."
+            : "In December the sun stays lower, so even the noon shadow is long."}
         </p>
       </div>
     </div>

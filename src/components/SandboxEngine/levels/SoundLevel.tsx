@@ -3,324 +3,267 @@
 import React, { useState } from 'react';
 import { playMatkaTap, playStringTelephone, playShoutWithEcho } from '@/utils/webAudio';
 
-function MatkaPitch({ recordAction }: { recordAction: (actionType: string, actionDetails?: any) => void }) {
+type RecordAction = (actionType: string, actionDetails?: any) => void;
+
+function MatkaPitch({ recordAction }: { recordAction: RecordAction }) {
   const [waterLevel, setWaterLevel] = useState(50);
   const [playing, setPlaying] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
 
   // Pitch maps directly to air column height: less air (more water) = higher frequency
-  const pitch = 200 + (waterLevel * 5); 
+  const pitch = 200 + (waterLevel * 5);
   const isAnomaly = waterLevel > 80;
+  const pitchWord = waterLevel > 70 ? "High" : waterLevel < 30 ? "Deep" : "Middle";
 
   const handleTap = () => {
     setPlaying(true);
+    setTapCount((c) => c + 1);
     playMatkaTap(pitch);
     recordAction('tapped_matka', { waterLevel, pitch });
-    setTimeout(() => setPlaying(false), 500);
+    setTimeout(() => setPlaying(false), 600);
   };
+
+  // Matka geometry: inside spans y=70..190
+  const INNER_TOP = 70;
+  const INNER_BOTTOM = 190;
+  const waterY = INNER_BOTTOM - ((INNER_BOTTOM - INNER_TOP) * waterLevel) / 100;
 
   return (
     <div className="flex flex-col h-full w-full">
-      {/* Control Bar */}
-      <div className="bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 sm:gap-4 text-xs text-gray-300 shrink-0 z-20">
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-sky-400">Water Fill</span>
-          <input 
-            type="range" min="10" max="90" step="10" value={waterLevel} 
-            onChange={e => { 
+      <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
+        <div className="flex flex-col gap-0.5 w-full md:flex-1">
+          <div className="flex justify-between items-center">
+            <span className="font-bold text-sky-300">💧 Water in matka</span>
+            <span className="text-xs font-mono text-gray-300">{waterLevel}%</span>
+          </div>
+          <input
+            type="range" min="10" max="90" step="10" value={waterLevel}
+            aria-label="Water in matka"
+            onChange={e => {
               const val = parseInt(e.target.value);
-              setWaterLevel(val); 
-              recordAction('changed_water_level', { val }); 
-            }} 
-            className="w-24 sm:w-32 accent-sky-500 cursor-pointer" 
+              setWaterLevel(val);
+              recordAction('changed_water_level', { val });
+            }}
           />
-          <span className="text-[11px] font-mono text-gray-400">{waterLevel}%</span>
         </div>
-        <button 
-          onClick={handleTap} 
-          className="bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-bold py-1.5 px-4 rounded-xl shadow text-xs transition-transform flex items-center gap-1.5 cursor-pointer min-h-[36px]"
-          aria-label="Tap Matka to play sound"
+        <button
+          onClick={handleTap}
+          className="bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-black px-5 rounded-xl shadow text-sm transition-transform flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+          aria-label="Tap the matka to hear its sound"
         >
-          <span className="material-symbols-outlined text-sm">music_note</span>
-          <span>TAP MATKA ({pitch} Hz)</span>
+          👆 TAP MATKA
         </button>
       </div>
 
-      {/* Acoustic Simulation Stage */}
-      <div className="relative flex-1 min-h-[220px] bg-slate-900 overflow-hidden flex flex-col items-center justify-center p-3">
-        {playing && (
-          <div className="bg-white/95 px-4 py-1.5 rounded-full shadow-xl border border-sky-300 font-black text-xs text-sky-900 mb-3 animate-bounce flex items-center gap-2">
-            <span className="material-symbols-outlined text-sm text-sky-600 animate-spin">graphic_eq</span>
-            <span>🎵 Pitch: {pitch} Hz ({waterLevel > 70 ? "High Ceramic Ping" : waterLevel < 30 ? "Deep Hollow Tone" : "Mid Resonance"})</span>
-          </div>
-        )}
+      <div className="relative flex-1 min-h-[220px] bg-slate-900 flex items-end">
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block cursor-pointer" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`${pitchWord} sound`} onClick={handleTap}>
+          <defs>
+            <clipPath id="matka-inside">
+              <path d="M 136 62 Q 128 70 136 78 Q 100 100 108 148 Q 118 194 170 194 Q 222 194 232 148 Q 240 100 204 78 Q 212 70 204 62 Z" />
+            </clipPath>
+          </defs>
 
-        {/* Matka Pot (Clickable to Tap) */}
-        <div 
-          onClick={handleTap}
-          className="relative cursor-pointer group select-none"
-          title="Click to tap the clay pot!"
-        >
-          {/* Sound waves radiating on tap */}
-          {playing && (
-            <div className="absolute -inset-4 border-2 border-sky-400/60 rounded-full animate-ping pointer-events-none" />
-          )}
+          {/* Sound rings on tap */}
+          {playing && [0, 1, 2].map((i) => (
+            <circle key={`${tapCount}-${i}`} cx="170" cy="130" r="70" fill="none" stroke="#38bdf8" strokeWidth="2">
+              <animate attributeName="r" values="70;120" dur="0.6s" begin={`${i * 0.15}s`} fill="freeze" />
+              <animate attributeName="opacity" values="0.8;0" dur="0.6s" begin={`${i * 0.15}s`} fill="freeze" />
+            </circle>
+          ))}
 
-          <div className={`w-28 sm:w-36 h-36 sm:h-44 rounded-b-[50px] rounded-t-2xl bg-gradient-to-b from-amber-800 via-amber-700 to-amber-900 border-t-8 border-amber-950 flex flex-col justify-end overflow-hidden shadow-2xl transition-transform duration-150 ${playing ? 'scale-105' : 'group-hover:scale-[1.02]'}`}>
-            {/* Empty Air Column (Vibrating Zone) */}
-            <div 
-              className="w-full flex items-center justify-center text-amber-200/50 text-[10px] font-bold uppercase transition-all duration-300 relative"
-              style={{ height: `${100 - waterLevel}%` }}
-            >
-              {playing && (
-                <div className="absolute inset-0 bg-sky-400/20 flex items-center justify-center animate-pulse">
-                  <span className="text-[10px] font-mono text-sky-200">〰️ Air Vibration 〰️</span>
-                </div>
-              )}
-              {!playing && (
-                <span className="text-[9px] opacity-70">Air Column ({100 - waterLevel}%)</span>
-              )}
-            </div>
+          {/* Matka body */}
+          <path d="M 136 62 Q 128 70 136 78 Q 100 100 108 148 Q 118 194 170 194 Q 222 194 232 148 Q 240 100 204 78 Q 212 70 204 62 Z" fill="#b45309" stroke="#78350f" strokeWidth="3" />
+          <g clipPath="url(#matka-inside)">
+            {/* Air column (the part that vibrates) */}
+            <rect x="100" y="56" width="140" height={waterY - 56} fill={playing ? "#7dd3fc" : "#fde68a"} opacity={playing ? 0.55 : 0.28} />
+            {/* Water */}
+            <rect x="100" y={waterY} width="140" height={200 - waterY} fill="#2563eb" opacity="0.8" />
+          </g>
+          <text x="170" y={Math.max(84, (56 + waterY) / 2 + 4)} textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff7ed">AIR</text>
+          {waterLevel >= 20 && <text x="170" y={(waterY + 194) / 2 + 4} textAnchor="middle" fontSize="11" fontWeight="800" fill="#dbeafe">WATER</text>}
 
-            {/* Water Fill */}
-            <div 
-              className="w-full bg-gradient-to-t from-sky-600/90 to-sky-400/70 border-t-2 border-sky-300/80 transition-all duration-300 relative flex items-center justify-center" 
-              style={{ height: `${waterLevel}%` }}
-            >
-              <span className="text-[9px] font-bold text-white/70">Water ({waterLevel}%)</span>
-            </div>
-          </div>
-          
-          <div className="w-40 h-2.5 bg-black/40 rounded-full mt-2 mx-auto blur-[1px]" />
-          <span className="text-[10px] font-bold text-gray-400 text-center block mt-1">Tap pot to play pitch</span>
-        </div>
+          {/* Air column height marker */}
+          <line x1="250" y1="66" x2="250" y2={waterY} stroke="#fcd34d" strokeWidth="2" />
+          <line x1="244" y1="66" x2="256" y2="66" stroke="#fcd34d" strokeWidth="2" />
+          <line x1="244" y1={waterY} x2="256" y2={waterY} stroke="#fcd34d" strokeWidth="2" />
+          <text x="262" y={(66 + waterY) / 2 + 4} fontSize="10" fontWeight="700" fill="#fcd34d">air height</text>
+
+          {/* Pitch meter: Deep -> High */}
+          <text x="30" y="40" fontSize="10" fontWeight="700" fill="#d1d5db">Sound</text>
+          <rect x="30" y="48" width="14" height="140" rx="7" fill="#1f2937" stroke="#4b5563" />
+          <rect x="33" y={185 - (waterLevel / 100) * 134} width="8" height={(waterLevel / 100) * 134} rx="4" fill="#38bdf8" />
+          <text x="50" y="58" fontSize="9" fill="#9ca3af">High</text>
+          <text x="50" y="188" fontSize="9" fill="#9ca3af">Deep</text>
+        </svg>
       </div>
 
-      {/* Observation Strip */}
       <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
-        <span className="text-xs sm:text-sm font-bold text-sky-300 block">
-          {isAnomaly && playing ? "Surprise: More water makes a HIGHER pitch, not lower!" : `Air Column: ${100 - waterLevel}% | Frequency: ${pitch} Hz`}
+        <span className="text-sm font-bold text-sky-300 block">
+          {isAnomaly ? "🤯 More water makes a HIGHER sound!" : `🎵 ${pitchWord} sound (${pitch} Hz)`}
         </span>
-        <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
-          {isAnomaly && playing 
-            ? "When you add water, the remaining empty air column gets shorter. Shorter air columns vibrate at higher frequencies!" 
-            : "Adjust the water slider and tap the pot to hear how the pitch rises as water replaces the air space."}
+        <p className="text-xs text-gray-300 mt-0.5">
+          {isAnomaly
+            ? "More water leaves a shorter space of air. A short air space shakes faster, so the sound is higher."
+            : "The air inside the pot shakes when you tap. Add water and tap again: does the sound change?"}
         </p>
       </div>
     </div>
   );
 }
 
-function StringTelephone({ recordAction }: { recordAction: (actionType: string, actionDetails?: any) => void }) {
+function StringTelephone({ recordAction }: { recordAction: RecordAction }) {
   const [tension, setTension] = useState(60);
   const [pinched, setPinched] = useState(false);
   const [talking, setTalking] = useState(false);
+  const [talkCount, setTalkCount] = useState(0);
 
   const isAnomaly = pinched && tension > 50;
   const soundPasses = tension >= 40 && !pinched;
+  const slack = tension < 40;
 
   const handleTalk = () => {
     setTalking(true);
+    setTalkCount((c) => c + 1);
     playStringTelephone(tension, pinched);
     recordAction('used_phone', { tension, pinched, soundPasses });
     setTimeout(() => setTalking(false), 1500);
   };
 
+  // String geometry from cup to cup
+  const L = { x: 66, y: 112 };
+  const R = { x: 274, y: 112 };
+  const sag = slack ? 26 + (40 - tension) * 0.9 : 0;
+  const stringPath = `M ${L.x} ${L.y} Q 170 ${L.y + sag * 2} ${R.x} ${R.y}`;
+  const travelPath = pinched ? `M ${L.x} ${L.y} L 170 ${L.y}` : stringPath;
+
   return (
     <div className="flex flex-col h-full w-full">
-      {/* Toolbar */}
-      <div className="bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 sm:gap-4 text-xs text-gray-300 shrink-0 z-20">
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-red-400">Tension</span>
-          <input 
-            type="range" min="10" max="100" step="10" value={tension} 
-            onChange={e => { 
+      <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
+        <div className="flex flex-col gap-0.5 w-full md:flex-1">
+          <div className="flex justify-between items-center">
+            <span className="font-bold text-red-300">🧵 String tightness</span>
+            <span className="text-xs font-mono text-gray-300">{slack ? "Loose" : "Tight"} ({tension}%)</span>
+          </div>
+          <input
+            type="range" min="10" max="100" step="10" value={tension}
+            aria-label="String tightness"
+            onChange={e => {
               const val = parseInt(e.target.value);
-              setTension(val); 
-              recordAction('changed_tension', { val }); 
-            }} 
-            className="w-20 sm:w-28 accent-red-500 cursor-pointer" 
+              setTension(val);
+              recordAction('changed_tension', { val });
+            }}
           />
-          <span className="text-[11px] font-mono text-gray-400">{tension}% ({tension < 40 ? "Slack" : "Taut"})</span>
         </div>
-        
-        <label className="flex items-center gap-1.5 cursor-pointer text-[11px] font-bold text-yellow-300 bg-gray-800/80 px-2.5 py-1 rounded-lg border border-gray-700">
-          <input 
-            type="checkbox" 
-            checked={pinched} 
-            onChange={e => { 
-              setPinched(e.target.checked); 
-              recordAction('toggled_pinch', { val: e.target.checked }); 
-            }} 
-            className="accent-yellow-400 cursor-pointer"
-          />
-          <span>Pinch String 🤏</span>
-        </label>
-        
-        <button 
-          onClick={handleTalk} 
-          disabled={talking}
-          className="bg-red-600 hover:bg-red-500 disabled:opacity-50 active:scale-95 text-white font-bold py-1.5 px-4 rounded-xl shadow text-xs transition-transform flex items-center gap-1.5 cursor-pointer min-h-[36px]"
-          aria-label="Speak into string telephone"
-        >
-          <span className="material-symbols-outlined text-sm">record_voice_over</span>
-          <span>SPEAK 🗣️</span>
-        </button>
-      </div>
-
-      {/* Visual Telephone Workspace */}
-      <div className="relative flex-1 min-h-[220px] bg-slate-900 overflow-hidden flex flex-col items-center justify-center p-3">
-        {/* Transmission Speech Bubbles */}
-        <div className="flex items-center justify-between w-full max-w-sm mb-4 px-2 min-h-[28px]">
-          {talking ? (
-            <span className="bg-white/95 text-gray-900 px-3 py-1 rounded-full shadow text-xs font-bold animate-pulse flex items-center gap-1">
-              <span>🗣️</span> <span>"Hello!"</span>
-            </span>
-          ) : (
-            <span className="text-[10px] text-gray-500">Speaker Cup</span>
-          )}
-
-          {talking ? (
-            <span className={`px-3 py-1 rounded-full shadow text-xs font-black flex items-center gap-1 transition-all ${
-              soundPasses 
-                ? 'bg-emerald-100 border border-emerald-300 text-emerald-900 animate-bounce' 
-                : 'bg-red-950 border border-red-700 text-red-300'
-            }`}>
-              {soundPasses ? (
-                <>
-                  <span className="material-symbols-outlined text-sm text-emerald-700">volume_up</span>
-                  <span>👂 Heard clearly!</span>
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-sm text-red-400">volume_off</span>
-                  <span>🔇 {pinched ? "Blocked by Pinch!" : "Muffled by Slack String!"}</span>
-                </>
-              )}
-            </span>
-          ) : (
-            <span className="text-[10px] text-gray-500">Receiver Cup</span>
-          )}
-        </div>
-
-        {/* Telephone Physical Rig (Cups + String) */}
-        <div className="w-full max-w-md flex items-center justify-between relative px-2">
-          {/* Left Speaker Cup */}
-          <div className={`w-12 sm:w-14 h-16 bg-gradient-to-r from-red-600 to-red-500 rounded-l-2xl border-2 border-red-700 shadow-xl flex items-center justify-center shrink-0 z-10 ${talking ? 'scale-105 transition-transform' : ''}`}>
-            <span className="text-white text-[10px] font-black -rotate-90">SPEAK</span>
-          </div>
-
-          {/* Dynamic Mechanical String with transverse vibration */}
-          <div className="flex-1 relative h-16 flex items-center mx-1 overflow-visible">
-            {/* When string is SLACK (<40% tension): sagging curved line */}
-            {tension < 40 && (
-              <svg className="w-full h-full overflow-visible" preserveAspectRatio="none">
-                <path 
-                  d={`M 0,20 Q 50,${40 + (40 - tension) * 0.8} 100,20`}
-                  fill="none" 
-                  stroke="#94a3b8" 
-                  strokeWidth="2.5" 
-                  strokeDasharray={talking ? "4 2" : "none"}
-                  className={talking ? "animate-pulse" : ""}
-                />
-              </svg>
-            )}
-
-            {/* When string is TAUT (>=40% tension): straight or vibrating wave */}
-            {tension >= 40 && (
-              <div className="w-full relative h-6 flex items-center">
-                {/* Pinching divides string: left half vibrates, right half is completely damped */}
-                {pinched ? (
-                  <div className="w-full flex items-center h-full relative">
-                    {/* Left half (from speaker to pinch) */}
-                    <div className="w-1/2 h-full relative flex items-center">
-                      <div 
-                        className={`w-full h-0.5 bg-yellow-400 ${
-                          talking ? 'animate-bounce shadow-[0_0_8px_#facc15]' : ''
-                        }`} 
-                      />
-                    </div>
-
-                    {/* Pinch Point */}
-                    <div className="absolute left-1/2 -translate-x-1/2 -top-3 z-30 flex flex-col items-center">
-                      <span className="text-2xl drop-shadow-md animate-bounce">🤏</span>
-                      <span className="text-[8px] font-bold text-yellow-300 bg-black/80 px-1 rounded -mt-1">Pinch</span>
-                    </div>
-
-                    {/* Right half (from pinch to receiver - completely stationary!) */}
-                    <div className="w-1/2 h-full relative flex items-center">
-                      <div className="w-full h-0.5 bg-gray-500 opacity-60" />
-                    </div>
-                  </div>
-                ) : (
-                  /* Unpinched taut string */
-                  <div className="w-full h-full relative flex items-center">
-                    <div 
-                      className={`w-full h-0.5 bg-slate-300 transition-all ${
-                        talking 
-                          ? 'bg-sky-400 h-1 shadow-[0_0_10px_#38bdf8] animate-pulse' 
-                          : ''
-                      }`} 
-                    />
-                    {/* Travelling transverse vibration waves when transmitting */}
-                    {talking && soundPasses && (
-                      <div className="absolute inset-0 flex items-center justify-around pointer-events-none overflow-hidden">
-                        {[...Array(8)].map((_, i) => (
-                          <div 
-                            key={i} 
-                            className="w-2 h-4 bg-sky-400 rounded-full blur-[1px] animate-ping"
-                            style={{ animationDelay: `${i * 80}ms`, animationDuration: '600ms' }} 
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Right Receiver Cup */}
-          <div className={`w-12 sm:w-14 h-16 bg-gradient-to-l from-red-600 to-red-500 rounded-r-2xl border-2 border-red-700 shadow-xl flex items-center justify-center shrink-0 z-10 ${talking && soundPasses ? 'scale-105 transition-transform' : ''}`}>
-            <span className="text-white text-[10px] font-black rotate-90">LISTEN</span>
-          </div>
-        </div>
-
-        {/* Audio / String status line */}
-        <div className="mt-4 text-center">
-          <span className="text-[11px] font-mono text-gray-400 bg-gray-800/80 px-3 py-1 rounded-full border border-gray-700">
-            {pinched ? "❌ String pinched: Wave reflection kills transmission" : tension < 40 ? "⚠️ String slack: Low tension damps vibration" : "✅ String taut: Longitudinal sound wave propagates"}
-          </span>
+        <div className="flex gap-2 shrink-0">
+          <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-yellow-300 bg-gray-800/80 px-3 rounded-xl border border-gray-700 min-h-[40px]">
+            <input
+              type="checkbox"
+              checked={pinched}
+              onChange={e => {
+                setPinched(e.target.checked);
+                recordAction('toggled_pinch', { val: e.target.checked });
+              }}
+              className="accent-yellow-400 cursor-pointer w-5 h-5"
+            />
+            <span>🤏 Pinch string</span>
+          </label>
+          <button
+            onClick={handleTalk}
+            disabled={talking}
+            className="flex-1 bg-red-600 hover:bg-red-500 disabled:opacity-50 active:scale-95 text-white font-black px-5 rounded-xl shadow text-sm transition-transform cursor-pointer"
+            aria-label="Speak into the cup"
+          >
+            🗣️ SPEAK
+          </button>
         </div>
       </div>
 
-      {/* Observation Strip */}
+      <div className="relative flex-1 min-h-[220px] bg-slate-800 flex items-end">
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={soundPasses ? "Sound travels along the string" : "Sound does not reach the other cup"}>
+          <rect x="0" y="190" width="340" height="30" fill="#475569" />
+
+          {/* Children */}
+          {[{ x: 34, flip: 1 }, { x: 306, flip: -1 }].map((kid, i) => (
+            <g key={i}>
+              <circle cx={kid.x} cy="96" r="13" fill="#fcd34d" />
+              <rect x={kid.x - 10} y="110" width="20" height="44" rx="6" fill={i === 0 ? "#f97316" : "#22c55e"} />
+              <line x1={kid.x - 5} y1="154" x2={kid.x - 7} y2="190" stroke="#1f2937" strokeWidth="5" strokeLinecap="round" />
+              <line x1={kid.x + 5} y1="154" x2={kid.x + 7} y2="190" stroke="#1f2937" strokeWidth="5" strokeLinecap="round" />
+            </g>
+          ))}
+
+          {/* Cups */}
+          <path d={`M ${L.x - 18} 100 L ${L.x} 104 L ${L.x} 120 L ${L.x - 18} 124 Z`} fill="#ef4444" stroke="#991b1b" strokeWidth="2" />
+          <path d={`M ${R.x + 18} 100 L ${R.x} 104 L ${R.x} 120 L ${R.x + 18} 124 Z`} fill="#ef4444" stroke="#991b1b" strokeWidth="2" />
+
+          {/* String */}
+          <path d={stringPath} stroke={talking && soundPasses ? "#38bdf8" : "#e2e8f0"} strokeWidth="2.5" fill="none" />
+
+          {/* Pinch */}
+          {pinched && (
+            <g>
+              <circle cx="170" cy={L.y + sag} r="12" fill="#fcd34d" stroke="#a16207" strokeWidth="2" />
+              <text x="170" y={L.y + sag + 30} textAnchor="middle" fontSize="10" fontWeight="800" fill="#fde047">PINCH</text>
+            </g>
+          )}
+
+          {/* Travelling vibration */}
+          {talking && (
+            <g key={talkCount}>
+              {[0, 1, 2].map((i) => (
+                <circle key={i} r="6" fill="#38bdf8" opacity={slack ? 0.35 : 0.9}>
+                  <animateMotion dur={slack ? "1.6s" : "0.9s"} begin={`${i * 0.2}s`} fill="freeze" path={travelPath} />
+                  {(slack || pinched) && <animate attributeName="opacity" values="0.9;0" dur={slack ? "1.6s" : "0.9s"} begin={`${i * 0.2}s`} fill="freeze" />}
+                </circle>
+              ))}
+            </g>
+          )}
+
+          {/* Speech + result bubbles */}
+          {talking && (
+            <g>
+              <rect x="8" y="50" width="70" height="22" rx="11" fill="#ffffff" />
+              <text x="43" y="65" textAnchor="middle" fontSize="11" fontWeight="800" fill="#111827">"Hello!"</text>
+              <rect x={soundPasses ? 250 : 236} y="50" width={soundPasses ? 84 : 98} height="22" rx="11" fill={soundPasses ? "#dcfce7" : "#450a0a"} />
+              <text x={soundPasses ? 292 : 285} y="65" textAnchor="middle" fontSize="10" fontWeight="800" fill={soundPasses ? "#166534" : "#fca5a5"}>
+                {soundPasses ? "👂 I hear you!" : "🔇 Nothing…"}
+              </text>
+            </g>
+          )}
+        </svg>
+      </div>
+
       <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
-        <span className="text-xs sm:text-sm font-bold text-red-400 block">
-          {isAnomaly && talking ? "A simple pinch silenced the sound completely!" : soundPasses && talking ? "Sound transmitted as physical vibration!" : "Mechanical Wave Transmission"}
+        <span className="text-sm font-bold text-red-300 block">
+          {isAnomaly && talking ? "🤯 One pinch stopped the sound!" : soundPasses && talking ? "📞 The sound travelled along the string!" : "Press SPEAK"}
         </span>
-        <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
-          {isAnomaly && talking 
-            ? "Sound travels as a mechanical physical wave along the string. Pinching it absorbs the kinetic energy and stops wave transmission instantly!" 
-            : "Pull the string taut and click SPEAK to observe and hear voice vibrations travel through the wire."}
+        <p className="text-xs text-gray-300 mt-0.5">
+          {pinched
+            ? "Your voice shakes the string. Pinching it stops the shaking, so the sound cannot pass."
+            : slack
+              ? "A loose string cannot carry the shaking well. Pull it tight."
+              : "Your voice makes the tight string shake. The shaking travels to the other cup."}
         </p>
       </div>
     </div>
   );
 }
 
-function Echoes({ recordAction }: { recordAction: (actionType: string, actionDetails?: any) => void }) {
+function Echoes({ recordAction }: { recordAction: RecordAction }) {
   const [location, setLocation] = useState<"Well" | "Field">("Well");
   const [depth, setDepth] = useState(50);
   const [shouting, setShouting] = useState(false);
   const [echoStatus, setEchoStatus] = useState<"none" | "waiting" | "echo">("none");
+  const [shoutCount, setShoutCount] = useState(0);
 
   const isAnomaly = location === "Field" || (location === "Well" && depth < 30);
+  const delaySec = Math.max(0.25, Math.min(0.8, (depth / 100) * 0.7));
 
   const handleShout = () => {
     setShouting(true);
+    setShoutCount((c) => c + 1);
     setEchoStatus("waiting");
     const hasEcho = location === "Well" && depth >= 30;
-    const delaySec = Math.max(0.25, Math.min(0.8, (depth / 100) * 0.7));
     playShoutWithEcho(hasEcho, delaySec);
     recordAction('shouted', { location, depth });
 
@@ -328,112 +271,138 @@ function Echoes({ recordAction }: { recordAction: (actionType: string, actionDet
       setShouting(false);
       if (hasEcho) {
         setEchoStatus("echo");
-        setTimeout(() => setEchoStatus("none"), 1200);
+        setTimeout(() => setEchoStatus("none"), 1400);
       } else {
         setEchoStatus("none");
       }
     }, delaySec * 1000);
   };
 
+  // Well geometry
+  const GROUND_Y = 92;
+  const shaftPx = 30 + depth * 1.1; // 10m -> 41px, 90m -> 129px
+  const WATER_Y = GROUND_Y + shaftPx;
+  const travelSec = Math.max(0.5, delaySec * 1.6);
+  const isWell = location === "Well";
+
   return (
     <div className="flex flex-col h-full w-full">
-      <div className="bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 sm:gap-4 text-xs text-gray-300 shrink-0 z-20">
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-emerald-400">Place:</span>
-          <div className="flex gap-1">
+      <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-bold text-emerald-300">Place:</span>
+          <div className="flex gap-1.5">
             {(["Well", "Field"] as const).map(loc => (
-              <button 
+              <button
                 key={loc}
                 onClick={() => { setLocation(loc); recordAction('changed_location', { val: loc }); }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${location === loc ? 'bg-emerald-500 text-white shadow' : 'bg-gray-700 text-gray-300'}`}
+                className={`px-4 rounded-lg text-xs font-bold transition-all cursor-pointer ${location === loc ? 'bg-emerald-500 text-white shadow' : 'bg-gray-800 text-gray-300'}`}
               >
-                {loc}
+                {loc === "Well" ? "🕳️ Well" : "🌾 Open field"}
               </button>
             ))}
           </div>
         </div>
-        {location === "Well" && (
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-emerald-400">Well Depth</span>
-            <input 
-              type="range" min="10" max="90" step="20" value={depth} 
-              onChange={e => { 
+        {isWell && (
+          <div className="flex flex-col gap-0.5 w-full md:flex-1">
+            <div className="flex justify-between items-center">
+              <span className="font-bold text-emerald-300">Well depth</span>
+              <span className="text-xs font-mono text-gray-300">{depth} m</span>
+            </div>
+            <input
+              type="range" min="10" max="90" step="20" value={depth}
+              aria-label="Well depth in metres"
+              onChange={e => {
                 const val = parseInt(e.target.value);
-                setDepth(val); 
-                recordAction('changed_depth', { val }); 
-              }} 
-              className="w-20 sm:w-28 accent-emerald-500 cursor-pointer" 
+                setDepth(val);
+                recordAction('changed_depth', { val });
+              }}
             />
-            <span className="text-[11px] font-mono text-gray-400">{depth}m</span>
           </div>
         )}
-        <button 
-          onClick={handleShout} 
+        <button
+          onClick={handleShout}
           disabled={shouting}
-          className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 active:scale-95 text-white font-bold py-1.5 px-4 rounded-xl shadow text-xs transition-transform flex items-center gap-1.5 cursor-pointer min-h-[36px]"
-          aria-label="Shout into location"
+          className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 active:scale-95 text-white font-black px-5 rounded-xl shadow text-sm transition-transform cursor-pointer shrink-0"
+          aria-label="Shout"
         >
-          <span className="material-symbols-outlined text-sm">campaign</span>
-          <span>SHOUT 🗣️</span>
+          📣 SHOUT
         </button>
       </div>
 
-      <div className="relative flex-1 min-h-[220px] overflow-hidden flex flex-col justify-end bg-slate-900">
-        {location === "Field" ? (
-          <div className="absolute inset-0 bg-gradient-to-b from-sky-400 to-green-400 flex flex-col justify-end">
-            <div className="w-full h-1/3 bg-green-600 border-t-4 border-green-700" />
-            {shouting && (
-              <div className="absolute top-1/4 left-1/3 border-4 border-white/40 rounded-full w-48 h-48 animate-ping pointer-events-none" />
-            )}
-          </div>
-        ) : (
-          <div className="absolute inset-0 bg-sky-200 flex flex-col items-center justify-end">
-            <div className="w-full h-8 bg-green-600" />
-            <div className="w-36 sm:w-44 bg-gray-800 border-4 border-gray-600 rounded-t shadow-inner relative overflow-hidden" style={{ height: `${Math.max(25, depth * 0.8)}%` }}>
-              <div className="w-full h-3 bg-blue-900/60 absolute bottom-0" />
+      <div className="relative flex-1 min-h-[220px] bg-gradient-to-b from-sky-300 to-sky-100 flex items-end">
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={isWell && depth >= 30 ? "An echo comes back" : "No clear echo"}>
+          {isWell ? (
+            <g>
+              {/* Ground cut-away with well shaft */}
+              <rect x="0" y={GROUND_Y} width="340" height={220 - GROUND_Y} fill="#a16207" />
+              <rect x="0" y={GROUND_Y} width="340" height="6" fill="#16a34a" />
+              <rect x="150" y={GROUND_Y} width="60" height={shaftPx} fill="#1f2937" />
+              <rect x="146" y={GROUND_Y} width="4" height={shaftPx} fill="#78716c" />
+              <rect x="210" y={GROUND_Y} width="4" height={shaftPx} fill="#78716c" />
+              <rect x="150" y={WATER_Y - 6} width="60" height="6" fill="#2563eb" />
+              <rect x="140" y={GROUND_Y - 14} width="80" height="14" fill="#9ca3af" stroke="#6b7280" />
+              <text x="232" y={WATER_Y - 2} fontSize="10" fontWeight="700" fill="#fef3c7">{depth} m deep</text>
+
+              {/* Sound going down and coming back up */}
               {shouting && (
-                <div className="absolute inset-x-0 top-0 h-4 bg-yellow-300/40 animate-pulse flex items-center justify-center text-[9px] text-yellow-200 font-mono">
-                  ↓ sound waves ↓
-                </div>
+                <g key={`down-${shoutCount}`}>
+                  {[0, 1].map((i) => (
+                    <path key={i} d="M 160 0 Q 180 8 200 0" transform={`translate(0 ${GROUND_Y})`} stroke="#fde047" strokeWidth="3" fill="none">
+                      <animateTransform attributeName="transform" type="translate" values={`0 ${GROUND_Y}; 0 ${WATER_Y - 10}`} dur={`${travelSec / 2}s`} begin={`${i * 0.12}s`} fill="freeze" />
+                    </path>
+                  ))}
+                </g>
               )}
               {echoStatus === "echo" && (
-                <div className="absolute inset-x-0 bottom-4 h-4 bg-emerald-400/50 animate-bounce flex items-center justify-center text-[9px] text-emerald-100 font-bold">
-                  ↑ reflected echo ↑
-                </div>
+                <g key={`up-${shoutCount}`}>
+                  {[0, 1].map((i) => (
+                    <path key={i} d="M 160 0 Q 180 -8 200 0" stroke="#4ade80" strokeWidth="3" fill="none">
+                      <animateTransform attributeName="transform" type="translate" values={`0 ${WATER_Y - 10}; 0 ${GROUND_Y - 30}`} dur={`${travelSec / 2}s`} begin={`${i * 0.12}s`} fill="freeze" />
+                    </path>
+                  ))}
+                </g>
               )}
-            </div>
-          </div>
-        )}
+            </g>
+          ) : (
+            <g>
+              <rect x="0" y={GROUND_Y + 40} width="340" height={220 - GROUND_Y - 40} fill="#65a30d" />
+              {[40, 90, 250, 300].map((x) => (
+                <path key={x} d={`M ${x} ${GROUND_Y + 40} q 3 -14 0 -22 M ${x + 6} ${GROUND_Y + 40} q 3 -16 0 -26`} stroke="#3f6212" strokeWidth="2" fill="none" />
+              ))}
+              {/* Sound spreads out and fades away: nothing to bounce off */}
+              {shouting && (
+                <g key={`field-${shoutCount}`}>
+                  {[0, 1, 2].map((i) => (
+                    <circle key={i} cx="120" cy="104" r="20" fill="none" stroke="#fde047" strokeWidth="3">
+                      <animate attributeName="r" values="20;170" dur="1s" begin={`${i * 0.15}s`} fill="freeze" />
+                      <animate attributeName="opacity" values="0.9;0" dur="1s" begin={`${i * 0.15}s`} fill="freeze" />
+                    </circle>
+                  ))}
+                </g>
+              )}
+            </g>
+          )}
 
-        {/* Character Shout Feedback */}
-        <div className="absolute top-4 left-6 flex items-center gap-2 z-10">
-          <div className="w-8 h-8 bg-amber-200 rounded-full border border-gray-800 flex items-center justify-center text-sm shadow">
-            👤
-          </div>
-          {shouting && (
-            <span className="bg-white/95 px-3 py-1 rounded-full shadow text-xs font-bold text-gray-900 animate-pulse flex items-center gap-1">
-              <span>🗣️</span> <span>"HELLO!!"</span>
-            </span>
-          )}
-          {echoStatus === "echo" && (
-            <span className="bg-emerald-100 border border-emerald-300 px-3 py-1 rounded-full shadow text-xs font-bold text-emerald-900 animate-bounce flex items-center gap-1">
-              <span>🔊</span> <span>"...hello! (Echo)"</span>
-            </span>
-          )}
-        </div>
+          {/* Child shouting */}
+          <g transform={`translate(${isWell ? 112 : 120} ${isWell ? GROUND_Y - 44 : GROUND_Y})`}>
+            <circle cx="0" cy="0" r="11" fill="#fcd34d" />
+            <rect x="-9" y="11" width="18" height="24" rx="5" fill="#f97316" />
+            {shouting && <text x="16" y="-8" fontSize="11" fontWeight="800" fill="#111827">"HELLO!"</text>}
+            {echoStatus === "echo" && <text x="16" y="-8" fontSize="11" fontWeight="800" fill="#15803d">"…hello!" 👂</text>}
+          </g>
+        </svg>
       </div>
 
-      {/* Observation Strip */}
       <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
-        <span className="text-xs sm:text-sm font-bold text-emerald-300 block">
-          {location === "Field" ? "No Echo in Open Field — Sound Radiates Away" : depth < 30 ? "Shallow Well — Shout Blends with Immediate Reflection" : `Deep Well (${depth}m) — Distinct Reflected Echo!`}
+        <span className="text-sm font-bold text-emerald-300 block">
+          {!isWell ? "🌾 No echo in an open field" : depth < 30 ? "Shallow well: the echo mixes with your shout" : `🕳️ Deep well (${depth} m): a clear echo!`}
         </span>
-        <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
-          {location === "Field" 
-            ? "Without solid vertical walls, sound waves disperse freely into the atmosphere with nothing to bounce back from." 
-            : depth < 30 
-              ? "Human ears require at least 0.1s (approx. 17 meters roundtrip) separation to distinguish an echo from original sound." 
-              : "Sound travels down the shaft and reflects off hard stone walls, returning as a distinct delayed echo."}
+        <p className="text-xs text-gray-300 mt-0.5">
+          {!isWell
+            ? "There are no hard walls, so the sound spreads out and never comes back."
+            : depth < 30
+              ? "The sound comes back too fast, so you cannot hear it separately."
+              : "Your shout goes down, bounces off the water and stone, and comes back up to your ears."}
         </p>
       </div>
     </div>

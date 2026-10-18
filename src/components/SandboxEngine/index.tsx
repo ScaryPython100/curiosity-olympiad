@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTelemetry } from './useTelemetry';
 import { OpticsLevel } from './levels/OpticsLevel';
 import { GravityLevel } from './levels/GravityLevel';
@@ -58,6 +58,12 @@ export default function SandboxEngine({
   const levelsCount = 3;
   
   const experimentLabels = EXPERIMENT_LABELS[mockTestId] || ["Experiment 1", "Experiment 2", "Experiment 3"];
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Keep the active experiment tab fully visible on narrow phones
+  useEffect(() => {
+    tabRefs.current[currentLevelIndex]?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+  }, [currentLevelIndex, mockTestId]);
 
   useEffect(() => {
     onLevelChange?.(currentLevelIndex);
@@ -115,7 +121,7 @@ export default function SandboxEngine({
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col gap-3 font-sans relative overflow-x-hidden">
+    <div className="sim-root w-full max-w-3xl mx-auto flex flex-col gap-3 font-sans relative overflow-x-hidden">
       {/* Ambient Experiment Navigation Bar */}
       <div className="relative w-full overflow-hidden p-1.5 bg-gray-100/90 rounded-2xl border border-gray-200/80 shadow-xs">
         <div 
@@ -127,8 +133,9 @@ export default function SandboxEngine({
             return (
               <button
                 key={idx}
+                ref={(el) => { tabRefs.current[idx] = el; }}
                 onClick={() => handleSwitchExperiment(idx)}
-                className={`shrink-0 py-2 px-3.5 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                className={`shrink-0 min-h-[40px] py-2 px-3.5 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
                   isActive 
                     ? 'bg-[#143867] text-white shadow-md' 
                     : 'text-gray-600 hover:text-gray-900 hover:bg-white/80'

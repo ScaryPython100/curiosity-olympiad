@@ -56,7 +56,7 @@ function SizeScale({ recordAction }: { recordAction: (actionType: string, action
   return (
     <div className="flex flex-col h-full w-full">
       {/* Control Bar */}
-      <div className="bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300 shrink-0 z-20">
+      <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300 shrink-0 z-20">
         <div className="flex items-center gap-2">
           <span className="font-bold text-amber-400">Select Planet:</span>
           <select
@@ -73,7 +73,7 @@ function SizeScale({ recordAction }: { recordAction: (actionType: string, action
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-[11px] text-gray-400">Microscope Zoom:</span>
+          <span className="text-xs font-bold text-gray-300">🔍 Zoom:</span>
           <input
             type="range"
             min="1"
@@ -90,10 +90,10 @@ function SizeScale({ recordAction }: { recordAction: (actionType: string, action
 
       {/* Visual Simulation Stage */}
       <div className="relative flex-1 min-h-[220px] bg-slate-950 overflow-hidden flex flex-col items-center justify-center p-3 select-none">
-        <div className="flex items-center justify-around w-full max-w-md gap-4">
+        <div className="flex items-center justify-around w-full max-w-md gap-3">
           {/* Scaled Sun: 10 cm Cricket Ball */}
           <div className="flex flex-col items-center">
-            <div className="relative w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-gradient-to-br from-yellow-300 via-amber-500 to-amber-700 border-2 border-yellow-200 shadow-[0_0_40px_rgba(245,158,11,0.7)] flex flex-col items-center justify-center overflow-hidden">
+            <div className="relative w-28 h-28 sm:w-44 sm:h-44 rounded-full bg-gradient-to-br from-yellow-300 via-amber-500 to-amber-700 border-2 border-yellow-200 shadow-[0_0_40px_rgba(245,158,11,0.7)] flex flex-col items-center justify-center overflow-hidden">
               <span className="text-xs font-black text-amber-950 uppercase tracking-widest">
                 The Sun
               </span>
@@ -123,7 +123,7 @@ function SizeScale({ recordAction }: { recordAction: (actionType: string, action
           </div>
 
           {/* Scaled Planet Specimen Display */}
-          <div className="flex flex-col items-center bg-slate-900/90 border border-slate-800 p-4 rounded-2xl min-w-[140px] sm:min-w-[160px] shadow-xl">
+          <div className="flex flex-col items-center bg-slate-900/90 border border-slate-800 p-3 sm:p-4 rounded-2xl min-w-[112px] sm:min-w-[160px] shadow-xl">
             <span className="text-xs font-bold text-white mb-2">{selectedPlanet.name}</span>
 
             {/* Specimen Inspection Ring */}
@@ -162,15 +162,15 @@ function SizeScale({ recordAction }: { recordAction: (actionType: string, action
 
       {/* Observation Banner */}
       <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
-        <span className="text-xs sm:text-sm font-bold text-amber-300 block">
+        <span className="text-sm font-bold text-amber-300 block">
           {selectedPlanet.name === "Earth"
             ? "Aha! If the Sun is a 10 cm cricket ball, Earth is just a tiny 0.9 mm mustard seed (rai)!"
             : selectedPlanet.name === "Jupiter"
-            ? "Jupiter is a small 1 cm marble—more massive than all 7 other planets combined!"
+            ? "Jupiter is a 1 cm marble: heavier than all the other planets put together!"
             : `${selectedPlanet.name} measures just ${selectedPlanet.mm} mm: roughly the size of a ${selectedPlanet.everyday}.`}
         </span>
-        <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
-          Over 1,300,000 Earths could fit inside the Sun! Textbooks draw Earth much too large to fit on a single page.
+        <p className="text-xs text-gray-300 mt-0.5">
+          About 13 lakh (1.3 million) Earths could fit inside the Sun! Books draw planets much bigger than they really are.
         </p>
       </div>
     </div>
@@ -235,9 +235,9 @@ function DistanceScale({ recordAction }: { recordAction: (actionType: string, ac
   return (
     <div className="flex flex-col h-full w-full">
       {/* Control Bar */}
-      <div className="bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300 shrink-0 z-20">
+      <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300 shrink-0 z-20">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-amber-400">Pace Field:</span>
+          <span className="font-bold text-amber-300">🚶 Walk the field</span>
           <input
             type="range"
             min="0"
@@ -259,99 +259,93 @@ function DistanceScale({ recordAction }: { recordAction: (actionType: string, ac
           className="bg-sky-500 hover:bg-sky-400 disabled:opacity-50 text-gray-950 font-black text-xs px-3 py-1.5 rounded-lg transition-all active:scale-95 flex items-center gap-1 min-h-[32px]"
         >
           <span className="material-symbols-outlined text-sm">flash_on</span>
-          <span>{photonActive ? `Beam: ${photonPos}m...` : "Trace Speed of Light"}</span>
+          <span>{photonActive ? `Light: ${photonPos} m…` : "Send light"}</span>
         </button>
       </div>
 
-      {/* Visual Simulation Stage: The 350m Playground Field Track */}
-      <div className="relative flex-1 min-h-[220px] bg-slate-950 overflow-hidden flex flex-col justify-center p-3 select-none">
-        {/* The Field Running Track Trackline */}
-        <div className="relative w-full h-20 bg-stone-900/90 rounded-2xl border border-stone-700 flex items-center px-4 overflow-x-hidden">
-          {/* Turf yard lines */}
-          <div className="absolute inset-x-0 top-0 bottom-0 flex justify-between pointer-events-none opacity-20">
-            {[0, 50, 100, 150, 200, 250, 300].map((m) => (
-              <div key={m} className="border-l border-white h-full flex items-end pb-1 pl-1 text-[8px] font-mono">
-                {m}m
-              </div>
-            ))}
-          </div>
-
-          {/* Planet Markers Placed Proportioned along Track */}
-          {PLANET_DISTANCES.map((p) => {
-            const pct = (p.meters / 340) * 100;
+      {/* Visual: school field track 0..340 m, plus a zoom box for the crowded inner planets */}
+      <div className="relative flex-1 min-h-[220px] bg-slate-950 flex items-end select-none">
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`You walked ${fieldPace} metres, nearest is ${closest.name}`}>
+          {(() => {
+            const X0 = 16;
+            const X1 = 324;
+            const toX = (m: number) => X0 + (m / 340) * (X1 - X0);
+            const TRACK_Y = 150;
+            // Zoom box geometry for 0..16 m
+            const ZX0 = 30;
+            const ZX1 = 310;
+            const toZ = (m: number) => ZX0 + (m / 16) * (ZX1 - ZX0);
+            const inner = PLANET_DISTANCES.filter((p) => p.meters <= 16);
+            const outer = PLANET_DISTANCES.filter((p) => p.meters > 16);
             return (
-              <div
-                key={p.name}
-                className="absolute flex flex-col items-center top-2 -translate-x-1/2 z-10"
-                style={{ left: `${pct}%` }}
-              >
-                <div
-                  className={`w-2 h-2 rounded-full border border-white shadow-md ${
-                    p.name === "Sun" ? "bg-amber-400 w-4 h-4 -top-1" : "bg-sky-400"
-                  }`}
-                />
-                <span className="text-[8px] font-mono text-gray-300 bg-black/60 px-0.5 rounded mt-0.5">
-                  {p.name}
-                </span>
-                <span className="text-[7px] text-gray-400 font-mono">{p.meters}m</span>
-              </div>
+              <g>
+                {/* Zoom box: first 16 metres */}
+                <rect x="10" y="8" width="320" height="64" rx="10" fill="#0f172a" stroke="#334155" />
+                <text x="20" y="22" fontSize="9" fontWeight="700" fill="#94a3b8">Zoom: first 16 m</text>
+                <line x1={ZX0} y1="46" x2={ZX1} y2="46" stroke="#475569" strokeWidth="2" />
+                {inner.map((p, i) => (
+                  <g key={p.name}>
+                    <circle cx={toZ(p.meters)} cy="46" r={p.name === "Sun" ? 8 : 4} fill={p.name === "Sun" ? "#fbbf24" : p.name === "Earth" ? "#3b82f6" : "#94a3b8"} />
+                    <text x={toZ(p.meters)} y={i % 2 === 0 ? 34 : 64} textAnchor="middle" fontSize="9" fontWeight="700" fill="#e2e8f0">{p.name} {p.meters > 0 ? `${p.meters}m` : ""}</text>
+                  </g>
+                ))}
+                {fieldPace <= 16 && <circle cx={toZ(fieldPace)} cy="46" r="6" fill="none" stroke="#22c55e" strokeWidth="2.5" />}
+
+                {/* Lines from the zoom box to the start of the field */}
+                <line x1="10" y1="72" x2={toX(0)} y2={TRACK_Y - 10} stroke="#334155" strokeDasharray="3 3" />
+                <line x1="330" y1="72" x2={toX(16)} y2={TRACK_Y - 10} stroke="#334155" strokeDasharray="3 3" />
+
+                {/* Field track */}
+                <rect x={X0 - 6} y={TRACK_Y - 10} width={X1 - X0 + 12} height="20" rx="10" fill="#14532d" />
+                {[0, 100, 200, 300].map((m) => (
+                  <g key={m}>
+                    <line x1={toX(m)} y1={TRACK_Y + 10} x2={toX(m)} y2={TRACK_Y + 16} stroke="#64748b" />
+                    <text x={toX(m)} y={TRACK_Y + 26} textAnchor="middle" fontSize="9" fill="#64748b">{m}m</text>
+                  </g>
+                ))}
+                <rect x={toX(0) - 2} y={TRACK_Y - 10} width={toX(16) - toX(0) + 4} height="20" fill="#3b82f6" opacity="0.35" />
+                <circle cx={toX(0)} cy={TRACK_Y} r="6" fill="#fbbf24" />
+
+                {/* Outer planets with alternating labels */}
+                {outer.map((p, i) => (
+                  <g key={p.name}>
+                    <circle cx={toX(p.meters)} cy={TRACK_Y} r="5" fill="#38bdf8" stroke="#ffffff" strokeWidth="1" />
+                    <line x1={toX(p.meters)} y1={i % 2 === 0 ? TRACK_Y - 12 : TRACK_Y + 12} x2={toX(p.meters)} y2={i % 2 === 0 ? TRACK_Y - 22 : TRACK_Y + 32} stroke="#475569" />
+                    <text x={Math.min(318, toX(p.meters))} y={i % 2 === 0 ? TRACK_Y - 26 : TRACK_Y + 44} textAnchor={toX(p.meters) > 300 ? "end" : "middle"} fontSize="9" fontWeight="700" fill="#e2e8f0">{p.name} {p.meters}m</text>
+                  </g>
+                ))}
+
+                {/* Light beam */}
+                {photonActive && <circle cx={toX(photonPos)} cy={TRACK_Y} r="5" fill="#fde047" />}
+
+                {/* You */}
+                <g style={{ transform: `translateX(${toX(fieldPace)}px)`, transition: 'transform 0.2s' }}>
+                  <polygon points={`-6,${TRACK_Y - 30} 6,${TRACK_Y - 30} 0,${TRACK_Y - 16}`} fill="#22c55e" />
+                  <text x="0" y={TRACK_Y - 34} textAnchor="middle" fontSize="9" fontWeight="800" fill="#86efac">You</text>
+                </g>
+
+                <text x="170" y="212" textAnchor="middle" fontSize="10" fontWeight="700" fill="#fcd34d">
+                  Near: {closest.marker} • Light takes {fieldPace === 0 ? "0 s" : fieldPace <= 11 ? `${Math.round((fieldPace / 11) * 500)} s` : `${Math.round((fieldPace / 11) * 8.3)} min`}
+                </text>
+              </g>
             );
-          })}
-
-          {/* Student Walking Pacer Marker */}
-          <div
-            className="absolute bottom-2 -translate-x-1/2 flex flex-col items-center transition-all duration-200 z-20"
-            style={{ left: `${(fieldPace / 340) * 100}%` }}
-          >
-            <div className="w-5 h-5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center shadow-lg animate-bounce">
-              <span className="material-symbols-outlined text-[10px] text-white">directions_walk</span>
-            </div>
-            <span className="text-[8px] font-bold text-emerald-300 bg-emerald-950 px-1 rounded border border-emerald-700">
-              You ({fieldPace}m)
-            </span>
-          </div>
-
-          {/* Speed of Light Photon Beam */}
-          {photonActive && (
-            <div
-              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-yellow-300 shadow-[0_0_15px_rgba(253,224,71,1)] z-30"
-              style={{ left: `${(photonPos / 340) * 100}%` }}
-            />
-          )}
-        </div>
-
-        {/* Current Location Distance Breakdown */}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl z-10">
-          <div className="text-xs">
-            <span className="text-gray-400">Nearest Landmark: </span>
-            <strong className="text-amber-300 font-bold">{closest.marker}</strong>
-          </div>
-          <div className="text-xs font-mono text-gray-300">
-            Light Travel Time to Here:{" "}
-            <strong className="text-sky-300">
-              {fieldPace === 0
-                ? "0s"
-                : fieldPace <= 11
-                ? `${Math.round((fieldPace / 11) * 500)} sec (~8 min)`
-                : `${Math.round((fieldPace / 11) * 8.3)} minutes`}
-            </strong>
-          </div>
-        </div>
+          })()}
+        </svg>
       </div>
 
       {/* Observation Banner */}
       <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
-        <span className="text-xs sm:text-sm font-bold text-amber-300 block">
+        <span className="text-sm font-bold text-amber-300 block">
           {fieldPace <= 16
-            ? "The inner 4 rocky planets (Mercury, Venus, Earth, Mars) are huddled inside just 16 meters!"
+            ? "🪐 Mercury, Venus, Earth and Mars are all inside the first 16 metres!"
             : fieldPace < 56
-            ? "Vast Empty Void! You must walk 40 meters across empty space just to reach Jupiter."
+            ? "🌌 Empty space! You walk 40 more metres before you reach Jupiter."
             : fieldPace >= 320
-            ? "Neptune at 324 meters! You have walked past more than 3 entire football fields."
-            : `Walking through the outer solar system (${fieldPace}m). Space is overwhelmingly empty!`}
+            ? "🏟️ Neptune at 324 metres: more than 3 football fields away!"
+            : `Walking through space (${fieldPace} m). Almost all of it is empty!`}
         </span>
-        <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
-          Light takes 8 minutes 20 seconds to crawl the 11 meters from the cricket ball Sun to mustard seed Earth.
+        <p className="text-xs text-gray-300 mt-0.5">
+          On this scale the Sun is a cricket ball and Earth is a mustard seed 11 m away. Light takes about 8 minutes to make that trip.
         </p>
       </div>
     </div>
@@ -399,9 +393,9 @@ function OrbitSpeedway({ recordAction }: { recordAction: (actionType: string, ac
   return (
     <div className="flex flex-col h-full w-full">
       {/* Control Bar */}
-      <div className="bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300 shrink-0 z-20">
+      <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300 shrink-0 z-20">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-amber-400">Sun Gravity:</span>
+          <span className="font-bold text-amber-300">☀️ Sun's pull:</span>
           <input
             type="range"
             min="0.5"
@@ -489,13 +483,13 @@ function OrbitSpeedway({ recordAction }: { recordAction: (actionType: string, ac
 
       {/* Observation Banner */}
       <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
-        <span className="text-xs sm:text-sm font-bold text-amber-300 block">
+        <span className="text-sm font-bold text-amber-300 block">
           {raceDays >= 365
-            ? "1 Earth Year finished! Mercury zoomed through 4+ full years, while Neptune moved less than 2°!"
-            : "Watch the speed contrast: inner planets whip fast, while distant outer planets glide slowly."}
+            ? "🎉 One Earth year done! Mercury went round 4 times, Neptune barely moved!"
+            : "Planets close to the Sun race round fast. Far planets move slowly."}
         </span>
-        <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
-          Neptune takes 165 Earth years to complete one orbit! Because gravity weakens with distance, Neptune travels at just 5.4 km/s vs. Mercury's 47.4 km/s.
+        <p className="text-xs text-gray-300 mt-0.5">
+          Neptune takes 165 Earth years to go round once. The Sun's pull is weaker far away, so Neptune moves slowly.
         </p>
       </div>
     </div>

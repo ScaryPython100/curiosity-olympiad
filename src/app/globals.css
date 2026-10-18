@@ -54,3 +54,57 @@
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+/* ------------------------------------------------------------------
+   Simulation controls: finger-sized sliders and buttons on phones.
+   Applies inside SandboxEngine (.sim-root) only.
+   ------------------------------------------------------------------ */
+.sim-root input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 32px; /* tap area */
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+.sim-root input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 9999px;
+  background: #374151;
+}
+.sim-root input[type="range"]::-moz-range-track {
+  height: 8px;
+  border-radius: 9999px;
+  background: #374151;
+}
+.sim-root input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  margin-top: -9px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 4px solid #fbbf24;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+.sim-root input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 4px solid #fbbf24;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+.sim-root input[type="range"]:focus-visible {
+  outline: 2px solid #fbbf24;
+  outline-offset: 2px;
+  border-radius: 9999px;
+}
+.sim-root .sim-toolbar button {
+  min-height: 40px;
+}
+/* Keep simulation scenes from growing taller than a laptop screen can show */
+.sim-root svg[viewBox="0 0 340 220"] {
+  max-height: 420px;
+}
