@@ -4,7 +4,7 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { getUserProfile, getFollowStatus, followUser, unfollowUser, getFollowers, getFollowing } from "@/app/actions/profile";
-import { getBestBadge } from "@/utils/gamification";
+import { getBestBadge, calculateLevelProgress } from "@/utils/gamification";
 import { useUserAvatar } from "@/utils/userAvatar";
 import Link from "next/link";
 import { CuriosityQuotientCard } from "@/components/CuriosityQuotientCard";
@@ -112,7 +112,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userId
   const isSelf = currentUserId === userId;
   const displayAvatar = useUserAvatar(userId, profile?.avatar_url, profile?.username);
   const badge = getBestBadge(profile.xp);
-  const currentLevel = Math.floor(profile.xp / 1000) + 1;
+  const currentLevel = calculateLevelProgress(profile.xp).level;
 
   return (
     <div className="bg-[#f7f9fb] text-[#191c1e] min-h-screen flex flex-col font-['Montserrat'] antialiased">

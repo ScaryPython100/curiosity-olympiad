@@ -1342,6 +1342,8 @@ function PracticeContent() {
   const [reversalsCount, setReversalsCount] = useState<number>(0);
   const [sliderAdjustments, setSliderAdjustments] = useState<number>(0);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
+  // Set from the server's answer: true when this test already earned XP today (retake gives 0 XP)
+  const [xpAlreadyEarnedToday, setXpAlreadyEarnedToday] = useState(false);
   const [activeTelemetry, setActiveTelemetry] = useState<any>({
     distinctStatesReached: 0,
     triggerActivated: false,
@@ -1372,6 +1374,10 @@ function PracticeContent() {
       setSliderAdjustments(totalEdits);
     }
   }, []);
+
+  // Stable reference: SandboxEngine re-runs an effect whenever this callback changes,
+  // so an inline arrow here caused a "Maximum update depth exceeded" render loop.
+  const handleExperimentChange = useCallback((idx: number) => setCurrentExpIndex(idx), []);
 
   // Persistence for completed mock tests
   const [completedMockTests, setCompletedMockTests] = useState<Record<number, MockTestResult>>({});
@@ -1588,6 +1594,7 @@ function PracticeContent() {
       }
     }
 
+    setXpAlreadyEarnedToday(false);
     setIsSubmitted(true);
     setShowTelemetryModal(true);
 
@@ -1602,6 +1609,7 @@ function PracticeContent() {
       if (!subRes?.success) {
         console.warn("Supabase test submission note:", subRes?.error);
       } else if (subRes.alreadyEarnedToday) {
+        setXpAlreadyEarnedToday(true);
         toast.info("Great practice! 🔁", {
           description: "You already got XP for this test today. Come back tomorrow for more XP!",
         });
@@ -2041,8 +2049,13 @@ function PracticeContent() {
 
                     <div className="pt-3 border-t border-gray-300 flex items-center justify-between font-black text-sm text-[#143867]">
                       <span>🌟 Total XP Earned:</span>
-                      <span className="text-lg text-[#ea580c]">+{modalXP.totalXP} XP</span>
+                      <span className="text-lg text-[#ea580c]">+{xpAlreadyEarnedToday ? 0 : modalXP.totalXP} XP</span>
                     </div>
+                    {xpAlreadyEarnedToday && (
+                      <p className="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                        🔁 You already got XP for this test today. Come back tomorrow for more XP!
+                      </p>
+                    )}
                   </div>
 
                   <button
@@ -2096,8 +2109,8 @@ function PracticeContent() {
                 <SandboxEngine
                   mockTestId={selectedMockTestId}
                   activeExperimentIndex={currentExpIndex}
-                  onExperimentChange={(idx) => setCurrentExpIndex(idx)}
-                  onLevelChange={(idx) => setCurrentExpIndex(idx)}
+                  onExperimentChange={handleExperimentChange}
+                  onLevelChange={handleExperimentChange}
                   level={difficulty === "level2" ? "level2" : "level1"}
                   onSubmitComplete={handleSubmitTest}
                   onTelemetryUpdate={handleTelemetryUpdate}

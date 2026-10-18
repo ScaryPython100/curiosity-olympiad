@@ -233,7 +233,7 @@ export async function getProfileStats() {
       username: profileData?.username || "Explorer",
       school_code: (user.user_metadata?.school_code as string) || null,
       rank: `#${rank}`,
-      streak: `${streakDays} Days`,
+      streak: `${streakDays} ${streakDays === 1 ? "Day" : "Days"}`,
       streakCount: streakDays,
       hasCompletedActivityToday,
       quests: "0" // Placeholder until quests are implemented

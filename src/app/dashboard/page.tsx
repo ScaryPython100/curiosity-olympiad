@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { awardXP } from "@/app/actions/profile";
-import { getBestBadge } from "@/utils/gamification";
+import { getBestBadge, calculateLevelProgress } from "@/utils/gamification";
 import { getUserAvatar } from "@/utils/userAvatar";
 import { playLevelUpSound } from "@/utils/audio";
 import { LanguageSelector } from "@/components/LanguageSelector";
@@ -297,7 +297,7 @@ export default function DashboardPage() {
                     Mobile Science Van
                   </span>
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#143867] text-white text-[10px] font-black uppercase tracking-wider">
-                    Level {Math.floor((xp || 450) / 100) + 1} • {xp || 450} XP
+                    Level {calculateLevelProgress(xp || 0).level} • {xp || 0} XP
                   </span>
                 </div>
                 <h3 className="text-base sm:text-lg font-black text-[#143867] tracking-tight">
