@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { calculateCQProfile, CQProfileResult, RawTelemetryLog } from "@/utils/cqScoring";
 import { getUserTelemetry } from "@/app/actions/profile";
+import { getMyInquiryCodes } from "@/app/actions/inquiry";
+import type { InquiryCodes } from "@/config/inquiryMatrix";
 
 export type { CQAxis } from "@/utils/cqScoring";
 
@@ -25,7 +27,7 @@ export function CuriosityQuotientCard({ username = "Explorer", telemetryLogs = [
     async function loadTelemetrySources() {
       let combinedLogs: RawTelemetryLog[] = [...(telemetryLogs || [])];
       let completedTests: Record<string, any> = {};
-      let gatheredReflections: Record<string, string> = {};
+      const localCodes: Record<string, InquiryCodes | null> = {};
 
       if (typeof window !== "undefined") {
         try {
@@ -53,9 +55,10 @@ export function CuriosityQuotientCard({ username = "Explorer", telemetryLogs = [
                 combinedLogs.push(item);
               } catch (e) {}
             }
-            if (key && key.startsWith("reflection_")) {
-              const val = localStorage.getItem(key);
-              if (val) gatheredReflections[key] = val;
+            if (key && key.startsWith("inquiry_code_")) {
+              try {
+                localCodes[key] = JSON.parse(localStorage.getItem(key) || "null");
+              } catch (e) {}
             }
           }
         } catch (e) {
@@ -86,10 +89,19 @@ export function CuriosityQuotientCard({ username = "Explorer", telemetryLogs = [
         return;
       }
 
+      // 5. Open-inquiry codes: the server copy wins; codes saved on this phone fill gaps
+      let inquiryCodes = Object.values(localCodes).filter((c): c is InquiryCodes => Boolean(c));
+      try {
+        const codeRes = await getMyInquiryCodes();
+        if (codeRes.success && codeRes.data.length >= inquiryCodes.length) inquiryCodes = codeRes.data;
+      } catch (err) {
+        console.warn("Error fetching inquiry codes:", err);
+      }
+
       const result = calculateCQProfile({
         telemetryLogs: combinedLogs,
         completedMockTests: completedTests,
-        reflections: gatheredReflections,
+        inquiryCodes,
         xp
       });
 

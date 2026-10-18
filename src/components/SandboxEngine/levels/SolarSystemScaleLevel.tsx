@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useAnomalySignal } from '../useAnomalySignal';
 
 // ==========================================
 // EXPERIMENT 1: CRICKET BALL SUN & MUSTARD SEED EARTH (SIZE SCALE)
@@ -21,6 +22,7 @@ function SizeScale({ recordAction }: { recordAction: (actionType: string, action
   const [zoom, setZoom] = useState(10); // 1x to 30x zoom
   const [fillCounter, setFillCounter] = useState(false);
   const [earthCount, setEarthCount] = useState(1);
+  useAnomalySignal(fillCounter, recordAction);
 
   const selectedPlanet = PLANET_SIZES[selectedIdx];
 
@@ -202,6 +204,7 @@ function DistanceScale({ recordAction }: { recordAction: (actionType: string, ac
     Math.abs(curr.meters - fieldPace) < Math.abs(prev.meters - fieldPace) ? curr : prev
   );
 
+  useAnomalySignal(fieldPace > 16 && fieldPace < 56, recordAction);
   const handlePaceChange = (meters: number) => {
     setFieldPace(meters);
     recordAction("walked_school_field", {
@@ -363,6 +366,7 @@ function OrbitSpeedway({ recordAction }: { recordAction: (actionType: string, ac
   const [gravity, setGravity] = useState(1.0); // 0.5x to 1.5x
   const [isRacing, setIsRacing] = useState(false);
   const [raceDays, setRaceDays] = useState(0);
+  useAnomalySignal(raceDays >= 365, recordAction);
 
   const handleStartRace = () => {
     setIsRacing(true);

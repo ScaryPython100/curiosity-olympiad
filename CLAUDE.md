@@ -25,7 +25,10 @@
 - **Styling**: Tailwind CSS v4 (`@tailwindcss/postcss`, `@theme` variables in `src/app/globals.css`).
 - **Database**: Supabase (PostgreSQL 15, RLS policies, RPC functions, triggers).
 - **Audio**: Procedural Web Audio API (`src/utils/webAudio.ts`) — zero downloaded audio assets.
-- **AI Evaluation (not wired up)**: `gradeFreeText` and `evaluateExperiment` in `src/app/actions/scoring.ts` use `@ai-sdk/google` (`gemini-1.5-pro`, an outdated model ID) via `generateObject`, but **nothing calls them**, so `telemetry_logs` is never written. `zod` is imported there but is not a direct dependency in `package.json`.
+- **Open inquiry / ML coding ("Quick Scientist's Thought")**: follows Agastya's "Measuring Curiosity in Digital Platform Environments" framework. Prompts and the Question Matrix live in `src/config/inquiryMatrix.ts` (document wording, do not edit without the Impact team). `submitInquiryResponse` in `src/app/actions/inquiry.ts` codes the answer via AI SDK 7 `generateText` + `Output.object` through the AI Gateway (`THOUGHT_CODING_MODEL`, default `anthropic/claude-haiku-5.5`; needs `AI_GATEWAY_API_KEY` locally or OIDC on Vercel) and saves it to `inquiry_responses` (`inquiry_responses.sql`). The model returns codes only, never a score or feedback; codes are not shown to students and do not affect XP or rank. Without a key, answers are saved with `coding_status = 'pending'`.
+- **Fairness rule**: never score open-inquiry text by length, keywords or English wording. The CQ Generative Inquiry axis uses only the framework's Question generation and Generative extension rates from the codes.
+- **Anomalies**: each experiment reports its built-in surprise with `useAnomalySignal(condition, recordAction)` (`src/components/SandboxEngine/useAnomalySignal.ts`); this switches the thought prompt to the "after anomaly" wording.
+- `evaluateExperiment` in `src/app/actions/scoring.ts` is still unused, so `telemetry_logs` is never written.
 
 ## Critical Traps & Architectural Rules
 1. **Exam UUIDs**:
@@ -66,7 +69,7 @@
 - `src/app/page.tsx` is not a landing page; it redirects to `/dashboard`.
 
 ## Key File Locations
-- **Simulations Engine**: `src/components/SandboxEngine/` (13 level files in `levels/`, one per mock test, 3 experiments each = 39 experiments).
+- **Simulations Engine**: `src/components/SandboxEngine/` (13 level files in `levels/`, one per mock test, 3 experiments each = 39 experiments). Scenes are SVG with `viewBox="0 0 340 220"` so geometry holds on every screen; check changes at 360px, 768px and 1280px.
 - **Behavioral Telemetry**: `src/components/SandboxEngine/useTelemetry.ts`
 - **CQ Calculation**: `src/utils/cqScoring.ts`
 - **Curriculum / Mock Tests**: `src/data/mockTestsData.ts` (13 master mock tests). The practice page keeps its own `MOCK_TESTS` list and 117 questions (`PRACTICE_QUESTIONS`, 9 per test) in `src/app/practice/page.tsx`; keep both in sync.
@@ -75,4 +78,4 @@
 - **Procedural Sound**: `src/utils/webAudio.ts`
 - **Canvas Certificates**: `src/utils/certificateCanvas.ts`
 - **Database Schema & Migrations**: `supabase_migration.sql`, `auto_profile_trigger.sql`, `fix_rls_policies.sql`
-- **Unit Tests**: `tests/` (72 tests across 10 test files)
+- **Unit Tests**: `tests/` (84 tests across 11 test files)

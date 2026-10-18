@@ -9,6 +9,8 @@
  * - Voluntary: Unprompted actions & self-directed persistence (Voluntary Seeking)
  */
 
+import { questionGenerationRate, generativeExtensionRate, type InquiryCodes } from "../config/inquiryMatrix.ts";
+
 export interface CQAxis {
   id: "voluntary" | "uncertainty" | "directed" | "generative" | "range";
   label: string;
@@ -48,6 +50,12 @@ export interface RawTelemetryLog {
 export interface CQScoringInput {
   telemetryLogs?: RawTelemetryLog[];
   completedMockTests?: Record<string | number, any>;
+  /** Question Matrix codes for the learner's open-inquiry responses */
+  inquiryCodes?: InquiryCodes[];
+  /**
+   * @deprecated Raw text is no longer scored: the Agastya framework forbids rewarding
+   * response length or English wording. Kept so older callers still type-check.
+   */
   reflections?: Record<string, string>;
   xp?: number;
 }
@@ -119,19 +127,16 @@ export function calculateCQProfile(input: CQScoringInput): CQProfileResult {
   const {
     telemetryLogs = [],
     completedMockTests = {},
-    reflections = {},
+    inquiryCodes = [],
   } = input;
 
   const completedTestKeys = Object.keys(completedMockTests);
   const completedCount = completedTestKeys.length;
   const logsCount = telemetryLogs.length;
 
-  const validReflections = Object.entries(reflections).filter(
-    ([_, text]) => typeof text === "string" && text.trim().length > 3
-  );
-  const reflectionCount = validReflections.length;
+  const codedCount = inquiryCodes.length;
 
-  const hasAnyActivity = completedCount > 0 || logsCount > 0 || reflectionCount > 0;
+  const hasAnyActivity = completedCount > 0 || logsCount > 0 || codedCount > 0;
 
   // Uncalibrated / brand-new account fallback (safe starting baseline)
   if (!hasAnyActivity) {
@@ -224,25 +229,19 @@ export function calculateCQProfile(input: CQScoringInput): CQProfileResult {
   const directedScore = Math.min(96, Math.max(22, Math.round(30 + directedSignal)));
 
   // -------------------------------------------------------------
-  // AXIS 4: GENERATIVE INQUIRY (epistemic depth, reflection questions)
-  // Baseline: 24. Sensitive to "Quick Scientist's Thought" reflections and question syntax
+  // AXIS 4: GENERATIVE INQUIRY (open-inquiry responses)
+  // Baseline: 24. Uses two core indicators from the Agastya framework (section 4):
+  //   Question generation  = valid inquiry responses / open-inquiry opportunities
+  //   Generative extension = novel/testable extensions / open-inquiry opportunities
+  // Both come from the Question Matrix codes, never from text length or English
+  // wording (framework fairness requirement). Each opportunity is one experiment
+  // (3 per completed test). Equal 50/50 weighting is a placeholder until the
+  // Impact team validates weights against human-rated responses (section 7).
   // -------------------------------------------------------------
-  let reflectionScore = 0;
-  validReflections.forEach(([_, text]) => {
-    const lower = text.toLowerCase();
-    let pts = 10;
-    if (lower.includes("what if") || lower.includes("what-if")) pts += 8;
-    if (lower.includes("why") || lower.includes("because")) pts += 5;
-    if (lower.includes("if we") || lower.includes("predict") || lower.includes("hypothesis") || lower.includes("suppose")) pts += 7;
-    if (lower.includes("?")) pts += 4;
-    if (text.trim().length > 30) pts += 4;
-    reflectionScore += pts;
-  });
-  const avgEpistemic = telemetryLogs.length > 0 
-    ? telemetryLogs.reduce((acc, l) => acc + (l.epistemic_depth || 0), 0) / telemetryLogs.length 
-    : 0;
-  reflectionScore += Math.round(avgEpistemic * 6);
-  const generativeScore = Math.min(96, Math.max(22, Math.round(24 + Math.min(55, reflectionScore))));
+  const opportunities = Math.max(codedCount, completedCount * 3);
+  const qgRate = questionGenerationRate(inquiryCodes, opportunities);
+  const geRate = generativeExtensionRate(inquiryCodes, opportunities);
+  const generativeScore = Math.min(96, Math.max(22, Math.round(24 + 36 * qgRate + 36 * geRate)));
 
   // -------------------------------------------------------------
   // AXIS 5: EXPLORATION RANGE (distinct experiments & state space coverage)

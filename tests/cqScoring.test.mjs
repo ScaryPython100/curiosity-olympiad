@@ -16,26 +16,30 @@ test('CQ Scoring: calculateCQProfile', async (t) => {
     assert.deepEqual(axisIds, ['directed', 'generative', 'range', 'uncertainty', 'voluntary']);
   });
 
-  await t.test('surfaces generative superpower when epistemic reflections are extensive', () => {
+  await t.test('surfaces generative superpower when open-inquiry codes show generative questions', () => {
+    // Question Matrix codes for 3 responses (one completed test = 3 open-inquiry opportunities)
+    const generative = { epistemicDepth: 5, inquiryStage: 'Extend', evidenceGrounding: 2, testability: 1, causalOrientation: 1, generativity: 2, transfer: 1, uncertaintySpecificity: 2 };
     const richInput = {
-      telemetryLogs: [
-        {
-          epistemic_depth: 10,
-          reversals: 1,
-          voluntary_trials: 1,
-          distinct_states_reached: 2
-        }
-      ],
+      telemetryLogs: [{ reversals: 1, voluntary_trials: 1, distinct_states_reached: 2 }],
       completedMockTests: { 1: { score: 9 } },
-      reflections: {
-        q1: "The light beam refracted because white light contains all wavelengths and each bends at a distinct angle according to Snell's Law."
-      },
+      inquiryCodes: [generative, generative, generative],
       xp: 15000
     };
 
     const profile = calculateCQProfile(richInput);
-    assert.equal(profile.superpower.id, 'generative', 'Deep reflections should prioritize Generative Inquiry');
+    assert.equal(profile.superpower.id, 'generative', 'Generative open-inquiry codes should prioritize Generative Inquiry');
     assert.notEqual(profile.growthArea.id, 'generative', 'Growth area must never contradict superpower');
+  });
+
+  await t.test('does not reward response length or English wording (framework fairness rule)', () => {
+    const base = { telemetryLogs: [{ reversals: 2 }], completedMockTests: { 1: {} } };
+    const plain = calculateCQProfile(base);
+    const withLongEnglish = calculateCQProfile({
+      ...base,
+      reflections: { r1: "Why? What if we predict a hypothesis because suppose ".repeat(20) }
+    });
+    const gen = (p) => p.axes.find((a) => a.id === 'generative').score;
+    assert.equal(gen(withLongEnglish), gen(plain), 'Raw text must not change the Generative Inquiry score');
   });
 
   await t.test('surfaces directed inquiry superpower on high reversals and parameter tinkering', () => {
@@ -66,7 +70,7 @@ test('CQ Scoring: calculateCQProfile', async (t) => {
         epistemic_depth: 50
       })),
       completedMockTests: { 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}, 8: {}, 9: {}, 10: {}, 11: {} },
-      reflections: { r1: "Detailed hypothesis ".repeat(50) },
+      inquiryCodes: Array.from({ length: 60 }, () => ({ epistemicDepth: 6, inquiryStage: 'Extend', evidenceGrounding: 2, testability: 2, causalOrientation: 2, generativity: 2, transfer: 2, uncertaintySpecificity: 2 })),
       xp: 500000
     };
 

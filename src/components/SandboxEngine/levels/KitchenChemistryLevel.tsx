@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useAnomalySignal } from '../useAnomalySignal';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -16,6 +17,7 @@ function TurmericIndicator({ recordAction }: { recordAction: RecordAction }) {
   const isBasic = ph > 7.5;
   const isDeepRed = ph >= 9.0;
   const isAnomaly = drops.base > 0 && drops.acid > 0 && ph <= 7.0; // Reversal observed
+  useAnomalySignal(isAnomaly, recordAction);
 
   const handleAddLemon = () => {
     const nextPh = Math.max(3.0, parseFloat((ph - 1.2).toFixed(1)));
@@ -132,6 +134,7 @@ function SodaVinegarBalloon({ recordAction }: { recordAction: RecordAction }) {
   // Gas volume scales with baking soda up to vinegar limit (18g)
   const effectiveGrams = Math.min(sodaGrams, 18);
   const isAnomaly = reacted && sodaGrams > 18;
+  useAnomalySignal(isAnomaly, recordAction);
   const balloonR = reacted ? 14 + (effectiveGrams / 18) * 36 : 9;
 
   const handleMix = () => {
@@ -242,6 +245,7 @@ function SugarSaturation({ recordAction }: { recordAction: RecordAction }) {
   const undissolved = Math.max(0, spoons - maxSoluble);
   const isSaturated = spoons >= maxSoluble;
   const isAnomaly = spoons >= 6 && temperature >= 70 && undissolved === 0; // High thermal dissolution
+  useAnomalySignal(isAnomaly, recordAction);
 
   const handleAddSpoon = () => {
     if (spoons >= 12) return;

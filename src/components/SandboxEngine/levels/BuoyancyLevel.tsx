@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useAnomalySignal } from '../useAnomalySignal';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -11,6 +12,7 @@ function PaperBoat({ recordAction }: { recordAction: RecordAction }) {
   const capacity = boatShape === "Flat" ? 8 : 3;
   const isSunk = stones > capacity;
   const isAnomaly = boatShape === "Narrow" && stones === 4;
+  useAnomalySignal(isAnomaly, recordAction);
 
   // Boat geometry: the more stones, the lower it sits; a wide boat spreads the load
   const WATER_Y = 120;
@@ -101,6 +103,7 @@ function EggSaltWater({ recordAction }: { recordAction: RecordAction }) {
 
   const isFloating = salt >= 60;
   const isAnomaly = salt === 50 && !isFloating;
+  useAnomalySignal(isAnomaly, recordAction);
 
   const eggY = isFloating ? 74 : 166;
 
@@ -164,6 +167,7 @@ function OilAndWater({ recordAction }: { recordAction: RecordAction }) {
   const [mixed, setMixed] = useState(false);
 
   const isAnomaly = pourOrder === "Oil First" && !mixed;
+  useAnomalySignal(isAnomaly, recordAction);
 
   const handleStir = () => {
     setMixed(true);

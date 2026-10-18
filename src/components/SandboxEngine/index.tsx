@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTelemetry } from './useTelemetry';
 import { OpticsLevel } from './levels/OpticsLevel';
 import { GravityLevel } from './levels/GravityLevel';
@@ -24,6 +24,8 @@ interface SandboxEngineProps {
   onExperimentChange?: (index: number) => void;
   onSubmitComplete?: () => void;
   onTelemetryUpdate?: (data: any) => void;
+  /** Called with the experiment index when that experiment's anomaly is triggered */
+  onAnomaly?: (experimentIndex: number) => void;
 }
 
 export const EXPERIMENT_LABELS: Record<number, string[]> = {
@@ -49,7 +51,8 @@ export default function SandboxEngine({
   activeExperimentIndex,
   onExperimentChange,
   onSubmitComplete,
-  onTelemetryUpdate
+  onTelemetryUpdate,
+  onAnomaly
 }: SandboxEngineProps = {}) {
   const { telemetryData, recordAction, resetTelemetry } = useTelemetry();
   
@@ -80,9 +83,11 @@ export default function SandboxEngine({
     }
   }, [telemetryData, mockTestId, currentLevelIndex, onTelemetryUpdate]);
 
-  const handleRecordAction = (actionType: string, actionDetails?: any) => {
+  // Stable so each experiment's anomaly hook does not re-run on every render
+  const handleRecordAction = useCallback((actionType: string, actionDetails?: any) => {
     recordAction(actionType, actionDetails);
-  };
+    if (actionType === 'anomaly_trigger_activated') onAnomaly?.(currentLevelIndex);
+  }, [recordAction, onAnomaly, currentLevelIndex]);
 
   const handleSwitchExperiment = (idx: number) => {
     setInternalLevelIndex(idx);

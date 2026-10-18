@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useAnomalySignal } from '../useAnomalySignal';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -16,6 +17,7 @@ function MatkaSunShade({ recordAction }: { recordAction: RecordAction }) {
   }
 
   const isAnomaly = container === "Matka" && wetCloth && placement === "Sun";
+  useAnomalySignal(isAnomaly, recordAction);
   if (isAnomaly) temp = 22;
 
   const inSun = placement === "Sun";
@@ -141,6 +143,7 @@ function KiteString({ recordAction }: { recordAction: RecordAction }) {
   const [kiteAngle, setKiteAngle] = useState(30);
 
   const isAnomaly = windSpeed >= 80 && kiteAngle >= 60;
+  useAnomalySignal(isAnomaly, recordAction);
 
   // Lift is best at a moderate angle (~35°) and grows with the wind.
   const angleEfficiency = Math.max(0, 1 - Math.abs(kiteAngle - 35) / 55);
@@ -249,6 +252,7 @@ function ChapatiPuff({ recordAction }: { recordAction: RecordAction }) {
   }, [time]);
 
   const isAnomaly = thickness <= 3 && heat <= 40;
+  useAnomalySignal(isAnomaly, recordAction);
   const puffAmount = isAnomaly ? 0 : Math.min(100, (time * heat) / 100);
   const doneCooking = time >= 100;
 

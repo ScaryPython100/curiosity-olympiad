@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useAnomalySignal } from '../useAnomalySignal';
 import { OptionalToolsDrawer } from '../OptionalToolsDrawer';
 
 // --- SUB-COMPONENTS FOR STRICT CONDITIONAL RENDERING ---
@@ -13,6 +14,7 @@ function ExperimentOne({ recordAction }: { recordAction: (actionType: string, ac
   const isEyeStrain = roomLight < 30 && tvBrightness >= 40;
   const isGlare = roomLight > 70 && tvBrightness < 60;
   const isComfortable = !isEyeStrain && !isGlare;
+  useAnomalySignal(!isComfortable, recordAction);
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -179,6 +181,7 @@ function ExperimentTwo({ recordAction }: { recordAction: (actionType: string, ac
   const [laserColor, setLaserColor] = useState<"Sunlight" | "Red Laser">("Sunlight");
 
   const isRainbow = laserColor === "Sunlight" && scaleAngle > 20 && scaleAngle < 70;
+  useAnomalySignal(laserColor === "Red Laser", recordAction);
   const spread = isRainbow ? 20 : 2; 
 
   return (
@@ -325,6 +328,7 @@ function ExperimentThree({ recordAction }: { recordAction: (actionType: string, 
   const canopyShadowRx = Math.min(140, canopyR / Math.max(0.2, sinE));
 
   const isHigh = sunHeight >= 75;
+  useAnomalySignal(sunHeight >= 90, recordAction);
   const isLow = sunHeight <= 30;
 
   return (

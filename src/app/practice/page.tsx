@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import SandboxEngine, { EXPERIMENT_LABELS } from "@/components/SandboxEngine";
 import { computeMockTestXP, XP_RULES } from "@/utils/xpRules";
+import { ScientistThought } from "@/components/ScientistThought";
 import { submitMockTestAttempt, getMockTestAttempts } from "@/app/actions/exams";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
@@ -1335,7 +1336,6 @@ function PracticeContent() {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [currentExpIndex, setCurrentExpIndex] = useState(initialExp);
-  const [reflections, setReflections] = useState<Record<string, string>>({});
   
   // Telemetry metric tracking
   // Start at 0: bonus XP must come from real interaction with the experiment.
@@ -1378,6 +1378,12 @@ function PracticeContent() {
   // Stable reference: SandboxEngine re-runs an effect whenever this callback changes,
   // so an inline arrow here caused a "Maximum update depth exceeded" render loop.
   const handleExperimentChange = useCallback((idx: number) => setCurrentExpIndex(idx), []);
+
+  // Experiments where the learner ran into the built-in surprise (anomaly), keyed "test_exp"
+  const [anomalyKeys, setAnomalyKeys] = useState<Record<string, boolean>>({});
+  const handleAnomaly = useCallback((idx: number) => {
+    setAnomalyKeys((prev) => ({ ...prev, [`${selectedMockTestId}_${idx}`]: true }));
+  }, [selectedMockTestId]);
 
   // Persistence for completed mock tests
   const [completedMockTests, setCompletedMockTests] = useState<Record<number, MockTestResult>>({});
@@ -1457,23 +1463,6 @@ function PracticeContent() {
     return MOCK_TESTS.find((m) => m.id === selectedMockTestId) || MOCK_TESTS[0];
   }, [selectedMockTestId]);
 
-  // Sync reflections from localStorage scoped to test and experiment: reflection_${mockTestId}_${experimentId}
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const key = `reflection_${selectedMockTestId}_${currentExpIndex}`;
-      const saved = localStorage.getItem(key);
-      if (saved !== null) {
-        setReflections((prev) => ({ ...prev, [key]: saved }));
-      } else {
-        setReflections((prev) => {
-          if (prev[key] === undefined) {
-            return { ...prev, [key]: "" };
-          }
-          return prev;
-        });
-      }
-    }
-  }, [selectedMockTestId, currentExpIndex]);
 
   // Timer logic for practice test
   useEffect(() => {
@@ -2114,9 +2103,20 @@ function PracticeContent() {
                   level={difficulty === "level2" ? "level2" : "level1"}
                   onSubmitComplete={handleSubmitTest}
                   onTelemetryUpdate={handleTelemetryUpdate}
+                  onAnomaly={handleAnomaly}
                 />
               </div>
             </div>
+
+            {/* Open inquiry comes before the subject questions (Agastya framework: measure first) */}
+            <ScientistThought
+              key={`${selectedMockTestId}_${currentExpIndex}`}
+              mockTestId={selectedMockTestId}
+              experimentIndex={currentExpIndex}
+              experimentName={(EXPERIMENT_LABELS[selectedMockTestId] || [])[currentExpIndex] || `Experiment ${currentExpIndex + 1}`}
+              experimentCount={(EXPERIMENT_LABELS[selectedMockTestId] || []).length || 3}
+              anomalyTriggered={Boolean(anomalyKeys[`${selectedMockTestId}_${currentExpIndex}`])}
+            />
 
             {/* EXPERIENTIAL MCQ QUESTION LIST LINKED TO ACTIVE EXPERIMENT */}
             <div className="space-y-6">
@@ -2263,67 +2263,6 @@ function PracticeContent() {
                   );
                 })}
               </div>
-
-              {/* Stationary Quick Scientist's Thought Card with Scoped Storage and Sonner Toast Feedback */}
-              {(() => {
-                const currentReflectionKey = `reflection_${selectedMockTestId}_${currentExpIndex}`;
-                const currentReflectionValue = reflections[currentReflectionKey] ?? "";
-
-                return (
-                  <div className="bg-amber-50/60 border-2 border-amber-200/80 rounded-2xl p-4 sm:p-5 space-y-3 mt-6">
-                    <div className="flex items-start sm:items-center gap-2.5">
-                      <span className="text-xl shrink-0">💡</span>
-                      <div>
-                        <h4 className="text-xs sm:text-sm font-black text-amber-950 uppercase tracking-wide">
-                          Quick Scientist&apos;s Thought (Optional)
-                        </h4>
-                        <p className="text-[11px] sm:text-xs text-amber-900/80">
-                          In one sentence, what surprised you or what else would you test?
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <input
-                        id="scientist-thought-input"
-                        type="text"
-                        placeholder="e.g. In a pitch dark room, even low brightness strained my eyes..."
-                        value={currentReflectionValue}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setReflections((prev) => ({ ...prev, [currentReflectionKey]: val }));
-                          if (typeof window !== "undefined") {
-                            localStorage.setItem(currentReflectionKey, val);
-                          }
-                        }}
-                        className="flex-1 px-3.5 py-2.5 bg-white border border-amber-300 rounded-xl text-xs sm:text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
-                      />
-                      <button
-                        type="button"
-                        id="save-thought-btn"
-                        onClick={() => {
-                          const text = reflections[currentReflectionKey] || "";
-                          if (text && text.trim()) {
-                            if (typeof window !== "undefined") {
-                              localStorage.setItem(currentReflectionKey, text.trim());
-                            }
-                            toast.success("Scientist's thought saved!", {
-                              description: "Recorded in your science reflection log.",
-                              duration: 2500,
-                            });
-                          } else {
-                            toast.info("Feel free to jot down a one-sentence thought anytime!", {
-                              duration: 2000,
-                            });
-                          }
-                        }}
-                        className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold text-xs rounded-xl shadow-xs transition-colors shrink-0 active:scale-95 cursor-pointer"
-                      >
-                        Save Thought
-                      </button>
-                    </div>
-                  </div>
-                );
-              })()}
 
               {/* Ambient Experiment Stepper Navigation */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-gray-200 mt-6">

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useAnomalySignal } from '../useAnomalySignal';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -13,6 +14,7 @@ function OxygenBubbles({ recordAction }: { recordAction: RecordAction }) {
 
   const bubbleRate = Math.round(3 + (lightIntensity / 100) * 39);
   const isAnomaly = lightIntensity >= 90;
+  useAnomalySignal(isAnomaly, recordAction);
 
   const handleSlider = (val: number) => {
     setLightIntensity(val);
@@ -104,6 +106,7 @@ function LeafTranspiration({ recordAction }: { recordAction: RecordAction }) {
   const isSun = weather === "Direct Sunlight";
   const condensationLevel = isSun ? Math.min(100, hoursElapsed * 28) : Math.min(25, hoursElapsed * 5);
   const isAnomaly = isSun && hoursElapsed >= 3;
+  useAnomalySignal(isAnomaly, recordAction);
 
   const handleSetWeather = (w: Weather) => {
     setWeather(w);
@@ -196,6 +199,7 @@ function Phototropism({ recordAction }: { recordAction: RecordAction }) {
   const isLeft = lightPos === "Left";
   const isRight = lightPos === "Right";
   const isAnomaly = isLeft || isRight;
+  useAnomalySignal(isAnomaly, recordAction);
 
   const handleLightPos = (pos: LightPos) => {
     setLightPos(pos);

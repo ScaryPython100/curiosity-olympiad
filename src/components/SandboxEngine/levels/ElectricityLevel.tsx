@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useAnomalySignal } from '../useAnomalySignal';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -11,6 +12,7 @@ function CombHair({ recordAction }: { recordAction: RecordAction }) {
   const [rubbing, setRubbing] = useState(false);
 
   const isAnomaly = humidity > 70 && rubCount >= 10;
+  useAnomalySignal(isAnomaly, recordAction);
 
   let bitsPickedUp = Math.min(10, Math.floor(rubCount / 2));
   if (humidity > 70) bitsPickedUp = Math.min(1, bitsPickedUp);
@@ -138,6 +140,7 @@ function TorchCircuit({ recordAction }: { recordAction: RecordAction }) {
 
   const isLit = !wireGap;
   const isAnomaly = wireGap && batteries === 2;
+  useAnomalySignal(isAnomaly, recordAction);
 
   // Circuit loop (clockwise): battery left side, bulb at top, gap on the right wire
   const loop = "M 90 150 L 90 60 L 250 60 L 250 150 L 90 150";
@@ -239,6 +242,7 @@ function MagnetTest({ recordAction }: { recordAction: RecordAction }) {
   const isMagnetic = testObject === "Nail";
   const isAttracted = isMagnetic && distance < 40;
   const isAnomaly = testObject === "Coin" && distance < 20;
+  useAnomalySignal(isAnomaly, recordAction);
 
   // Slider shows "closeness" so moving it right brings the magnet closer
   const closeness = 110 - distance; // 10..100

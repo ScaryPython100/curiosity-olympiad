@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useAnomalySignal } from '../useAnomalySignal';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -21,6 +22,7 @@ function SoilRain({ recordAction }: { recordAction: RecordAction }) {
     status = "Perfect moisture balance. Ready to sow in 2 days.";
   }
 
+  useAnomalySignal(isAnomaly, recordAction);
   const SOIL_TOP = 110;
   const soilColor = soil === "Clay" ? "#7c2d12" : soil === "Sandy" ? "#d6a64f" : "#78350f";
   const flooded = soil === "Clay" && rain >= 30;
@@ -138,6 +140,7 @@ function SolarCooker({ recordAction }: { recordAction: RecordAction }) {
   else temp = 40;
 
   const isAnomaly = timeOfDay === "Late Afternoon" && angle === 90;
+  useAnomalySignal(isAnomaly, recordAction);
   const focused = temp >= 100;
 
   // Scene geometry: sun position follows the time of day
@@ -239,6 +242,7 @@ function BiogasPlant({ recordAction }: { recordAction: RecordAction }) {
 
   const gas = temp < 20 ? (dungRatio * 0.2) : (dungRatio * (temp / 20));
   const isAnomaly = dungRatio > 60 && temp < 20;
+  useAnomalySignal(isAnomaly, recordAction);
   const isWinter = temp < 20;
 
   // Scene geometry

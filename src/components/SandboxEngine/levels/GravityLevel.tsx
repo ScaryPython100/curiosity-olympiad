@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
+import { useAnomalySignal } from '../useAnomalySignal';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -13,6 +14,7 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
   // Flat blades just slice the air; angled blades push it down.
   const windReach = bladeType === "Flat" ? fanSpeed * 5 : fanSpeed * 20;
   const isAnomaly = bladeType === "Flat" && fanSpeed === 5;
+  useAnomalySignal(isAnomaly, recordAction);
 
   // Scene geometry (SVG units)
   const HUB_Y = 46;
@@ -192,6 +194,7 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
   }
 
   const isSix = distance >= BOUNDARY_M;
+  useAnomalySignal(!!flight && flight.power === 100 && flight.angle === 0, recordAction);
   const batRad = (batAngle * Math.PI) / 180;
 
   return (
@@ -326,6 +329,7 @@ function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
   const stoneY = ROOF_Y - 8 + (GROUND_Y - 8 - (ROOF_Y - 8)) * progress.stone;
   const leafY = ROOF_Y - 6 + (GROUND_Y - 6 - (ROOF_Y - 6)) * progress.leaf;
   const leafSway = isVacuum ? 0 : Math.sin(progress.leaf * Math.PI * 6) * 10;
+  useAnomalySignal(isVacuum && landedTimes !== null, recordAction);
 
   return (
     <div className="flex flex-col h-full w-full">

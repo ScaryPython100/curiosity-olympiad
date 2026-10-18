@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useAnomalySignal } from '../useAnomalySignal';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -36,6 +37,7 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
   }, [stoveHeat]);
 
   const steelHot = temps.steel > 55;
+  useAnomalySignal(steelHot, recordAction);
   const steamLevel = temps.dal > 85 ? 3 : temps.dal > 65 ? 2 : temps.dal > 45 ? 1 : 0;
 
   return (
@@ -142,6 +144,7 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
 
   const potTemp = material === "Metal" ? 35 : 35 - ((100 - humidity) / 5);
   const isAnomaly = material === "Clay" && humidity > 80;
+  useAnomalySignal(isAnomaly, recordAction);
   const isClay = material === "Clay";
   const evaporation = isClay ? (100 - humidity) / 90 : 0; // 0..1
 
@@ -276,6 +279,7 @@ function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
   }, [covered, oxygen, burnSeconds]);
 
   const lit = oxygen > 0;
+  useAnomalySignal(covered && !lit, recordAction);
   const flameScale = covered ? 0.35 + oxygen * 0.65 : 1;
 
   // Jar geometry grows with the Jar Size slider

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useAnomalySignal } from '../useAnomalySignal';
 import { playMatkaTap, playStringTelephone, playShoutWithEcho } from '@/utils/webAudio';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
@@ -13,6 +14,7 @@ function MatkaPitch({ recordAction }: { recordAction: RecordAction }) {
   // Pitch maps directly to air column height: less air (more water) = higher frequency
   const pitch = 200 + (waterLevel * 5);
   const isAnomaly = waterLevel > 80;
+  useAnomalySignal(isAnomaly, recordAction);
   const pitchWord = waterLevel > 70 ? "High" : waterLevel < 30 ? "Deep" : "Middle";
 
   const handleTap = () => {
@@ -118,6 +120,7 @@ function StringTelephone({ recordAction }: { recordAction: RecordAction }) {
   const [talkCount, setTalkCount] = useState(0);
 
   const isAnomaly = pinched && tension > 50;
+  useAnomalySignal(isAnomaly, recordAction);
   const soundPasses = tension >= 40 && !pinched;
   const slack = tension < 40;
 
@@ -257,6 +260,7 @@ function Echoes({ recordAction }: { recordAction: RecordAction }) {
   const [shoutCount, setShoutCount] = useState(0);
 
   const isAnomaly = location === "Field" || (location === "Well" && depth < 30);
+  useAnomalySignal(isAnomaly, recordAction);
   const delaySec = Math.max(0.25, Math.min(0.8, (depth / 100) * 0.7));
 
   const handleShout = () => {

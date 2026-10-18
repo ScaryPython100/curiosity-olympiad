@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useAnomalySignal } from '../useAnomalySignal';
 
 // ==========================================
 // EXPERIMENT 1: THE FLASHLIGHT & SPINNING GLOBE (DAY & NIGHT)
@@ -134,6 +135,7 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
       : Math.round(65 - orbitFactor * 28);
 
   const isIndiaSummer = monthIndex >= 4 && monthIndex <= 7;
+  useAnomalySignal(tiltDeg === 0, recordAction);
   const isIndiaWinter = monthIndex === 11 || monthIndex === 0 || monthIndex === 1;
 
   const handleMonthChange = (idx: number) => {
@@ -336,6 +338,7 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
   // Shadow length inversely related to elevation angle (tan of angle)
   const gnomonHeight = 60; // pixels
   const shadowLength = Math.min(140, Math.round(gnomonHeight / Math.tan((sunElevation * Math.PI) / 180)));
+  useAnomalySignal(season === "december" && timeHour === 12, recordAction);
 
 
   const handleTimeChange = (val: number) => {

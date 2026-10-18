@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useAnomalySignal } from '../useAnomalySignal';
 import { playHeartbeat } from '@/utils/webAudio';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
@@ -22,6 +23,7 @@ function PulseHeartbeat({ recordAction }: { recordAction: RecordAction }) {
 
   const { bpm, o2 } = bpmMap[activity];
   const isAnomaly = activity === "Sprint";
+  useAnomalySignal(isAnomaly, recordAction);
 
   const handleSetActivity = (act: Activity) => {
     setActivity(act);
@@ -158,6 +160,7 @@ function DiaphragmBalloonLungs({ recordAction }: { recordAction: RecordAction })
   const isExhaling = diaphragmPos <= 35;
   const thoracicPressure = (760 - (diaphragmPos - 50) * 0.16).toFixed(1); // mmHg, kept for telemetry
   const isAnomaly = diaphragmPos >= 90;
+  useAnomalySignal(isAnomaly, recordAction);
 
   const handleSlider = (val: number) => {
     setDiaphragmPos(val);
@@ -236,6 +239,7 @@ function PupilReflex({ recordAction }: { recordAction: RecordAction }) {
   const isConstricted = lightIntensity >= 70;
   const isDilated = lightIntensity <= 25;
   const isAnomaly = lightIntensity >= 90;
+  useAnomalySignal(isAnomaly, recordAction);
 
   const handleSlider = (val: number) => {
     setLightIntensity(val);
