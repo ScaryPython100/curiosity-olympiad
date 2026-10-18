@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import SandboxEngine, { EXPERIMENT_LABELS } from "@/components/SandboxEngine";
-import { computeMockTestXP } from "@/utils/xpRules";
+import { computeMockTestXP, XP_RULES } from "@/utils/xpRules";
 import { submitMockTestAttempt, getMockTestAttempts } from "@/app/actions/exams";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
@@ -1613,6 +1613,20 @@ function PracticeContent() {
 
   const idealTimeMins = activeMockTest.idealTime[difficulty];
 
+  // Result-screen XP, from the same capped formula the server awards with
+  const modalXP = computeMockTestXP({
+    score: calculateScore(),
+    total: mockTestQuestions.length,
+    questionCap: mockTestQuestions.length,
+    reversals: reversalsCount,
+    adjustments: sliderAdjustments,
+    timeSecs: elapsedSeconds,
+    idealSecs: activeMockTest.idealSeconds[difficulty],
+  });
+  const modalReversalXP = Math.min(reversalsCount, XP_RULES.maxReversals) * XP_RULES.perReversal;
+  const modalAdjustmentXP = Math.min(sliderAdjustments, XP_RULES.maxAdjustments) * XP_RULES.perAdjustment;
+  const modalPaceXP = modalXP.telemetryBonusXP - modalReversalXP - modalAdjustmentXP;
+
   return (
     <div className="bg-[#f7f9fb] text-[#191c1e] min-h-screen w-full max-w-[100vw] overflow-x-hidden flex flex-col font-['Montserrat'] antialiased relative">
       {/* TopAppBar: Impeccable Responsive Header */}
@@ -1991,7 +2005,7 @@ function PracticeContent() {
                     <div className="flex items-center justify-between pb-2 border-b border-gray-200">
                       <span className="font-bold text-gray-700">🎯 Accuracy Score</span>
                       <span className="font-black text-[#143867] text-sm">
-                        {calculateScore()} / {mockTestQuestions.length} Correct (+{calculateScore() * 100} XP)
+                        {modalXP.score} / {modalXP.total} Correct (+{modalXP.accuracyXP} XP)
                       </span>
                     </div>
 
@@ -2005,7 +2019,7 @@ function PracticeContent() {
                           <span className="material-symbols-outlined text-sm text-indigo-600">swap_horiz</span>
                           Hypothesis Testing Reversals ({reversalsCount} detected)
                         </span>
-                        <span className="font-bold text-indigo-900">+{reversalsCount * 50} XP</span>
+                        <span className="font-bold text-indigo-900">+{modalReversalXP} XP</span>
                       </div>
 
                       <div className="flex items-center justify-between text-gray-600">
@@ -2013,7 +2027,7 @@ function PracticeContent() {
                           <span className="material-symbols-outlined text-sm text-emerald-600">tune</span>
                           Variable Slider Manipulations ({sliderAdjustments} edits)
                         </span>
-                        <span className="font-bold text-emerald-900">+{sliderAdjustments * 20} XP</span>
+                        <span className="font-bold text-emerald-900">+{modalAdjustmentXP} XP</span>
                       </div>
 
                       <div className="flex items-center justify-between text-gray-600">
@@ -2021,13 +2035,13 @@ function PracticeContent() {
                           <span className="material-symbols-outlined text-sm text-amber-600">timer</span>
                           Dynamic Ideal Pace Bonus
                         </span>
-                        <span className="font-bold text-amber-900">+50 XP</span>
+                        <span className="font-bold text-amber-900">+{modalPaceXP} XP</span>
                       </div>
                     </div>
 
                     <div className="pt-3 border-t border-gray-300 flex items-center justify-between font-black text-sm text-[#143867]">
                       <span>🌟 Total XP Earned:</span>
-                      <span className="text-lg text-[#ea580c]">+{(calculateScore() * 100) + (reversalsCount * 50) + (sliderAdjustments * 20) + 50} XP</span>
+                      <span className="text-lg text-[#ea580c]">+{modalXP.totalXP} XP</span>
                     </div>
                   </div>
 
