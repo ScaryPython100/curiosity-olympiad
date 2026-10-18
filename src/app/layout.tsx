@@ -6,6 +6,7 @@ import { TabSessionGuard } from "@/components/TabSessionGuard";
 import { StreakExpiryAlert } from "@/components/StreakExpiryAlert";
 import Script from "next/script";
 import type { Viewport } from "next";
+import { MATERIAL_ICON_NAMES } from "@/config/iconSubset";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -87,7 +88,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link 
           rel="stylesheet" 
-          href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" 
+          href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" 
+        />
+        {/* Only the icons we use (~15 KB instead of ~320 KB). Add new icons in src/config/iconSubset.ts */}
+        <link
+          rel="stylesheet"
+          href={`https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=${MATERIAL_ICON_NAMES.join(",")}&display=block`}
         />
       </head>
       <body suppressHydrationWarning className="bg-[#f7f9fb] dark:bg-gray-900 text-[#191c1e] dark:text-gray-100 antialiased transition-colors duration-300 overflow-x-hidden w-full max-w-[100vw]">

@@ -126,12 +126,13 @@ export async function signUpAction(formData: FormData) {
       
     if (profileError) return { error: profileError.message };
 
-    // Initialize gamification data
+    // Initialize gamification data. The handle_new_user trigger normally creates
+    // this row already, and RLS may block students writing it, so don't fail sign-up here.
     const { error: gamificationError } = await supabase
       .from("user_gamification")
       .upsert([{ id: data.user.id, user_id: data.user.id, xp: 0, curiosity_points: 0 }], { onConflict: "user_id" });
 
-    if (gamificationError) return { error: gamificationError.message };
+    if (gamificationError) console.warn("Gamification row init skipped:", gamificationError.message);
   }
 
   // Send them to the dashboard!

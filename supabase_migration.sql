@@ -218,6 +218,9 @@ CREATE POLICY "Users can update their own profile"
   USING (auth.uid() = id);
 
 -- 4.2 user_gamification
+-- XP is written by server actions with the service-role key (src/utils/xpLedger.ts).
+-- Once SUPABASE_SERVICE_ROLE_KEY is set in production, drop the student INSERT/UPDATE
+-- policies below (see phase0_launch_fixes.sql, Part 2) so XP can't be edited from the browser.
 ALTER TABLE public.user_gamification ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Public can view leaderboard gamification" ON public.user_gamification;
@@ -293,7 +296,7 @@ CREATE POLICY "Users can view their own telemetry logs"
   USING (auth.uid() = user_id);
 
 -- ------------------------------------------------------------------------------
--- 5. SEED DATA - 9 SYSTEM EXAMS & PRACTICE LAB MOCK TESTS
+-- 5. SEED DATA - SANDBOX EXAM + 13 PRACTICE LAB MOCK TESTS
 -- ------------------------------------------------------------------------------
 INSERT INTO public.exams (id, title, description, category, difficulty, duration_minutes, max_score, status, is_results_published, results_release_date)
 VALUES
@@ -434,6 +437,30 @@ VALUES
     'Mock Test 11: Plants & Growth',
     'Agastya Curiosity Practice Lab - Mock Test 11: Plants & Growth (Photosynthesis & Systems)',
     'Botany',
+    'all-levels',
+    15,
+    9,
+    'published',
+    false,
+    '2026-12-31 23:59:59+00'
+  ),
+  (
+    '00000000-0000-0000-0000-000000000012',
+    'Mock Test 12: Day, Night & Earth''s Seasons',
+    'Agastya Curiosity Practice Lab - Mock Test 12: Day, Night & Earth''s Seasons (Rotation, Tilt & Sundials)',
+    'Astronomy',
+    'all-levels',
+    15,
+    9,
+    'published',
+    false,
+    '2026-12-31 23:59:59+00'
+  ),
+  (
+    '00000000-0000-0000-0000-000000000013',
+    'Mock Test 13: The Solar System Scale',
+    'Agastya Curiosity Practice Lab - Mock Test 13: The Solar System Scale (Distances & Orbits)',
+    'Astronomy',
     'all-levels',
     15,
     9,

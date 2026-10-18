@@ -111,7 +111,6 @@ export default function DashboardPage() {
         }
 
         setXp(newXp);
-        setStreak("1 Days");
         router.refresh();
       } else if (result.error) {
         toast.error(result.error);

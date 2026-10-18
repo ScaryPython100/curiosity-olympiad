@@ -2,6 +2,9 @@
 
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { applyXP } from "@/utils/xpLedger";
+import { XP_RULES, currentStreak } from "@/utils/xpRules";
+import { istDayKey, istStartOfDay, istStartOfWeek } from "@/utils/istTime";
 
 const createClient = async () => {
   const cookieStore = await cookies();
@@ -73,15 +76,10 @@ export async function getLeaderboard(timeframe: 'weekly' | 'daily' | 'friends' =
     return { data: [] };
   }
 
+  // Daily and weekly cycles follow India time (midnight IST, weeks start Monday).
   const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-
-  // Compute current week start (Monday 00:00:00)
-  const currentWeekStart = new Date(now);
-  const dayOfWeek = currentWeekStart.getDay();
-  const diffToMonday = currentWeekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-  currentWeekStart.setDate(diffToMonday);
-  currentWeekStart.setHours(0, 0, 0, 0);
+  const todayStart = istStartOfDay(now);
+  const currentWeekStart = istStartOfWeek(now);
 
   const fixCutoff = new Date("2026-07-27T00:30:00Z");
 
@@ -170,199 +168,20 @@ export async function getLeaderboard(timeframe: 'weekly' | 'daily' | 'friends' =
 }
 
 /**
- * Awards XP to the user.
- * Handles DB constraints: user_id has no UNIQUE constraint (so upsert with
- * onConflict: 'user_id' fails), and RLS may block plain inserts.
- * Strategy: UPDATE for existing rows, plain INSERT for new rows.
+ * Claims the once-a-day login reward. The amount is fixed on the server;
+ * the first argument is ignored and only kept so existing callers still work.
  */
-export async function awardXP(amount: number, reason: string) {
+export async function awardXP(_amount: number, reason: string) {
+  if (reason !== "daily_login") return { error: "Unsupported XP reason." };
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
   if (!user) return { error: "Not authenticated" };
 
-  // Fetch current data to check daily claim limit
-  const { data: currentData, error: fetchError } = await supabase
-    .from("user_gamification")
-    .select("xp, curiosity_points, last_claimed_date, daily_xp, weekly_xp, last_daily_reset, last_weekly_reset")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const result = await applyXP(supabase, user.id, XP_RULES.dailyLoginXP, { dailyClaim: true });
+  if (!result.success) return { error: result.error };
 
-  if (fetchError) return { error: fetchError.message };
-
-  const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-
-  // Compute current week start (Monday 00:00:00)
-  const currentWeekStart = new Date(now);
-  const dayOfWeek = currentWeekStart.getDay();
-  const diffToMonday = currentWeekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-  currentWeekStart.setDate(diffToMonday);
-  currentWeekStart.setHours(0, 0, 0, 0);
-
-  // Check daily login claim cooldown ONLY for daily_login claims
-  if (reason === "daily_login" && currentData?.last_claimed_date) {
-    const lastClaimed = new Date(currentData.last_claimed_date);
-    if (lastClaimed >= todayStart) {
-      return { error: "Daily XP already claimed today. Come back tomorrow!" };
-    }
-  }
-
-  let newDailyXp = amount;
-  let newWeeklyXp = amount;
-  
-  if (currentData) {
-    // Reset daily_xp if last reset was before today 00:00 AM
-    if (currentData.last_daily_reset) {
-      const lastDaily = new Date(currentData.last_daily_reset);
-      if (lastDaily >= todayStart) {
-        newDailyXp = (currentData.daily_xp || 0) + amount;
-      }
-    }
-
-    // Reset weekly_xp if last reset was before this week's Monday 00:00 AM
-    if (currentData.last_weekly_reset) {
-      const lastWeekly = new Date(currentData.last_weekly_reset);
-      if (lastWeekly >= currentWeekStart) {
-        newWeeklyXp = (currentData.weekly_xp || 0) + amount;
-      }
-    }
-  }
-
-  const newXp = (currentData?.xp || 0) + amount;
-  const newPoints = (currentData?.curiosity_points || 0) + amount;
-  const nowIso = now.toISOString();
-
-  if (currentData) {
-    // Row exists → UPDATE
-    const { error: updateError } = await supabase
-      .from("user_gamification")
-      .update({ 
-        xp: newXp, 
-        curiosity_points: newPoints, 
-        last_claimed_date: nowIso,
-        daily_xp: newDailyXp,
-        weekly_xp: newWeeklyXp,
-        last_daily_reset: nowIso,
-        last_weekly_reset: nowIso
-      })
-      .eq("user_id", user.id);
-
-    if (updateError) return { error: updateError.message };
-  } else {
-    const row = { 
-      id: user.id, 
-      user_id: user.id, 
-      xp: newXp, 
-      curiosity_points: newPoints, 
-      last_claimed_date: nowIso,
-      daily_xp: newDailyXp,
-      weekly_xp: newWeeklyXp,
-      last_daily_reset: nowIso,
-      last_weekly_reset: nowIso
-    };
-
-    const { error: upsertError } = await supabase
-      .from("user_gamification")
-      .upsert(row, { onConflict: "user_id" });
-
-    if (upsertError) {
-      // Fallback: try a plain insert
-      const { error: insertError } = await supabase
-        .from("user_gamification")
-        .insert([row]);
-
-      if (insertError) {
-        return {
-          error: `Failed to create XP record. Upsert error: ${upsertError.message}. Insert error: ${insertError.message}`
-        };
-      }
-    }
-  }
-
-  return { success: true, newXp, newXP: newXp, newPoints: newPoints };
-}
-
-/**
- * Awards XP specifically for mock test attempts, practice labs, and telemetry bonuses without daily claim locks.
- */
-export async function addActivityXP(amount: number, reason: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) return { error: "Not authenticated" };
-
-  const { data: currentData, error: fetchError } = await supabase
-    .from("user_gamification")
-    .select("xp, curiosity_points, daily_xp, weekly_xp, last_daily_reset, last_weekly_reset")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (fetchError) return { error: fetchError.message };
-
-  const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-
-  // Compute current week start (Monday 00:00:00)
-  const currentWeekStart = new Date(now);
-  const dayOfWeek = currentWeekStart.getDay();
-  const diffToMonday = currentWeekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-  currentWeekStart.setDate(diffToMonday);
-  currentWeekStart.setHours(0, 0, 0, 0);
-
-  let newDailyXp = amount;
-  let newWeeklyXp = amount;
-
-  if (currentData) {
-    if (currentData.last_daily_reset) {
-      const lastDaily = new Date(currentData.last_daily_reset);
-      if (lastDaily >= todayStart) {
-        newDailyXp = (currentData.daily_xp || 0) + amount;
-      }
-    }
-
-    if (currentData.last_weekly_reset) {
-      const lastWeekly = new Date(currentData.last_weekly_reset);
-      if (lastWeekly >= currentWeekStart) {
-        newWeeklyXp = (currentData.weekly_xp || 0) + amount;
-      }
-    }
-  }
-
-  const newXp = (currentData?.xp || 0) + amount;
-  const newPoints = (currentData?.curiosity_points || 0) + amount;
-  const nowIso = now.toISOString();
-
-  if (currentData) {
-    const { error: updateError } = await supabase
-      .from("user_gamification")
-      .update({
-        xp: newXp,
-        curiosity_points: newPoints,
-        daily_xp: newDailyXp,
-        weekly_xp: newWeeklyXp,
-        last_daily_reset: nowIso,
-        last_weekly_reset: nowIso
-      })
-      .eq("user_id", user.id);
-
-    if (updateError) return { error: updateError.message };
-  } else {
-    const row = {
-      id: user.id,
-      user_id: user.id,
-      xp: newXp,
-      curiosity_points: newPoints,
-      last_claimed_date: nowIso,
-      daily_xp: newDailyXp,
-      weekly_xp: newWeeklyXp,
-      last_daily_reset: nowIso,
-      last_weekly_reset: nowIso,
-    };
-    await supabase.from("user_gamification").upsert(row, { onConflict: "user_id" });
-  }
-
-  return { success: true, newXp, newXP: newXp, newPoints: newPoints };
+  return { success: true, newXp: result.newXp, newXP: result.newXp, newPoints: result.newPoints };
 }
 
 /**
@@ -377,7 +196,7 @@ export async function getProfileStats() {
   // 1. Fetch user's gamification data
   const { data: gamificationData, error: gamError } = await supabase
     .from("user_gamification")
-    .select("xp, curiosity_points, streak_days, last_claimed_date, daily_xp")
+    .select("xp, curiosity_points, streak_days, last_login_date")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -400,19 +219,12 @@ export async function getProfileStats() {
 
   const rank = countError ? "-" : (count !== null ? count + 1 : 1);
 
-  // 4. Calculate streak & daily activity status
-  const streakDays = gamificationData?.streak_days || 1;
-  const lastClaimed = gamificationData?.last_claimed_date ? new Date(gamificationData.last_claimed_date) : null;
-  const now = new Date();
-  
-  let hasCompletedActivityToday = false;
-  if (lastClaimed) {
-    const isSameDay = 
-      lastClaimed.getFullYear() === now.getFullYear() &&
-      lastClaimed.getMonth() === now.getMonth() &&
-      lastClaimed.getDate() === now.getDate();
-    hasCompletedActivityToday = isSameDay;
-  }
+  // 4. Streak counts days with a finished practice lesson (India time).
+  // A streak shows as 0 once a whole day has been missed.
+  const today = istDayKey();
+  const lastActiveDay: string | null = gamificationData?.last_login_date ?? null;
+  const streakDays = currentStreak(gamificationData?.streak_days ?? 0, lastActiveDay, today);
+  const hasCompletedActivityToday = lastActiveDay === today;
 
   return {
     data: {

@@ -1,6 +1,10 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { OFFICIAL_MOCK_TESTS } from "@/data/mockTestsData";
+import { computeMockTestXP } from "@/utils/xpRules";
+import { applyXP } from "@/utils/xpLedger";
+import { istDayKey } from "@/utils/istTime";
 
 /**
  * Silently submits an H5P exam score for the currently authenticated user.
@@ -73,8 +77,10 @@ const REVERSE_EXAM_MAP: Record<string, number> = Object.entries(MOCK_TEST_EXAM_I
 );
 
 /**
- * Submits a Mock Test attempt to Supabase exam_submissions
- * Sets up the dedicated Mock Test UUID and persists rich Curiosity Quotient telemetry.
+ * Submits a Mock Test attempt to Supabase exam_submissions and awards its XP.
+ * XP is calculated here from clamped inputs, never taken from the browser.
+ * A test earns XP once per India day; retakes the same day still save the
+ * attempt and keep the streak alive, but award 0 XP.
  */
 export async function submitMockTestAttempt(
   mockTestId: number,
@@ -82,8 +88,64 @@ export async function submitMockTestAttempt(
   maxScore: number,
   telemetryData: any
 ) {
-  const examId = MOCK_TEST_EXAM_IDS[mockTestId] || "00000000-0000-0000-0000-000000000000";
-  return submitExamScore(examId, score, maxScore, telemetryData);
+  const test = OFFICIAL_MOCK_TESTS.find((t) => t.id === mockTestId);
+  const examId = MOCK_TEST_EXAM_IDS[mockTestId];
+  if (!test || !examId) {
+    return { success: false, error: "Unknown mock test." };
+  }
+
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { success: false, error: "Unauthorized: You must be logged in to submit a test." };
+  }
+
+  const level = telemetryData?.level === "level2" ? "level2" : "level1";
+  const xp = computeMockTestXP({
+    score,
+    total: maxScore,
+    questionCap: test.questionCount,
+    reversals: telemetryData?.reversals,
+    adjustments: telemetryData?.sliderAdjustments,
+    timeSecs: telemetryData?.timeSecs,
+    idealSecs: test.idealSeconds[level],
+  });
+
+  const { data: previous } = await supabase
+    .from("exam_submissions")
+    .select("submitted_at")
+    .eq("user_id", user.id)
+    .eq("exam_id", examId)
+    .maybeSingle();
+  const alreadyEarnedToday =
+    !!previous?.submitted_at && istDayKey(new Date(previous.submitted_at)) === istDayKey();
+  const xpAwarded = alreadyEarnedToday ? 0 : xp.totalXP;
+
+  const saved = await submitExamScore(examId, xp.score, xp.total, {
+    ...(telemetryData || {}),
+    score: xp.score,
+    total: xp.total,
+    accuracyXP: xp.accuracyXP,
+    telemetryBonusXP: xp.telemetryBonusXP,
+    totalXP: xp.totalXP,
+    xpAwarded,
+  });
+  if (!saved.success) return { ...saved, xpAwarded: 0 };
+
+  const award = await applyXP(supabase, user.id, xpAwarded, { countsForStreak: true });
+  if (!award.success) {
+    console.error("XP award failed after saving attempt:", award.error);
+    return { success: true, ...xp, xpAwarded: 0, alreadyEarnedToday, xpError: award.error };
+  }
+
+  return {
+    success: true,
+    ...xp,
+    xpAwarded,
+    alreadyEarnedToday,
+    newXp: award.newXp,
+    streakCount: award.streakCount,
+  };
 }
 
 /**
@@ -115,7 +177,7 @@ export async function getMockTestAttempts(): Promise<{ success: boolean; data?: 
         if (testId) {
           const telemetry = row.telemetry_data || {};
           const accuracyXP = telemetry.accuracyXP ?? (row.score * 100);
-          const telemetryBonusXP = telemetry.telemetryBonusXP ?? 210;
+          const telemetryBonusXP = telemetry.telemetryBonusXP ?? 0;
           const totalXP = telemetry.totalXP ?? (accuracyXP + telemetryBonusXP);
           attemptsMap[testId] = {
             completed: true,

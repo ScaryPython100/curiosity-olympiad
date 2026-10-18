@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import SandboxEngine, { EXPERIMENT_LABELS } from "@/components/SandboxEngine";
-import { addActivityXP } from "@/app/actions/profile";
+import { computeMockTestXP } from "@/utils/xpRules";
 import { submitMockTestAttempt, getMockTestAttempts } from "@/app/actions/exams";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
@@ -1315,7 +1315,7 @@ function PracticeContent() {
   const initialTestId = (() => {
     const p = searchParams?.get("mockTestId") || searchParams?.get("testId") || searchParams?.get("id");
     const val = parseInt(p || "1", 10);
-    return !isNaN(val) && val >= 1 && val <= 11 ? val : 1;
+    return !isNaN(val) && val >= 1 && val <= MOCK_TESTS.length ? val : 1;
   })();
   const initialActive = (() => {
     const s = searchParams?.get("start") || searchParams?.get("auto");
@@ -1338,17 +1338,18 @@ function PracticeContent() {
   const [reflections, setReflections] = useState<Record<string, string>>({});
   
   // Telemetry metric tracking
-  const [reversalsCount, setReversalsCount] = useState<number>(2);
-  const [sliderAdjustments, setSliderAdjustments] = useState<number>(4);
+  // Start at 0: bonus XP must come from real interaction with the experiment.
+  const [reversalsCount, setReversalsCount] = useState<number>(0);
+  const [sliderAdjustments, setSliderAdjustments] = useState<number>(0);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
   const [activeTelemetry, setActiveTelemetry] = useState<any>({
-    distinctStatesReached: 3,
+    distinctStatesReached: 0,
     triggerActivated: false,
-    voluntaryExplorationTrials: 2,
-    sliderAdjustments: 4,
-    reversals: 2,
-    totalDwellTime: 45000,
-    optionalActions: 1
+    voluntaryExplorationTrials: 0,
+    sliderAdjustments: 0,
+    reversals: 0,
+    totalDwellTime: 0,
+    optionalActions: 0
   });
 
   const [hoveredExperiment, setHoveredExperiment] = useState<number | null>(null);
@@ -1374,7 +1375,7 @@ function PracticeContent() {
 
   // Persistence for completed mock tests
   const [completedMockTests, setCompletedMockTests] = useState<Record<number, MockTestResult>>({});
-  const [unlockedLevelIndices, setUnlockedLevelIndices] = useState<number[]>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  const [unlockedLevelIndices, setUnlockedLevelIndices] = useState<number[]>(MOCK_TESTS.map((_, i) => i));
 
   useEffect(() => {
     // Fetch unlocked levels from backend
@@ -1397,7 +1398,7 @@ function PracticeContent() {
       }
       if (testIdParam) {
         const parsed = parseInt(testIdParam, 10);
-        if (!isNaN(parsed) && parsed >= 1 && parsed <= 11) {
+        if (!isNaN(parsed) && parsed >= 1 && parsed <= MOCK_TESTS.length) {
           setSelectedMockTestId(parsed);
           const expParam = searchParams?.get("exp") || searchParams?.get("expIndex") || urlParams?.get("exp") || urlParams?.get("expIndex");
           if (expParam) {
@@ -1520,14 +1521,16 @@ function PracticeContent() {
     const total = mockTestQuestions.length;
     const percentage = Math.round((score / (total || 1)) * 100);
 
-    // Calculate XP & Curiosity Telemetry Bonus
-    const accuracyXP = score * 100;
-    const reversalBonus = reversalsCount * 50;
-    const adjustmentBonus = sliderAdjustments * 20;
-    const targetSecs = activeMockTest.idealSeconds[difficulty];
-    const speedBonus = elapsedSeconds <= targetSecs ? 50 : 0;
-    const telemetryBonusXP = reversalBonus + adjustmentBonus + speedBonus;
-    const totalXP = accuracyXP + telemetryBonusXP;
+    // Same capped formula the server uses to award XP (src/utils/xpRules.ts)
+    const { accuracyXP, telemetryBonusXP, totalXP } = computeMockTestXP({
+      score,
+      total,
+      questionCap: total,
+      reversals: reversalsCount,
+      adjustments: sliderAdjustments,
+      timeSecs: elapsedSeconds,
+      idealSecs: activeMockTest.idealSeconds[difficulty],
+    });
 
     const result: MockTestResult = {
       completed: true,
@@ -1562,7 +1565,7 @@ function PracticeContent() {
       totalXP,
       reversals: reversalsCount,
       sliderAdjustments: sliderAdjustments,
-      distinctStatesReached: activeTelemetry.distinctStatesReached || 3,
+      distinctStatesReached: activeTelemetry.distinctStatesReached || 0,
       triggerActivated: activeTelemetry.triggerActivated || false,
       voluntaryExplorationTrials: activeTelemetry.voluntaryExplorationTrials || 0,
       totalDwellTime: elapsedSeconds * 1000,
@@ -1588,9 +1591,9 @@ function PracticeContent() {
     setIsSubmitted(true);
     setShowTelemetryModal(true);
 
-    // Persist to Supabase: Exam Submission & Telemetry (Source of Truth)
+    // Persist to Supabase: the server saves the attempt and awards XP itself
     try {
-      const subRes = await submitMockTestAttempt(
+      const subRes: any = await submitMockTestAttempt(
         selectedMockTestId,
         score,
         total,
@@ -1598,16 +1601,13 @@ function PracticeContent() {
       );
       if (!subRes?.success) {
         console.warn("Supabase test submission note:", subRes?.error);
+      } else if (subRes.alreadyEarnedToday) {
+        toast.info("Great practice! 🔁", {
+          description: "You already got XP for this test today. Come back tomorrow for more XP!",
+        });
       }
     } catch (err) {
       console.error("Failed to persist test attempt to Supabase:", err);
-    }
-
-    // Award XP to profile backend & local state
-    try {
-      await addActivityXP(totalXP, `Completed ${activeMockTest.title}`);
-    } catch (err) {
-      console.error("Failed to persist XP:", err);
     }
   };
 
