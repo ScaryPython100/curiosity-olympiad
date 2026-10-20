@@ -12,7 +12,8 @@ import {
 } from "@/config/inquiryMatrix";
 
 // AI Gateway model id (see AGENTS.md). Override with THOUGHT_CODING_MODEL.
-const CODING_MODEL = process.env.THOUGHT_CODING_MODEL || "anthropic/claude-haiku-5.5";
+// Gemini Flash-Lite is available on the Gateway free tier (Anthropic models are not).
+const CODING_MODEL = process.env.THOUGHT_CODING_MODEL || "google/gemini-2.5-flash-lite";
 const MAX_RESPONSE_CHARS = 600;
 
 const level02 = z.number().int().min(0).max(2);
