@@ -16,7 +16,7 @@ export const MATERIAL_ICON_NAMES = [
   "emoji_objects", "error", "expand_more", "explore", "favorite", "feedback", "filter", "flash_on",
   "flashlight_on", "foundation", "graphic_eq", "group", "group_add", "group_off", "groups",
   "hearing", "help", "help_center", "help_outline", "history", "home", "hourglass_top",
-  "how_to_reg", "info", "keep", "key", "language", "leaderboard", "light", "light_mode",
+  "how_to_reg", "info", "ios_share", "keep", "key", "language", "leaderboard", "light", "light_mode",
   "lightbulb", "list", "local_fire_department", "lock", "lock_clock", "lock_reset", "login",
   "logout", "mail_lock", "message", "military_tech", "mode", "monitoring", "music_note",
   "notifications", "nutrition", "password", "pause", "pending", "person", "person_add",

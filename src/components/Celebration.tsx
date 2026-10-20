@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { KuppuBubble } from "@/components/KuppuGuide";
+import { starsFor } from "@/utils/learningPath";
 
 // Fixed confetti pieces (no random values, so server and client render the same)
 const CONFETTI = Array.from({ length: 24 }, (_, i) => ({
@@ -42,6 +44,10 @@ export interface CelebrationProps {
   /** Streak after this test; null until known. */
   streakCount: number | null;
   goalDone: boolean;
+  /** This test earned a streak freeze. */
+  freezeEarned?: boolean;
+  /** A streak freeze covered a missed day. */
+  freezeUsed?: boolean;
   onSeeAnswers: () => void;
   onAllTests: () => void;
 }
@@ -57,12 +63,15 @@ export function Celebration({
   breakdown,
   streakCount,
   goalDone,
+  freezeEarned = false,
+  freezeUsed = false,
   onSeeAnswers,
   onAllTests,
 }: CelebrationProps) {
   const { t } = useLanguage();
   const xpShown = useCountUp(xpEarned);
-  const stars = total > 0 ? (score / total >= 0.99 ? 3 : score / total >= 0.6 ? 2 : 1) : 1;
+  const stars = starsFor(score, total);
+  const cheer = stars === 3 ? t.kuppu.cheer_3 : stars === 2 ? t.kuppu.cheer_2 : t.kuppu.cheer_1;
 
   return (
     <div
@@ -93,6 +102,10 @@ export function Celebration({
           <p className="text-xs text-gray-500 mt-0.5">{testTitle}</p>
         </div>
 
+        <KuppuBubble speech={cheer} mood={stars === 1 ? "think" : "happy"} size={52} className="text-left">
+          {cheer}
+        </KuppuBubble>
+
         <p className="text-lg font-black text-[#143867]">
           {t.learn.score_line.replace("{score}", String(score)).replace("{total}", String(total))}
         </p>
@@ -109,6 +122,17 @@ export function Celebration({
             <div className="text-[11px] font-bold text-amber-800 uppercase tracking-wide">{t.learn.streak}</div>
           </div>
         </div>
+
+        {freezeUsed && (
+          <p className="text-sm font-black text-sky-800 bg-sky-50 border border-sky-200 rounded-xl px-3 py-2">
+            {t.freeze.used}
+          </p>
+        )}
+        {freezeEarned && (
+          <p className="text-sm font-black text-sky-800 bg-sky-50 border border-sky-200 rounded-xl px-3 py-2">
+            {t.freeze.earned}
+          </p>
+        )}
 
         {goalDone && (
           <p className="text-sm font-black text-green-700 bg-green-50 border border-green-200 rounded-xl py-2">

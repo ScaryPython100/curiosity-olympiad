@@ -3,7 +3,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { applyXP } from "@/utils/xpLedger";
-import { XP_RULES, currentStreak } from "@/utils/xpRules";
+import { XP_RULES, currentStreak, daysCoveredByFreezes } from "@/utils/xpRules";
+import { isMissingFreezeColumn } from "@/utils/xpLedger";
 import { istDayKey, istStartOfDay, istStartOfWeek } from "@/utils/istTime";
 
 const createClient = async () => {
@@ -194,11 +195,27 @@ export async function getProfileStats() {
   if (!user) return { error: "Not authenticated" };
 
   // 1. Fetch user's gamification data
-  const { data: gamificationData, error: gamError } = await supabase
+  let gamResult = await supabase
     .from("user_gamification")
-    .select("xp, curiosity_points, streak_days, last_login_date")
+    .select("xp, curiosity_points, streak_days, last_login_date, streak_freezes")
     .eq("user_id", user.id)
     .maybeSingle();
+  if (isMissingFreezeColumn(gamResult.error)) {
+    // phase1_streak_freeze.sql not run yet: same data without freezes
+    gamResult = await supabase
+      .from("user_gamification")
+      .select("xp, curiosity_points, streak_days, last_login_date")
+      .eq("user_id", user.id)
+      .maybeSingle();
+  }
+  const gamificationData = gamResult.data as {
+    xp: number | null;
+    curiosity_points: number | null;
+    streak_days: number | null;
+    last_login_date: string | null;
+    streak_freezes?: number | null;
+  } | null;
+  const gamError = gamResult.error;
 
   if (gamError) return { error: gamError.message };
 
@@ -223,7 +240,8 @@ export async function getProfileStats() {
   // A streak shows as 0 once a whole day has been missed.
   const today = istDayKey();
   const lastActiveDay: string | null = gamificationData?.last_login_date ?? null;
-  const streakDays = currentStreak(gamificationData?.streak_days ?? 0, lastActiveDay, today);
+  const streakFreezes = gamificationData?.streak_freezes ?? 0;
+  const streakDays = currentStreak(gamificationData?.streak_days ?? 0, lastActiveDay, today, streakFreezes);
   const hasCompletedActivityToday = lastActiveDay === today;
 
   return {
@@ -236,6 +254,9 @@ export async function getProfileStats() {
       streak: `${streakDays} ${streakDays === 1 ? "Day" : "Days"}`,
       streakCount: streakDays,
       hasCompletedActivityToday,
+      streakFreezes,
+      // Missed days a freeze is covering; it is used up when the next test is done
+      freezeCoveringDays: daysCoveredByFreezes(lastActiveDay, today, streakFreezes),
       quests: "0" // Placeholder until quests are implemented
     }
   };

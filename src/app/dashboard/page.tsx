@@ -32,7 +32,12 @@ export default function DashboardPage() {
   const { userId, loading: userLoading } = useUser();
   const [isAwarding, setIsAwarding] = useState(false);
   // null until loaded, so the card never flashes "0 Days"
-  const [streakInfo, setStreakInfo] = useState<{ count: number; doneToday: boolean } | null>(null);
+  const [streakInfo, setStreakInfo] = useState<{
+    count: number;
+    doneToday: boolean;
+    freezes: number;
+    freezeCovering: number;
+  } | null>(null);
   const [xp, setXp] = useState(0);
   const [friendsActivity, setFriendsActivity] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
@@ -48,7 +53,12 @@ export default function DashboardPage() {
         ]);
         
         if (res.data) {
-          setStreakInfo({ count: res.data.streakCount ?? 0, doneToday: Boolean(res.data.hasCompletedActivityToday) });
+          setStreakInfo({
+            count: res.data.streakCount ?? 0,
+            doneToday: Boolean(res.data.hasCompletedActivityToday),
+            freezes: res.data.streakFreezes ?? 0,
+            freezeCovering: res.data.freezeCoveringDays ?? 0,
+          });
           setXp(res.data.xp);
         }
         if (activityRes.data) {
@@ -526,7 +536,19 @@ export default function DashboardPage() {
                   ));
                 })()}
               </div>
-              <p className="text-[11px] text-blue-200 font-medium">Consistent curiosity leads to breakthroughs.</p>
+              {streakInfo && streakInfo.freezeCovering > 0 && !streakInfo.doneToday ? (
+                <p className="text-xs font-bold text-sky-100 bg-sky-500/20 border border-sky-300/30 rounded-xl px-3 py-2 mt-1">
+                  🧊 {t.freeze.covering}
+                </p>
+              ) : (
+                <p className="text-[11px] text-blue-200 font-medium">Consistent curiosity leads to breakthroughs.</p>
+              )}
+              {streakInfo && streakInfo.freezes > 0 && (
+                <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-black text-sky-100 bg-white/10 rounded-full px-3 py-1">
+                  <span aria-hidden>{"🧊".repeat(streakInfo.freezes)}</span>
+                  {t.freeze.label}: {streakInfo.freezes}
+                </p>
+              )}
             </div>
           </div>
 

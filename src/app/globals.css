@@ -149,3 +149,42 @@
   .answer-pop, .answer-shake, .feedback-in, .celebration-pop { animation: none; }
   .confetti-layer { display: none; }
 }
+
+/* ---- Learning path, Kuppu, sheets (Phase 1 Step 3) ---- */
+.path-node-plain { box-shadow: 0 6px 0 0 #dbe3ee; }
+.path-node-orange { box-shadow: 0 6px 0 0 #9a3412; }
+.path-node-green { box-shadow: 0 6px 0 0 #15803d; }
+.path-node-gold { box-shadow: 0 6px 0 0 #b45309; }
+.path-node:active { box-shadow: none; }
+@keyframes path-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.55); }
+  100% { box-shadow: 0 0 0 18px rgba(234, 88, 12, 0); }
+}
+.path-pulse { animation: path-pulse 1.6s ease-out infinite; }
+.path-tip::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #143867;
+}
+@keyframes kuppu-hop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes kuppu-tilt {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-8deg); }
+}
+.kuppu-hop { animation: kuppu-hop 1.8s ease-in-out infinite; }
+.kuppu-tilt { animation: kuppu-tilt 2.4s ease-in-out infinite; }
+@keyframes sheet-up {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.sheet-up { animation: sheet-up 0.25s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .path-pulse, .kuppu-hop, .kuppu-tilt, .sheet-up { animation: none; }
+}

@@ -282,5 +282,42 @@
     "write_first": "Write your question first. Any language is fine!",
     "thanks": "Saved! Thank you for sharing your thought. 🔬",
     "saved_phone": "Saved on this phone. Thank you! 🔬"
+  },
+  "path": {
+    "title": "Your science path",
+    "progress": "{done} of {total} done",
+    "start": "Start",
+    "play_again": "Play again",
+    "last_score": "Last time: {score} of {total} right",
+    "all_done": "You finished every test! 🏆",
+    "close": "Close",
+    "questions": "{count} questions",
+    "minutes": "About {mins} minutes",
+    "hero_title": "Play. Wonder. Answer.",
+    "hero_body": "Try each experiment first, then answer the questions.",
+    "level": "Level {n}",
+    "grades": "Grades {range}"
+  },
+  "kuppu": {
+    "start_here": "Start here!",
+    "explore_tip": "First play with the experiment. Move things and watch what happens. Then answer the questions!",
+    "got_it": "Got it",
+    "cheer_3": "Wow! Every answer right. You are a real scientist!",
+    "cheer_2": "Great work! You are learning fast.",
+    "cheer_1": "Good try! Every scientist learns by trying. Play again!",
+    "name": "Kuppu"
+  },
+  "freeze": {
+    "earned": "You earned a streak freeze! 🧊 It saves your streak if you miss a day.",
+    "used": "A streak freeze saved your streak! 🧊",
+    "label": "Streak freezes",
+    "covering": "Your streak freeze is protecting your streak. Do 1 test today!"
+  },
+  "install": {
+    "title": "Add Curiosity to your phone",
+    "body": "Open it in one tap, like an app.",
+    "add": "Add",
+    "ios": "Tap the Share button, then “Add to Home Screen”.",
+    "not_now": "Not now"
   }
 }

@@ -31,6 +31,11 @@
 - **Practice feedback**: each question allows one try; the first tap locks the answer, plays `playCorrect`/`playWrong` (`src/utils/webAudio.ts`) and shows the right answer plus the question's `explanation`. The end-of-test screen is `src/components/Celebration.tsx` and only shows XP the server actually awarded (`xpAwarded`).
 - **Daily goal**: 1 finished test per IST day (the same thing that keeps the streak). The dashboard ring and week dots use `hasCompletedActivityToday` and `streakWeekDots` (`src/utils/streakWeek.ts`).
 - **Read-aloud**: `src/utils/speech.ts` uses the phone's own voice (Web Speech API, no downloads). `ReadAloud`/`SpeakButton` (`src/components/ReadAloud.tsx`) wrap questions, answer explanations and the Thought prompt; every experiment hint strip has an `<ObservationSpeaker />`. English text is read with an Indian English voice; a button hides when the phone has no voice for its language.
+- **Learning path**: `/practice` with no test in the link shows `LearningPath` (`src/components/LearningPath.tsx`), a winding path over the 13 tests. Nothing is locked; the next unfinished test is highlighted and `?start=true` without a test id starts it. Stars use `starsFor` (`src/utils/learningPath.ts`). XP and streaks are still counted per test.
+- **Streak freezes**: earned every 7 streak days (max 2); each one covers a missed day. Rules are `streakAfterLesson`/`currentStreak` in `src/utils/xpRules.ts`; only `applyXP` writes `user_gamification.streak_freezes`. Needs `phase1_streak_freeze.sql`; until it is run the app works without freezes (`isMissingFreezeColumn`).
+- **Kuppu**: `src/components/KuppuGuide.tsx` (`KuppuAvatar`, `KuppuBubble`, one-time `KuppuTip`) uses `public/kuppu/face-128.webp` (4.6 KB). Never use the 846 KB `kuppu-mascot.jpg` in the UI.
+- **Install (Add to Home Screen)**: `src/components/InstallPrompt.tsx` shows on the dashboard after the first finished test (Android install button, iPhone Share steps; "Not now" snoozes 7 days). Needs `public/manifest.json` + `public/icons/*`, linked from `metadata.manifest` in `src/app/layout.tsx`.
+- Telemetry counters (reversals, slider moves) start at 0 for every test; never seed them, they become bonus XP.
 - New UI text lives in the `learn` and `thought` sections of `locales/*.json`. The 117 practice questions and the experiment labels are still English only.
 - `evaluateExperiment` in `src/app/actions/scoring.ts` is still unused, so `telemetry_logs` is never written.
 
@@ -82,4 +87,4 @@
 - **Procedural Sound**: `src/utils/webAudio.ts`
 - **Canvas Certificates**: `src/utils/certificateCanvas.ts`
 - **Database Schema & Migrations**: `supabase_migration.sql`, `auto_profile_trigger.sql`, `fix_rls_policies.sql`
-- **Unit Tests**: `tests/` (103 tests across 13 test files)
+- **Unit Tests**: `tests/` (119 tests across 14 test files)

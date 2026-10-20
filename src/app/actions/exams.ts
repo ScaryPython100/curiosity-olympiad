@@ -145,6 +145,9 @@ export async function submitMockTestAttempt(
     alreadyEarnedToday,
     newXp: award.newXp,
     streakCount: award.streakCount,
+    streakFreezes: award.streakFreezes,
+    freezesUsed: award.freezesUsed,
+    freezeEarned: award.freezeEarned,
   };
 }
 

@@ -4,19 +4,32 @@ import { Toaster } from "sonner";
 import { ThemeInitializer } from "@/components/ThemeInitializer";
 import { TabSessionGuard } from "@/components/TabSessionGuard";
 import { StreakExpiryAlert } from "@/components/StreakExpiryAlert";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import Script from "next/script";
-import type { Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import { MATERIAL_ICON_NAMES } from "@/config/iconSubset";
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  themeColor: "#143867",
 };
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Curiosity Olympiad",
   description: "Your journey to discovery begins here.",
+  // Makes the app installable ("Add to Home Screen")
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/icons/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Curiosity",
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({
@@ -102,6 +115,7 @@ export default function RootLayout({
         <ThemeInitializer />
         <LanguageProvider>
           {children}
+          <InstallPrompt />
           <Toaster position="top-center" richColors theme="system" />
         </LanguageProvider>
       </body>

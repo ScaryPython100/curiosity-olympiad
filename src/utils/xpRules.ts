@@ -4,12 +4,6 @@
  * server-only imports so both sides and the unit tests can use it.
  */
 
-// Kept import-free: Node's test runner needs ".ts" import extensions, which
-// this tsconfig doesn't allow. Same as previousIstDayKey in istTime.ts.
-function previousIstDayKey(dayKey: string): string {
-  return new Date(Date.parse(`${dayKey}T00:00:00Z`) - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-}
-
 export const XP_RULES = {
   perCorrectAnswer: 100,
   perReversal: 50,
@@ -65,22 +59,86 @@ export function computeMockTestXP(input: MockTestXPInput): MockTestXPResult {
   return { score, total, accuracyXP, telemetryBonusXP, totalXP: accuracyXP + telemetryBonusXP };
 }
 
-/**
- * Streak after finishing a lesson today.
- * Same day: unchanged. Day after the last lesson: +1. Any gap: back to 1.
- */
-export function nextStreak(previousStreak: number, lastActiveDay: string | null, today: string): number {
-  const prev = Math.max(0, previousStreak || 0);
-  if (lastActiveDay === today) return Math.max(prev, 1);
-  if (lastActiveDay && lastActiveDay === previousIstDayKey(today)) return prev + 1;
-  return 1;
+/** Most streak freezes a student can hold. */
+export const MAX_STREAK_FREEZES = 2;
+/** A freeze is earned each time the streak reaches a multiple of this. */
+export const FREEZE_EVERY_DAYS = 7;
+
+/** Whole IST days from `fromDay` to `toDay` (both "YYYY-MM-DD"). */
+export function daysBetween(fromDay: string, toDay: string): number {
+  return Math.round((Date.parse(`${toDay}T00:00:00Z`) - Date.parse(`${fromDay}T00:00:00Z`)) / (24 * 60 * 60 * 1000));
 }
 
-/** Streak to show right now: a streak is broken (0) once a whole day is missed. */
-export function currentStreak(storedStreak: number, lastActiveDay: string | null, today: string): number {
-  if (!lastActiveDay) return 0;
-  if (lastActiveDay === today || lastActiveDay === previousIstDayKey(today)) {
-    return Math.max(0, storedStreak || 0);
+export interface StreakUpdate {
+  streak: number;
+  freezes: number;
+  /** Missed days covered by freezes on this update. */
+  freezesUsed: number;
+  /** True when this update earned a new freeze. */
+  freezeEarned: boolean;
+}
+
+/**
+ * Streak after finishing a lesson today, with streak freezes.
+ * - Same day: unchanged. Next day: +1.
+ * - Missed days are covered by freezes (one freeze per missed day). If there
+ *   are not enough freezes, the streak starts again at 1 and freezes are kept.
+ * - Reaching 7, 14, 21… days earns a freeze, up to MAX_STREAK_FREEZES.
+ */
+export function streakAfterLesson(
+  previousStreak: number,
+  lastActiveDay: string | null,
+  today: string,
+  freezesHeld = 0
+): StreakUpdate {
+  const prev = Math.max(0, Math.floor(previousStreak || 0));
+  let freezes = Math.min(MAX_STREAK_FREEZES, Math.max(0, Math.floor(freezesHeld || 0)));
+  if (lastActiveDay === today) return { streak: Math.max(prev, 1), freezes, freezesUsed: 0, freezeEarned: false };
+
+  let streak = 1;
+  let freezesUsed = 0;
+  const gap = lastActiveDay ? daysBetween(lastActiveDay, today) : Infinity;
+  if (gap === 1) {
+    streak = prev + 1;
+  } else if (gap > 1 && prev > 0 && gap - 1 <= freezes) {
+    freezesUsed = gap - 1;
+    freezes -= freezesUsed;
+    streak = prev + 1;
   }
+
+  let freezeEarned = false;
+  if (streak > prev && streak % FREEZE_EVERY_DAYS === 0 && freezes < MAX_STREAK_FREEZES) {
+    freezes += 1;
+    freezeEarned = true;
+  }
+  return { streak, freezes, freezesUsed, freezeEarned };
+}
+
+/** Streak after finishing a lesson today (no freezes). */
+export function nextStreak(previousStreak: number, lastActiveDay: string | null, today: string): number {
+  return streakAfterLesson(previousStreak, lastActiveDay, today, 0).streak;
+}
+
+/**
+ * Streak to show right now. It stays alive through missed days that the
+ * student's freezes can cover (they are used up when the next lesson is done);
+ * otherwise it is broken (0) once a whole day is missed.
+ */
+export function currentStreak(
+  storedStreak: number,
+  lastActiveDay: string | null,
+  today: string,
+  freezesHeld = 0
+): number {
+  if (!lastActiveDay) return 0;
+  const missed = daysBetween(lastActiveDay, today) - 1;
+  if (missed <= Math.max(0, freezesHeld || 0)) return Math.max(0, storedStreak || 0);
   return 0;
+}
+
+/** Missed days (up to yesterday) that freezes are covering right now. */
+export function daysCoveredByFreezes(lastActiveDay: string | null, today: string, freezesHeld = 0): number {
+  if (!lastActiveDay) return 0;
+  const missed = daysBetween(lastActiveDay, today) - 1;
+  return missed > 0 && missed <= freezesHeld ? missed : 0;
 }

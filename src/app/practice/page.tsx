@@ -8,6 +8,9 @@ import { computeMockTestXP, XP_RULES } from "@/utils/xpRules";
 import { ScientistThought } from "@/components/ScientistThought";
 import { Celebration } from "@/components/Celebration";
 import { ReadAloud } from "@/components/ReadAloud";
+import { LearningPath } from "@/components/LearningPath";
+import { KuppuAvatar, KuppuTip } from "@/components/KuppuGuide";
+import { nextTestId } from "@/utils/learningPath";
 import { playCorrect, playWrong, playCelebrate } from "@/utils/webAudio";
 import { submitMockTestAttempt, getMockTestAttempts } from "@/app/actions/exams";
 import { LanguageSelector } from "@/components/LanguageSelector";
@@ -1352,6 +1355,7 @@ function PracticeContent() {
   const [celebrationStreak, setCelebrationStreak] = useState<number | null>(null);
   const [goalDoneToday, setGoalDoneToday] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
+  const [freezeNews, setFreezeNews] = useState<{ earned: boolean; used: boolean }>({ earned: false, used: false });
   const [activeTelemetry, setActiveTelemetry] = useState<any>({
     distinctStatesReached: 0,
     triggerActivated: false,
@@ -1428,9 +1432,16 @@ function PracticeContent() {
             setActiveTest(true);
           }
         }
-      } else {
+      } else if (startParam === "true") {
+        // "Start" without a test (e.g. the streak reminder): go to the next unfinished test on the path
+        let saved: Record<number, MockTestResult> = {};
+        try {
+          saved = JSON.parse(localStorage.getItem("curiosity_mock_tests_results") || "{}");
+        } catch {}
+        setSelectedMockTestId(nextTestId(MOCK_TESTS.map((m) => m.id), saved) ?? 1);
         setActiveTest(true);
       }
+      // No test in the link: show the learning path
 
       // Hydrate completed mock tests: Supabase is source of truth, localStorage is fallback/cache
       if (typeof window !== "undefined") {
@@ -1490,6 +1501,20 @@ function PracticeContent() {
       return true;
     });
   }, [selectedMockTestId, difficulty]);
+
+  // Starts a test from the path. Telemetry starts at 0: bonus XP only comes
+  // from what the student really does in the experiment.
+  const startTest = (testId: number) => {
+    setSelectedMockTestId(testId);
+    setActiveTest(true);
+    setCurrentExpIndex(0);
+    setElapsedSeconds(0);
+    setSelectedAnswers({});
+    setIsSubmitted(false);
+    setReversalsCount(0);
+    setSliderAdjustments(0);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+  };
 
   // One try per question: the first tap locks the answer and shows right/wrong straight away.
   const handleSelectOption = (qId: number, optionIdx: number) => {
@@ -1595,6 +1620,7 @@ function PracticeContent() {
     setCelebrationStreak(null);
     setGoalDoneToday(false);
     setSaveFailed(false);
+    setFreezeNews({ earned: false, used: false });
     setIsSubmitted(true);
     setShowTelemetryModal(true);
     playCelebrate();
@@ -1616,6 +1642,7 @@ function PracticeContent() {
         setServerXP(subRes.xpAwarded ?? 0);
         setCelebrationStreak(typeof subRes.streakCount === "number" ? subRes.streakCount : null);
         setGoalDoneToday(true);
+        setFreezeNews({ earned: Boolean(subRes.freezeEarned), used: (subRes.freezesUsed ?? 0) > 0 });
       }
     } catch (err) {
       console.error("Failed to persist test attempt to Supabase:", err);
@@ -1744,229 +1771,64 @@ function PracticeContent() {
           /* =========================================================
              PRE-LAUNCH: MOCK TEST SELECTOR & STATUS CARDS
              ========================================================= */
-          <div className="space-y-8 max-w-5xl mx-auto">
-            {/* Hero Banner */}
-            <div className="bg-gradient-to-r from-[#143867] via-[#1e4a85] to-[#285e9e] rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-              <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none translate-x-10 translate-y-10">
-                <span className="material-symbols-outlined text-[240px]">science</span>
-              </div>
-              <div className="relative z-10 max-w-2xl space-y-3">
-                <span className="inline-flex items-center gap-1.5 bg-[#ea580c] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  <span className="material-symbols-outlined text-xs">rocket_launch</span>
+          <div className="space-y-4 sm:space-y-6 max-w-xl mx-auto">
+            {/* Compact header: Kuppu + level switch, so the path starts on the first screen */}
+            <div className="bg-gradient-to-r from-[#143867] via-[#1e4a85] to-[#285e9e] rounded-3xl p-4 sm:p-6 text-white shadow-lg flex items-center gap-3 sm:gap-4">
+              <KuppuAvatar size={56} mood="happy" />
+              <div className="min-w-0">
+                <span className="text-[11px] font-black uppercase tracking-wider text-amber-300">
                   Agastya Science Experiments
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
-                  Interactive Science Mock Tests
-                </h2>
-                <p className="text-sm sm:text-base text-indigo-100 leading-relaxed">
-                  Play official science experiments for Optics, Gravity, and Chemistry. Exploring and trying new things will earn you extra curiosity points!
+                <h2 className="text-lg sm:text-2xl font-black leading-tight">{t.path.hero_title}</h2>
+                <p className="text-xs sm:text-sm text-indigo-100 leading-snug">
+                  {t.path.hero_body}
                 </p>
               </div>
             </div>
 
-            {/* Difficulty Tier Selector (Level 1 vs Level 2) */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-black text-[#143867]">
-                1. Choose Level
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Level 1 Card */}
-                <div
-                  onClick={() => setDifficulty("level1")}
-                  className={`cursor-pointer rounded-2xl p-5 border-2 transition-all flex items-center justify-between ${
-                    difficulty === "level1"
-                      ? "bg-white border-[#143867] shadow-md ring-4 ring-[#143867]/10"
-                      : "bg-white/70 border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <div className="space-y-1">
-                    <span className="bg-[#eef2f7] text-[#143867] text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase">
-                      Level 1: Foundation (Grades 6–8)
+            {/* Level switch */}
+            <div role="radiogroup" aria-label="Choose level" className="grid grid-cols-2 gap-2 bg-white border border-gray-200 rounded-2xl p-1.5 shadow-2xs">
+              {(["level1", "level2"] as const).map((lvl) => {
+                const on = difficulty === lvl;
+                return (
+                  <button
+                    key={lvl}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    onClick={() => setDifficulty(lvl)}
+                    className={`min-h-[52px] rounded-xl px-2 py-2 text-center transition-colors ${
+                      on
+                        ? lvl === "level1"
+                          ? "bg-[#143867] text-white shadow-sm"
+                          : "bg-[#ea580c] text-white shadow-sm"
+                        : "text-[#143867] hover:bg-gray-50"
+                    }`}
+                  >
+                    <span className="block text-sm font-black">{t.path.level.replace("{n}", lvl === "level1" ? "1" : "2")}</span>
+                    <span className={`block text-[11px] font-bold ${on ? "text-white/85" : "text-gray-500"}`}>
+                      {t.path.grades.replace("{range}", lvl === "level1" ? "6–8" : "9–10")}
                     </span>
-                    <h4 className="text-base font-black text-[#143867]">
-                      Science for Beginners
-                    </h4>
-                    <p className="text-xs text-gray-500">
-                      Ideal Completion Pace: 5 Mins • Relatable Daily Life Science
-                    </p>
-                  </div>
-                  {difficulty === "level1" && (
-                    <span className="material-symbols-outlined text-[#143867] text-2xl">
-                      check_circle
-                    </span>
-                  )}
-                </div>
-
-                {/* Level 2 Card */}
-                <div
-                  onClick={() => setDifficulty("level2")}
-                  className={`cursor-pointer rounded-2xl p-5 border-2 transition-all flex items-center justify-between ${
-                    difficulty === "level2"
-                      ? "bg-white border-[#ea580c] shadow-md ring-4 ring-[#ea580c]/10"
-                      : "bg-white/70 border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <div className="space-y-1">
-                    <span className="bg-[#fff7ed] text-[#ea580c] text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase">
-                      Level 2: Advanced (Grades 9–10)
-                    </span>
-                    <h4 className="text-base font-black text-[#143867]">
-                      Science for Experts
-                    </h4>
-                    <p className="text-xs text-gray-500">
-                      Ideal Completion Pace: 10 Mins • Fun Science Challenges
-                    </p>
-                  </div>
-                  {difficulty === "level2" && (
-                    <span className="material-symbols-outlined text-[#ea580c] text-2xl">
-                      check_circle
-                    </span>
-                  )}
-                </div>
-              </div>
+                  </button>
+                );
+              })}
             </div>
 
-            {/* MOCK TESTS LIST (3 Distinct Mock Tests) */}
-            <div className="space-y-4 pt-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-black text-[#143867]">
-                    2. Select Science Experiment ({MOCK_TESTS.length} Available)
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    Play experiments and earn Curiosity Points every time!
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-5">
-                {MOCK_TESTS.map((test, index) => {
-                  const result = completedMockTests[test.id];
-                  const isCompleted = Boolean(result?.completed);
-                  const isSelected = selectedMockTestId === test.id;
-                  const isLocked = false; // All experiments unlocked for practice
-
-                  return (
-                    <div
-                      key={test.id}
-                      onClick={() => !isLocked && setSelectedMockTestId(test.id)}
-                      className={`rounded-3xl p-6 border-2 transition-all relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 ${
-                        isLocked 
-                          ? "opacity-50 cursor-not-allowed bg-gray-50 border-gray-200" 
-                          : isSelected
-                            ? "cursor-pointer border-[#143867] shadow-xl ring-4 ring-[#143867]/10 bg-white"
-                            : "cursor-pointer border-gray-200 hover:border-gray-300 shadow-sm bg-white"
-                      }`}
-                    >
-                      <div className="flex items-start gap-4 max-w-2xl">
-                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-md bg-gradient-to-br ${isLocked ? 'from-gray-400 to-gray-500' : test.color}`}>
-                          <span className="material-symbols-outlined text-2xl">
-                            {isLocked ? 'lock' : test.icon}
-                          </span>
-                        </div>
-                        <div className="space-y-1.5">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-0.5 rounded-full bg-gray-100 text-gray-700">
-                              {test.badge}
-                            </span>
-
-                            {/* Status Pill: Completed vs Pending vs Locked */}
-                            {isLocked ? (
-                              <span className="inline-flex items-center gap-1 bg-gray-200 text-gray-700 text-xs font-bold px-3 py-0.5 rounded-full border border-gray-300">
-                                <span className="material-symbols-outlined text-sm">lock</span>
-                                Locked (Finish previous level)
-                              </span>
-                            ) : isCompleted ? (
-                              <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 text-xs font-black px-3 py-0.5 rounded-full border border-green-300">
-                                <span className="material-symbols-outlined text-sm">check_circle</span>
-                                Completed ({result.score}/{result.total} • {result.percentage}%)
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-900 text-xs font-bold px-3 py-0.5 rounded-full border border-amber-300">
-                                <span className="material-symbols-outlined text-sm">schedule</span>
-                                Pending (Ready for Attempt)
-                              </span>
-                            )}
-                          </div>
-
-                          <h4 className="text-xl font-black text-[#143867]">
-                            {test.title}
-                          </h4>
-                          <p className="text-xs text-gray-600 leading-relaxed">
-                            {test.description}
-                          </p>
-
-                          {/* Completed Details Sub-banner */}
-                          {isCompleted && result && (
-                            <div className="pt-2 flex flex-wrap items-center gap-4 text-xs font-bold text-gray-600">
-                              <span className="text-green-700 flex items-center gap-1">
-                                <span className="material-symbols-outlined text-sm">stars</span>
-                                Total XP Earned: +{result.totalXP} XP
-                              </span>
-                              <span>•</span>
-                              <span>Bonus Points: +{result.telemetryBonusXP} XP</span>
-                              <span>•</span>
-                              <span>Time Taken: {formatTime(result.timeSecs)}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="w-full md:w-auto flex flex-col items-stretch md:items-end gap-3 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-gray-100">
-                        <div className="text-xs font-bold text-gray-500 text-left md:text-right">
-                          <span>Ideal Pace: {test.idealTime[difficulty]}</span>
-                          <span className="block text-[11px] text-gray-400">9 Experiential MCQs</span>
-                        </div>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedMockTestId(test.id);
-                            setActiveTest(true);
-                            setCurrentExpIndex(0);
-                            setElapsedSeconds(0);
-                            setSelectedAnswers({});
-                            setIsSubmitted(false);
-                            setReversalsCount(Math.floor(Math.random() * 3) + 2);
-                            setSliderAdjustments(Math.floor(Math.random() * 4) + 3);
-                          }}
-                          className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2 ${
-                            isCompleted
-                              ? "bg-gray-100 hover:bg-gray-200 text-[#143867] border border-gray-300"
-                              : "bg-[#143867] hover:bg-[#1e4a85] text-white"
-                          }`}
-                        >
-                          <span className="material-symbols-outlined text-base">
-                            {isCompleted ? "refresh" : "play_circle"}
-                          </span>
-                          <span>{isCompleted ? `Play Experiment ${test.id} Again` : `Start Experiment ${test.id}`}</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Launch Banner CTA */}
-            <div className="pt-4 text-center">
-              <button
-                data-testid="launch-mock-test-btn"
-                onClick={() => {
-                  setActiveTest(true);
-                  setCurrentExpIndex(0);
-                  setElapsedSeconds(0);
-                  setSelectedAnswers({});
-                  setIsSubmitted(false);
-                  setReversalsCount(Math.floor(Math.random() * 3) + 2);
-                  setSliderAdjustments(Math.floor(Math.random() * 4) + 3);
-                }}
-                className="w-full sm:w-auto px-10 py-4 bg-[#143867] hover:bg-[#1e4a85] text-white font-black text-base uppercase tracking-wider rounded-2xl shadow-xl active:scale-[0.98] transition-all inline-flex items-center justify-center gap-3"
-              >
-                <span className="material-symbols-outlined">rocket_launch</span>
-                <span>Launch Selected {activeMockTest.title.split(":")[0]} ({difficulty === "level1" ? "Level 1" : "Level 2"})</span>
-              </button>
-            </div>
+            {/* LEARNING PATH: every test is open; the next one is highlighted */}
+            <LearningPath
+              tests={MOCK_TESTS.map((test) => ({
+                id: test.id,
+                title: test.title,
+                description: test.description,
+                icon: test.icon,
+                idealMinutes: Math.round(test.idealSeconds[difficulty] / 60),
+                questionCount: PRACTICE_QUESTIONS.filter(
+                  (q) => q.mockTestId === test.id && !(difficulty === "level1" && q.level === "level2")
+                ).length,
+              }))}
+              results={completedMockTests}
+              onStart={startTest}
+            />
           </div>
         ) : (
           /* =========================================================
@@ -2013,6 +1875,8 @@ function PracticeContent() {
                 }}
                 streakCount={celebrationStreak}
                 goalDone={goalDoneToday}
+                freezeEarned={freezeNews.earned}
+                freezeUsed={freezeNews.used}
                 onSeeAnswers={() => setShowTelemetryModal(false)}
                 onAllTests={() => {
                   setShowTelemetryModal(false);
@@ -2038,10 +1902,13 @@ function PracticeContent() {
               <div className="flex items-center gap-1.5 bg-[#fff7ed] border border-[#ffedd5] px-2.5 py-1 rounded-full">
                 <span className="w-2 h-2 rounded-full bg-[#ea580c]" />
                 <span className="text-[11px] sm:text-xs font-bold text-[#ea580c]">
-                  {activeMockTest.module} ({mockTestQuestions.length} Qs)
+                  {activeMockTest.title.split(":").slice(1).join(":").trim() || activeMockTest.module} ({mockTestQuestions.length} Qs)
                 </span>
               </div>
             </div>
+
+            {/* Kuppu's one-time tip: explore first, answer after */}
+            <KuppuTip storageKey="kuppu_tip_explore_v1" text={t.kuppu.explore_tip} />
 
             {/* LIVE EXPERIENTIAL SANDBOX ENGINE */}
             <div className="bg-white p-3.5 sm:p-6 rounded-3xl border border-gray-200 shadow-sm space-y-4 overflow-hidden">
@@ -2226,12 +2093,17 @@ function PracticeContent() {
                           }`}
                           role="status"
                         >
-                          <p className={`font-black ${isCorrect ? "text-green-800" : "text-amber-900"}`}>
+                          <p className={`font-black flex items-center gap-2 ${isCorrect ? "text-green-800" : "text-amber-900"}`}>
+                            {selectedIdx !== undefined && (
+                              <KuppuAvatar size={30} mood={isCorrect ? "happy" : "think"} />
+                            )}
+                            <span>
                             {selectedIdx === undefined
                               ? t.learn.right_answer.replace("{letter}", String.fromCharCode(65 + q.correct))
                               : isCorrect
                               ? `🎉 ${t.learn.cheer_correct}`
                               : `💪 ${t.learn.cheer_wrong} ${t.learn.right_answer.replace("{letter}", String.fromCharCode(65 + q.correct))}`}
+                            </span>
                           </p>
                           <ReadAloud
                             text={`The right answer is ${String.fromCharCode(65 + q.correct)}. ${q.options[q.correct]}. ${q.explanation}`}
@@ -2327,6 +2199,8 @@ function PracticeContent() {
                       setIsSubmitted(false);
                       setSelectedAnswers({});
                       setElapsedSeconds(0);
+                      setReversalsCount(0);
+                      setSliderAdjustments(0);
                     }}
                     className="px-8 py-3.5 rounded-xl bg-[#143867] hover:bg-[#1e4a85] text-white font-black text-sm uppercase tracking-wider shadow-lg active:scale-95 transition-all flex items-center gap-2"
                   >

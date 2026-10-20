@@ -47,8 +47,10 @@ export function StreakExpiryAlert() {
         const count = res.data.streakCount || (parseInt(res.data.streak?.split(" ")[0]) || 0);
         const hasCompleted = res.data.hasCompletedActivityToday;
 
-        // If user has an active streak and has NOT completed an activity today
-        if (count >= 1 && !hasCompleted) {
+        // Warn only when the streak would really reset tonight: an active streak,
+        // no test today, and no streak freeze left to cover the missed day.
+        const freezes = res.data.streakFreezes ?? 0;
+        if (count >= 1 && !hasCompleted && freezes === 0) {
           setStreakCount(count);
           setShowAlert(true);
         }

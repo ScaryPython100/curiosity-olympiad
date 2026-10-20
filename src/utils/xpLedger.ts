@@ -1,7 +1,28 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { istDayKey, istStartOfDay, istStartOfWeek } from "@/utils/istTime";
-import { nextStreak } from "@/utils/xpRules";
+import { streakAfterLesson } from "@/utils/xpRules";
+
+const BASE_COLUMNS =
+  "xp, curiosity_points, daily_xp, weekly_xp, last_daily_reset, last_weekly_reset, last_claimed_date, streak_days, last_login_date";
+
+interface GamificationRow {
+  xp: number | null;
+  curiosity_points: number | null;
+  daily_xp: number | null;
+  weekly_xp: number | null;
+  last_daily_reset: string | null;
+  last_weekly_reset: string | null;
+  last_claimed_date: string | null;
+  streak_days: number | null;
+  last_login_date: string | null;
+  streak_freezes?: number | null;
+}
+
+/** True for "column does not exist" errors, i.e. phase1_streak_freeze.sql has not been run yet. */
+export function isMissingFreezeColumn(error: { code?: string; message?: string } | null) {
+  return Boolean(error && (error.code === "42703" || /streak_freezes/.test(error.message || "")));
+}
 
 /**
  * Single place where XP, daily/weekly XP and streaks are written.
@@ -18,19 +39,32 @@ export async function applyXP(
   amount: number,
   opts: { countsForStreak?: boolean; dailyClaim?: boolean } = {}
 ): Promise<
-  | { success: true; newXp: number; newPoints: number; streakCount: number }
+  | {
+      success: true;
+      newXp: number;
+      newPoints: number;
+      streakCount: number;
+      streakFreezes: number;
+      freezesUsed: number;
+      freezeEarned: boolean;
+    }
   | { success?: false; error: string }
 > {
   const db = createAdminClient() ?? userClient;
   const safeAmount = Math.max(0, Math.floor(amount) || 0);
 
-  const { data: row, error: fetchError } = await db
+  // Streak freezes need phase1_streak_freeze.sql; until it is run, everything else still works.
+  let hasFreezeColumn = true;
+  let fetched = await db
     .from("user_gamification")
-    .select(
-      "xp, curiosity_points, daily_xp, weekly_xp, last_daily_reset, last_weekly_reset, last_claimed_date, streak_days, last_login_date"
-    )
+    .select(`${BASE_COLUMNS}, streak_freezes`)
     .eq("user_id", userId)
     .maybeSingle();
+  if (isMissingFreezeColumn(fetched.error)) {
+    hasFreezeColumn = false;
+    fetched = await db.from("user_gamification").select(BASE_COLUMNS).eq("user_id", userId).maybeSingle();
+  }
+  const { data: row, error: fetchError } = fetched as { data: GamificationRow | null; error: { message: string } | null };
 
   if (fetchError) return { error: fetchError.message };
 
@@ -54,7 +88,11 @@ export async function applyXP(
 
   const storedStreak = row?.streak_days ?? 0;
   const lastActiveDay: string | null = row?.last_login_date ?? null;
-  const streakCount = opts.countsForStreak ? nextStreak(storedStreak, lastActiveDay, today) : storedStreak;
+  const heldFreezes = hasFreezeColumn ? row?.streak_freezes ?? 0 : 0;
+  const update = opts.countsForStreak
+    ? streakAfterLesson(storedStreak, lastActiveDay, today, heldFreezes)
+    : { streak: storedStreak, freezes: heldFreezes, freezesUsed: 0, freezeEarned: false };
+  const streakCount = update.streak;
 
   const fields: Record<string, unknown> = {
     xp: newXp,
@@ -67,6 +105,7 @@ export async function applyXP(
   if (opts.countsForStreak) {
     fields.streak_days = streakCount;
     fields.last_login_date = today;
+    if (hasFreezeColumn) fields.streak_freezes = update.freezes;
   }
   if (opts.dailyClaim) {
     fields.last_claimed_date = nowIso;
@@ -88,5 +127,13 @@ export async function applyXP(
     }
   }
 
-  return { success: true, newXp, newPoints, streakCount };
+  return {
+    success: true,
+    newXp,
+    newPoints,
+    streakCount,
+    streakFreezes: update.freezes,
+    freezesUsed: hasFreezeColumn ? update.freezesUsed : 0,
+    freezeEarned: hasFreezeColumn && update.freezeEarned,
+  };
 }
