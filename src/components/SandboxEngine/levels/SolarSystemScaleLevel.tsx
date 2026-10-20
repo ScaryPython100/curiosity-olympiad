@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useAnomalySignal } from '../useAnomalySignal';
+import { ObservationSpeaker } from "@/components/ReadAloud";
 
 // ==========================================
 // EXPERIMENT 1: CRICKET BALL SUN & MUSTARD SEED EARTH (SIZE SCALE)
@@ -163,7 +164,8 @@ function SizeScale({ recordAction }: { recordAction: (actionType: string, action
       </div>
 
       {/* Observation Banner */}
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {selectedPlanet.name === "Earth"
             ? "Aha! If the Sun is a 10 cm cricket ball, Earth is just a tiny 0.9 mm mustard seed (rai)!"
@@ -337,7 +339,8 @@ function DistanceScale({ recordAction }: { recordAction: (actionType: string, ac
       </div>
 
       {/* Observation Banner */}
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {fieldPace <= 16
             ? "🪐 Mercury, Venus, Earth and Mars are all inside the first 16 metres!"
@@ -486,7 +489,8 @@ function OrbitSpeedway({ recordAction }: { recordAction: (actionType: string, ac
       </div>
 
       {/* Observation Banner */}
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {raceDays >= 365
             ? "🎉 One Earth year done! Mercury went round 4 times, Neptune barely moved!"

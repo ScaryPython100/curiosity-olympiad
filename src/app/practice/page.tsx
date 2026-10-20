@@ -7,6 +7,7 @@ import SandboxEngine, { EXPERIMENT_LABELS } from "@/components/SandboxEngine";
 import { computeMockTestXP, XP_RULES } from "@/utils/xpRules";
 import { ScientistThought } from "@/components/ScientistThought";
 import { Celebration } from "@/components/Celebration";
+import { ReadAloud } from "@/components/ReadAloud";
 import { playCorrect, playWrong, playCelebrate } from "@/utils/webAudio";
 import { submitMockTestAttempt, getMockTestAttempts } from "@/app/actions/exams";
 import { LanguageSelector } from "@/components/LanguageSelector";
@@ -2157,10 +2158,14 @@ function PracticeContent() {
                         )}
                       </div>
 
-                      {/* Question Text */}
-                      <p className="text-sm sm:text-base font-bold text-[#143867] leading-relaxed">
-                        {q.question}
-                      </p>
+                      {/* Question Text (speaker reads the question and its options) */}
+                      <ReadAloud
+                        text={`${q.question} ${q.options.map((o, i) => `${String.fromCharCode(65 + i)}. ${o}`).join(" ")}`}
+                      >
+                        <p className="text-sm sm:text-base font-bold text-[#143867] leading-relaxed px-1">
+                          {q.question}
+                        </p>
+                      </ReadAloud>
 
                       {/* Options with Letter Badges and Tactile Press */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
@@ -2228,10 +2233,14 @@ function PracticeContent() {
                               ? `🎉 ${t.learn.cheer_correct}`
                               : `💪 ${t.learn.cheer_wrong} ${t.learn.right_answer.replace("{letter}", String.fromCharCode(65 + q.correct))}`}
                           </p>
-                          <p className="text-gray-700 leading-relaxed text-xs sm:text-sm">
-                            <span className="font-bold text-[#143867]">{t.learn.why} </span>
-                            {q.explanation}
-                          </p>
+                          <ReadAloud
+                            text={`The right answer is ${String.fromCharCode(65 + q.correct)}. ${q.options[q.correct]}. ${q.explanation}`}
+                          >
+                            <p className="text-gray-700 leading-relaxed text-xs sm:text-sm px-1">
+                              <span className="font-bold text-[#143867]">{t.learn.why} </span>
+                              {q.explanation}
+                            </p>
+                          </ReadAloud>
                         </div>
                       )}
                     </div>

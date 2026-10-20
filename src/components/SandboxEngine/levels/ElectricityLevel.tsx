@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
+import { ObservationSpeaker } from "@/components/ReadAloud";
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -120,7 +121,9 @@ function CombHair({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-yellow-300 block">
           {isAnomaly && testing ? "🤔 Why didn't the paper jump up?" : testing ? `📄 The comb lifted ${bitsPickedUp} pieces!` : "Rub the comb on the hair, then TEST"}
         </span>
@@ -219,7 +222,9 @@ function TorchCircuit({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-yellow-300 block">
           {isAnomaly ? "🤔 Still dark, even with 2 batteries!" : isLit ? "💡 The torch is ON!" : "🌑 The torch is OFF"}
         </span>
@@ -322,7 +327,9 @@ function MagnetTest({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-fuchsia-300 block">
           {isAnomaly ? "🤔 The coin is metal, but it did not stick!" : isAttracted ? "🧲 The iron nail stuck!" : "Which things does a magnet pull?"}
         </span>

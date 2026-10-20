@@ -30,6 +30,7 @@
 - **Anomalies**: each experiment reports its built-in surprise with `useAnomalySignal(condition, recordAction)` (`src/components/SandboxEngine/useAnomalySignal.ts`); this switches the thought prompt to the "after anomaly" wording.
 - **Practice feedback**: each question allows one try; the first tap locks the answer, plays `playCorrect`/`playWrong` (`src/utils/webAudio.ts`) and shows the right answer plus the question's `explanation`. The end-of-test screen is `src/components/Celebration.tsx` and only shows XP the server actually awarded (`xpAwarded`).
 - **Daily goal**: 1 finished test per IST day (the same thing that keeps the streak). The dashboard ring and week dots use `hasCompletedActivityToday` and `streakWeekDots` (`src/utils/streakWeek.ts`).
+- **Read-aloud**: `src/utils/speech.ts` uses the phone's own voice (Web Speech API, no downloads). `ReadAloud`/`SpeakButton` (`src/components/ReadAloud.tsx`) wrap questions, answer explanations and the Thought prompt; every experiment hint strip has an `<ObservationSpeaker />`. English text is read with an Indian English voice; a button hides when the phone has no voice for its language.
 - New UI text lives in the `learn` and `thought` sections of `locales/*.json`. The 117 practice questions and the experiment labels are still English only.
 - `evaluateExperiment` in `src/app/actions/scoring.ts` is still unused, so `telemetry_logs` is never written.
 
@@ -81,4 +82,4 @@
 - **Procedural Sound**: `src/utils/webAudio.ts`
 - **Canvas Certificates**: `src/utils/certificateCanvas.ts`
 - **Database Schema & Migrations**: `supabase_migration.sql`, `auto_profile_trigger.sql`, `fix_rls_policies.sql`
-- **Unit Tests**: `tests/` (97 tests across 13 test files)
+- **Unit Tests**: `tests/` (103 tests across 13 test files)

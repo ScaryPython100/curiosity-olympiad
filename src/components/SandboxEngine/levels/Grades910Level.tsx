@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
+import { ObservationSpeaker } from "@/components/ReadAloud";
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -113,7 +114,9 @@ function SoilRain({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {flooded ? "🌊 Clay holds too much water!" : soil === "Sandy" ? "🏜️ Sand lets the water run away" : "🌱 Just right for sowing"}
         </span>
@@ -220,7 +223,9 @@ function SolarCooker({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-yellow-300 block">
           {isAnomaly ? "🤔 The noon angle does not work now!" : focused ? "🍲 Cooking hot!" : "Point the mirror at the sun"}
         </span>
@@ -321,7 +326,9 @@ function BiogasPlant({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-cyan-300 block">
           {isAnomaly ? "🤔 More dung, but almost no extra gas!" : isWinter ? "❄️ Cold tank: very little gas" : "🔥 Warm tank: lots of gas"}
         </span>

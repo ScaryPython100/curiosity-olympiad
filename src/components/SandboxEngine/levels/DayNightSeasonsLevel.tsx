@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useAnomalySignal } from '../useAnomalySignal';
+import { ObservationSpeaker } from "@/components/ReadAloud";
 
 // ==========================================
 // EXPERIMENT 1: THE FLASHLIGHT & SPINNING GLOBE (DAY & NIGHT)
@@ -95,7 +96,9 @@ function SpinningGlobe({ recordAction }: { recordAction: (actionType: string, ac
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {hour === 12
             ? "☀️ Noon in India, and night in New York!"
@@ -304,7 +307,8 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
       </div>
 
       {/* Observation Banner */}
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {tiltDeg === 0
             ? "🤯 No tilt: no summer and no winter anywhere!"
@@ -440,7 +444,8 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
       </div>
 
       {/* Observation Banner */}
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {timeHour === 12
             ? `☀️ Noon: the shortest shadow (${shadowLength} cm)!`

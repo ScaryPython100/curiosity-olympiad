@@ -54,3 +54,37 @@ test('Phase 1 text exists in all 9 languages', () => {
 test('answer sounds are safe without a browser', () => {
   assert.doesNotThrow(() => { playCorrect(); playWrong(); playCelebrate(); });
 });
+
+import { pickVoice, speechChunks, speak, canSpeak } from '../src/utils/speech.ts';
+
+test('read-aloud voice choice', async (t) => {
+  const voices = [
+    { lang: 'en-US', name: 'US', localService: true },
+    { lang: 'en-IN', name: 'India online', localService: false },
+    { lang: 'en_IN', name: 'India offline', localService: true },
+    { lang: 'hi-IN', name: 'Hindi', localService: false },
+  ];
+  await t.test('English prefers an Indian voice stored on the phone', () => {
+    assert.equal(pickVoice(voices, 'en').name, 'India offline');
+  });
+  await t.test('uses any voice of the language when the India locale is missing', () => {
+    assert.equal(pickVoice([{ lang: 'te', name: 'Telugu' }], 'te').name, 'Telugu');
+  });
+  await t.test('returns null when the phone has no voice for the language', () => {
+    assert.equal(pickVoice(voices, 'kn'), null);
+  });
+});
+
+test('read-aloud text pieces', () => {
+  const long = 'Light bends when it leaves the water. ' + 'word '.repeat(80) + 'end.';
+  const chunks = speechChunks(long);
+  assert.ok(chunks.length >= 3);
+  assert.ok(chunks.every((c) => c.length <= 180), 'no piece is too long');
+  assert.equal(chunks.join(' ').replace(/\s+/g, ' '), long.replace(/\s+/g, ' ').trim(), 'no words are lost');
+  assert.deepEqual(speechChunks('Hi! Ok.'), ['Hi! Ok.']);
+});
+
+test('read-aloud is safe without a browser', () => {
+  assert.equal(canSpeak('en'), false);
+  assert.equal(speak('x', 'hello', 'en'), false);
+});

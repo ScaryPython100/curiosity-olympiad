@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
 import { playHeartbeat } from '@/utils/webAudio';
+import { ObservationSpeaker } from "@/components/ReadAloud";
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -135,7 +136,9 @@ function PulseHeartbeat({ recordAction }: { recordAction: RecordAction }) {
         <style>{`@keyframes heart-beat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.25); } 30% { transform: scale(1); } 45% { transform: scale(1.15); } }`}</style>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-rose-300 block">
           {isAnomaly ? "🏃 Running: your heart beats more than twice as fast!" : `${bpmMap[activity].label}: ${bpm} beats a minute`}
         </span>
@@ -210,7 +213,9 @@ function DiaphragmBalloonLungs({ recordAction }: { recordAction: RecordAction })
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-sky-300 block">
           {isAnomaly ? "🫁 Pulled all the way down: big breath in!" : isInhaling ? "🫁 Breathing in" : isExhaling ? "💨 Breathing out" : "Pull the sheet down and watch the lungs"}
         </span>
@@ -285,7 +290,9 @@ function PupilReflex({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {isAnomaly ? "👁️ Bright light: the pupil became tiny!" : isDilated ? "🌑 In the dark, the pupil opens wide" : "Make the torch brighter and watch the black circle"}
         </span>

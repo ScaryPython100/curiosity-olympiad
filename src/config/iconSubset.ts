@@ -25,7 +25,7 @@ export const MATERIAL_ICON_NAMES = [
   "privacy_tip", "psychiatry", "psychology", "psychology_alt", "public", "quiz", "radar",
   "record_voice_over", "refresh", "remove", "replay", "rocket_launch", "save", "schedule",
   "school", "science", "score", "search", "send", "sentiment_very_satisfied", "settings", "share",
-  "shield", "sms", "soap", "stairs", "star", "stars", "start", "storage", "swap_horiz", "tab",
+  "shield", "sms", "soap", "stairs", "star", "stars", "start", "stop_circle", "storage", "swap_horiz", "tab",
   "target", "timer", "tips_and_updates", "today", "translate", "travel_explore", "tune", "tv",
   "upload_file", "verified", "verified_user", "view_in_ar", "visibility", "volume_off",
   "volume_up", "warning", "water_drop", "wb_sunny", "workspace_premium",

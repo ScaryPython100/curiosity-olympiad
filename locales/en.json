@@ -268,7 +268,9 @@
     "xp_right_answers": "Right answers",
     "xp_trying": "Trying things in the lab",
     "xp_on_time": "Finished on time",
-    "not_saved": "Not saved. Check your internet and try again."
+    "not_saved": "Not saved. Check your internet and try again.",
+    "listen": "Listen",
+    "stop": "Stop"
   },
   "thought": {
     "title": "Quick Scientist's Thought",

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
+import { ObservationSpeaker } from "@/components/ReadAloud";
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -121,7 +122,9 @@ function MatkaSunShade({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-teal-300 block">
           {isAnomaly ? "🤯 Colder in the hot sun?!" : `${container} in the ${placement.toLowerCase()}: ${temp}°C`}
         </span>
@@ -222,7 +225,9 @@ function KiteString({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-sky-300 block">
           {isAnomaly ? "😱 The kite dived down!" : tooLittleLift ? "🪁 The kite can't stay up" : "🪁 The kite is flying!"}
         </span>
@@ -339,7 +344,9 @@ function ChapatiPuff({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {isAnomaly ? "😕 Too thin on low heat: no puff!" : puffAmount > 50 ? "🎈 The chapati puffed up!" : "Watch the chapati…"}
         </span>

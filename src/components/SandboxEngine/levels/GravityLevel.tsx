@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
+import { ObservationSpeaker } from "@/components/ReadAloud";
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -131,7 +132,8 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
       </div>
 
       {/* Dedicated Bottom Observation Strip */}
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-sky-300 block">
           {isAnomaly ? "🤔 Why is there no breeze?" : breezeReachesChild ? "💨 The breeze reaches you!" : "Can the air reach the child?"}
         </span>
@@ -172,6 +174,8 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
   const PX_PER_M = (330 - X0) / 110;
   const boundaryX = X0 + BOUNDARY_M * PX_PER_M;
 
+  // A flat (0°) hit never leaves the ground; it only rolls a short way.
+  const rollM = flight && flight.angle === 0 ? Math.min(40, flight.power * 0.4) : 0;
   let pathD = "";
   if (flight) {
     const v = flight.power;
@@ -187,7 +191,7 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
     }
     if (flight.angle === 0) {
       // Ground shot: rolls along the grass
-      pathD = `M ${X0} ${GROUND_Y - 4} L ${X0 + Math.min(40, v * 0.4) * PX_PER_M} ${GROUND_Y - 4}`;
+      pathD = `M ${X0} ${GROUND_Y - 4} L ${X0 + rollM * PX_PER_M} ${GROUND_Y - 4}`;
     } else {
       pathD = `M ${pts.join(" L ")}`;
     }
@@ -226,7 +230,7 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-gradient-to-b from-sky-400 to-sky-200 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`Ball travelled ${Math.round(distance)} metres`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`Ball travelled ${Math.round(rollM || distance)} metres`}>
           {/* Ground with distance marks */}
           <rect x="0" y={GROUND_Y} width="340" height={220 - GROUND_Y} fill="#16a34a" />
           {[20, 40, 60, 80, 100].map((m) => (
@@ -267,14 +271,21 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
       </div>
 
       {/* Dedicated Bottom Observation Strip */}
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-gray-100 block">
-          {flight ? (isSix ? `🎉 SIX! The ball flew ${Math.round(distance)} m` : `The ball flew ${Math.round(distance)} m`) : "Press HIT! to bat"}
+          {!flight
+            ? "Press HIT! to bat"
+            : flight.angle === 0
+              ? `The ball rolled ${Math.round(rollM)} m on the ground. It did not fly.`
+              : isSix
+                ? `🎉 SIX! The ball flew ${Math.round(distance)} m`
+                : `The ball flew ${Math.round(distance)} m`}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {flight && hitPower === 100 && batAngle === 0
-            ? "Full power, but hit flat on the ground! Without an angle, the ball cannot fly."
-            : flight && batAngle === 90
+          {flight && flight.angle === 0
+            ? "Hit flat, the ball only rolls. Without an angle, it cannot fly up into the air."
+            : flight && flight.angle === 90
               ? "Straight up! Gravity pulls it back down right where it started."
               : "Gravity always pulls the ball back down. Change power and angle to hit further."}
         </p>
@@ -415,7 +426,8 @@ function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
       </div>
 
       {/* Dedicated Bottom Observation Strip */}
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-purple-300 block">
           {landedTimes
             ? isVacuum ? "🤯 Both landed at the same time!" : "🪨 The stone landed first"

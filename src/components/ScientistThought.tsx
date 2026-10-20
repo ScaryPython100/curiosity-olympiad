@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { submitInquiryResponse } from "@/app/actions/inquiry";
 import { INQUIRY_PROMPTS, choosePromptType } from "@/config/inquiryMatrix";
 import { useLanguage } from "@/context/LanguageContext";
+import { ReadAloud } from "@/components/ReadAloud";
 
 /**
  * "Quick Scientist's Thought": the open-inquiry prompt from the Agastya
@@ -91,11 +92,13 @@ export function ScientistThought({
     <div className="bg-amber-50/70 border-2 border-amber-200/80 rounded-2xl p-4 sm:p-5 space-y-3">
       <div className="flex items-start gap-2.5">
         <span className="text-2xl shrink-0" aria-hidden>💡</span>
-        <div>
+        <div className="flex-1 min-w-0">
           <h4 className="text-sm font-black text-amber-950">{t.thought.title}</h4>
-          <p className="text-sm text-amber-950 mt-1 leading-snug" id="scientist-thought-prompt">
-            {promptText}
-          </p>
+          <ReadAloud text={promptText} className="mt-1">
+            <p className="text-sm text-amber-950 leading-snug" id="scientist-thought-prompt">
+              {promptText}
+            </p>
+          </ReadAloud>
           <p className="text-xs text-amber-800/80 mt-1">{t.thought.any_language}</p>
         </div>
       </div>

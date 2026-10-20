@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
 import { playMatkaTap, playStringTelephone, playShoutWithEcho } from '@/utils/webAudio';
+import { ObservationSpeaker } from "@/components/ReadAloud";
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -99,7 +100,9 @@ function MatkaPitch({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-sky-300 block">
           {isAnomaly ? "🤯 More water makes a HIGHER sound!" : `🎵 ${pitchWord} sound (${pitch} Hz)`}
         </span>
@@ -236,7 +239,9 @@ function StringTelephone({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-red-300 block">
           {isAnomaly && talking ? "🤯 One pinch stopped the sound!" : soundPasses && talking ? "📞 The sound travelled along the string!" : "Press SPEAK"}
         </span>
@@ -397,7 +402,9 @@ function Echoes({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-emerald-300 block">
           {!isWell ? "🌾 No echo in an open field" : depth < 30 ? "Shallow well: the echo mixes with your shout" : `🕳️ Deep well (${depth} m): a clear echo!`}
         </span>

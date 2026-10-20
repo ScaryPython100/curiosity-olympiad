@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
+import { ObservationSpeaker } from "@/components/ReadAloud";
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -81,7 +82,9 @@ function OxygenBubbles({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-emerald-300 block">
           {isAnomaly ? "🌿 Lamp very close: lots of bubbles!" : `🫧 ${bubbleRate} bubbles a minute`}
         </span>
@@ -175,7 +178,9 @@ function LeafTranspiration({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-sky-300 block">
           {isAnomaly ? "💧 The bag is full of water drops!" : isSun ? "☀️ Drops are forming in the bag" : "🌳 Only a few drops in the shade"}
         </span>
@@ -249,7 +254,9 @@ function Phototropism({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {isAnomaly ? `🌱 The stem bent towards the light!` : "🌱 Light from the top: the stem grows straight up"}
         </span>

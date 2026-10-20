@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
+import { ObservationSpeaker } from "@/components/ReadAloud";
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -121,7 +122,9 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-orange-300 block">
           {steelHot ? "😣 Ouch! The steel handle is too hot!" : stoveHeat === 0 ? "Turn on the stove" : "Heating the dal…"}
         </span>
@@ -237,7 +240,9 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-teal-300 block">
           {isAnomaly ? "🤔 The matka is not cooling!" : isClay ? `🏺 Matka water: ${Math.round(potTemp)}°C` : `🥘 Metal pot water: ${Math.round(potTemp)}°C`}
         </span>
@@ -378,7 +383,9 @@ function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {!covered ? "🔥 The diya is burning in open air" : lit ? "⏳ The flame is getting smaller…" : "💨 The flame went out!"}
         </span>

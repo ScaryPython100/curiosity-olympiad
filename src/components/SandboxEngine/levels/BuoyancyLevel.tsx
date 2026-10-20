@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
+import { ObservationSpeaker } from "@/components/ReadAloud";
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -84,7 +85,9 @@ function PaperBoat({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-sky-300 block">
           {isAnomaly ? "😮 The narrow boat sank with only 4 stones!" : isSunk ? "💦 Too heavy: the boat sank" : `⛵ Floating with ${stones} stone${stones === 1 ? "" : "s"}`}
         </span>
@@ -146,7 +149,9 @@ function EggSaltWater({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-sky-300 block">
           {isAnomaly ? "🤔 5 spoons of salt, and it still sinks!" : isFloating ? "🥚 The egg floats up!" : "🥚 The egg sinks to the bottom"}
         </span>
@@ -230,7 +235,9 @@ function OilAndWater({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {isAnomaly ? "🤔 Oil went in first, but it is on top!" : mixed ? "🥄 Mixed… now watch" : "Oil sits on top of water"}
         </span>

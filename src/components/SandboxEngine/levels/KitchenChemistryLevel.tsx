@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
+import { ObservationSpeaker } from "@/components/ReadAloud";
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -109,7 +110,9 @@ function TurmericIndicator({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {isAnomaly ? "✨ Lemon turned it back to yellow!" : isDeepRed ? "🔴 Soap turned the turmeric red!" : "🟡 Turmeric water is yellow"}
         </span>
@@ -215,7 +218,9 @@ function SodaVinegarBalloon({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-emerald-300 block">
           {isAnomaly ? "🤔 More soda, but the balloon got no bigger!" : reacted ? "🎈 The gas blew up the balloon!" : "Choose the soda, then tip it in"}
         </span>
@@ -327,7 +332,9 @@ function SugarSaturation({ recordAction }: { recordAction: RecordAction }) {
         </svg>
       </div>
 
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {isAnomaly
             ? "🔥 Hot water melted all the leftover sugar!"

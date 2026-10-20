@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
 import { OptionalToolsDrawer } from '../OptionalToolsDrawer';
+import { ObservationSpeaker } from "@/components/ReadAloud";
 
 // --- SUB-COMPONENTS FOR STRICT CONDITIONAL RENDERING ---
 
@@ -164,7 +165,8 @@ function ExperimentOne({ recordAction }: { recordAction: (actionType: string, ac
       </div>
 
       {/* Dedicated Bottom Observation Strip */}
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+        <ObservationSpeaker />
         <span className="text-sm font-bold block" style={{ color: isComfortable ? '#67e8f9' : '#fca5a5' }}>
           {isComfortable ? "😌 Comfortable TV watching!" : isGlare ? "😖 Too much glare on the screen!" : "😖 Ouch! TV is too bright for a dark room!"}
         </span>
@@ -284,7 +286,8 @@ function ExperimentTwo({ recordAction }: { recordAction: (actionType: string, ac
       </div>
 
       {/* Dedicated Bottom Observation Strip */}
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">{isRainbow ? "🌈 A rainbow on the wall!" : laserColor === "Sunlight" ? "No rainbow at this tilt" : "Only one red line"}</span>
         <p className="text-xs text-gray-300 mt-0.5">
           {laserColor === "Sunlight"
@@ -431,7 +434,8 @@ function ExperimentThree({ recordAction }: { recordAction: (actionType: string, 
       </div>
 
       {/* Dedicated Bottom Observation Strip */}
-      <div className="shrink-0 w-full bg-gray-950 border-t border-gray-800 px-3 py-2 text-center z-10">
+      <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
+        <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {isHigh ? "☀️ Sun is high: short shadow!" : isLow ? "🌅 Sun is low: very long shadow!" : "Move the sun up and down"}
         </span>
