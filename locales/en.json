@@ -270,7 +270,11 @@
     "xp_on_time": "Finished on time",
     "not_saved": "Not saved. Check your internet and try again.",
     "listen": "Listen",
-    "stop": "Stop"
+    "stop": "Stop",
+    "show_english": "English",
+    "ai_translated": "Translated by computer. Ask your teacher if something looks wrong.",
+    "experiment_of": "Experiment {n} of 3",
+    "questions_for": "Questions for {name}"
   },
   "thought": {
     "title": "Quick Scientist's Thought",

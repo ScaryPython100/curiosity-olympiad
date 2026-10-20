@@ -12,6 +12,8 @@ import { LearningPath } from "@/components/LearningPath";
 import { KuppuAvatar, KuppuTip } from "@/components/KuppuGuide";
 import { nextTestId } from "@/utils/learningPath";
 import { isBadgeId, type BadgeId } from "@/utils/questsBadges";
+import { localizeQuestion } from "@/utils/questionI18n";
+import { useQuestionTranslations } from "@/hooks/useQuestionTranslations";
 import { playCorrect, playWrong, playCelebrate } from "@/utils/webAudio";
 import { submitMockTestAttempt, getMockTestAttempts } from "@/app/actions/exams";
 import { LanguageSelector } from "@/components/LanguageSelector";
@@ -1317,7 +1319,12 @@ export default function PracticePage() {
 }
 
 function PracticeContent() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  // Questions in the student's language (downloaded only for that language)
+  const questionFile = useQuestionTranslations(language);
+  const [showEnglish, setShowEnglish] = useState(false);
+  const shownFile = showEnglish ? null : questionFile;
+  const questionLang = shownFile ? language : "en";
   const searchParams = useSearchParams();
   
   const initialTestId = (() => {
@@ -1822,8 +1829,8 @@ function PracticeContent() {
             <LearningPath
               tests={MOCK_TESTS.map((test) => ({
                 id: test.id,
-                title: test.title,
-                description: test.description,
+                title: questionFile?.tests[String(test.id)]?.name ?? test.title,
+                description: questionFile?.tests[String(test.id)]?.description ?? test.description,
                 icon: test.icon,
                 idealMinutes: Math.round(test.idealSeconds[difficulty] / 60),
                 questionCount: PRACTICE_QUESTIONS.filter(
@@ -1942,6 +1949,7 @@ function PracticeContent() {
                   onSubmitComplete={handleSubmitTest}
                   onTelemetryUpdate={handleTelemetryUpdate}
                   onAnomaly={handleAnomaly}
+                  experimentNames={questionFile?.experiments?.[String(selectedMockTestId)]}
                 />
               </div>
             </div>
@@ -1959,9 +1967,9 @@ function PracticeContent() {
             {/* EXPERIENTIAL MCQ QUESTION LIST LINKED TO ACTIVE EXPERIMENT */}
             <div className="space-y-6">
               {(() => {
-                const currentExperimentQuestions = mockTestQuestions.filter(
-                  (q) => q.experimentIndex === currentExpIndex
-                );
+                const currentExperimentQuestions = mockTestQuestions
+                  .filter((q) => q.experimentIndex === currentExpIndex)
+                  .map((q) => localizeQuestion(q, shownFile));
 
                 return (
                   <>
@@ -1969,14 +1977,36 @@ function PracticeContent() {
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <div>
                           <span className="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#ea580c] text-white tracking-wide">
-                            Experiment {currentExpIndex + 1} of 3 • Real-Life Questions
+                            {t.learn.experiment_of.replace("{n}", String(currentExpIndex + 1))}
                           </span>
                           <h3 className="text-base sm:text-lg font-black text-[#143867] mt-1.5">
-                            Questions for {EXPERIMENT_LABELS[selectedMockTestId]?.[currentExpIndex] || `Experiment ${currentExpIndex + 1}`}
+                            {t.learn.questions_for.replace(
+                              "{name}",
+                              questionFile?.experiments?.[String(selectedMockTestId)]?.[currentExpIndex] ||
+                                EXPERIMENT_LABELS[selectedMockTestId]?.[currentExpIndex] ||
+                                `${currentExpIndex + 1}`
+                            )}
                           </h3>
                           <p className="text-xs text-gray-600 font-medium mt-0.5">
                             {t.learn.one_try}
                           </p>
+                          {questionFile && (
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setShowEnglish((v) => !v)}
+                                aria-pressed={showEnglish}
+                                className={`min-h-[36px] px-3 rounded-full text-xs font-black border transition-colors ${
+                                  showEnglish ? "bg-[#143867] text-white border-[#143867]" : "bg-white text-[#143867] border-[#d1dbe5]"
+                                }`}
+                              >
+                                🔤 {t.learn.show_english}
+                              </button>
+                              {!questionFile.reviewed && !showEnglish && (
+                                <span className="text-[11px] text-gray-500">{t.learn.ai_translated}</span>
+                              )}
+                            </div>
+                          )}
                         </div>
                         {isSubmitted && (
                           <span className="text-xs sm:text-sm font-bold text-[#143867] bg-[#eef2f7] px-3 py-1 rounded-full border border-[#d1dbe5]">
@@ -2032,6 +2062,7 @@ function PracticeContent() {
 
                       {/* Question Text (speaker reads the question and its options) */}
                       <ReadAloud
+                        lang={questionLang}
                         text={`${q.question} ${q.options.map((o, i) => `${String.fromCharCode(65 + i)}. ${o}`).join(" ")}`}
                       >
                         <p className="text-sm sm:text-base font-bold text-[#143867] leading-relaxed px-1">
@@ -2111,7 +2142,12 @@ function PracticeContent() {
                             </span>
                           </p>
                           <ReadAloud
-                            text={`The right answer is ${String.fromCharCode(65 + q.correct)}. ${q.options[q.correct]}. ${q.explanation}`}
+                            lang={questionLang}
+                            text={
+                              shownFile
+                                ? `${t.learn.right_answer.replace("{letter}", String.fromCharCode(65 + q.correct))}. ${q.options[q.correct]}. ${q.explanation}`
+                                : `The right answer is ${String.fromCharCode(65 + q.correct)}. ${q.options[q.correct]}. ${q.explanation}`
+                            }
                           >
                             <p className="text-gray-700 leading-relaxed text-xs sm:text-sm px-1">
                               <span className="font-bold text-[#143867]">{t.learn.why} </span>

@@ -26,6 +26,8 @@ interface SandboxEngineProps {
   onTelemetryUpdate?: (data: any) => void;
   /** Called with the experiment index when that experiment's anomaly is triggered */
   onAnomaly?: (experimentIndex: number) => void;
+  /** Experiment names in the student's language (falls back to English). */
+  experimentNames?: string[];
 }
 
 export const EXPERIMENT_LABELS: Record<number, string[]> = {
@@ -52,7 +54,8 @@ export default function SandboxEngine({
   onExperimentChange,
   onSubmitComplete,
   onTelemetryUpdate,
-  onAnomaly
+  onAnomaly,
+  experimentNames
 }: SandboxEngineProps = {}) {
   const { telemetryData, recordAction, resetTelemetry } = useTelemetry();
   
@@ -60,7 +63,8 @@ export default function SandboxEngine({
   const currentLevelIndex = typeof activeExperimentIndex === "number" ? activeExperimentIndex : internalLevelIndex;
   const levelsCount = 3;
   
-  const experimentLabels = EXPERIMENT_LABELS[mockTestId] || ["Experiment 1", "Experiment 2", "Experiment 3"];
+  const englishLabels = EXPERIMENT_LABELS[mockTestId] || ["Experiment 1", "Experiment 2", "Experiment 3"];
+  const experimentLabels = englishLabels.map((name, i) => experimentNames?.[i] || name);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   // Keep the active experiment tab fully visible on narrow phones

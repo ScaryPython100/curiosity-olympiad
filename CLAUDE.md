@@ -37,7 +37,10 @@
 - **Install (Add to Home Screen)**: `src/components/InstallPrompt.tsx` shows on the dashboard after the first finished test (Android install button, iPhone Share steps; "Not now" snoozes 7 days). Needs `public/manifest.json` + `public/icons/*`, linked from `metadata.manifest` in `src/app/layout.tsx`.
 - **Teacher portal (`/schools`)**: real data only. Students join a school with the code they type at sign-up (`school_students`, filled by `handle_new_user`). Agastya staff add a school + teacher PIN with the admin form on `/schools` (needs `ADMIN_SECRET_KEY`); the PIN is stored as a salted scrypt hash, 5 wrong PINs lock it for 15 minutes. Sign-in sets a signed httpOnly `teacher_session` cookie (`src/utils/teacherSession.ts`); `src/app/actions/teacher.ts` always takes the school from that cookie, never from the browser, and reads with the service-role client. `schools` and `school_students` have RLS on with no policies. Class numbers come from `buildClassReport` (`src/utils/classReport.ts`). Needs `teacher_portal.sql`.
 - Telemetry counters (reversals, slider moves) start at 0 for every test; never seed them, they become bonus XP.
-- New UI text lives in the `learn` and `thought` sections of `locales/*.json`. The 117 practice questions and the experiment labels are still English only.
+- New UI text lives in the `learn`, `thought`, `path`, `kuppu`, `freeze`, `install`, `teacher`, `quests` and `badges` sections of `locales/*.json`.
+- **Question translations**: the 117 questions, test names and 39 experiment names are in `public/i18n/questions/<lang>.json` (8 languages), drafted by `node scripts/translate-questions.mjs` (AI Gateway, Gemini) and checked by `checkQuestionFile` (`src/utils/questionI18n.ts`): same 4 options in the same order, numbers kept, target script, sane length. Re-run the script after adding or editing a question (it only redoes what fails). Files are `"reviewed": false` until a teacher checks them. The practice page loads only the student's language (`useQuestionTranslations`) and has an "English" switch. Text inside the 39 experiment scenes is still English.
+- **Daily quests & badges**: rules in `src/utils/questsBadges.ts`, checked and saved on the server (`src/app/actions/quests.ts`, `src/utils/badgeLedger.ts`); the quest chest gives `CHEST_XP` once per IST day. Nothing rewards the Quick Scientist's Thought (framework rule). Needs `phase2_quests_badges.sql`.
+- **Offline cache**: `publicExcludes` in `next.config.ts` keeps big or optional files (avatars, language files, large photos) out of the service worker's first download. Add new large files there.
 - `evaluateExperiment` in `src/app/actions/scoring.ts` is still unused, so `telemetry_logs` is never written.
 
 ## Critical Traps & Architectural Rules
@@ -87,4 +90,4 @@
 - **Procedural Sound**: `src/utils/webAudio.ts`
 - **Canvas Certificates**: `src/utils/certificateCanvas.ts`
 - **Database Schema & Migrations**: `supabase_migration.sql`, `teacher_portal.sql` (current `handle_new_user`; `auto_profile_trigger.sql` is superseded), `fix_rls_policies.sql`
-- **Unit Tests**: `tests/` (121 tests across 14 test files)
+- **Unit Tests**: `tests/` (136 tests across 16 test files)
