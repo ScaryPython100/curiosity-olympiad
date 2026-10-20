@@ -78,4 +78,4 @@
 - **Procedural Sound**: `src/utils/webAudio.ts`
 - **Canvas Certificates**: `src/utils/certificateCanvas.ts`
 - **Database Schema & Migrations**: `supabase_migration.sql`, `auto_profile_trigger.sql`, `fix_rls_policies.sql`
-- **Unit Tests**: `tests/` (84 tests across 11 test files)
+- **Unit Tests**: `tests/` (89 tests across 12 test files)
