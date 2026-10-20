@@ -35,6 +35,7 @@
 - **Streak freezes**: earned every 7 streak days (max 2); each one covers a missed day. Rules are `streakAfterLesson`/`currentStreak` in `src/utils/xpRules.ts`; only `applyXP` writes `user_gamification.streak_freezes`. Needs `phase1_streak_freeze.sql`; until it is run the app works without freezes (`isMissingFreezeColumn`).
 - **Kuppu**: `src/components/KuppuGuide.tsx` (`KuppuAvatar`, `KuppuBubble`, one-time `KuppuTip`) uses `public/kuppu/face-128.webp` (4.6 KB). Never use the 846 KB `kuppu-mascot.jpg` in the UI.
 - **Install (Add to Home Screen)**: `src/components/InstallPrompt.tsx` shows on the dashboard after the first finished test (Android install button, iPhone Share steps; "Not now" snoozes 7 days). Needs `public/manifest.json` + `public/icons/*`, linked from `metadata.manifest` in `src/app/layout.tsx`.
+- **Teacher portal (`/schools`)**: real data only. Students join a school with the code they type at sign-up (`school_students`, filled by `handle_new_user`). Agastya staff add a school + teacher PIN with the admin form on `/schools` (needs `ADMIN_SECRET_KEY`); the PIN is stored as a salted scrypt hash, 5 wrong PINs lock it for 15 minutes. Sign-in sets a signed httpOnly `teacher_session` cookie (`src/utils/teacherSession.ts`); `src/app/actions/teacher.ts` always takes the school from that cookie, never from the browser, and reads with the service-role client. `schools` and `school_students` have RLS on with no policies. Class numbers come from `buildClassReport` (`src/utils/classReport.ts`). Needs `teacher_portal.sql`.
 - Telemetry counters (reversals, slider moves) start at 0 for every test; never seed them, they become bonus XP.
 - New UI text lives in the `learn` and `thought` sections of `locales/*.json`. The 117 practice questions and the experiment labels are still English only.
 - `evaluateExperiment` in `src/app/actions/scoring.ts` is still unused, so `telemetry_logs` is never written.
@@ -73,7 +74,6 @@
    - Only the Material Symbols listed in `src/config/iconSubset.ts` are downloaded (~15 KB vs ~320 KB). A new icon must be added there (sorted), or it renders as plain text. `tests/iconSubset.test.mjs` checks this.
 
 ## Known Gaps (verify before relying on these features)
-- **Schools portal is mostly demo data**: 12 hard-coded Kuppam students, a live query that ignores the school code, and fixed CQ breakdown and milestones. `enrollStudentRoster` does not write to Supabase. `verifyTeacherPin` accepts any PIN of 6+ characters.
 - **Unused modules**: `KuppuMascot.tsx`, `src/utils/aws.ts`, `REDEMPTION_RULES`, `checkTournamentQualification`. Level gating is also effectively off (`getUnlockedLevels` unlocks everything).
 - `src/app/page.tsx` is not a landing page; it redirects to `/dashboard`.
 
@@ -83,8 +83,8 @@
 - **CQ Calculation**: `src/utils/cqScoring.ts`
 - **Curriculum / Mock Tests**: `src/data/mockTestsData.ts` (13 master mock tests). The practice page keeps its own `MOCK_TESTS` list and 117 questions (`PRACTICE_QUESTIONS`, 9 per test) in `src/app/practice/page.tsx`; keep both in sync.
 - **Scoring Config & AI Rubrics**: `src/config/scoringConfig.ts`
-- **Server Actions**: `src/app/actions/` (`exams.ts`, `profile.ts`, `schools.ts`, `scoring.ts`)
+- **Server Actions**: `src/app/actions/` (`exams.ts`, `profile.ts`, `teacher.ts`, `inquiry.ts`, `scoring.ts`)
 - **Procedural Sound**: `src/utils/webAudio.ts`
 - **Canvas Certificates**: `src/utils/certificateCanvas.ts`
-- **Database Schema & Migrations**: `supabase_migration.sql`, `auto_profile_trigger.sql`, `fix_rls_policies.sql`
-- **Unit Tests**: `tests/` (119 tests across 14 test files)
+- **Database Schema & Migrations**: `supabase_migration.sql`, `teacher_portal.sql` (current `handle_new_user`; `auto_profile_trigger.sql` is superseded), `fix_rls_policies.sql`
+- **Unit Tests**: `tests/` (121 tests across 14 test files)

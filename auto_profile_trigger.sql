@@ -1,3 +1,7 @@
+-- SUPERSEDED: run teacher_portal.sql instead. Its handle_new_user() also
+-- records the student's school (school_students). Running this older version
+-- after it would stop new students from appearing in their teacher's class.
+
 -- 1. Create a function that automatically inserts into student_profiles
 CREATE OR REPLACE FUNCTION public.handle_new_user() 
 RETURNS TRIGGER AS $$

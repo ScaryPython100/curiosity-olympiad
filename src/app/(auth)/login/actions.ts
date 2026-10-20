@@ -194,6 +194,14 @@ export async function sendOtpAction(formData: FormData) {
   const username = ((formData.get("username") as string) || "").trim();
   const schoolCode = ((formData.get("schoolCode") as string) || "").trim().toUpperCase();
   const parentalConsent = formData.get("parentalConsent") === "true";
+  // Saved on the new account; the school code puts the student in their teacher's class
+  const signupMetadata = {
+    username: username || "Explorer",
+    real_name: username || "Explorer",
+    school_code: schoolCode,
+    parental_consent: parentalConsent,
+    consent_timestamp: new Date().toISOString(),
+  };
 
   if (isCreateAccount) {
     if (!schoolCode) {
@@ -263,7 +271,7 @@ export async function sendOtpAction(formData: FormData) {
       email: destination.trim(),
       options: {
         shouldCreateUser: isCreateAccount,
-        data: isCreateAccount ? { username: username || "Explorer", real_name: username || "Explorer" } : undefined,
+        data: isCreateAccount ? signupMetadata : undefined,
       },
     });
 
@@ -279,7 +287,7 @@ export async function sendOtpAction(formData: FormData) {
       phone: phoneNum,
       options: {
         shouldCreateUser: isCreateAccount,
-        data: isCreateAccount ? { username: username || "Explorer", real_name: username || "Explorer" } : undefined,
+        data: isCreateAccount ? signupMetadata : undefined,
       },
     });
 
