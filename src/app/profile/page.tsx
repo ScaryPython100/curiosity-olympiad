@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
-import { calculateLevelProgress } from "@/utils/gamification";
+import { calculateLevelProgress, XP_PER_LEVEL } from "@/utils/gamification";
+import { BadgeShelf } from "@/components/BadgeShelf";
 import { AvatarPickerModal } from "@/components/AvatarPickerModal";
 import { useUserAvatar } from "@/utils/userAvatar";
 import { CuriosityQuotientCard } from "@/components/CuriosityQuotientCard";
@@ -278,7 +279,7 @@ export default function ProfilePage() {
             <div className="flex justify-between items-end">
               <div>
                 <span className="text-[10px] font-black text-gray-500 uppercase tracking-wider block">Level Progress</span>
-                <span className="text-xs sm:text-sm font-bold text-[#143867]">{userStats.xp % 1000} / 1000 XP</span>
+                <span className="text-xs sm:text-sm font-bold text-[#143867]">{(userStats.xp % XP_PER_LEVEL).toLocaleString()} / {XP_PER_LEVEL.toLocaleString()} XP</span>
               </div>
               <span className="text-xl sm:text-2xl font-black text-[#143867]">{Math.floor(progressPercentage)}%</span>
             </div>
@@ -293,6 +294,11 @@ export default function ProfilePage() {
               <span>LVL {level + 1}</span>
             </div>
           </div>
+        </div>
+
+        {/* Achievement badges */}
+        <div className="mb-6">
+          <BadgeShelf />
         </div>
 
         {/* 📊 Curiosity Quotient (CQ) Analytics Engine Radar Chart */}

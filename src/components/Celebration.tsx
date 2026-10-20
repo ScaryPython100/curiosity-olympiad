@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { KuppuBubble } from "@/components/KuppuGuide";
 import { starsFor } from "@/utils/learningPath";
+import { BADGE_EMOJI, type BadgeId } from "@/utils/questsBadges";
 
 // Fixed confetti pieces (no random values, so server and client render the same)
 const CONFETTI = Array.from({ length: 24 }, (_, i) => ({
@@ -48,6 +49,8 @@ export interface CelebrationProps {
   freezeEarned?: boolean;
   /** A streak freeze covered a missed day. */
   freezeUsed?: boolean;
+  /** Badges this test earned. */
+  newBadges?: BadgeId[];
   onSeeAnswers: () => void;
   onAllTests: () => void;
 }
@@ -65,6 +68,7 @@ export function Celebration({
   goalDone,
   freezeEarned = false,
   freezeUsed = false,
+  newBadges = [],
   onSeeAnswers,
   onAllTests,
 }: CelebrationProps) {
@@ -132,6 +136,20 @@ export function Celebration({
           <p className="text-sm font-black text-sky-800 bg-sky-50 border border-sky-200 rounded-xl px-3 py-2">
             {t.freeze.earned}
           </p>
+        )}
+
+        {newBadges.length > 0 && (
+          <div className="bg-amber-50 border border-amber-300 rounded-xl px-3 py-2 space-y-1">
+            <p className="text-xs font-black text-amber-800 uppercase tracking-wide">🏅 {t.badges.new_badge}</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {newBadges.map((id) => (
+                <span key={id} className="celebration-pop inline-flex items-center gap-1.5 bg-white rounded-full px-3 py-1 text-sm font-black text-[#143867] shadow-sm">
+                  <span aria-hidden>{BADGE_EMOJI[id]}</span>
+                  {t.badges[id as keyof typeof t.badges]}
+                </span>
+              ))}
+            </div>
+          </div>
         )}
 
         {goalDone && (

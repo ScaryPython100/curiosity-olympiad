@@ -5,6 +5,7 @@ import { OFFICIAL_MOCK_TESTS } from "@/data/mockTestsData";
 import { computeMockTestXP } from "@/utils/xpRules";
 import { applyXP } from "@/utils/xpLedger";
 import { istDayKey } from "@/utils/istTime";
+import { loadProgressAndSyncBadges } from "@/utils/badgeLedger";
 
 /**
  * Silently submits an H5P exam score for the currently authenticated user.
@@ -138,11 +139,20 @@ export async function submitMockTestAttempt(
     return { success: true, ...xp, xpAwarded: 0, alreadyEarnedToday, xpError: award.error };
   }
 
+  // Badges this test earned (e.g. first test, perfect score), shown on the celebration screen
+  let newBadges: string[] = [];
+  try {
+    newBadges = (await loadProgressAndSyncBadges(supabase, user.id)).newlyEarned;
+  } catch (err) {
+    console.error("Badge check failed:", err);
+  }
+
   return {
     success: true,
     ...xp,
     xpAwarded,
     alreadyEarnedToday,
+    newBadges,
     newXp: award.newXp,
     streakCount: award.streakCount,
     streakFreezes: award.streakFreezes,

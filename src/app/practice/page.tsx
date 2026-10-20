@@ -11,6 +11,7 @@ import { ReadAloud } from "@/components/ReadAloud";
 import { LearningPath } from "@/components/LearningPath";
 import { KuppuAvatar, KuppuTip } from "@/components/KuppuGuide";
 import { nextTestId } from "@/utils/learningPath";
+import { isBadgeId, type BadgeId } from "@/utils/questsBadges";
 import { playCorrect, playWrong, playCelebrate } from "@/utils/webAudio";
 import { submitMockTestAttempt, getMockTestAttempts } from "@/app/actions/exams";
 import { LanguageSelector } from "@/components/LanguageSelector";
@@ -1356,6 +1357,7 @@ function PracticeContent() {
   const [goalDoneToday, setGoalDoneToday] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
   const [freezeNews, setFreezeNews] = useState<{ earned: boolean; used: boolean }>({ earned: false, used: false });
+  const [newBadges, setNewBadges] = useState<BadgeId[]>([]);
   const [activeTelemetry, setActiveTelemetry] = useState<any>({
     distinctStatesReached: 0,
     triggerActivated: false,
@@ -1621,6 +1623,7 @@ function PracticeContent() {
     setGoalDoneToday(false);
     setSaveFailed(false);
     setFreezeNews({ earned: false, used: false });
+    setNewBadges([]);
     setIsSubmitted(true);
     setShowTelemetryModal(true);
     playCelebrate();
@@ -1643,6 +1646,7 @@ function PracticeContent() {
         setCelebrationStreak(typeof subRes.streakCount === "number" ? subRes.streakCount : null);
         setGoalDoneToday(true);
         setFreezeNews({ earned: Boolean(subRes.freezeEarned), used: (subRes.freezesUsed ?? 0) > 0 });
+        setNewBadges(((subRes.newBadges ?? []) as string[]).filter(isBadgeId));
       }
     } catch (err) {
       console.error("Failed to persist test attempt to Supabase:", err);
@@ -1877,6 +1881,7 @@ function PracticeContent() {
                 goalDone={goalDoneToday}
                 freezeEarned={freezeNews.earned}
                 freezeUsed={freezeNews.used}
+                newBadges={newBadges}
                 onSeeAnswers={() => setShowTelemetryModal(false)}
                 onAllTests={() => {
                   setShowTelemetryModal(false);

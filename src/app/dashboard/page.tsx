@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import ComingSoonOlympiadCard from "@/components/ComingSoonOlympiadCard";
 import { istDayKey } from "@/utils/istTime";
 import { streakWeekDots } from "@/utils/streakWeek";
+import { DailyQuests } from "@/components/DailyQuests";
 
 const PARTNER_SCHOOLS = [
   { name: "Global Olympiad Partner Academy", location: "Worldwide", icon: "public", badgeColor: "bg-[#143867] text-white border-[#ea580c]", emblem: "🌐" },
@@ -474,6 +475,9 @@ export default function DashboardPage() {
             </div>
           </Link>
         </section>
+
+        {/* Daily quests (signed-in students only) */}
+        {userId && <DailyQuests onXpGained={(gained) => setXp((x) => x + gained)} />}
 
         {/* Academic Streak & Daily Insights */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-5">

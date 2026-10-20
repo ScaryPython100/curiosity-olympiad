@@ -188,3 +188,13 @@
 @media (prefers-reduced-motion: reduce) {
   .path-pulse, .kuppu-hop, .kuppu-tilt, .sheet-up { animation: none; }
 }
+
+/* ---- Daily quest chest ---- */
+@keyframes chest-wiggle {
+  0%, 70%, 100% { transform: rotate(0deg); }
+  75% { transform: rotate(-12deg); }
+  85% { transform: rotate(12deg); }
+  95% { transform: rotate(-6deg); }
+}
+.chest-wiggle { display: inline-block; animation: chest-wiggle 1.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .chest-wiggle { animation: none; } }
