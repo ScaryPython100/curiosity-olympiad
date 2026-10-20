@@ -2,11 +2,15 @@
 
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import crypto from "crypto";
+import {
+  LEGACY_FALLBACK_SECRET,
+  deriveFallbackPassword,
+  signInMovingLegacyPassword,
+} from "@/utils/fallbackPassword";
 
 function getSecureFallbackPassword(identifier: string): string {
-  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.AUTH_FALLBACK_SALT || process.env.DESCOPE_MANAGEMENT_KEY || "agastya_private_server_hmac_salt";
-  return crypto.createHmac("sha256", secret).update(identifier).digest("hex").slice(0, 24) + "!Aa9";
+  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.AUTH_FALLBACK_SALT || process.env.DESCOPE_MANAGEMENT_KEY || LEGACY_FALLBACK_SECRET;
+  return deriveFallbackPassword(identifier, secret);
 }
 
 // 1. Secure Cookie Client Setup
@@ -383,11 +387,17 @@ export async function verifyOtpAction(formData: FormData) {
       ? destination.trim()
       : `${destination.replace(/[^0-9]/g, "")}@phone.curiosityolympiad.org`;
 
-    // Try to login if they already exist
-    let authRes = await supabase.auth.signInWithPassword({
-      email: emailToCheck,
-      password: password,
-    });
+    // Try to login if they already exist. Accounts made before the server key
+    // was set use the legacy derived password and are moved to the current one.
+    const signIn = (pwd: string) => supabase.auth.signInWithPassword({ email: emailToCheck, password: pwd });
+    let authRes = providedPassword
+      ? await signIn(password)
+      : await signInMovingLegacyPassword({
+          currentPassword: password,
+          legacyPassword: deriveFallbackPassword(destination.trim().toLowerCase(), LEGACY_FALLBACK_SECRET),
+          signIn,
+          updatePassword: (pwd) => supabase.auth.updateUser({ password: pwd }),
+        });
 
     // If login fails (because user doesn't exist), sign them up
     if (authRes.error && isCreateAccount) {
