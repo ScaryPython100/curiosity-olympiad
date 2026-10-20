@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { submitInquiryResponse } from "@/app/actions/inquiry";
 import { INQUIRY_PROMPTS, choosePromptType } from "@/config/inquiryMatrix";
+import { useLanguage } from "@/context/LanguageContext";
 
 /**
  * "Quick Scientist's Thought": the open-inquiry prompt from the Agastya
@@ -27,6 +28,7 @@ export function ScientistThought({
   experimentCount: number;
   anomalyTriggered: boolean;
 }) {
+  const { t } = useLanguage();
   const storageKey = `reflection_${mockTestId}_${experimentIndex}`;
   const codesKey = `inquiry_code_${mockTestId}_${experimentIndex}`;
   const promptType = choosePromptType({ anomalyTriggered, experimentIndex, experimentCount });
@@ -49,7 +51,7 @@ export function ScientistThought({
   const save = async () => {
     const answer = text.trim();
     if (!answer) {
-      toast.info("Write your question first. Any language is fine!", { duration: 2000 });
+      toast.info(t.thought.write_first, { duration: 2000 });
       return;
     }
     setSaving(true);
@@ -74,10 +76,10 @@ export function ScientistThought({
         localStorage.setItem(`${storageKey}_submitted`, answer);
       } catch {}
       setSavedText(answer);
-      toast.success("Saved! Thank you for sharing your thought. 🔬", { duration: 2500 });
+      toast.success(t.thought.thanks, { duration: 2500 });
     } catch (err) {
       console.error("Could not send thought:", err);
-      toast.success("Saved on this phone. Thank you! 🔬", { duration: 2500 });
+      toast.success(t.thought.saved_phone, { duration: 2500 });
     } finally {
       setSaving(false);
     }
@@ -90,11 +92,11 @@ export function ScientistThought({
       <div className="flex items-start gap-2.5">
         <span className="text-2xl shrink-0" aria-hidden>💡</span>
         <div>
-          <h4 className="text-sm font-black text-amber-950">Quick Scientist&apos;s Thought</h4>
+          <h4 className="text-sm font-black text-amber-950">{t.thought.title}</h4>
           <p className="text-sm text-amber-950 mt-1 leading-snug" id="scientist-thought-prompt">
             {promptText}
           </p>
-          <p className="text-xs text-amber-800/80 mt-1">You can write in any language. There is no wrong answer.</p>
+          <p className="text-xs text-amber-800/80 mt-1">{t.thought.any_language}</p>
         </div>
       </div>
       <textarea
@@ -110,7 +112,7 @@ export function ScientistThought({
             localStorage.setItem(storageKey, val);
           } catch {}
         }}
-        placeholder="Write here…"
+        placeholder={t.thought.placeholder}
         className="w-full px-3.5 py-2.5 bg-white border border-amber-300 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
       />
       <button
@@ -120,7 +122,7 @@ export function ScientistThought({
         disabled={saving || isSaved}
         className="w-full sm:w-auto min-h-[44px] px-5 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-amber-950 font-black text-sm rounded-xl transition-colors active:scale-95 cursor-pointer"
       >
-        {saving ? "Saving…" : isSaved ? "✓ Saved" : "Save my thought"}
+        {saving ? t.thought.saving : isSaved ? t.thought.saved : t.thought.save}
       </button>
     </div>
   );

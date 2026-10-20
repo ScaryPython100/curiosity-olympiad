@@ -6,6 +6,8 @@ import { useSearchParams } from "next/navigation";
 import SandboxEngine, { EXPERIMENT_LABELS } from "@/components/SandboxEngine";
 import { computeMockTestXP, XP_RULES } from "@/utils/xpRules";
 import { ScientistThought } from "@/components/ScientistThought";
+import { Celebration } from "@/components/Celebration";
+import { playCorrect, playWrong, playCelebrate } from "@/utils/webAudio";
 import { submitMockTestAttempt, getMockTestAttempts } from "@/app/actions/exams";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
@@ -1344,6 +1346,11 @@ function PracticeContent() {
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
   // Set from the server's answer: true when this test already earned XP today (retake gives 0 XP)
   const [xpAlreadyEarnedToday, setXpAlreadyEarnedToday] = useState(false);
+  // Celebration screen: XP the server awarded (null while waiting) and the streak after this test
+  const [serverXP, setServerXP] = useState<number | null>(null);
+  const [celebrationStreak, setCelebrationStreak] = useState<number | null>(null);
+  const [goalDoneToday, setGoalDoneToday] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
   const [activeTelemetry, setActiveTelemetry] = useState<any>({
     distinctStatesReached: 0,
     triggerActivated: false,
@@ -1355,13 +1362,6 @@ function PracticeContent() {
   });
 
   const [hoveredExperiment, setHoveredExperiment] = useState<number | null>(null);
-
-  // Sound Engine initial load
-  useEffect(() => {
-    import('@/utils/webAudio').then(module => {
-      module.soundEngine.init();
-    }).catch(() => {});
-  }, []);
 
   const handleTelemetryUpdate = useCallback((data: any) => {
     if (!data) return;
@@ -1490,9 +1490,15 @@ function PracticeContent() {
     });
   }, [selectedMockTestId, difficulty]);
 
+  // One try per question: the first tap locks the answer and shows right/wrong straight away.
   const handleSelectOption = (qId: number, optionIdx: number) => {
-    if (isSubmitted || isPaused) return;
+    if (isSubmitted || isPaused || selectedAnswers[qId] !== undefined) return;
     setSelectedAnswers((prev) => ({ ...prev, [qId]: optionIdx }));
+    const q = mockTestQuestions.find((x) => x.id === qId);
+    if (q) {
+      if (optionIdx === q.correct) playCorrect();
+      else playWrong();
+    }
   };
 
   const calculateScore = () => {
@@ -1584,8 +1590,13 @@ function PracticeContent() {
     }
 
     setXpAlreadyEarnedToday(false);
+    setServerXP(null);
+    setCelebrationStreak(null);
+    setGoalDoneToday(false);
+    setSaveFailed(false);
     setIsSubmitted(true);
     setShowTelemetryModal(true);
+    playCelebrate();
 
     // Persist to Supabase: the server saves the attempt and awards XP itself
     try {
@@ -1597,14 +1608,18 @@ function PracticeContent() {
       );
       if (!subRes?.success) {
         console.warn("Supabase test submission note:", subRes?.error);
-      } else if (subRes.alreadyEarnedToday) {
-        setXpAlreadyEarnedToday(true);
-        toast.info("Great practice! 🔁", {
-          description: "You already got XP for this test today. Come back tomorrow for more XP!",
-        });
+        setSaveFailed(true);
+        setServerXP(0);
+      } else {
+        setXpAlreadyEarnedToday(Boolean(subRes.alreadyEarnedToday));
+        setServerXP(subRes.xpAwarded ?? 0);
+        setCelebrationStreak(typeof subRes.streakCount === "number" ? subRes.streakCount : null);
+        setGoalDoneToday(true);
       }
     } catch (err) {
       console.error("Failed to persist test attempt to Supabase:", err);
+      setSaveFailed(true);
+      setServerXP(0);
     }
   };
 
@@ -1792,7 +1807,7 @@ function PracticeContent() {
                 >
                   <div className="space-y-1">
                     <span className="bg-[#fff7ed] text-[#ea580c] text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase">
-                      Level 2: Advanced (Grades 9–12)
+                      Level 2: Advanced (Grades 9–10)
                     </span>
                     <h4 className="text-base font-black text-[#143867]">
                       Science for Experts
@@ -1981,80 +1996,30 @@ function PracticeContent() {
               </div>
             )}
 
-            {/* TELEMETRY RESULTS MODAL */}
+            {/* END-OF-TEST CELEBRATION */}
             {showTelemetryModal && isSubmitted && (
-              <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-                <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-gray-100 relative animate-in fade-in zoom-in-95 duration-200">
-                  <div className="text-center space-y-2">
-                    <div className="w-16 h-16 bg-[#fff7ed] text-[#ea580c] border-2 border-[#f37021] rounded-full flex items-center justify-center mx-auto shadow-sm">
-                      <span className="material-symbols-outlined text-3xl">military_tech</span>
-                    </div>
-                    <h3 className="text-2xl font-black text-[#143867]">
-                      Mock Test Completed!
-                    </h3>
-                    <p className="text-xs text-gray-500">
-                      {activeMockTest.title} ({difficulty === "level1" ? "Level 1" : "Level 2"})
-                    </p>
-                  </div>
-
-                  {/* Telemetry Breakdown Card */}
-                  <div className="bg-[#f7f9fb] border border-gray-200 rounded-2xl p-5 space-y-3 text-xs">
-                    <div className="flex items-center justify-between pb-2 border-b border-gray-200">
-                      <span className="font-bold text-gray-700">🎯 Accuracy Score</span>
-                      <span className="font-black text-[#143867] text-sm">
-                        {modalXP.score} / {modalXP.total} Correct (+{modalXP.accuracyXP} XP)
-                      </span>
-                    </div>
-
-                    <div className="space-y-2 pt-1">
-                      <span className="font-black text-[#ea580c] uppercase tracking-wider block">
-                        🧠 Curiosity Telemetry Bonus Metrics
-                      </span>
-
-                      <div className="flex items-center justify-between text-gray-600">
-                        <span className="flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-sm text-indigo-600">swap_horiz</span>
-                          Hypothesis Testing Reversals ({reversalsCount} detected)
-                        </span>
-                        <span className="font-bold text-indigo-900">+{modalReversalXP} XP</span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-gray-600">
-                        <span className="flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-sm text-emerald-600">tune</span>
-                          Variable Slider Manipulations ({sliderAdjustments} edits)
-                        </span>
-                        <span className="font-bold text-emerald-900">+{modalAdjustmentXP} XP</span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-gray-600">
-                        <span className="flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-sm text-amber-600">timer</span>
-                          Dynamic Ideal Pace Bonus
-                        </span>
-                        <span className="font-bold text-amber-900">+{modalPaceXP} XP</span>
-                      </div>
-                    </div>
-
-                    <div className="pt-3 border-t border-gray-300 flex items-center justify-between font-black text-sm text-[#143867]">
-                      <span>🌟 Total XP Earned:</span>
-                      <span className="text-lg text-[#ea580c]">+{xpAlreadyEarnedToday ? 0 : modalXP.totalXP} XP</span>
-                    </div>
-                    {xpAlreadyEarnedToday && (
-                      <p className="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                        🔁 You already got XP for this test today. Come back tomorrow for more XP!
-                      </p>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => setShowTelemetryModal(false)}
-                    className="w-full py-3.5 bg-[#143867] hover:bg-[#1e4a85] text-white font-black text-sm uppercase tracking-wider rounded-xl shadow-lg transition-all"
-                  >
-                    View Question Explanations
-                  </button>
-                </div>
-              </div>
+              <Celebration
+                testTitle={`${activeMockTest.title} (${difficulty === "level1" ? "Level 1" : "Level 2"})`}
+                score={modalXP.score}
+                total={modalXP.total}
+                xpEarned={serverXP === null ? null : xpAlreadyEarnedToday ? 0 : serverXP}
+                alreadyEarnedToday={xpAlreadyEarnedToday}
+                saveFailed={saveFailed}
+                breakdown={{
+                  rightAnswers: modalXP.accuracyXP,
+                  trying: modalReversalXP + modalAdjustmentXP,
+                  onTime: modalPaceXP,
+                }}
+                streakCount={celebrationStreak}
+                goalDone={goalDoneToday}
+                onSeeAnswers={() => setShowTelemetryModal(false)}
+                onAllTests={() => {
+                  setShowTelemetryModal(false);
+                  setActiveTest(false);
+                  setIsSubmitted(false);
+                  setSelectedAnswers({});
+                }}
+              />
             )}
 
             {/* Assessment Header Info: Clean Impeccable Design */}
@@ -2137,7 +2102,7 @@ function PracticeContent() {
                             Questions for {EXPERIMENT_LABELS[selectedMockTestId]?.[currentExpIndex] || `Experiment ${currentExpIndex + 1}`}
                           </h3>
                           <p className="text-xs text-gray-600 font-medium mt-0.5">
-                            Try adjusting the simulation above to see how things react, then pick your answer!
+                            {t.learn.one_try}
                           </p>
                         </div>
                         {isSubmitted && (
@@ -2152,19 +2117,19 @@ function PracticeContent() {
                       {currentExperimentQuestions.map((q, idx) => {
                         const selectedIdx = selectedAnswers[q.id];
                         const isCorrect = selectedIdx === q.correct;
+                        // Answers lock on the first tap, so feedback shows as soon as one is picked
+                        const revealed = isSubmitted || selectedIdx !== undefined;
 
                         return (
                     <div
                       key={q.id}
                       className={`bg-white rounded-2xl p-4 sm:p-6 border-2 transition-all shadow-2xs space-y-3.5 ${
-                        isSubmitted
+                        revealed
                           ? isCorrect
                             ? "border-green-400 bg-green-50/20"
                             : "border-red-300 bg-red-50/20"
-                          : selectedIdx !== undefined
-                          ? "border-[#143867] bg-indigo-50/10 shadow-xs"
                           : "border-gray-200 hover:border-gray-300"
-                      }`}
+                      } ${!isSubmitted && selectedIdx !== undefined ? (isCorrect ? "answer-pop" : "answer-shake") : ""}`}
                     >
                       {/* Question Header */}
                       <div className="flex items-center justify-between">
@@ -2176,7 +2141,7 @@ function PracticeContent() {
                             {q.title}
                           </span>
                         </div>
-                        {isSubmitted && (
+                        {revealed && (
                           <span
                             className={`text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
                               isCorrect
@@ -2187,7 +2152,7 @@ function PracticeContent() {
                             <span className="material-symbols-outlined text-xs">
                               {isCorrect ? "check_circle" : "cancel"}
                             </span>
-                            {isCorrect ? "Correct" : "Incorrect"}
+                            {isCorrect ? t.learn.correct : t.learn.not_quite}
                           </span>
                         )}
                       </div>
@@ -2205,7 +2170,7 @@ function PracticeContent() {
                           let optionStyle =
                             "bg-gray-50/80 border-gray-200 text-gray-800 hover:bg-gray-100 hover:border-gray-300";
 
-                          if (isSubmitted) {
+                          if (revealed) {
                             if (oIdx === q.correct) {
                               optionStyle =
                                 "bg-green-600 text-white font-bold border-green-700 shadow-sm";
@@ -2225,12 +2190,12 @@ function PracticeContent() {
                               key={oIdx}
                               type="button"
                               onClick={() => handleSelectOption(q.id, oIdx)}
-                              disabled={isSubmitted}
+                              disabled={revealed}
                               className={`p-3 sm:p-3.5 rounded-xl border text-left text-xs sm:text-sm transition-transform duration-100 active:scale-[0.98] flex items-center justify-between gap-2.5 cursor-pointer min-h-[44px] ${optionStyle}`}
                             >
                               <div className="flex items-center gap-2.5 min-w-0">
                                 <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
-                                  isSelected || (isSubmitted && oIdx === q.correct)
+                                  isSelected || (revealed && oIdx === q.correct)
                                     ? "bg-white/20 text-white"
                                     : "bg-gray-200 text-gray-700"
                                 }`}>
@@ -2238,9 +2203,9 @@ function PracticeContent() {
                                 </span>
                                 <span className="leading-snug">{option}</span>
                               </div>
-                              {isSelected && !isSubmitted && (
+                              {revealed && (oIdx === q.correct || isSelected) && (
                                 <span className="material-symbols-outlined text-sm shrink-0">
-                                  check
+                                  {oIdx === q.correct ? "check_circle" : "cancel"}
                                 </span>
                               )}
                             </button>
@@ -2248,13 +2213,23 @@ function PracticeContent() {
                         })}
                       </div>
 
-                      {/* Post-Submit Explanation */}
-                      {isSubmitted && (
-                        <div className="mt-3 p-3.5 bg-gray-50 border border-gray-200 rounded-xl text-xs space-y-1">
-                          <span className="font-bold text-[#143867] uppercase tracking-wider block">
-                            Why this happens
-                          </span>
-                          <p className="text-gray-600 leading-relaxed">
+                      {/* Feedback right after answering: cheer, the right answer and a short "why" */}
+                      {revealed && (
+                        <div
+                          className={`feedback-in mt-3 p-3.5 rounded-xl text-sm space-y-1.5 border ${
+                            isCorrect ? "bg-green-50 border-green-200" : "bg-amber-50 border-amber-200"
+                          }`}
+                          role="status"
+                        >
+                          <p className={`font-black ${isCorrect ? "text-green-800" : "text-amber-900"}`}>
+                            {selectedIdx === undefined
+                              ? t.learn.right_answer.replace("{letter}", String.fromCharCode(65 + q.correct))
+                              : isCorrect
+                              ? `🎉 ${t.learn.cheer_correct}`
+                              : `💪 ${t.learn.cheer_wrong} ${t.learn.right_answer.replace("{letter}", String.fromCharCode(65 + q.correct))}`}
+                          </p>
+                          <p className="text-gray-700 leading-relaxed text-xs sm:text-sm">
+                            <span className="font-bold text-[#143867]">{t.learn.why} </span>
                             {q.explanation}
                           </p>
                         </div>

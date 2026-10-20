@@ -108,3 +108,44 @@
 .sim-root svg[viewBox="0 0 340 220"] {
   max-height: 420px;
 }
+
+/* ---- Answer feedback & celebration (Phase 1) ---- */
+@keyframes answer-pop {
+  0% { transform: scale(0.96); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+@keyframes answer-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+@keyframes feedback-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes confetti-fall {
+  0% { transform: translateY(-10vh); opacity: 1; }
+  100% { transform: translateY(110vh); opacity: 0.7; }
+}
+@keyframes celebration-pop {
+  0% { transform: scale(0.85); opacity: 0; }
+  70% { transform: scale(1.03); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.answer-pop { animation: answer-pop 0.35s ease-out; }
+.answer-shake { animation: answer-shake 0.4s ease-in-out; }
+.feedback-in { animation: feedback-in 0.25s ease-out; }
+.celebration-pop { animation: celebration-pop 0.4s ease-out; }
+.confetti-piece {
+  position: absolute;
+  top: 0;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  animation: confetti-fall 2.6s ease-in forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .answer-pop, .answer-shake, .feedback-in, .celebration-pop { animation: none; }
+  .confetti-layer { display: none; }
+}

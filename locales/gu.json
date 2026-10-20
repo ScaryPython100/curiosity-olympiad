@@ -240,5 +240,39 @@
     "2d": "2d",
     "Canvas rendering is not supported on this device.": "આ ઉપકરણ પર કેનવાસ રેન્ડરિંગ સપોર્ટેડ નથી.",
     "Unable to download image. You can use the Print / PDF option as fallback.": "છબી ડાઉનલોડ કરવામાં અસમર્થ. તમે ફોલબેક તરીકે પ્રિન્ટ / પીડીએફ વિકલ્પનો ઉપયોગ કરી શકો છો."
+  },
+  "learn": {
+    "one_try": "તારો જવાબ પસંદ કર. એક જ તક છે!",
+    "correct": "સાચું!",
+    "not_quite": "જરાક ચૂકી ગયા!",
+    "right_answer": "સાચો જવાબ: {letter}",
+    "why": "કેમ?",
+    "cheer_correct": "શાબાશ, વૈજ્ઞાનિક!",
+    "cheer_wrong": "સરસ પ્રયત્ન! હવે તને ખબર છે.",
+    "test_done": "ટેસ્ટ પૂરી થઈ!",
+    "score_line": "{total} માંથી {score} સાચા",
+    "xp_earned": "મળેલા XP",
+    "streak": "સતત દિવસો",
+    "goal_title": "આજનું લક્ષ્ય",
+    "goal_todo": "આજે 1 ટેસ્ટ પૂરી કર",
+    "goal_done": "આજનું લક્ષ્ય પૂરું!",
+    "see_answers": "જવાબ જો",
+    "all_tests": "બધી ટેસ્ટ",
+    "already_earned": "આ ટેસ્ટના XP આજે મળી ગયા છે. કાલે ફરી આવજે!",
+    "xp_right_answers": "સાચા જવાબ",
+    "xp_trying": "લેબમાં પ્રયત્નો",
+    "xp_on_time": "સમયસર પૂરું",
+    "not_saved": "સેવ ન થયું. ઇન્ટરનેટ તપાસી ફરી પ્રયત્ન કર."
+  },
+  "thought": {
+    "title": "વૈજ્ઞાનિકનો નાનો વિચાર",
+    "any_language": "કોઈ પણ ભાષામાં લખ. કોઈ જવાબ ખોટો નથી.",
+    "placeholder": "અહીં લખ…",
+    "save": "મારો વિચાર સેવ કર",
+    "saving": "સેવ થાય છે…",
+    "saved": "✓ સેવ થયું",
+    "write_first": "પહેલા તારો પ્રશ્ન લખ. કોઈ પણ ભાષા ચાલશે!",
+    "thanks": "સેવ થયું! તારો વિચાર જણાવવા બદલ આભાર. 🔬",
+    "saved_phone": "આ ફોનમાં સેવ થયું. આભાર! 🔬"
   }
 }

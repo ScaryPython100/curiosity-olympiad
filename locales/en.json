@@ -246,5 +246,39 @@
     "2d": "2d",
     "Canvas rendering is not supported on this device.": "Canvas rendering is not supported on this device.",
     "Unable to download image. You can use the Print / PDF option as fallback.": "Unable to download image. You can use the Print / PDF option as fallback."
+  },
+  "learn": {
+    "one_try": "Pick your answer. You get one try!",
+    "correct": "Correct!",
+    "not_quite": "Not quite!",
+    "right_answer": "Right answer: {letter}",
+    "why": "Why?",
+    "cheer_correct": "Great job, scientist!",
+    "cheer_wrong": "Good try! Now you know.",
+    "test_done": "Test complete!",
+    "score_line": "{score} of {total} right",
+    "xp_earned": "XP earned",
+    "streak": "Streak",
+    "goal_title": "Today's goal",
+    "goal_todo": "Finish 1 test today",
+    "goal_done": "Today's goal done!",
+    "see_answers": "See answers",
+    "all_tests": "All tests",
+    "already_earned": "You already got XP for this test today. Come back tomorrow for more!",
+    "xp_right_answers": "Right answers",
+    "xp_trying": "Trying things in the lab",
+    "xp_on_time": "Finished on time",
+    "not_saved": "Not saved. Check your internet and try again."
+  },
+  "thought": {
+    "title": "Quick Scientist's Thought",
+    "any_language": "You can write in any language. There is no wrong answer.",
+    "placeholder": "Write here…",
+    "save": "Save my thought",
+    "saving": "Saving…",
+    "saved": "✓ Saved",
+    "write_first": "Write your question first. Any language is fine!",
+    "thanks": "Saved! Thank you for sharing your thought. 🔬",
+    "saved_phone": "Saved on this phone. Thank you! 🔬"
   }
 }

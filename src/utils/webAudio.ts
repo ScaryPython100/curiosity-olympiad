@@ -272,3 +272,44 @@ export function playHeartbeat(bpm: number = 72) {
   osc2.start(s2Time);
   osc2.stop(s2Time + 0.12);
 }
+
+/**
+ * Plays a short run of notes. Shared by the answer and celebration sounds.
+ */
+function playNotes(notes: { freq: number; at: number; dur: number }[], type: OscillatorType, volume: number) {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  for (const note of notes) {
+    const osc = ctx.createOscillator();
+    osc.type = type;
+    osc.frequency.setValueAtTime(note.freq, now + note.at);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.001, now + note.at);
+    gain.gain.linearRampToValueAtTime(volume, now + note.at + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + note.at + note.dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now + note.at);
+    osc.stop(now + note.at + note.dur + 0.02);
+  }
+}
+
+/** Right answer: two quick rising notes. */
+export function playCorrect() {
+  playNotes([{ freq: 660, at: 0, dur: 0.12 }, { freq: 990, at: 0.1, dur: 0.22 }], "sine", 0.25);
+}
+
+/** Wrong answer: a soft low falling note, not harsh. */
+export function playWrong() {
+  playNotes([{ freq: 300, at: 0, dur: 0.14 }, { freq: 220, at: 0.12, dur: 0.24 }], "triangle", 0.2);
+}
+
+/** End of a test: a short happy arpeggio. */
+export function playCelebrate() {
+  playNotes(
+    [523, 659, 784, 1047].map((freq, i) => ({ freq, at: i * 0.11, dur: i === 3 ? 0.45 : 0.16 })),
+    "triangle",
+    0.22
+  );
+}

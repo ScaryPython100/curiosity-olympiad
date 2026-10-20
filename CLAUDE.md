@@ -28,6 +28,9 @@
 - **Open inquiry / ML coding ("Quick Scientist's Thought")**: follows Agastya's "Measuring Curiosity in Digital Platform Environments" framework. Prompts and the Question Matrix live in `src/config/inquiryMatrix.ts` (document wording, do not edit without the Impact team). `submitInquiryResponse` in `src/app/actions/inquiry.ts` codes the answer via AI SDK 7 `generateText` + `Output.object` through the AI Gateway (`THOUGHT_CODING_MODEL`, default `google/gemini-2.5-flash-lite` because the Gateway free tier blocks Anthropic models; needs `AI_GATEWAY_API_KEY` locally or OIDC on Vercel) and saves it to `inquiry_responses` (`inquiry_responses.sql`). The model returns codes only, never a score or feedback; codes are not shown to students and do not affect XP or rank. Without a key, answers are saved with `coding_status = 'pending'`.
 - **Fairness rule**: never score open-inquiry text by length, keywords or English wording. The CQ Generative Inquiry axis uses only the framework's Question generation and Generative extension rates from the codes.
 - **Anomalies**: each experiment reports its built-in surprise with `useAnomalySignal(condition, recordAction)` (`src/components/SandboxEngine/useAnomalySignal.ts`); this switches the thought prompt to the "after anomaly" wording.
+- **Practice feedback**: each question allows one try; the first tap locks the answer, plays `playCorrect`/`playWrong` (`src/utils/webAudio.ts`) and shows the right answer plus the question's `explanation`. The end-of-test screen is `src/components/Celebration.tsx` and only shows XP the server actually awarded (`xpAwarded`).
+- **Daily goal**: 1 finished test per IST day (the same thing that keeps the streak). The dashboard ring and week dots use `hasCompletedActivityToday` and `streakWeekDots` (`src/utils/streakWeek.ts`).
+- New UI text lives in the `learn` and `thought` sections of `locales/*.json`. The 117 practice questions and the experiment labels are still English only.
 - `evaluateExperiment` in `src/app/actions/scoring.ts` is still unused, so `telemetry_logs` is never written.
 
 ## Critical Traps & Architectural Rules
@@ -78,4 +81,4 @@
 - **Procedural Sound**: `src/utils/webAudio.ts`
 - **Canvas Certificates**: `src/utils/certificateCanvas.ts`
 - **Database Schema & Migrations**: `supabase_migration.sql`, `auto_profile_trigger.sql`, `fix_rls_policies.sql`
-- **Unit Tests**: `tests/` (89 tests across 12 test files)
+- **Unit Tests**: `tests/` (97 tests across 13 test files)

@@ -12,6 +12,8 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
 import { toast } from "sonner";
 import ComingSoonOlympiadCard from "@/components/ComingSoonOlympiadCard";
+import { istDayKey } from "@/utils/istTime";
+import { streakWeekDots } from "@/utils/streakWeek";
 
 const PARTNER_SCHOOLS = [
   { name: "Global Olympiad Partner Academy", location: "Worldwide", icon: "public", badgeColor: "bg-[#143867] text-white border-[#ea580c]", emblem: "🌐" },
@@ -29,7 +31,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const { userId, loading: userLoading } = useUser();
   const [isAwarding, setIsAwarding] = useState(false);
-  const [streak, setStreak] = useState("0 Days");
+  // null until loaded, so the card never flashes "0 Days"
+  const [streakInfo, setStreakInfo] = useState<{ count: number; doneToday: boolean } | null>(null);
   const [xp, setXp] = useState(0);
   const [friendsActivity, setFriendsActivity] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
@@ -45,7 +48,7 @@ export default function DashboardPage() {
         ]);
         
         if (res.data) {
-          setStreak(res.data.streak);
+          setStreakInfo({ count: res.data.streakCount ?? 0, doneToday: Boolean(res.data.hasCompletedActivityToday) });
           setXp(res.data.xp);
         }
         if (activityRes.data) {
@@ -220,7 +223,7 @@ export default function DashboardPage() {
                 Practice Tournament Series
               </span>
               <span className="bg-white/15 text-blue-100 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold">
-                8 Mock Tests • 24 Experiments
+                13 Mock Tests • 39 Experiments
               </span>
               <span className="bg-white/15 text-blue-100 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold">
                 9 Questions per Test
@@ -330,7 +333,7 @@ export default function DashboardPage() {
               &ldquo;Aah! Aha! Ha-ha!&rdquo; — Sparking Wonder & Joy in Science
             </h3>
             <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-              Our assessment moves beyond rote memorization. We measure curiosity quotient, inquiry resilience, and investigative initiative across 24 real-world experiments.
+              Our assessment moves beyond rote memorization. We measure curiosity quotient, inquiry resilience, and investigative initiative across 39 real-world experiments.
             </p>
           </div>
           <div className="flex items-center gap-3 w-full md:w-auto shrink-0 flex-wrap">
@@ -403,7 +406,7 @@ export default function DashboardPage() {
                   Tournaments &amp; Tests
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                  Browse all 8 curriculum mock tests with Level 1 (Grades 6–8) and Level 2 (Grades 9–10).
+                  Browse all 13 curriculum mock tests with Level 1 (Grades 6–8) and Level 2 (Grades 9–10).
                 </p>
               </div>
               <div className="flex items-center text-[#143867] font-bold text-xs gap-1 pt-2">
@@ -464,39 +467,64 @@ export default function DashboardPage() {
 
         {/* Academic Streak & Daily Insights */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Academic Streak Box */}
-          <div className="bg-[#143867] rounded-2xl p-6 text-white shadow-sm flex flex-col justify-between min-h-[200px] border border-blue-900/40">
+          {/* Academic Streak Box + today's goal */}
+          <div className="bg-[#143867] rounded-2xl p-5 sm:p-6 text-white shadow-sm flex flex-col justify-between min-h-[200px] border border-blue-900/40">
             <div>
-              <span className="text-[10px] font-black uppercase text-amber-300 tracking-wider block mb-1">
-                Academic Streak
-              </span>
-              <p className="text-3xl sm:text-4xl font-black">{streak}</p>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <span className="text-[10px] font-black uppercase text-amber-300 tracking-wider block mb-1">
+                    Academic Streak
+                  </span>
+                  <p className="text-3xl sm:text-4xl font-black">
+                    {streakInfo ? `${streakInfo.count} ${streakInfo.count === 1 ? "Day" : "Days"}` : "–"}
+                  </p>
+                </div>
+
+                {/* Daily goal ring: 1 finished test a day keeps the streak */}
+                <Link
+                  href="/practice"
+                  className="flex items-center gap-2 bg-white/10 hover:bg-white/15 rounded-2xl pl-2 pr-3 py-2 transition-colors shrink-0"
+                  aria-label={`${t.learn.goal_title}: ${streakInfo?.doneToday ? t.learn.goal_done : t.learn.goal_todo}`}
+                >
+                  <svg viewBox="0 0 36 36" className="w-11 h-11 -rotate-90" aria-hidden>
+                    <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="4" />
+                    <circle
+                      cx="18" cy="18" r="15" fill="none" stroke="#fbbf24" strokeWidth="4" strokeLinecap="round"
+                      strokeDasharray="94.25" strokeDashoffset={streakInfo?.doneToday ? 0 : 94.25}
+                      style={{ transition: "stroke-dashoffset 0.8s ease-out" }}
+                    />
+                    <text x="18" y="18" textAnchor="middle" dominantBaseline="central" fontSize="11" fontWeight="900" fill="white" transform="rotate(90 18 18)">
+                      {streakInfo?.doneToday ? "✓" : "0/1"}
+                    </text>
+                  </svg>
+                  <span className="max-w-[7.5rem] leading-tight">
+                    <span className="block text-[10px] font-black uppercase text-amber-300 tracking-wider">{t.learn.goal_title}</span>
+                    <span className="block text-xs font-bold">{streakInfo?.doneToday ? t.learn.goal_done : t.learn.goal_todo}</span>
+                  </span>
+                </Link>
+              </div>
 
               {/* Weekly Day Tracker */}
-              <div className="flex items-center gap-2 mt-4 mb-2">
-                {["M", "T", "W", "T", "F", "S", "S"].map((day, i) => {
-                  const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
-                  const streakNum = parseInt(streak.split(" ")[0]) || 0;
-                  const isHighlighted = i <= todayIdx && i >= todayIdx - streakNum + 1;
-                  const isToday = i === todayIdx;
-
-                  return (
+              <div className="flex items-center gap-1.5 sm:gap-2 mt-4 mb-2">
+                {(() => {
+                  const { lit, todayIdx } = streakWeekDots(streakInfo?.count ?? 0, streakInfo?.doneToday ?? false, istDayKey());
+                  return ["M", "T", "W", "T", "F", "S", "S"].map((day, i) => (
                     <div key={i} className="flex flex-col items-center gap-1">
                       <span className="text-[10px] text-blue-200 font-bold">{day}</span>
                       <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                        isHighlighted 
-                          ? "bg-amber-400 text-amber-950 font-black shadow-xs" 
+                        lit[i]
+                          ? "bg-amber-400 text-amber-950 font-black shadow-xs"
                           : "bg-white/10 text-blue-200"
-                      } ${isToday ? "ring-2 ring-white" : ""}`}>
-                        {isHighlighted ? (
+                      } ${i === todayIdx ? "ring-2 ring-white" : ""}`}>
+                        {lit[i] ? (
                           <span className="material-symbols-outlined text-sm">local_fire_department</span>
                         ) : (
                           <span className="material-symbols-outlined text-xs opacity-40">remove</span>
                         )}
                       </div>
                     </div>
-                  );
-                })}
+                  ));
+                })()}
               </div>
               <p className="text-[11px] text-blue-200 font-medium">Consistent curiosity leads to breakthroughs.</p>
             </div>
@@ -520,7 +548,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <h4 className="text-xs sm:text-sm font-black text-[#143867]">Standardized Curriculum Modules</h4>
-                <p className="text-xs text-gray-600">8 official curriculum mock tests are calibrated with 9 questions and 3 experiments each.</p>
+                <p className="text-xs text-gray-600">13 official curriculum mock tests are calibrated with 9 questions and 3 experiments each.</p>
               </div>
             </div>
           </div>
