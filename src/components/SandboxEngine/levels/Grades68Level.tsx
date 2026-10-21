@@ -3,10 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
 import { ObservationSpeaker } from "@/components/ReadAloud";
+import { FitText, useSceneText } from '../SceneText';
+
+const POT_KEY = { Matka: "pot_matka", Steel: "pot_steel", Plastic: "pot_plastic" } as const;
+const POT_EMOJI = { Matka: "🏺", Steel: "🥘", Plastic: "🧴" } as const;
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
 function MatkaSunShade({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("grades68");
   const [container, setContainer] = useState<"Matka" | "Steel" | "Plastic">("Matka");
   const [placement, setPlacement] = useState<"Sun" | "Shade">("Sun");
   const [wetCloth, setWetCloth] = useState(false);
@@ -30,14 +35,14 @@ function MatkaSunShade({ recordAction }: { recordAction: RecordAction }) {
     <div className="flex flex-col h-full w-full">
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col gap-2 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex items-center justify-between gap-2">
-          <span className="font-bold text-teal-300">Pot:</span>
+          <span className="font-bold text-teal-300">{s("pot_label")}</span>
           <div className="flex gap-1.5">
             {(["Matka", "Steel", "Plastic"] as const).map(c => (
               <button
                 key={c}
                 onClick={() => { setContainer(c); recordAction('changed_container', { val: c }); }}
                 className={`px-3 rounded-lg text-xs font-bold ${container === c ? 'bg-teal-500 text-white' : 'bg-gray-800 text-gray-300'}`}
-              >{c === "Matka" ? "🏺 Matka" : c === "Steel" ? "🥘 Steel" : "🧴 Plastic"}</button>
+              >{`${POT_EMOJI[c]} ${s(POT_KEY[c])}`}</button>
             ))}
           </div>
         </div>
@@ -48,7 +53,7 @@ function MatkaSunShade({ recordAction }: { recordAction: RecordAction }) {
                 key={p}
                 onClick={() => { setPlacement(p); recordAction('changed_placement', { val: p }); }}
                 className={`px-3 rounded-lg text-xs font-bold ${placement === p ? 'bg-amber-500 text-amber-950' : 'bg-gray-800 text-gray-300'}`}
-              >{p === "Sun" ? "☀️ Sun" : "🌳 Shade"}</button>
+              >{s(p === "Sun" ? "pot_sun" : "pot_shade")}</button>
             ))}
           </div>
           <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-sky-300 min-h-[40px]">
@@ -58,13 +63,13 @@ function MatkaSunShade({ recordAction }: { recordAction: RecordAction }) {
               onChange={e => { setWetCloth(e.target.checked); recordAction('toggled_wet_cloth', { val: e.target.checked }); }}
               className="accent-sky-500 w-5 h-5"
             />
-            <span>Wet cloth</span>
+            <span>{s("pot_wet_cloth")}</span>
           </label>
         </div>
       </div>
 
       <div className={`relative flex-1 min-h-[220px] flex items-end ${inSun ? 'bg-gradient-to-b from-amber-200 to-amber-50' : 'bg-gradient-to-b from-emerald-900 to-emerald-700'}`}>
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`Water is ${temp} degrees`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("pot_pic", { n: temp })}>
           {inSun ? (
             <g>
               <circle cx="46" cy="40" r="22" fill="#facc15" />
@@ -104,7 +109,7 @@ function MatkaSunShade({ recordAction }: { recordAction: RecordAction }) {
           {wetCloth && (
             <g opacity="0.85">
               <rect x="124" y="118" width="92" height="44" rx="10" fill="#bae6fd" fillOpacity="0.7" stroke="#38bdf8" strokeWidth="2" strokeDasharray="5 3" />
-              <text x="170" y="144" textAnchor="middle" fontSize="10" fontWeight="700" fill="#075985">wet cloth</text>
+              <FitText en={en("pot_cloth_on_pic")} x="170" y="144" textAnchor="middle" fontSize="10" fontWeight="700" fill="#075985">{s("pot_cloth_on_pic")}</FitText>
             </g>
           )}
 
@@ -117,7 +122,7 @@ function MatkaSunShade({ recordAction }: { recordAction: RecordAction }) {
 
           {/* Temperature badge */}
           <rect x="244" y="96" width="82" height="44" rx="12" fill="#111827" />
-          <text x="285" y="114" textAnchor="middle" fontSize="10" fontWeight="700" fill="#d1d5db">Water</text>
+          <FitText en={en("pot_water")} x="285" y="114" textAnchor="middle" fontSize="10" fontWeight="700" fill="#d1d5db">{s("pot_water")}</FitText>
           <text x="285" y="132" textAnchor="middle" fontSize="17" fontWeight="800" fill={temp <= 25 ? "#38bdf8" : "#f87171"}>{temp}°C</text>
         </svg>
       </div>
@@ -126,14 +131,14 @@ function MatkaSunShade({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-teal-300 block">
-          {isAnomaly ? "🤯 Colder in the hot sun?!" : `${container} in the ${placement.toLowerCase()}: ${temp}°C`}
+          {isAnomaly ? s("pot_colder") : s(inSun ? "pot_in_sun" : "pot_in_shade", { pot: s(POT_KEY[container]), n: temp })}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
           {isAnomaly
-            ? "The wet cloth dries super fast in hot sun. Drying pulls heat away, so the water gets very cold."
+            ? s("pot_cloth_why")
             : isMatka
-              ? "Water seeps out of the clay and dries. Drying takes heat away from the water."
-              : `${container} has no tiny holes, so no water dries on the outside to cool it.`}
+              ? s("pot_matka_why")
+              : s("pot_no_holes_why", { pot: s(POT_KEY[container]) })}
         </p>
       </div>
     </div>
@@ -141,6 +146,7 @@ function MatkaSunShade({ recordAction }: { recordAction: RecordAction }) {
 }
 
 function KiteString({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("grades68");
   const [stringLen, setStringLen] = useState(50);
   const [windSpeed, setWindSpeed] = useState(50);
   const [kiteAngle, setKiteAngle] = useState(30);
@@ -168,9 +174,9 @@ function KiteString({ recordAction }: { recordAction: RecordAction }) {
     <div className="flex flex-col h-full w-full">
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-gray-300 shrink-0 z-20 w-full">
         {[
-          { label: "💨 Wind", value: windSpeed, set: setWindSpeed, min: 20, max: 100, step: 10, unit: "", act: 'changed_wind' },
-          { label: "📐 Pull Angle", value: kiteAngle, set: setKiteAngle, min: 10, max: 80, step: 10, unit: "°", act: 'changed_angle' },
-          { label: "🧵 String", value: stringLen, set: setStringLen, min: 30, max: 100, step: 10, unit: " m", act: 'changed_string_length' },
+          { label: s("kite_wind"), value: windSpeed, set: setWindSpeed, min: 20, max: 100, step: 10, unit: "", act: 'changed_wind' },
+          { label: s("kite_angle"), value: kiteAngle, set: setKiteAngle, min: 10, max: 80, step: 10, unit: "°", act: 'changed_angle' },
+          { label: s("kite_string"), value: stringLen, set: setStringLen, min: 30, max: 100, step: 10, unit: " m", act: 'changed_string_length' },
         ].map((c) => (
           <div key={c.label} className="flex flex-col gap-0.5">
             <div className="flex justify-between items-center">
@@ -187,7 +193,7 @@ function KiteString({ recordAction }: { recordAction: RecordAction }) {
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-gradient-to-b from-sky-400 to-sky-200 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={isAnomaly ? "The kite is diving" : `Kite flying ${heightMeters} metres high`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={isAnomaly ? s("kite_pic_diving") : s("kite_pic_flying", { n: heightMeters })}>
           {/* Wind arrows: more wind, more arrows */}
           {[...Array(Math.round(windSpeed / 20))].map((_, i) => (
             <g key={i} opacity="0.7">
@@ -219,7 +225,7 @@ function KiteString({ recordAction }: { recordAction: RecordAction }) {
           {!isAnomaly && !tooLittleLift && (
             <g>
               <rect x="226" y="198" width="104" height="18" rx="9" fill="#14532d" />
-              <text x="278" y="211" textAnchor="middle" fontSize="10" fontWeight="700" fill="#ffffff">Kite height: {heightMeters} m</text>
+              <FitText en={en("kite_height", { n: heightMeters })} x="278" y="211" textAnchor="middle" fontSize="10" fontWeight="700" fill="#ffffff">{s("kite_height", { n: heightMeters })}</FitText>
             </g>
           )}
         </svg>
@@ -229,14 +235,10 @@ function KiteString({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-sky-300 block">
-          {isAnomaly ? "😱 The kite dived down!" : tooLittleLift ? "🪁 The kite can't stay up" : "🪁 The kite is flying!"}
+          {s(isAnomaly ? "kite_dived" : tooLittleLift ? "kite_cannot_stay" : "kite_flying")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "Pulling too tight in strong wind makes the wind spill off the kite, so it dives."
-            : tooLittleLift
-              ? "Not enough wind push. Try a middle pull angle or more wind."
-              : "Wind pushes the kite up, the string pulls it back. Let out more string to fly higher."}
+          {s(isAnomaly ? "kite_dive_why" : tooLittleLift ? "kite_low_why" : "kite_fly_why")}
         </p>
       </div>
     </div>
@@ -244,6 +246,7 @@ function KiteString({ recordAction }: { recordAction: RecordAction }) {
 }
 
 function ChapatiPuff({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("grades68");
   const [heat, setHeat] = useState(50);
   const [thickness, setThickness] = useState(5);
   const [time, setTime] = useState(0);
@@ -274,23 +277,23 @@ function ChapatiPuff({ recordAction }: { recordAction: RecordAction }) {
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex flex-col gap-0.5 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-amber-300">🔥 Tawa Heat</span>
+            <span className="font-bold text-amber-300">{s("roti_heat")}</span>
             <span className="text-xs font-mono text-gray-300">{heat}</span>
           </div>
           <input
             type="range" min="10" max="100" step="10" value={heat}
-            aria-label="Tawa heat"
+            aria-label={s("roti_heat_slider")}
             onChange={e => { setHeat(parseInt(e.target.value)); recordAction('changed_heat', { val: parseInt(e.target.value) }); }}
           />
         </div>
         <div className="flex flex-col gap-0.5 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-yellow-300">🫓 Dough thickness</span>
+            <span className="font-bold text-yellow-300">{s("roti_thickness")}</span>
             <span className="text-xs font-mono text-gray-300">{thickness} mm</span>
           </div>
           <input
             type="range" min="1" max="10" step="1" value={thickness}
-            aria-label="Dough thickness"
+            aria-label={s("roti_thickness_slider")}
             onChange={e => { setThickness(parseInt(e.target.value)); recordAction('changed_thickness', { val: parseInt(e.target.value) }); }}
           />
         </div>
@@ -298,12 +301,12 @@ function ChapatiPuff({ recordAction }: { recordAction: RecordAction }) {
           onClick={() => { setTime(0); recordAction('reset_chapati'); }}
           className="px-4 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs shrink-0"
         >
-          🫓 New dough
+          {s("roti_new")}
         </button>
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-900 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={puffAmount > 50 ? "The chapati puffed up" : "The chapati is flat"}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s(puffAmount > 50 ? "roti_pic_puffed" : "roti_pic_flat")}>
           {/* Flames under the tawa */}
           {[...Array(6)].map((_, i) => (
             <path key={i} d={`M ${120 + i * 20} 196 q -6 ${-4 - heat * 0.12} 0 ${-8 - heat * 0.2} q 6 ${3 + heat * 0.1} 0 ${8 + heat * 0.2} Z`} fill={heat > 60 ? "#f97316" : "#3b82f6"} opacity="0.9" />
@@ -327,20 +330,20 @@ function ChapatiPuff({ recordAction }: { recordAction: RecordAction }) {
           {/* Steam pocket label */}
           {puffAmount > 50 && (
             <g>
-              <text x={cx} y={baseY - domeH * 0.6} textAnchor="middle" fontSize="10" fontWeight="800" fill="#92400e">steam inside!</text>
+              <FitText en={en("roti_steam_inside")} x={cx} y={baseY - domeH * 0.6} textAnchor="middle" fontSize="10" fontWeight="800" fill="#92400e">{s("roti_steam_inside")}</FitText>
               {[0, 1].map((i) => (
                 <path key={i} d={`M ${cx - 20 + i * 40} ${baseY - domeH - 10} q -6 -8 0 -16 q 6 -8 0 -16`} stroke="#e5e7eb" strokeWidth="2.5" fill="none" opacity="0.6" />
               ))}
             </g>
           )}
           {isAnomaly && doneCooking && (
-            <text x={cx} y={baseY - 18} textAnchor="middle" fontSize="11" fontWeight="800" fill="#fca5a5">dry and cracked</text>
+            <FitText en={en("roti_cracked")} x={cx} y={baseY - 18} textAnchor="middle" fontSize="11" fontWeight="800" fill="#fca5a5">{s("roti_cracked")}</FitText>
           )}
 
           {/* Cooking progress */}
           <rect x="20" y="20" width="120" height="10" rx="5" fill="#1f2937" />
           <rect x="20" y="20" width={1.2 * time} height="10" rx="5" fill="#f59e0b" />
-          <text x="20" y="44" fontSize="10" fontWeight="700" fill="#d1d5db">{doneCooking ? "Done!" : "Cooking…"}</text>
+          <FitText en={en(doneCooking ? "roti_done" : "roti_cooking")} x="20" y="44" fontSize="10" fontWeight="700" fill="#d1d5db">{s(doneCooking ? "roti_done" : "roti_cooking")}</FitText>
         </svg>
       </div>
 
@@ -348,12 +351,10 @@ function ChapatiPuff({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
-          {isAnomaly ? "😕 Too thin on low heat: no puff!" : puffAmount > 50 ? "🎈 The chapati puffed up!" : "Watch the chapati…"}
+          {s(isAnomaly ? "roti_no_puff" : puffAmount > 50 ? "roti_puffed" : "roti_watch")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "The thin dough dried out before the water inside could turn into steam."
-            : "High heat turns the water inside the dough into steam. The steam blows it up like a balloon."}
+          {s(isAnomaly ? "roti_thin_why" : "roti_why")}
         </p>
       </div>
     </div>

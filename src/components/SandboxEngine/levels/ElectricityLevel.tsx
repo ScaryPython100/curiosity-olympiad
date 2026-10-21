@@ -3,10 +3,14 @@
 import React, { useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
 import { ObservationSpeaker } from "@/components/ReadAloud";
+import { FitText, useSceneText } from '../SceneText';
+
+const OBJECT_KEY = { Nail: "magnet_nail", Coin: "magnet_coin", Wood: "magnet_wood" } as const;
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
 function CombHair({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("electricity");
   const [rubCount, setRubCount] = useState(0);
   const [humidity, setHumidity] = useState(20);
   const [testing, setTesting] = useState(false);
@@ -45,12 +49,12 @@ function CombHair({ recordAction }: { recordAction: RecordAction }) {
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex flex-col gap-0.5 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-sky-300">💧 Wet air (humidity)</span>
+            <span className="font-bold text-sky-300">{s("comb_humidity")}</span>
             <span className="text-xs font-mono text-gray-300">{humidity}% {humidity > 70 ? "🌧️" : "☀️"}</span>
           </div>
           <input
             type="range" min="10" max="90" step="20" value={humidity}
-            aria-label="Humidity"
+            aria-label={s("comb_humidity_slider")}
             onChange={e => { setHumidity(parseInt(e.target.value)); recordAction('changed_humidity', { val: parseInt(e.target.value) }); }}
           />
         </div>
@@ -60,20 +64,20 @@ function CombHair({ recordAction }: { recordAction: RecordAction }) {
             disabled={testing}
             className="flex-1 bg-yellow-600 hover:bg-yellow-500 active:scale-95 text-white font-black px-4 rounded-xl shadow text-sm transition-transform"
           >
-            ✋ RUB ({rubCount})
+            {s("comb_rub", { n: rubCount })}
           </button>
           <button
             onClick={handleTest}
             disabled={testing || rubCount === 0}
             className="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 active:scale-95 text-white font-black px-4 rounded-xl shadow text-sm transition-transform"
           >
-            📄 TEST
+            {s("comb_test")}
           </button>
         </div>
       </div>
 
       <div className={`relative flex-1 min-h-[220px] flex items-end ${humidity > 70 ? "bg-gradient-to-b from-slate-600 to-slate-400" : "bg-gradient-to-b from-amber-200 to-amber-50"}`}>
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`Comb picked up ${testing ? bitsPickedUp : 0} pieces of paper`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("comb_pic", { n: testing ? bitsPickedUp : 0 })}>
           {humidity > 70 && [...Array(10)].map((_, i) => (
             <line key={i} x1={20 + i * 34} y1={10 + (i % 3) * 8} x2={16 + i * 34} y2={22 + (i % 3) * 8} stroke="#1d4ed8" strokeWidth="2" opacity="0.6" />
           ))}
@@ -114,10 +118,10 @@ function CombHair({ recordAction }: { recordAction: RecordAction }) {
           </g>
 
           {/* Charge meter */}
-          <text x="236" y="30" fontSize="10" fontWeight="700" fill="#374151">Charge on comb</text>
+          <FitText en={en("comb_charge")} x="236" y="30" fontSize="10" fontWeight="700" fill="#374151">{s("comb_charge")}</FitText>
           <rect x="236" y="36" width="92" height="12" rx="6" fill="#1f2937" />
           <rect x="236" y="36" width={92 * charge} height="12" rx="6" fill="#facc15" />
-          {humidity > 70 && rubCount > 0 && <text x="236" y="62" fontSize="10" fontWeight="700" fill="#1e3a8a">leaking into wet air…</text>}
+          {humidity > 70 && rubCount > 0 && <FitText en={en("comb_leaking")} x="236" y="62" fontSize="10" fontWeight="700" fill="#1e3a8a">{s("comb_leaking")}</FitText>}
         </svg>
       </div>
 
@@ -125,12 +129,10 @@ function CombHair({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-yellow-300 block">
-          {isAnomaly && testing ? "🤔 Why didn't the paper jump up?" : testing ? `📄 The comb lifted ${bitsPickedUp} pieces!` : "Rub the comb on the hair, then TEST"}
+          {isAnomaly && testing ? s("comb_no_jump") : testing ? s("comb_lifted", { n: bitsPickedUp }) : s("comb_how")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly && testing
-            ? "Wet air lets the comb's charge leak away, so it cannot pull the paper."
-            : "Rubbing builds up static charge on the comb. A charged comb pulls light paper up."}
+          {s(isAnomaly && testing ? "comb_wet_why" : "comb_why")}
         </p>
       </div>
     </div>
@@ -138,6 +140,7 @@ function CombHair({ recordAction }: { recordAction: RecordAction }) {
 }
 
 function TorchCircuit({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("electricity");
   const [batteries, setBatteries] = useState(1);
   const [wireGap, setWireGap] = useState(false);
 
@@ -152,7 +155,7 @@ function TorchCircuit({ recordAction }: { recordAction: RecordAction }) {
     <div className="flex flex-col h-full w-full">
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex items-center justify-between gap-2">
-          <span className="font-bold text-yellow-300">🔋 Batteries:</span>
+          <span className="font-bold text-yellow-300">{s("torch_batteries")}</span>
           <div className="flex gap-1.5">
             {[1, 2].map(b => (
               <button
@@ -172,12 +175,12 @@ function TorchCircuit({ recordAction }: { recordAction: RecordAction }) {
             onChange={e => { setWireGap(e.target.checked); recordAction('toggled_gap', { val: e.target.checked }); }}
             className="accent-red-500 w-5 h-5"
           />
-          <span>✂️ Make a gap in the wire</span>
+          <span>{s("torch_gap")}</span>
         </label>
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-950 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={isLit ? "The bulb is on" : "The bulb is off"}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s(isLit ? "torch_pic_on" : "torch_pic_off")}>
           {/* Bulb glow */}
           {isLit && <circle cx="170" cy="48" r={40 + batteries * 18} fill="#fde047" opacity={0.12 + batteries * 0.08} />}
 
@@ -189,7 +192,7 @@ function TorchCircuit({ recordAction }: { recordAction: RecordAction }) {
               <path d="M 250 128 L 250 150 L 90 150" stroke="#e5e7eb" strokeWidth="5" fill="none" strokeLinejoin="round" />
               <circle cx="250" cy="100" r="4" fill="#9ca3af" />
               <circle cx="250" cy="128" r="4" fill="#9ca3af" />
-              <text x="262" y="118" fontSize="11" fontWeight="800" fill="#f87171">GAP!</text>
+              <FitText en={en("torch_gap_on_pic")} x="262" y="118" fontSize="11" fontWeight="800" fill="#f87171">{s("torch_gap_on_pic")}</FitText>
             </g>
           ) : (
             <path d="M 250 100 L 250 150 L 90 150" stroke="#e5e7eb" strokeWidth="5" fill="none" strokeLinejoin="round" />
@@ -216,9 +219,9 @@ function TorchCircuit({ recordAction }: { recordAction: RecordAction }) {
             </g>
           ))}
 
-          <text x="170" y="190" textAnchor="middle" fontSize="11" fontWeight="700" fill="#9ca3af">
-            {isLit ? "The loop is complete: current flows" : "The loop is broken: no current"}
-          </text>
+          <FitText en={en(isLit ? "torch_loop_done" : "torch_loop_broken")} x="170" y="190" textAnchor="middle" fontSize="11" fontWeight="700" fill="#9ca3af">
+            {s(isLit ? "torch_loop_done" : "torch_loop_broken")}
+          </FitText>
         </svg>
       </div>
 
@@ -226,14 +229,10 @@ function TorchCircuit({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-yellow-300 block">
-          {isAnomaly ? "🤔 Still dark, even with 2 batteries!" : isLit ? "💡 The torch is ON!" : "🌑 The torch is OFF"}
+          {s(isAnomaly ? "torch_still_dark" : isLit ? "torch_on" : "torch_off")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "Electricity needs a full, unbroken loop. A gap stops it, no matter how many batteries."
-            : isLit
-              ? "Electricity goes round the loop and lights the bulb. This loop is called a circuit."
-              : "Electricity cannot jump across the gap, so the bulb stays dark."}
+          {s(isAnomaly ? "torch_gap_why" : isLit ? "torch_on_why" : "torch_off_why")}
         </p>
       </div>
     </div>
@@ -241,6 +240,7 @@ function TorchCircuit({ recordAction }: { recordAction: RecordAction }) {
 }
 
 function MagnetTest({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("electricity");
   const [distance, setDistance] = useState(100);
   const [testObject, setTestObject] = useState<"Nail" | "Coin" | "Wood">("Nail");
 
@@ -259,7 +259,7 @@ function MagnetTest({ recordAction }: { recordAction: RecordAction }) {
     <div className="flex flex-col h-full w-full">
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex items-center justify-between gap-2">
-          <span className="font-bold text-fuchsia-300">Test:</span>
+          <span className="font-bold text-fuchsia-300">{s("magnet_test")}</span>
           <div className="flex gap-1.5">
             {(["Nail", "Coin", "Wood"] as const).map(obj => (
               <button
@@ -267,26 +267,26 @@ function MagnetTest({ recordAction }: { recordAction: RecordAction }) {
                 onClick={() => { setTestObject(obj); setDistance(100); recordAction('changed_object', { val: obj }); }}
                 className={`px-3 rounded-lg text-xs font-bold ${testObject === obj ? 'bg-fuchsia-500 text-white' : 'bg-gray-800 text-gray-300'}`}
               >
-                {obj === "Nail" ? "🔩 Nail" : obj === "Coin" ? "🪙 ₹5 coin" : "🪵 Wood"}
+                {s(OBJECT_KEY[obj])}
               </button>
             ))}
           </div>
         </div>
         <div className="flex flex-col gap-0.5 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-fuchsia-300">🧲 Move magnet closer →</span>
-            <span className="text-xs font-mono text-gray-300">{distance} cm away</span>
+            <span className="font-bold text-fuchsia-300">{s("magnet_closer")}</span>
+            <span className="text-xs font-mono text-gray-300">{s("magnet_away", { n: distance })}</span>
           </div>
           <input
             type="range" min="10" max="100" step="10" value={closeness}
-            aria-label="Move the magnet closer"
+            aria-label={s("magnet_closer_slider")}
             onChange={e => { const d = 110 - parseInt(e.target.value); setDistance(d); recordAction('changed_distance', { val: d }); }}
           />
         </div>
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-800 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={isAttracted ? "The magnet pulled the nail" : "Nothing moved"}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s(isAttracted ? "magnet_pic_pulled" : "magnet_pic_nothing")}>
           <rect x="0" y="150" width="340" height="70" fill="#78350f" />
           <rect x="0" y="146" width="340" height="6" fill="#a16207" />
 
@@ -318,12 +318,12 @@ function MagnetTest({ recordAction }: { recordAction: RecordAction }) {
             <path d="M 0 -20 L -8 -20 A 20 20 0 0 0 -8 20 L 0 20" fill="none" stroke="#dc2626" strokeWidth="12" transform="scale(-1 1)" />
             <rect x="-14" y="-26" width="12" height="12" fill="#e5e7eb" />
             <rect x="-14" y="14" width="12" height="12" fill="#e5e7eb" />
-            <text x="10" y="-30" textAnchor="middle" fontSize="10" fontWeight="800" fill="#fca5a5">MAGNET</text>
+            <FitText en={en("magnet_label")} x="10" y="-30" textAnchor="middle" fontSize="10" fontWeight="800" fill="#fca5a5">{s("magnet_label")}</FitText>
           </g>
 
-          <text x="170" y="190" textAnchor="middle" fontSize="12" fontWeight="800" fill="#fef3c7">
-            {isAttracted ? "SNAP! It stuck to the magnet" : distance < 40 ? "Nothing happens" : "Bring the magnet closer"}
-          </text>
+          <FitText en={en(isAttracted ? "magnet_snap" : distance < 40 ? "magnet_nothing" : "magnet_bring")} x="170" y="190" textAnchor="middle" fontSize="12" fontWeight="800" fill="#fef3c7">
+            {s(isAttracted ? "magnet_snap" : distance < 40 ? "magnet_nothing" : "magnet_bring")}
+          </FitText>
         </svg>
       </div>
 
@@ -331,12 +331,10 @@ function MagnetTest({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-fuchsia-300 block">
-          {isAnomaly ? "🤔 The coin is metal, but it did not stick!" : isAttracted ? "🧲 The iron nail stuck!" : "Which things does a magnet pull?"}
+          {s(isAnomaly ? "magnet_coin_odd" : isAttracted ? "magnet_nail_stuck" : "magnet_question")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "Not all metals are magnetic. Magnets pull iron and steel, but this coin is made of a different metal."
-            : "Magnets pull things made of iron or steel. You cannot tell just by looking: you have to test."}
+          {s(isAnomaly ? "magnet_coin_why" : "magnet_why")}
         </p>
       </div>
     </div>

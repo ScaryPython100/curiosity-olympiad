@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
 import { ObservationSpeaker } from "@/components/ReadAloud";
+import { FitText, useSceneText } from '../SceneText';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
 // --- SUB-COMPONENTS FOR STRICT CONDITIONAL RENDERING ---
 
 function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("gravity");
   const [fanSpeed, setFanSpeed] = useState(1);
   const [bladeType, setBladeType] = useState<"Flat" | "Angled">("Angled");
 
@@ -29,12 +31,12 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex flex-col gap-1 w-full md:w-auto md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-sky-300">🌀 Fan Speed</span>
-            <span className="text-xs font-mono text-gray-300">Speed {fanSpeed}</span>
+            <span className="font-bold text-sky-300">{s("fan_speed")}</span>
+            <span className="text-xs font-mono text-gray-300">{s("fan_speed_value", { n: fanSpeed })}</span>
           </div>
           <input
             type="range" min="1" max="5" step="1" value={fanSpeed}
-            aria-label="Fan speed"
+            aria-label={s("fan_speed_slider")}
             onChange={(e) => {
               const val = parseInt(e.target.value);
               setFanSpeed(val);
@@ -43,7 +45,7 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
           />
         </div>
         <div className="flex items-center justify-between md:justify-end gap-2 shrink-0 pt-1 md:pt-0 border-t border-gray-800 md:border-t-0">
-          <span className="font-bold text-sky-300 text-xs">Blades:</span>
+          <span className="font-bold text-sky-300 text-xs">{s("fan_blades")}</span>
           <div className="flex gap-1.5">
             {(["Flat", "Angled"] as const).map(bt => (
               <button
@@ -55,7 +57,7 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
                 }}
                 className={`px-4 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${bladeType === bt ? 'bg-sky-500 text-white shadow' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
               >
-                {bt}
+                {s(bt === "Flat" ? "fan_flat" : "fan_angled")}
               </button>
             ))}
           </div>
@@ -63,7 +65,7 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-800 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={breezeReachesChild ? "The breeze reaches the child" : "The breeze does not reach the child"}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s(breezeReachesChild ? "fan_pic_reaches" : "fan_pic_not")}>
           {/* Room */}
           <rect x="0" y="0" width="340" height="12" fill="#475569" />
           <rect x="0" y="196" width="340" height="24" fill="#78716c" />
@@ -120,9 +122,9 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
           <rect x="158" y="160" width="24" height="22" rx="6" fill="#f97316" />
           <circle cx="170" cy={HEAD_Y} r="13" fill="#fcd34d" />
           <text x="170" y={HEAD_Y + 5} textAnchor="middle" fontSize="15">{breezeReachesChild ? "😊" : "🥵"}</text>
-          <text x="236" y="168" fontSize="11" fontWeight="700" fill={breezeReachesChild ? "#7dd3fc" : "#fca5a5"}>
-            {breezeReachesChild ? "Cool breeze!" : "Too hot!"}
-          </text>
+          <FitText en={en(breezeReachesChild ? "fan_cool" : "fan_hot")} x="236" y="168" fontSize="11" fontWeight="700" fill={breezeReachesChild ? "#7dd3fc" : "#fca5a5"}>
+            {s(breezeReachesChild ? "fan_cool" : "fan_hot")}
+          </FitText>
 
           <style>{`
             @keyframes fan-blade-spin { 0% { transform: scaleX(1); } 50% { transform: scaleX(-1); } 100% { transform: scaleX(1); } }
@@ -135,14 +137,10 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
       <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
         <ObservationSpeaker />
         <span className="text-sm font-bold text-sky-300 block">
-          {isAnomaly ? "🤔 Why is there no breeze?" : breezeReachesChild ? "💨 The breeze reaches you!" : "Can the air reach the child?"}
+          {s(isAnomaly ? "fan_no_breeze" : breezeReachesChild ? "fan_reaches" : "fan_question")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "The fan is at top speed, but flat blades cannot push air down. Blades must be tilted."
-            : bladeType === "Flat"
-              ? "Flat blades only slice through the air. Try angled blades."
-              : "Faster spinning blades push more air down towards you."}
+          {s(isAnomaly ? "fan_no_breeze_why" : bladeType === "Flat" ? "fan_flat_why" : "fan_angled_why")}
         </p>
       </div>
     </div>
@@ -150,6 +148,7 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
 }
 
 function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("gravity");
   const [hitPower, setHitPower] = useState(50);
   const [batAngle, setBatAngle] = useState(45);
   const [distance, setDistance] = useState(0);
@@ -206,31 +205,31 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex flex-col gap-1 w-full md:w-auto md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-red-300">💪 Hit Power</span>
+            <span className="font-bold text-red-300">{s("bat_power")}</span>
             <span className="text-xs font-mono text-gray-300">{hitPower}%</span>
           </div>
           <input
             type="range" min="10" max="100" step="10" value={hitPower}
-            aria-label="Hit power"
+            aria-label={s("bat_power_slider")}
             onChange={e => { const val = parseInt(e.target.value); setHitPower(val); recordAction('changed_hit_power', { val }); }}
           />
         </div>
         <div className="flex flex-col gap-1 w-full md:w-auto md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-red-300">📐 Hit Angle</span>
+            <span className="font-bold text-red-300">{s("bat_angle")}</span>
             <span className="text-xs font-mono text-gray-300">{batAngle}°</span>
           </div>
           <input
             type="range" min="0" max="90" step="15" value={batAngle}
-            aria-label="Hit angle"
+            aria-label={s("bat_angle_slider")}
             onChange={e => { const val = parseInt(e.target.value); setBatAngle(val); recordAction('changed_bat_angle', { val }); }}
           />
         </div>
-        <button onClick={calculateHit} className="w-full md:w-auto bg-red-600 hover:bg-red-500 text-white font-black py-2 px-5 rounded-xl shadow text-sm shrink-0 cursor-pointer active:scale-95">🏏 HIT!</button>
+        <button onClick={calculateHit} className="w-full md:w-auto bg-red-600 hover:bg-red-500 text-white font-black py-2 px-5 rounded-xl shadow text-sm shrink-0 cursor-pointer active:scale-95">{s("bat_hit")}</button>
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-gradient-to-b from-sky-400 to-sky-200 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`Ball travelled ${Math.round(rollM || distance)} metres`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("bat_pic", { n: Math.round(rollM || distance) })}>
           {/* Ground with distance marks */}
           <rect x="0" y={GROUND_Y} width="340" height={220 - GROUND_Y} fill="#16a34a" />
           {[20, 40, 60, 80, 100].map((m) => (
@@ -243,7 +242,7 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
           {/* Boundary rope */}
           <line x1={boundaryX} y1={GROUND_Y - 30} x2={boundaryX} y2={GROUND_Y} stroke="#ffffff" strokeWidth="2" strokeDasharray="4 3" />
           <rect x={boundaryX - 26} y={GROUND_Y - 44} width="52" height="14" rx="7" fill="#ffffff" opacity="0.9" />
-          <text x={boundaryX} y={GROUND_Y - 34} textAnchor="middle" fontSize="9" fontWeight="700" fill="#166534">Boundary</text>
+          <FitText en={en("bat_boundary")} x={boundaryX} y={GROUND_Y - 34} textAnchor="middle" fontSize="9" fontWeight="700" fill="#166534">{s("bat_boundary")}</FitText>
 
           {/* Batsman */}
           <circle cx="28" cy={GROUND_Y - 52} r="8" fill="#fcd34d" />
@@ -275,19 +274,13 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
         <ObservationSpeaker />
         <span className="text-sm font-bold text-gray-100 block">
           {!flight
-            ? "Press HIT! to bat"
+            ? s("bat_press")
             : flight.angle === 0
-              ? `The ball rolled ${Math.round(rollM)} m on the ground. It did not fly.`
-              : isSix
-                ? `🎉 SIX! The ball flew ${Math.round(distance)} m`
-                : `The ball flew ${Math.round(distance)} m`}
+              ? s("bat_rolled", { n: Math.round(rollM) })
+              : s(isSix ? "bat_six" : "bat_flew", { n: Math.round(distance) })}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {flight && flight.angle === 0
-            ? "Hit flat, the ball only rolls. Without an angle, it cannot fly up into the air."
-            : flight && flight.angle === 90
-              ? "Straight up! Gravity pulls it back down right where it started."
-              : "Gravity always pulls the ball back down. Change power and angle to hit further."}
+          {s(flight && flight.angle === 0 ? "bat_flat_why" : flight && flight.angle === 90 ? "bat_up_why" : "bat_why")}
         </p>
       </div>
     </div>
@@ -295,6 +288,7 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
 }
 
 function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("gravity");
   const [roofHeight, setRoofHeight] = useState(50);
   const [isVacuum, setIsVacuum] = useState(false);
   const [falling, setFalling] = useState(false);
@@ -347,12 +341,12 @@ function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex flex-col gap-1 w-full md:w-auto md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-purple-300">🏫 Roof Height</span>
+            <span className="font-bold text-purple-300">{s("drop_roof")}</span>
             <span className="text-xs font-mono text-gray-300">{roofHeight} m</span>
           </div>
           <input
             type="range" min="30" max="80" step="10" value={roofHeight} disabled={falling}
-            aria-label="Roof height in metres"
+            aria-label={s("drop_roof_slider")}
             onChange={e => { const val = parseInt(e.target.value); setRoofHeight(val); setLandedTimes(null); setProgress({ stone: 0, leaf: 0 }); recordAction('changed_roof_height', { val }); }}
           />
         </div>
@@ -365,14 +359,14 @@ function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
               onChange={(e) => { setIsVacuum(e.target.checked); setLandedTimes(null); setProgress({ stone: 0, leaf: 0 }); recordAction('toggled_vacuum', { val: e.target.checked }); }}
               className="accent-purple-500 w-5 h-5 rounded cursor-pointer"
             />
-            <span className="font-bold text-gray-200 text-xs">No air (vacuum)</span>
+            <span className="font-bold text-gray-200 text-xs">{s("drop_no_air")}</span>
           </label>
-          <button onClick={handleDrop} disabled={falling} className="bg-purple-600 hover:bg-purple-500 disabled:bg-gray-700 text-white font-black py-1.5 px-5 rounded-xl shadow text-sm cursor-pointer active:scale-95">DROP</button>
+          <button onClick={handleDrop} disabled={falling} className="bg-purple-600 hover:bg-purple-500 disabled:bg-gray-700 text-white font-black py-1.5 px-5 rounded-xl shadow text-sm cursor-pointer active:scale-95">{s("drop_button")}</button>
         </div>
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-gradient-to-b from-sky-300 to-sky-100 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label="Stone and leaf falling from a roof">
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("drop_pic")}>
           {/* Ground */}
           <rect x="0" y={GROUND_Y} width="340" height={220 - GROUND_Y} fill="#15803d" />
 
@@ -385,7 +379,7 @@ function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
               <rect x="98" y={ROOF_Y + 14 + i * 36} width="18" height="14" fill="#7dd3fc" />
             </g>
           ))}
-          <text x="85" y={GROUND_Y - 6} textAnchor="middle" fontSize="9" fontWeight="700" fill="#475569">SCHOOL</text>
+          <FitText en={en("drop_school")} x="85" y={GROUND_Y - 6} textAnchor="middle" fontSize="9" fontWeight="700" fill="#475569">{s("drop_school")}</FitText>
 
           {/* Height marker */}
           <line x1="20" y1={ROOF_Y} x2="20" y2={GROUND_Y} stroke="#334155" strokeWidth="1.5" />
@@ -395,7 +389,7 @@ function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
           {isVacuum && (
             <g>
               <rect x="150" y="8" width="180" height={GROUND_Y - 8} rx="10" fill="#e0f2fe" fillOpacity="0.25" stroke="#0284c7" strokeWidth="2" strokeDasharray="6 4" />
-              <text x="240" y="24" textAnchor="middle" fontSize="10" fontWeight="700" fill="#0369a1">NO AIR INSIDE</text>
+              <FitText en={en("drop_no_air_inside")} x="240" y="24" textAnchor="middle" fontSize="10" fontWeight="700" fill="#0369a1">{s("drop_no_air_inside")}</FitText>
             </g>
           )}
 
@@ -404,14 +398,14 @@ function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
 
           {/* Stone */}
           <circle cx="205" cy={stoneY} r="8" fill="#6b7280" stroke="#374151" strokeWidth="2" />
-          <text x="205" y={GROUND_Y + 15} textAnchor="middle" fontSize="10" fontWeight="700" fill="#f0fdf4">Stone</text>
+          <FitText en={en("drop_stone")} x="205" y={GROUND_Y + 15} textAnchor="middle" fontSize="10" fontWeight="700" fill="#f0fdf4">{s("drop_stone")}</FitText>
 
           {/* Leaf */}
           <g transform={`translate(${275 + leafSway} ${leafY}) rotate(${leafSway * 2})`}>
             <path d="M -12 0 Q 0 -9 12 0 Q 0 9 -12 0 Z" fill="#22c55e" stroke="#15803d" strokeWidth="1.5" />
             <line x1="-12" y1="0" x2="12" y2="0" stroke="#15803d" strokeWidth="1" />
           </g>
-          <text x="275" y={GROUND_Y + 15} textAnchor="middle" fontSize="10" fontWeight="700" fill="#f0fdf4">Leaf</text>
+          <FitText en={en("drop_leaf")} x="275" y={GROUND_Y + 15} textAnchor="middle" fontSize="10" fontWeight="700" fill="#f0fdf4">{s("drop_leaf")}</FitText>
 
           {/* Landing times */}
           {landedTimes && (
@@ -429,14 +423,10 @@ function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
       <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
         <ObservationSpeaker />
         <span className="text-sm font-bold text-purple-300 block">
-          {landedTimes
-            ? isVacuum ? "🤯 Both landed at the same time!" : "🪨 The stone landed first"
-            : isVacuum ? "No air: drop them!" : "Normal air: drop them!"}
+          {s(landedTimes ? (isVacuum ? "drop_same_time" : "drop_stone_first") : isVacuum ? "drop_try_vacuum" : "drop_try_air")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isVacuum
-            ? "With no air to push back, gravity pulls the heavy stone and the light leaf at the same speed."
-            : "Air pushes up on the wide leaf and slows it down. Tick “No air” to remove the air."}
+          {s(isVacuum ? "drop_vacuum_why" : "drop_air_why")}
         </p>
       </div>
     </div>

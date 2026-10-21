@@ -15,6 +15,8 @@ import { HumanBodyLevel } from './levels/HumanBodyLevel';
 import { PlantsGrowthLevel } from './levels/PlantsGrowthLevel';
 import { DayNightSeasonsLevel } from './levels/DayNightSeasonsLevel';
 import { SolarSystemScaleLevel } from './levels/SolarSystemScaleLevel';
+import { SceneTextProvider } from './SceneText';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface SandboxEngineProps {
   onLevelChange?: (index: number) => void;
@@ -28,6 +30,8 @@ interface SandboxEngineProps {
   onAnomaly?: (experimentIndex: number) => void;
   /** Experiment names in the student's language (falls back to English). */
   experimentNames?: string[];
+  /** Language of the text inside the experiments ("en" for English); defaults to the student's language. */
+  textLang?: string;
 }
 
 export const EXPERIMENT_LABELS: Record<number, string[]> = {
@@ -55,8 +59,10 @@ export default function SandboxEngine({
   onSubmitComplete,
   onTelemetryUpdate,
   onAnomaly,
-  experimentNames
+  experimentNames,
+  textLang
 }: SandboxEngineProps = {}) {
+  const { language } = useLanguage();
   const { telemetryData, recordAction, resetTelemetry } = useTelemetry();
   
   const [internalLevelIndex, setInternalLevelIndex] = useState(0);
@@ -168,7 +174,7 @@ export default function SandboxEngine({
 
       {/* Dynamic Physics Level Container */}
       <div className="w-full rounded-2xl overflow-hidden shadow-md border-2 border-gray-800 bg-gray-900 flex flex-col min-h-[380px] sm:min-h-[420px] flex-1 relative">
-        {renderLevel()}
+        <SceneTextProvider lang={textLang ?? language}>{renderLevel()}</SceneTextProvider>
       </div>
     </div>
   );

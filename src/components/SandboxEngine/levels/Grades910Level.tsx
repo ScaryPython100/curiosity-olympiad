@@ -3,25 +3,31 @@
 import React, { useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
 import { ObservationSpeaker } from "@/components/ReadAloud";
+import { FitText, useSceneText } from '../SceneText';
+
+const SOIL_KEY = { Sandy: "soil_sandy", Clay: "soil_clay", Loamy: "soil_loamy" } as const;
+const TIME_KEY = { Morning: "cooker_morning", Noon: "cooker_noon", "Late Afternoon": "cooker_evening" } as const;
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
 function SoilRain({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("grades910");
   const [soil, setSoil] = useState<"Sandy" | "Clay" | "Loamy">("Loamy");
   const [rain, setRain] = useState(50);
 
-  let status = "Ready to sow in 2 days";
+  let statusKey: "soil_status_ready" | "soil_status_flooded" | "soil_status_dried" | "soil_status_perfect" = "soil_status_ready";
   let isAnomaly = false;
 
   if (soil === "Clay" && rain >= 30) {
-    status = "Flooded! Cannot sow for 10+ days.";
+    statusKey = "soil_status_flooded";
     isAnomaly = true;
   } else if (soil === "Sandy") {
-    status = "Dried out! Water drained immediately.";
+    statusKey = "soil_status_dried";
     isAnomaly = true;
   } else if (soil === "Loamy") {
-    status = "Perfect moisture balance. Ready to sow in 2 days.";
+    statusKey = "soil_status_perfect";
   }
+  const status = s(statusKey);
 
   useAnomalySignal(isAnomaly, recordAction);
   const SOIL_TOP = 110;
@@ -37,27 +43,27 @@ function SoilRain({ recordAction }: { recordAction: RecordAction }) {
     <div className="flex flex-col h-full w-full">
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex items-center justify-between gap-2">
-          <span className="font-bold text-amber-300">Soil:</span>
+          <span className="font-bold text-amber-300">{s("soil_label")}</span>
           <div className="flex gap-1.5">
-            {(["Sandy", "Clay", "Loamy"] as const).map(s => (
+            {(["Sandy", "Clay", "Loamy"] as const).map(kind => (
               <button
-                key={s}
-                onClick={() => { setSoil(s); recordAction('changed_soil', { val: s }); }}
-                className={`px-3 rounded-lg text-xs font-bold ${soil === s ? 'bg-emerald-600 text-white' : 'bg-gray-800 text-gray-300'}`}
+                key={kind}
+                onClick={() => { setSoil(kind); recordAction('changed_soil', { val: kind }); }}
+                className={`px-3 rounded-lg text-xs font-bold ${soil === kind ? 'bg-emerald-600 text-white' : 'bg-gray-800 text-gray-300'}`}
               >
-                {s}
+                {s(SOIL_KEY[kind])}
               </button>
             ))}
           </div>
         </div>
         <div className="flex flex-col gap-0.5 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-sky-300">🌧️ Rainfall</span>
+            <span className="font-bold text-sky-300">{s("soil_rain")}</span>
             <span className="text-xs font-mono text-gray-300">{rain} mm</span>
           </div>
           <input
             type="range" min="10" max="100" step="10" value={rain}
-            aria-label="Rainfall in millimetres"
+            aria-label={s("soil_rain_slider")}
             onChange={e => { setRain(parseInt(e.target.value)); recordAction('changed_rain', { val: parseInt(e.target.value) }); }}
           />
         </div>
@@ -105,12 +111,12 @@ function SoilRain({ recordAction }: { recordAction: RecordAction }) {
                 <ellipse cx="7" cy="-24" rx="7" ry="3.5" fill="#22c55e" transform="rotate(25 7 -24)" />
               </g>
             )}
-            {soil === "Sandy" && <text x="0" y="-12" textAnchor="middle" fontSize="10" fontWeight="700" fill="#7c2d12">dry 🥀</text>}
+            {soil === "Sandy" && <FitText en={en("soil_dry_seed")} x="0" y="-12" textAnchor="middle" fontSize="10" fontWeight="700" fill="#7c2d12">{s("soil_dry_seed")}</FitText>}
           </g>
 
           {/* Status */}
           <rect x="12" y="186" width="316" height="24" rx="12" fill="#ffffff" opacity="0.92" />
-          <text x="170" y="202" textAnchor="middle" fontSize="11" fontWeight="800" fill={isAnomaly ? "#dc2626" : "#047857"}>{status}</text>
+          <FitText en={en(statusKey)} x="170" y="202" textAnchor="middle" fontSize="11" fontWeight="800" fill={isAnomaly ? "#dc2626" : "#047857"}>{status}</FitText>
         </svg>
       </div>
 
@@ -118,14 +124,10 @@ function SoilRain({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
-          {flooded ? "🌊 Clay holds too much water!" : soil === "Sandy" ? "🏜️ Sand lets the water run away" : "🌱 Just right for sowing"}
+          {s(flooded ? "soil_flooded" : soil === "Sandy" ? "soil_sand_drains" : "soil_just_right")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {flooded
-            ? "Water cannot sink into tight clay, so it floods the top and the seed cannot breathe."
-            : soil === "Sandy"
-              ? "Sand has big gaps. Water drains down fast and the roots stay dry."
-              : "Loamy soil keeps some water and drains the rest: a good balance for seeds."}
+          {s(flooded ? "soil_flooded_why" : soil === "Sandy" ? "soil_sand_why" : "soil_loamy_why")}
         </p>
       </div>
     </div>
@@ -133,6 +135,7 @@ function SoilRain({ recordAction }: { recordAction: RecordAction }) {
 }
 
 function SolarCooker({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("grades910");
   const [angle, setAngle] = useState(45);
   const [timeOfDay, setTimeOfDay] = useState<"Morning" | "Noon" | "Late Afternoon">("Noon");
 
@@ -160,7 +163,7 @@ function SolarCooker({ recordAction }: { recordAction: RecordAction }) {
     <div className="flex flex-col h-full w-full">
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex items-center justify-between gap-2">
-          <span className="font-bold text-yellow-300">Time:</span>
+          <span className="font-bold text-yellow-300">{s("cooker_time")}</span>
           <div className="flex gap-1.5">
             {(["Morning", "Noon", "Late Afternoon"] as const).map(t => (
               <button
@@ -168,26 +171,26 @@ function SolarCooker({ recordAction }: { recordAction: RecordAction }) {
                 onClick={() => { setTimeOfDay(t); recordAction('changed_time', { val: t }); }}
                 className={`px-2.5 rounded-lg text-xs font-bold ${timeOfDay === t ? 'bg-orange-500 text-white' : 'bg-gray-800 text-gray-300'}`}
               >
-                {t === "Late Afternoon" ? "Evening" : t}
+                {s(TIME_KEY[t])}
               </button>
             ))}
           </div>
         </div>
         <div className="flex flex-col gap-0.5 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-yellow-300">🪞 Mirror Angle</span>
+            <span className="font-bold text-yellow-300">{s("cooker_mirror")}</span>
             <span className="text-xs font-mono text-gray-300">{angle}°</span>
           </div>
           <input
             type="range" min="0" max="90" step="15" value={angle}
-            aria-label="Mirror angle"
+            aria-label={s("cooker_mirror_slider")}
             onChange={e => { setAngle(parseInt(e.target.value)); recordAction('changed_angle', { val: parseInt(e.target.value) }); }}
           />
         </div>
       </div>
 
       <div className={`relative flex-1 min-h-[220px] flex items-end ${timeOfDay === "Noon" ? "bg-gradient-to-b from-sky-400 to-sky-200" : "bg-gradient-to-b from-orange-300 to-amber-100"}`}>
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`Cooker is ${temp} degrees`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("cooker_pic", { n: temp })}>
           {/* Sky path of the sun */}
           <path d="M 30 100 Q 170 -20 310 100" stroke="#ffffff" strokeWidth="1.5" strokeDasharray="4 5" fill="none" opacity="0.7" />
           <circle cx={sun.x} cy={sun.y} r="16" fill="#facc15" stroke="#f59e0b" strokeWidth="2" />
@@ -218,7 +221,7 @@ function SolarCooker({ recordAction }: { recordAction: RecordAction }) {
 
           {/* Thermometer badge */}
           <rect x="236" y="140" width="92" height="40" rx="12" fill="#111827" />
-          <text x="282" y="157" textAnchor="middle" fontSize="10" fontWeight="700" fill="#d1d5db">Cooker</text>
+          <FitText en={en("cooker_label")} x="282" y="157" textAnchor="middle" fontSize="10" fontWeight="700" fill="#d1d5db">{s("cooker_label")}</FitText>
           <text x="282" y="173" textAnchor="middle" fontSize="15" fontWeight="800" fill={focused ? "#f87171" : "#e5e7eb"}>{temp}°C</text>
         </svg>
       </div>
@@ -227,14 +230,10 @@ function SolarCooker({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-yellow-300 block">
-          {isAnomaly ? "🤔 The noon angle does not work now!" : focused ? "🍲 Cooking hot!" : "Point the mirror at the sun"}
+          {s(isAnomaly ? "cooker_noon_fails" : focused ? "cooker_hot" : "cooker_point")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "The sun has moved low in the sky, so the mirror bounces light away from the pot."
-            : focused
-              ? "The mirror bounces extra sunlight into the pot."
-              : "The sun moves across the sky. Change the mirror angle to follow it."}
+          {s(isAnomaly ? "cooker_low_sun_why" : focused ? "cooker_hot_why" : "cooker_follow_why")}
         </p>
       </div>
     </div>
@@ -242,6 +241,7 @@ function SolarCooker({ recordAction }: { recordAction: RecordAction }) {
 }
 
 function BiogasPlant({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("grades910");
   const [dungRatio, setDungRatio] = useState(20);
   const [temp, setTemp] = useState(15);
 
@@ -260,40 +260,40 @@ function BiogasPlant({ recordAction }: { recordAction: RecordAction }) {
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex flex-col gap-0.5 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-amber-300">🐄 Dung Load</span>
+            <span className="font-bold text-amber-300">{s("gas_dung")}</span>
             <span className="text-xs font-mono text-gray-300">{dungRatio}%</span>
           </div>
           <input
             type="range" min="20" max="100" step="20" value={dungRatio}
-            aria-label="Dung load"
+            aria-label={s("gas_dung_slider")}
             onChange={e => { setDungRatio(parseInt(e.target.value)); recordAction('changed_dung', { val: parseInt(e.target.value) }); }}
           />
         </div>
         <div className="flex flex-col gap-0.5 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-cyan-300">🌡️ Tank Temperature</span>
+            <span className="font-bold text-cyan-300">{s("gas_temp")}</span>
             <span className="text-xs font-mono text-gray-300">{temp}°C</span>
           </div>
           <input
             type="range" min="10" max="40" step="5" value={temp}
-            aria-label="Tank temperature"
+            aria-label={s("gas_temp_slider")}
             onChange={e => { setTemp(parseInt(e.target.value)); recordAction('changed_temp', { val: parseInt(e.target.value) }); }}
           />
         </div>
       </div>
 
       <div className={`relative flex-1 min-h-[220px] flex items-end ${isWinter ? "bg-gradient-to-b from-slate-500 to-slate-300" : "bg-gradient-to-b from-sky-400 to-amber-100"}`}>
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`Gas output ${Math.round(gas)} cubic metres per day`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("gas_pic", { n: Math.round(gas) })}>
           {/* Season marker */}
           {isWinter ? (
             <g>
               <text x="26" y="34" fontSize="22">❄️</text>
-              <text x="54" y="30" fontSize="11" fontWeight="800" fill="#1e293b">Winter: cold</text>
+              <FitText en={en("gas_winter")} x="54" y="30" fontSize="11" fontWeight="800" fill="#1e293b">{s("gas_winter")}</FitText>
             </g>
           ) : (
             <g>
               <circle cx="36" cy="28" r="13" fill="#facc15" />
-              <text x="56" y="32" fontSize="11" fontWeight="800" fill="#78350f">Summer: warm</text>
+              <FitText en={en("gas_summer")} x="56" y="32" fontSize="11" fontWeight="800" fill="#78350f">{s("gas_summer")}</FitText>
             </g>
           )}
 
@@ -313,7 +313,7 @@ function BiogasPlant({ recordAction }: { recordAction: RecordAction }) {
               </circle>
             ))}
           </g>
-          <text x="130" y="105" textAnchor="middle" fontSize="10" fontWeight="700" fill="#bef264">gas</text>
+          <FitText en={en("gas_label")} x="130" y="105" textAnchor="middle" fontSize="10" fontWeight="700" fill="#bef264">{s("gas_label")}</FitText>
 
           {/* Gas pipe to the stove */}
           <path d="M 130 70 L 130 52 L 262 52 L 262 150" stroke="#9ca3af" strokeWidth="5" fill="none" />
@@ -322,7 +322,7 @@ function BiogasPlant({ recordAction }: { recordAction: RecordAction }) {
             <path d={`M 262 150 C ${256 - flame * 6} ${144 - flame * 10} ${258} ${136 - flame * 22} 262 ${130 - flame * 30} C 266 ${136 - flame * 22} ${268 + flame * 6} ${144 - flame * 10} 262 150 Z`} fill="#3b82f6" />
           )}
           <rect x="236" y="170" width="92" height="18" rx="9" fill="#111827" />
-          <text x="282" y="183" textAnchor="middle" fontSize="10" fontWeight="800" fill="#bef264">{Math.round(gas)} m³ gas/day</text>
+          <FitText en={en("gas_per_day", { n: Math.round(gas) })} x="282" y="183" textAnchor="middle" fontSize="10" fontWeight="800" fill="#bef264">{s("gas_per_day", { n: Math.round(gas) })}</FitText>
         </svg>
       </div>
 
@@ -330,14 +330,10 @@ function BiogasPlant({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-cyan-300 block">
-          {isAnomaly ? "🤔 More dung, but almost no extra gas!" : isWinter ? "❄️ Cold tank: very little gas" : "🔥 Warm tank: lots of gas"}
+          {s(isAnomaly ? "gas_no_extra" : isWinter ? "gas_cold" : "gas_warm")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "The tiny bacteria that make gas work very slowly in the cold. More food does not help: warmth does."
-            : isWinter
-              ? "Bacteria slow down below 20°C. Keeping the tank warm helps."
-              : "Warm bacteria eat the dung quickly and make more gas for cooking."}
+          {s(isAnomaly ? "gas_cold_bacteria_why" : isWinter ? "gas_cold_why" : "gas_warm_why")}
         </p>
       </div>
     </div>

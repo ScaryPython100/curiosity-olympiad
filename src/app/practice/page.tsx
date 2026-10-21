@@ -1950,6 +1950,7 @@ function PracticeContent() {
                   onTelemetryUpdate={handleTelemetryUpdate}
                   onAnomaly={handleAnomaly}
                   experimentNames={questionFile?.experiments?.[String(selectedMockTestId)]}
+                  textLang={showEnglish ? "en" : language}
                 />
               </div>
             </div>

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
 import { playHeartbeat } from '@/utils/webAudio';
 import { ObservationSpeaker } from "@/components/ReadAloud";
+import { FitText, useSceneText } from '../SceneText';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -11,15 +12,16 @@ type RecordAction = (actionType: string, actionDetails?: any) => void;
 // EXPERIMENT 1: PULSE RATE & HEARTBEAT
 // ==========================================
 function PulseHeartbeat({ recordAction }: { recordAction: RecordAction }) {
+  const { s } = useSceneText("body");
   type Activity = "Resting" | "Brisk Walk" | "Sprint";
   const [activity, setActivity] = useState<Activity>("Resting");
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const bpmMap: Record<Activity, { bpm: number; o2: number; label: string }> = {
-    "Resting": { bpm: 72, o2: 250, label: "Sitting" },
-    "Brisk Walk": { bpm: 110, o2: 750, label: "Walking fast" },
-    "Sprint": { bpm: 165, o2: 2200, label: "Running fast" }
+  const bpmMap: Record<Activity, { bpm: number; o2: number; label: "pulse_sitting" | "pulse_walking" | "pulse_running" }> = {
+    "Resting": { bpm: 72, o2: 250, label: "pulse_sitting" },
+    "Brisk Walk": { bpm: 110, o2: 750, label: "pulse_walking" },
+    "Sprint": { bpm: 165, o2: 2200, label: "pulse_running" }
   };
 
   const { bpm, o2 } = bpmMap[activity];
@@ -89,18 +91,18 @@ function PulseHeartbeat({ recordAction }: { recordAction: RecordAction }) {
               key={act}
               onClick={() => handleSetActivity(act)}
               className={`px-2 rounded-xl font-bold transition-all text-xs cursor-pointer ${activity === act ? 'bg-rose-600 text-white shadow-md' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
-              aria-label={`Choose ${bpmMap[act].label}`}
+              aria-label={s("pulse_choose", { activity: s(bpmMap[act].label) })}
             >
-              {act === "Resting" ? "🪑 Sit" : act === "Brisk Walk" ? "🚶 Walk" : "🏃 Run"}
+              {s(act === "Resting" ? "pulse_sit" : act === "Brisk Walk" ? "pulse_walk" : "pulse_run")}
             </button>
           ))}
         </div>
         <button
           onClick={handleListenHeartbeat}
           className={`px-4 rounded-xl font-black text-sm shadow transition-all cursor-pointer ${isPlayingAudio ? 'bg-amber-500 text-gray-950 scale-95' : 'bg-rose-700 hover:bg-rose-600 text-white'}`}
-          aria-label="Listen to the heartbeat"
+          aria-label={s("pulse_listen_label")}
         >
-          👂 Listen to the heart
+          {s("pulse_listen")}
         </button>
       </div>
 
@@ -115,16 +117,16 @@ function PulseHeartbeat({ recordAction }: { recordAction: RecordAction }) {
               ❤️
             </span>
             <div>
-              <p className="text-xs text-gray-400 font-bold">Heartbeats</p>
-              <p className="text-xl font-black text-rose-400">{bpm} <span className="text-xs">per minute</span></p>
+              <p className="text-xs text-gray-400 font-bold">{s("pulse_heartbeats")}</p>
+              <p className="text-xl font-black text-rose-400">{bpm} <span className="text-xs">{s("pulse_per_minute")}</span></p>
             </div>
           </div>
           <span className="text-3xl" aria-hidden>{activity === "Resting" ? "🪑" : activity === "Brisk Walk" ? "🚶" : "🏃"}</span>
         </div>
         <div className="w-full max-w-md">
           <div className="flex justify-between text-xs font-bold text-gray-400 mb-1">
-            <span>Air your muscles need</span>
-            <span className="text-emerald-400">{o2 < 500 ? "a little" : o2 < 1500 ? "more" : "a lot!"}</span>
+            <span>{s("pulse_air_needed")}</span>
+            <span className="text-emerald-400">{s(o2 < 500 ? "pulse_air_little" : o2 < 1500 ? "pulse_air_more" : "pulse_air_lot")}</span>
           </div>
           <div className="h-3 rounded-full bg-slate-800 overflow-hidden">
             <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${(o2 / 2200) * 100}%` }} />
@@ -140,12 +142,10 @@ function PulseHeartbeat({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-rose-300 block">
-          {isAnomaly ? "🏃 Running: your heart beats more than twice as fast!" : `${bpmMap[activity].label}: ${bpm} beats a minute`}
+          {isAnomaly ? s("pulse_twice") : s("pulse_beats", { activity: s(bpmMap[activity].label), n: bpm })}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "Working muscles need lots of air and food from the blood, so the heart pumps faster."
-            : "Press “Listen” to hear the lub-dub sound: the heart's doors (valves) shutting."}
+          {s(isAnomaly ? "pulse_run_why" : "pulse_why")}
         </p>
       </div>
     </div>
@@ -156,6 +156,7 @@ function PulseHeartbeat({ recordAction }: { recordAction: RecordAction }) {
 // EXPERIMENT 2: DIAPHRAGM & BALLOON LUNGS
 // ==========================================
 function DiaphragmBalloonLungs({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("body");
   // Diaphragm displacement: 0 (Relaxed/Upwards, Exhale) to 100 (Contracted/Pulled Down, Inhale)
   const [diaphragmPos, setDiaphragmPos] = useState(50);
 
@@ -179,21 +180,21 @@ function DiaphragmBalloonLungs({ recordAction }: { recordAction: RecordAction })
     <div className="flex flex-col h-full w-full">
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col gap-1 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex justify-between items-center">
-          <span className="font-bold text-sky-300">⬇ Pull the bottom sheet down</span>
-          <span className="text-xs font-mono text-gray-300">{isInhaling ? "Breathing in" : isExhaling ? "Breathing out" : "Resting"}</span>
+          <span className="font-bold text-sky-300">{s("lungs_pull")}</span>
+          <span className="text-xs font-mono text-gray-300">{s(isInhaling ? "lungs_in" : isExhaling ? "lungs_out" : "lungs_rest")}</span>
         </div>
         <input
           type="range" min="10" max="95" step="5" value={diaphragmPos}
           onChange={e => handleSlider(parseInt(e.target.value))}
-          aria-label="Pull the diaphragm down"
+          aria-label={s("lungs_slider")}
         />
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-900 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={isInhaling ? "Air goes into the lungs" : isExhaling ? "Air comes out of the lungs" : "Lungs at rest"}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s(isInhaling ? "lungs_pic_in" : isExhaling ? "lungs_pic_out" : "lungs_pic_rest")}>
           {/* Air arrows at the top */}
-          {isInhaling && <g><polygon points="162,4 178,4 170,18" fill="#38bdf8" /><text x="188" y="16" fontSize="11" fontWeight="800" fill="#7dd3fc">air goes IN</text></g>}
-          {isExhaling && <g><polygon points="162,18 178,18 170,4" fill="#f59e0b" /><text x="188" y="16" fontSize="11" fontWeight="800" fill="#fcd34d">air goes OUT</text></g>}
+          {isInhaling && <g><polygon points="162,4 178,4 170,18" fill="#38bdf8" /><FitText en={en("lungs_air_in")} x="188" y="16" fontSize="11" fontWeight="800" fill="#7dd3fc">{s("lungs_air_in")}</FitText></g>}
+          {isExhaling && <g><polygon points="162,18 178,18 170,4" fill="#f59e0b" /><FitText en={en("lungs_air_out")} x="188" y="16" fontSize="11" fontWeight="800" fill="#fcd34d">{s("lungs_air_out")}</FitText></g>}
 
           {/* Jar (chest) */}
           <path d={`M 100 ${SHEET_Y} L 100 70 Q 100 40 130 40 L 210 40 Q 240 40 240 70 L 240 ${SHEET_Y}`} fill="#ffffff" fillOpacity="0.05" stroke="#cbd5e1" strokeWidth="3" />
@@ -203,13 +204,13 @@ function DiaphragmBalloonLungs({ recordAction }: { recordAction: RecordAction })
           {/* Balloon lungs */}
           <ellipse cx="140" cy={84 + lungR} rx={lungR * 0.85} ry={lungR} fill="#f43f5e" opacity="0.9" style={{ transition: 'all 0.3s' }} />
           <ellipse cx="200" cy={84 + lungR} rx={lungR * 0.85} ry={lungR} fill="#f43f5e" opacity="0.9" style={{ transition: 'all 0.3s' }} />
-          <text x="170" y={92 + lungR * 2 + 12} textAnchor="middle" fontSize="10" fontWeight="700" fill="#fda4af">lungs</text>
+          <FitText en={en("lungs_label")} x="170" y={92 + lungR * 2 + 12} textAnchor="middle" fontSize="10" fontWeight="700" fill="#fda4af">{s("lungs_label")}</FitText>
 
           {/* Rubber sheet (diaphragm) */}
           <path d={`M 100 ${SHEET_Y} Q 170 ${SHEET_Y - bulge * 2} 240 ${SHEET_Y}`} stroke="#f59e0b" strokeWidth="6" fill="none" style={{ transition: 'd 0.3s' }} />
           <line x1="170" y1={SHEET_Y - bulge} x2="170" y2="210" stroke="#d97706" strokeWidth="3" />
           <circle cx="170" cy="210" r="6" fill="#d97706" />
-          <text x="252" y={SHEET_Y + 4} fontSize="10" fontWeight="700" fill="#fcd34d">diaphragm</text>
+          <FitText en={en("lungs_diaphragm")} x="252" y={SHEET_Y + 4} fontSize="10" fontWeight="700" fill="#fcd34d">{s("lungs_diaphragm")}</FitText>
         </svg>
       </div>
 
@@ -217,14 +218,10 @@ function DiaphragmBalloonLungs({ recordAction }: { recordAction: RecordAction })
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-sky-300 block">
-          {isAnomaly ? "🫁 Pulled all the way down: big breath in!" : isInhaling ? "🫁 Breathing in" : isExhaling ? "💨 Breathing out" : "Pull the sheet down and watch the lungs"}
+          {s(isAnomaly ? "lungs_big_breath" : isInhaling ? "lungs_breathing_in" : isExhaling ? "lungs_breathing_out" : "lungs_try")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isInhaling
-            ? "Pulling the sheet down makes more space in the jar, so air rushes into the balloons."
-            : isExhaling
-              ? "When the sheet goes back up, the space gets smaller and air is pushed out."
-              : "Lungs have no muscles of their own. The diaphragm under them does the work."}
+          {s(isInhaling ? "lungs_in_why" : isExhaling ? "lungs_out_why" : "lungs_rest_why")}
         </p>
       </div>
     </div>
@@ -235,6 +232,7 @@ function DiaphragmBalloonLungs({ recordAction }: { recordAction: RecordAction })
 // EXPERIMENT 3: PUPIL DILATION REFLEX
 // ==========================================
 function PupilReflex({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("body");
   // Light intensity: 0 (Dark Room) to 100 (Direct Flashlight)
   const [lightIntensity, setLightIntensity] = useState(20);
 
@@ -255,18 +253,18 @@ function PupilReflex({ recordAction }: { recordAction: RecordAction }) {
     <div className="flex flex-col h-full w-full">
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col gap-1 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex justify-between items-center">
-          <span className="font-bold text-amber-300">🔦 Torch brightness</span>
-          <span className="text-xs font-mono text-gray-300">{isConstricted ? "Very bright" : isDilated ? "Dark room" : "Medium"}</span>
+          <span className="font-bold text-amber-300">{s("eye_torch")}</span>
+          <span className="text-xs font-mono text-gray-300">{s(isConstricted ? "eye_very_bright" : isDilated ? "eye_dark_room" : "eye_medium")}</span>
         </div>
         <input
           type="range" min="0" max="100" step="5" value={lightIntensity}
           onChange={e => handleSlider(parseInt(e.target.value))}
-          aria-label="Torch brightness"
+          aria-label={s("eye_torch_slider")}
         />
       </div>
 
       <div className="relative flex-1 min-h-[220px] flex items-end" style={{ backgroundColor: `hsl(222, 47%, ${4 + lightIntensity * 0.12}%)` }}>
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`Pupil is ${pupilDiameterMm} millimetres wide`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("eye_pic", { n: pupilDiameterMm })}>
           {/* Torch + beam */}
           <rect x="6" y="100" width="40" height="22" rx="4" fill="#475569" />
           <rect x="44" y="96" width="10" height="30" rx="2" fill="#94a3b8" />
@@ -284,9 +282,9 @@ function PupilReflex({ recordAction }: { recordAction: RecordAction }) {
 
           {/* Labels */}
           <line x1="246" y1="76" x2="292" y2="40" stroke="#94a3b8" strokeWidth="1" />
-          <text x="294" y="38" fontSize="10" fontWeight="700" fill="#cbd5e1">iris</text>
+          <FitText en={en("eye_iris")} x="294" y="38" fontSize="10" fontWeight="700" fill="#cbd5e1">{s("eye_iris")}</FitText>
           <line x1="200" y1={111 + pupilR} x2="200" y2="196" stroke="#94a3b8" strokeWidth="1" />
-          <text x="200" y="208" textAnchor="middle" fontSize="10" fontWeight="700" fill="#cbd5e1">pupil: {pupilDiameterMm} mm</text>
+          <FitText en={en("eye_pupil", { n: pupilDiameterMm })} x="200" y="208" textAnchor="middle" fontSize="10" fontWeight="700" fill="#cbd5e1">{s("eye_pupil", { n: pupilDiameterMm })}</FitText>
         </svg>
       </div>
 
@@ -294,14 +292,10 @@ function PupilReflex({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
-          {isAnomaly ? "👁️ Bright light: the pupil became tiny!" : isDilated ? "🌑 In the dark, the pupil opens wide" : "Make the torch brighter and watch the black circle"}
+          {s(isAnomaly ? "eye_tiny" : isDilated ? "eye_wide" : "eye_try")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "The coloured part (iris) squeezes the pupil small to protect the inside of your eye from too much light."
-            : isDilated
-              ? "A wide pupil lets in as much light as possible so you can see."
-              : "This happens by itself. You cannot stop your pupil from changing."}
+          {s(isAnomaly ? "eye_tiny_why" : isDilated ? "eye_wide_why" : "eye_why")}
         </p>
       </div>
     </div>

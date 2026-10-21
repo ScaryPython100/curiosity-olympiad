@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
 import { ObservationSpeaker } from "@/components/ReadAloud";
+import { FitText, useSceneText } from '../SceneText';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -10,6 +11,7 @@ type RecordAction = (actionType: string, actionDetails?: any) => void;
 // EXPERIMENT 1: TURMERIC INDICATOR (pH TEST)
 // ==========================================
 function TurmericIndicator({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("kitchen");
   // pH scale: 3 (strong lemon acid) -> 7 (neutral turmeric yellow) -> 11 (soap base deep red)
   const [ph, setPh] = useState(7.0);
   const [drops, setDrops] = useState<{ acid: number; base: number }>({ acid: 0, base: 0 });
@@ -49,7 +51,8 @@ function TurmericIndicator({ recordAction }: { recordAction: RecordAction }) {
     if (ph <= 4.5) return 'rgb(250, 204, 21)'; // Bright yellow
     return 'rgb(234, 179, 8)'; // Turmeric yellow
   };
-  const colorName = isDeepRed ? "Deep red" : isBasic ? "Orange-red" : "Yellow";
+  const colorKey = isDeepRed ? "turmeric_deep_red" : isBasic ? "turmeric_orange_red" : "turmeric_yellow";
+  const colorName = s(colorKey);
   const meterX = 40 + ((ph - 3) / 8) * 260;
 
   return (
@@ -58,28 +61,28 @@ function TurmericIndicator({ recordAction }: { recordAction: RecordAction }) {
         <button
           onClick={handleAddLemon}
           className="flex-1 px-3 bg-amber-400 hover:bg-amber-300 active:scale-95 text-gray-950 font-black rounded-xl shadow transition-all cursor-pointer text-sm"
-          aria-label="Add lemon juice"
+          aria-label={s("turmeric_lemon_label")}
         >
-          🍋 + Lemon
+          {s("turmeric_lemon")}
         </button>
         <button
           onClick={handleAddSoap}
           className="flex-1 px-3 bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-black rounded-xl shadow transition-all cursor-pointer text-sm"
-          aria-label="Add soap water"
+          aria-label={s("turmeric_soap_label")}
         >
-          🧼 + Soap
+          {s("turmeric_soap")}
         </button>
         <button
           onClick={handleReset}
           className="px-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold rounded-xl shadow text-xs cursor-pointer"
-          aria-label="Start again"
+          aria-label={s("restart_label")}
         >
           ↺
         </button>
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-900 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`The turmeric water is ${colorName.toLowerCase()}`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("turmeric_pic", { colour: colorName.toLowerCase() })}>
           {/* Falling drop */}
           {dropKey.kind && (
             <circle key={dropKey.n} cx="170" r="6" fill={dropKey.kind === "lemon" ? "#fde047" : "#f9a8d4"}>
@@ -91,7 +94,7 @@ function TurmericIndicator({ recordAction }: { recordAction: RecordAction }) {
           {/* Glass with turmeric water */}
           <path d="M 120 30 L 128 160 Q 129 168 138 168 L 202 168 Q 211 168 212 160 L 220 30" fill="#ffffff" fillOpacity="0.05" stroke="#e2e8f0" strokeWidth="3" />
           <path d="M 123 70 L 128 160 Q 129 166 138 166 L 202 166 Q 211 166 212 160 L 217 70 Z" fill={getLiquidColor()} style={{ transition: 'fill 0.5s' }} />
-          <text x="170" y="122" textAnchor="middle" fontSize="12" fontWeight="800" fill="#ffffff" opacity="0.9">{colorName}</text>
+          <FitText en={en(colorKey)} x="170" y="122" textAnchor="middle" fontSize="12" fontWeight="800" fill="#ffffff" opacity="0.9">{colorName}</FitText>
 
           {/* Colour scale: lemon side -> soap side */}
           <defs>
@@ -104,9 +107,9 @@ function TurmericIndicator({ recordAction }: { recordAction: RecordAction }) {
           </defs>
           <rect x="40" y="186" width="260" height="12" rx="6" fill="url(#turmeric-scale)" />
           <polygon points={`${meterX - 6},180 ${meterX + 6},180 ${meterX},188`} fill="#ffffff" style={{ transition: 'all 0.4s' }} />
-          <text x="40" y="212" fontSize="9" fontWeight="700" fill="#fde047">🍋 sour</text>
-          <text x="170" y="212" textAnchor="middle" fontSize="9" fontWeight="700" fill="#d1d5db">plain</text>
-          <text x="300" y="212" textAnchor="end" fontSize="9" fontWeight="700" fill="#fca5a5">soapy 🧼</text>
+          <FitText en={en("turmeric_sour")} x="40" y="212" fontSize="9" fontWeight="700" fill="#fde047">{s("turmeric_sour")}</FitText>
+          <FitText en={en("turmeric_plain")} x="170" y="212" textAnchor="middle" fontSize="9" fontWeight="700" fill="#d1d5db">{s("turmeric_plain")}</FitText>
+          <FitText en={en("turmeric_soapy")} x="300" y="212" textAnchor="end" fontSize="9" fontWeight="700" fill="#fca5a5">{s("turmeric_soapy")}</FitText>
         </svg>
       </div>
 
@@ -114,12 +117,10 @@ function TurmericIndicator({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
-          {isAnomaly ? "✨ Lemon turned it back to yellow!" : isDeepRed ? "🔴 Soap turned the turmeric red!" : "🟡 Turmeric water is yellow"}
+          {s(isAnomaly ? "turmeric_back" : isDeepRed ? "turmeric_red" : "turmeric_is_yellow")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "The sour lemon cancelled out the soap, so the colour came back. The change can go both ways."
-            : "Turmeric is a natural test: it stays yellow with sour things and turns red with soapy things."}
+          {s(isAnomaly ? "turmeric_back_why" : "turmeric_why")}
         </p>
       </div>
     </div>
@@ -130,6 +131,7 @@ function TurmericIndicator({ recordAction }: { recordAction: RecordAction }) {
 // EXPERIMENT 2: SODA & VINEGAR BALLOON INFLATION
 // ==================================================
 function SodaVinegarBalloon({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("kitchen");
   const [sodaGrams, setSodaGrams] = useState(10);
   const [reacted, setReacted] = useState(false);
   const [fizzing, setFizzing] = useState(false);
@@ -158,7 +160,7 @@ function SodaVinegarBalloon({ recordAction }: { recordAction: RecordAction }) {
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex flex-col gap-0.5 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-emerald-300">🥄 Baking soda</span>
+            <span className="font-bold text-emerald-300">{s("soda_amount")}</span>
             <span className="text-xs font-mono text-gray-300">{sodaGrams} g</span>
           </div>
           <input
@@ -169,7 +171,7 @@ function SodaVinegarBalloon({ recordAction }: { recordAction: RecordAction }) {
               recordAction('changed_soda_amount', { val });
             }}
             disabled={reacted}
-            aria-label="Baking soda in grams"
+            aria-label={s("soda_slider")}
           />
         </div>
         <div className="flex gap-2 shrink-0">
@@ -177,14 +179,14 @@ function SodaVinegarBalloon({ recordAction }: { recordAction: RecordAction }) {
             onClick={handleMix}
             disabled={reacted}
             className="flex-1 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-black rounded-xl shadow active:scale-95 transition-all cursor-pointer text-sm"
-            aria-label="Tip the baking soda into the vinegar"
+            aria-label={s("soda_tip_label")}
           >
-            ⬇ Tip it in
+            {s("soda_tip")}
           </button>
           <button
             onClick={handleReset}
             className="px-4 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold rounded-xl shadow text-xs cursor-pointer"
-            aria-label="Start again"
+            aria-label={s("restart_label")}
           >
             ↺
           </button>
@@ -192,12 +194,12 @@ function SodaVinegarBalloon({ recordAction }: { recordAction: RecordAction }) {
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-900 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={reacted ? "The balloon blew up" : "The balloon is flat"}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s(reacted ? "soda_pic_blown" : "soda_pic_flat")}>
           {/* Balloon on top of the bottle neck */}
           <g style={{ transition: 'all 0.8s ease-out' }}>
             <ellipse cx="170" cy={100 - balloonR} rx={balloonR} ry={balloonR * 1.15} fill="#ef4444" style={{ transition: 'all 0.8s ease-out' }} />
             <ellipse cx={170 - balloonR * 0.35} cy={100 - balloonR * 1.4} rx={balloonR * 0.2} ry={balloonR * 0.3} fill="#fecaca" opacity="0.6" style={{ transition: 'all 0.8s ease-out' }} />
-            {reacted && balloonR > 24 && <text x="170" y={104 - balloonR} textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff1f2">gas</text>}
+            {reacted && balloonR > 24 && <FitText en={en("soda_gas")} x="170" y={104 - balloonR} textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff1f2">{s("soda_gas")}</FitText>}
           </g>
           <rect x="162" y="96" width="16" height="12" fill="#b91c1c" />
 
@@ -213,8 +215,8 @@ function SodaVinegarBalloon({ recordAction }: { recordAction: RecordAction }) {
               <animate attributeName="cy" values="198;132" dur={`${0.6 + (i % 4) * 0.2}s`} begin={`${(i % 5) * 0.1}s`} repeatCount="indefinite" />
             </circle>
           ))}
-          <text x="236" y="186" fontSize="10" fontWeight="700" fill="#93c5fd">vinegar</text>
-          {isAnomaly && <text x="236" y="200" fontSize="10" fontWeight="700" fill="#f8fafc">extra soda left</text>}
+          <FitText en={en("soda_vinegar")} x="236" y="186" fontSize="10" fontWeight="700" fill="#93c5fd">{s("soda_vinegar")}</FitText>
+          {isAnomaly && <FitText en={en("soda_extra_left")} x="236" y="200" fontSize="10" fontWeight="700" fill="#f8fafc">{s("soda_extra_left")}</FitText>}
         </svg>
       </div>
 
@@ -222,14 +224,10 @@ function SodaVinegarBalloon({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-emerald-300 block">
-          {isAnomaly ? "🤔 More soda, but the balloon got no bigger!" : reacted ? "🎈 The gas blew up the balloon!" : "Choose the soda, then tip it in"}
+          {s(isAnomaly ? "soda_no_bigger" : reacted ? "soda_blown" : "soda_choose")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "All the vinegar was used up. The extra soda has nothing left to fizz with."
-            : reacted
-              ? "Soda and vinegar fizz and make a gas (carbon dioxide). The gas pushes out and fills the balloon."
-              : "Baking soda will mix with the vinegar in the bottle."}
+          {s(isAnomaly ? "soda_used_up_why" : reacted ? "soda_gas_why" : "soda_start_why")}
         </p>
       </div>
     </div>
@@ -240,6 +238,7 @@ function SodaVinegarBalloon({ recordAction }: { recordAction: RecordAction }) {
 // EXPERIMENT 3: SUGAR SATURATION & THERMAL SOLUBILITY
 // ==================================================
 function SugarSaturation({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("kitchen");
   const [temperature, setTemperature] = useState(25); // Celsius
   const [spoons, setSpoons] = useState(1);
 
@@ -273,8 +272,8 @@ function SugarSaturation({ recordAction }: { recordAction: RecordAction }) {
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex flex-col gap-0.5 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-amber-300">🌡️ Water heat</span>
-            <span className="text-xs font-mono text-gray-300">{temperature}°C ({temperature >= 60 ? "Hot" : temperature <= 20 ? "Cold" : "Warm"})</span>
+            <span className="font-bold text-amber-300">{s("sugar_heat")}</span>
+            <span className="text-xs font-mono text-gray-300">{temperature}°C ({s(temperature >= 60 ? "sugar_hot" : temperature <= 20 ? "sugar_cold" : "sugar_warm")})</span>
           </div>
           <input
             type="range" min="10" max="80" step="5" value={temperature}
@@ -283,7 +282,7 @@ function SugarSaturation({ recordAction }: { recordAction: RecordAction }) {
               setTemperature(val);
               recordAction('changed_water_temp', { temperature: val, spoons });
             }}
-            aria-label="Water temperature"
+            aria-label={s("sugar_heat_slider")}
           />
         </div>
         <div className="flex gap-2 shrink-0">
@@ -291,14 +290,14 @@ function SugarSaturation({ recordAction }: { recordAction: RecordAction }) {
             onClick={handleAddSpoon}
             disabled={spoons >= 12}
             className="flex-1 px-4 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-black rounded-xl shadow active:scale-95 transition-all cursor-pointer text-sm"
-            aria-label="Add a spoon of sugar"
+            aria-label={s("sugar_add_label")}
           >
-            🥄 + Sugar ({spoons})
+            {s("sugar_add", { n: spoons })}
           </button>
           <button
             onClick={handleReset}
             className="px-4 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold rounded-xl shadow text-xs cursor-pointer"
-            aria-label="Start again"
+            aria-label={s("restart_label")}
           >
             ↺
           </button>
@@ -306,7 +305,7 @@ function SugarSaturation({ recordAction }: { recordAction: RecordAction }) {
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-900 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={undissolved > 0 ? `${undissolved} spoons of sugar left at the bottom` : "All the sugar disappeared into the water"}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={undissolved === 1 ? s("sugar_pic_left_one") : undissolved > 1 ? s("sugar_pic_left", { n: undissolved }) : s("sugar_pic_gone")}>
           {hot && [0, 1, 2].map((i) => (
             <path key={i} d={`M ${146 + i * 24} 40 q -8 -10 0 -20 q 8 -10 0 -20`} stroke="#e5e7eb" strokeWidth="2.5" fill="none" opacity="0.5" />
           ))}
@@ -323,12 +322,12 @@ function SugarSaturation({ recordAction }: { recordAction: RecordAction }) {
           )}
 
           {/* Capacity meter: how much this water can hold at this heat */}
-          <text x="244" y="70" fontSize="10" fontWeight="700" fill="#d1d5db">Can hold</text>
+          <FitText en={en("sugar_can_hold")} x="244" y="70" fontSize="10" fontWeight="700" fill="#d1d5db">{s("sugar_can_hold")}</FitText>
           {[...Array(10)].map((_, i) => (
             <rect key={i} x="244" y={184 - i * 11} width="18" height="9" rx="2"
               fill={i < spoons ? (i < maxSoluble ? "#22c55e" : "#f59e0b") : i < maxSoluble ? "#14532d" : "#1f2937"} />
           ))}
-          <text x="268" y={192 - Math.min(10, maxSoluble) * 11} fontSize="9" fontWeight="700" fill="#4ade80">← full</text>
+          <FitText en={en("sugar_full_mark")} x="268" y={192 - Math.min(10, maxSoluble) * 11} fontSize="9" fontWeight="700" fill="#4ade80">{s("sugar_full_mark")}</FitText>
         </svg>
       </div>
 
@@ -337,19 +336,13 @@ function SugarSaturation({ recordAction }: { recordAction: RecordAction }) {
         <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {isAnomaly
-            ? "🔥 Hot water melted all the leftover sugar!"
+            ? s("sugar_melted")
             : isSaturated && undissolved > 0
-              ? `🍬 ${undissolved} spoon${undissolved > 1 ? "s" : ""} of sugar left at the bottom`
-              : isSaturated
-                ? "The water is now full of sugar"
-                : "The sugar disappears into the water"}
+              ? undissolved === 1 ? s("sugar_left_one") : s("sugar_left", { n: undissolved })
+              : s(isSaturated ? "sugar_full" : "sugar_disappears")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "Hot water can hold much more sugar than cold water."
-            : isSaturated
-              ? "This water cannot take any more sugar at this heat. Try making it hotter!"
-              : "Keep adding spoons. When does the sugar stop disappearing?"}
+          {s(isAnomaly ? "sugar_hot_why" : isSaturated ? "sugar_full_why" : "sugar_keep_why")}
         </p>
       </div>
     </div>

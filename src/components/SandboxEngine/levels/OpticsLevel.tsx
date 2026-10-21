@@ -4,10 +4,14 @@ import { useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
 import { OptionalToolsDrawer } from '../OptionalToolsDrawer';
 import { ObservationSpeaker } from "@/components/ReadAloud";
+import { FitText, useSceneText } from '../SceneText';
+
+const SHOW_KEY = { Cartoon: "tv_show_cartoon", Sports: "tv_show_sports", News: "tv_show_news" } as const;
 
 // --- SUB-COMPONENTS FOR STRICT CONDITIONAL RENDERING ---
 
 function ExperimentOne({ recordAction }: { recordAction: (actionType: string, actionDetails?: any) => void }) {
+  const { s } = useSceneText("optics");
   const [roomLight, setRoomLight] = useState(10);
   const [tvBrightness, setTvBrightness] = useState(80);
   const [tvShow, setTvShow] = useState<"Cartoon" | "Sports" | "News">("Cartoon");
@@ -24,7 +28,7 @@ function ExperimentOne({ recordAction }: { recordAction: (actionType: string, ac
         {/* Room Light Slider */}
         <div className="flex flex-col gap-1 w-full md:w-auto md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-amber-400">💡 Room Light</span>
+            <span className="font-bold text-amber-400">{s("tv_room_light")}</span>
             <span className="text-xs font-mono text-gray-300">{roomLight}%</span>
           </div>
           <input
@@ -45,7 +49,7 @@ function ExperimentOne({ recordAction }: { recordAction: (actionType: string, ac
         {/* TV Brightness Slider */}
         <div className="flex flex-col gap-1 w-full md:w-auto md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-cyan-300">📺 TV Brightness</span>
+            <span className="font-bold text-cyan-300">{s("tv_brightness")}</span>
             <span className="text-xs font-mono text-gray-300">{tvBrightness}%</span>
           </div>
           <input
@@ -66,18 +70,18 @@ function ExperimentOne({ recordAction }: { recordAction: (actionType: string, ac
         {/* Comfort indicator & Optional Tools Drawer Trigger */}
         <div className="flex items-center justify-between md:justify-end gap-2 shrink-0 pt-1 md:pt-0 border-t border-gray-800 md:border-t-0">
           <div className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-lg border border-gray-700">
-            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Comfort:</span>
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{s("tv_comfort")}</span>
             <span className="text-base">{isComfortable ? "😌" : "😖"}</span>
           </div>
           
           <OptionalToolsDrawer
-            title="TV Channel & Room Settings"
-            description="Switch channels to test contrast differences."
-            triggerLabel="Channels"
+            title={s("tv_drawer_title")}
+            description={s("tv_drawer_text")}
+            triggerLabel={s("tv_channels")}
             icon="tv"
           >
             <div className="space-y-3">
-              <span className="text-xs font-bold text-gray-300 block">Select TV Broadcast:</span>
+              <span className="text-xs font-bold text-gray-300 block">{s("tv_pick_show")}</span>
               <div className="grid grid-cols-3 gap-2">
                 {(["Cartoon", "Sports", "News"] as const).map((show) => (
                   <button
@@ -93,7 +97,7 @@ function ExperimentOne({ recordAction }: { recordAction: (actionType: string, ac
                         : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                     }`}
                   >
-                    {show}
+                    {s(SHOW_KEY[show])}
                   </button>
                 ))}
               </div>
@@ -104,7 +108,7 @@ function ExperimentOne({ recordAction }: { recordAction: (actionType: string, ac
 
       {/* Show Selector Inline Bar for Desktop / Quick Access */}
       <div className="hidden md:flex bg-gray-900/80 border-b border-gray-800 px-3 py-1.5 items-center justify-center gap-2 text-xs shrink-0">
-        <span className="text-gray-400 font-bold text-[11px]">Channel:</span>
+        <span className="text-gray-400 font-bold text-[11px]">{s("tv_channel")}</span>
         {(["Cartoon", "Sports", "News"] as const).map((show) => (
           <button
             key={show}
@@ -116,7 +120,7 @@ function ExperimentOne({ recordAction }: { recordAction: (actionType: string, ac
               tvShow === show ? 'bg-indigo-600 text-white shadow' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
             }`}
           >
-            {show}
+            {s(SHOW_KEY[show])}
           </button>
         ))}
       </div>
@@ -145,18 +149,18 @@ function ExperimentOne({ recordAction }: { recordAction: (actionType: string, ac
               backgroundColor: tvShow === "Cartoon" ? "#3b82f6" : tvShow === "Sports" ? "#22c55e" : "#eab308"
             }}
           >
-            <span className="text-white/90 font-black text-xl sm:text-2xl tracking-widest mix-blend-overlay">{tvShow.toUpperCase()}</span>
+            <span className="text-white/90 font-black text-xl sm:text-2xl tracking-widest mix-blend-overlay">{s(SHOW_KEY[tvShow]).toUpperCase()}</span>
           </div>
 
           {isGlare && (
             <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] flex items-center justify-center pointer-events-none">
-              <span className="text-gray-900 font-black text-xs bg-white/90 px-2 py-1 rounded shadow">✨ Glare</span>
+              <span className="text-gray-900 font-black text-xs bg-white/90 px-2 py-1 rounded shadow">{s("tv_glare_badge")}</span>
             </div>
           )}
 
           {isEyeStrain && (
             <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_50px_rgba(255,255,255,0.5)] flex items-end justify-center pb-2">
-              <span className="text-white font-bold text-xs bg-red-600/90 px-2 py-0.5 rounded animate-pulse">😖 Too bright!</span>
+              <span className="text-white font-bold text-xs bg-red-600/90 px-2 py-0.5 rounded animate-pulse">{s("tv_bright_badge")}</span>
             </div>
           )}
         </div>
@@ -168,10 +172,10 @@ function ExperimentOne({ recordAction }: { recordAction: (actionType: string, ac
       <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
         <ObservationSpeaker />
         <span className="text-sm font-bold block" style={{ color: isComfortable ? '#67e8f9' : '#fca5a5' }}>
-          {isComfortable ? "😌 Comfortable TV watching!" : isGlare ? "😖 Too much glare on the screen!" : "😖 Ouch! TV is too bright for a dark room!"}
+          {s(isComfortable ? "tv_ok" : isGlare ? "tv_glare" : "tv_strain")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isComfortable ? "The TV brightness matches the room light nicely." : isGlare ? "When the room is very bright, the TV screen reflects the light." : "A super bright TV in a pitch black room causes eye strain."}
+          {s(isComfortable ? "tv_ok_why" : isGlare ? "tv_glare_why" : "tv_strain_why")}
         </p>
       </div>
     </div>
@@ -179,6 +183,7 @@ function ExperimentOne({ recordAction }: { recordAction: (actionType: string, ac
 }
 
 function ExperimentTwo({ recordAction }: { recordAction: (actionType: string, actionDetails?: any) => void }) {
+  const { s, en } = useSceneText("optics");
   const [scaleAngle, setScaleAngle] = useState(45);
   const [laserColor, setLaserColor] = useState<"Sunlight" | "Red Laser">("Sunlight");
 
@@ -192,7 +197,7 @@ function ExperimentTwo({ recordAction }: { recordAction: (actionType: string, ac
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex flex-col gap-1 w-full md:w-auto md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-fuchsia-300">📏 Ruler Tilt</span>
+            <span className="font-bold text-fuchsia-300">{s("prism_tilt")}</span>
             <span className="text-xs text-gray-300 font-mono">{scaleAngle}°</span>
           </div>
           <input
@@ -210,7 +215,7 @@ function ExperimentTwo({ recordAction }: { recordAction: (actionType: string, ac
           />
         </div>
         <div className="flex items-center justify-between md:justify-end gap-2 shrink-0 pt-1 md:pt-0 border-t border-gray-800 md:border-t-0">
-          <span className="font-bold text-fuchsia-400 text-[11px]">Light Source:</span>
+          <span className="font-bold text-fuchsia-400 text-[11px]">{s("prism_source")}</span>
           <div className="flex gap-1.5">
             {(["Sunlight", "Red Laser"] as const).map(color => (
               <button 
@@ -224,7 +229,7 @@ function ExperimentTwo({ recordAction }: { recordAction: (actionType: string, ac
                   laserColor === color ? (color === "Sunlight" ? 'bg-amber-500 text-amber-950 font-black shadow' : 'bg-red-600 text-white font-black shadow') : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
                 }`}
               >
-                {color}
+                {s(color === "Sunlight" ? "prism_sunlight" : "prism_laser")}
               </button>
             ))}
           </div>
@@ -233,15 +238,15 @@ function ExperimentTwo({ recordAction }: { recordAction: (actionType: string, ac
 
       {/* Visual Canvas: torch -> ruler -> wall */}
       <div className="relative flex-1 min-h-[220px] bg-gray-950 flex items-center">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMid meet" role="img" aria-label={isRainbow ? "Light splits into a rainbow" : "Light does not split"}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMid meet" role="img" aria-label={s(isRainbow ? "prism_pic_rainbow" : "prism_pic_no_split")}>
           {/* Wall that catches the light */}
           <rect x="322" y="10" width="14" height="200" rx="3" fill="#374151" />
-          <text x="329" y="205" textAnchor="middle" fontSize="8" fill="#9ca3af" transform="rotate(-90 329 205)">WALL</text>
+          <FitText en={en("prism_wall")} x="329" y="205" textAnchor="middle" fontSize="8" fill="#9ca3af" transform="rotate(-90 329 205)">{s("prism_wall")}</FitText>
 
           {/* Torch */}
           <rect x="6" y="98" width="34" height="24" rx="5" fill={laserColor === "Sunlight" ? "#fbbf24" : "#dc2626"} />
           <rect x="36" y="95" width="8" height="30" rx="2" fill="#e5e7eb" />
-          <text x="23" y="140" textAnchor="middle" fontSize="9" fontWeight="700" fill="#d1d5db">{laserColor === "Sunlight" ? "SUNLIGHT" : "LASER"}</text>
+          <FitText en={en(laserColor === "Sunlight" ? "prism_torch_sun" : "prism_torch_laser")} maxWidth={44} x="23" y="140" textAnchor="middle" fontSize="9" fontWeight="700" fill="#d1d5db">{s(laserColor === "Sunlight" ? "prism_torch_sun" : "prism_torch_laser")}</FitText>
 
           {/* Incoming beam */}
           <line x1="44" y1="110" x2="170" y2="110" stroke={laserColor === "Sunlight" ? "#ffffff" : "#ef4444"} strokeWidth="5" strokeLinecap="round" opacity="0.95" />
@@ -288,13 +293,9 @@ function ExperimentTwo({ recordAction }: { recordAction: (actionType: string, ac
       {/* Dedicated Bottom Observation Strip */}
       <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
         <ObservationSpeaker />
-        <span className="text-sm font-bold text-amber-300 block">{isRainbow ? "🌈 A rainbow on the wall!" : laserColor === "Sunlight" ? "No rainbow at this tilt" : "Only one red line"}</span>
+        <span className="text-sm font-bold text-amber-300 block">{s(isRainbow ? "prism_rainbow" : laserColor === "Sunlight" ? "prism_no_rainbow" : "prism_one_line")}</span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {laserColor === "Sunlight"
-            ? isRainbow
-              ? "White sunlight is made of many colours. The ruler bends each colour a little differently."
-              : "Tilt the ruler between 25° and 65° to split the sunlight into colours."
-            : "Laser light has only one colour (red), so there is nothing to split."}
+          {s(laserColor === "Sunlight" ? (isRainbow ? "prism_rainbow_why" : "prism_tilt_hint") : "prism_laser_why")}
         </p>
       </div>
     </div>
@@ -302,6 +303,7 @@ function ExperimentTwo({ recordAction }: { recordAction: (actionType: string, ac
 }
 
 function ExperimentThree({ recordAction }: { recordAction: (actionType: string, actionDetails?: any) => void }) {
+  const { s, en } = useSceneText("optics");
   const [sunHeight, setSunHeight] = useState(45);
   const [treeHeight, setTreeHeight] = useState(30);
 
@@ -340,7 +342,7 @@ function ExperimentThree({ recordAction }: { recordAction: (actionType: string, 
         {/* Sun Height Slider */}
         <div className="flex flex-col gap-1 w-full md:w-auto md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-amber-300">☀️ Sun Height</span>
+            <span className="font-bold text-amber-300">{s("shadow_sun")}</span>
             <span className="text-xs text-gray-300 font-mono">{sunHeight}°</span>
           </div>
           <input
@@ -349,7 +351,7 @@ function ExperimentThree({ recordAction }: { recordAction: (actionType: string, 
             max="90"
             step="5"
             value={sunHeight}
-            aria-label="Sun height in degrees"
+            aria-label={s("shadow_sun_slider")}
             onChange={(e) => {
               const val = parseInt(e.target.value);
               setSunHeight(val);
@@ -361,7 +363,7 @@ function ExperimentThree({ recordAction }: { recordAction: (actionType: string, 
         {/* Tree Height Slider */}
         <div className="flex flex-col gap-1 w-full md:w-auto md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-emerald-300">🌳 Tree Height</span>
+            <span className="font-bold text-emerald-300">{s("shadow_tree")}</span>
             <span className="text-xs text-gray-300 font-mono">{treeHeight} m</span>
           </div>
           <input
@@ -370,7 +372,7 @@ function ExperimentThree({ recordAction }: { recordAction: (actionType: string, 
             max="60"
             step="5"
             value={treeHeight}
-            aria-label="Tree height in metres"
+            aria-label={s("shadow_tree_slider")}
             onChange={(e) => {
               const val = parseInt(e.target.value);
               setTreeHeight(val);
@@ -382,7 +384,7 @@ function ExperimentThree({ recordAction }: { recordAction: (actionType: string, 
 
       {/* Visual Canvas */}
       <div className="relative flex-1 min-h-[220px] bg-gradient-to-b from-sky-400 to-sky-200 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`Tree shadow is ${Math.round(shadowMeters)} metres long`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("shadow_pic", { n: Math.round(shadowMeters) })}>
           <defs>
             <clipPath id="tree-shadow-clip"><rect x="0" y="0" width="340" height="220" /></clipPath>
             <radialGradient id="sun-glow">
@@ -426,9 +428,9 @@ function ExperimentThree({ recordAction }: { recordAction: (actionType: string, 
           {/* Shadow length label */}
           <g>
             <rect x={Math.min(242, Math.max(BASE_X + 8, (BASE_X + Math.min(tipX, 332)) / 2 - 46))} y={GROUND_Y + 12} width="92" height="20" rx="10" fill="#111827" opacity="0.85" />
-            <text x={Math.min(288, Math.max(BASE_X + 54, (BASE_X + Math.min(tipX, 332)) / 2))} y={GROUND_Y + 26} textAnchor="middle" fontSize="12" fontWeight="700" fill="#ffffff">
-              Shadow: {Math.round(shadowMeters)} m{shadowRunsOff ? " →" : ""}
-            </text>
+            <FitText en={en("shadow_label", { n: Math.round(shadowMeters) }) + (shadowRunsOff ? " →" : "")} x={Math.min(288, Math.max(BASE_X + 54, (BASE_X + Math.min(tipX, 332)) / 2))} y={GROUND_Y + 26} textAnchor="middle" fontSize="12" fontWeight="700" fill="#ffffff">
+              {s("shadow_label", { n: Math.round(shadowMeters) }) + (shadowRunsOff ? " →" : "")}
+            </FitText>
           </g>
         </svg>
       </div>
@@ -437,14 +439,10 @@ function ExperimentThree({ recordAction }: { recordAction: (actionType: string, 
       <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
         <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
-          {isHigh ? "☀️ Sun is high: short shadow!" : isLow ? "🌅 Sun is low: very long shadow!" : "Move the sun up and down"}
+          {s(isHigh ? "shadow_high" : isLow ? "shadow_low" : "shadow_move")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isHigh
-            ? "When the sun is right above, light falls straight down, so the shadow is tiny."
-            : isLow
-              ? "Low sunlight comes from the side, so the shadow stretches far across the ground."
-              : "The higher the sun climbs, the shorter the shadow gets."}
+          {s(isHigh ? "shadow_high_why" : isLow ? "shadow_low_why" : "shadow_move_why")}
         </p>
       </div>
     </div>

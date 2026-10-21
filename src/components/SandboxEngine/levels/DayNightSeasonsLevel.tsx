@@ -3,11 +3,15 @@
 import React, { useState } from "react";
 import { useAnomalySignal } from '../useAnomalySignal';
 import { ObservationSpeaker } from "@/components/ReadAloud";
+import { FitText, useSceneText } from '../SceneText';
+
+const MONTH_KEYS = ["month_jan", "month_feb", "month_mar", "month_apr", "month_may", "month_jun", "month_jul", "month_aug", "month_sep", "month_oct", "month_nov", "month_dec"] as const;
 
 // ==========================================
 // EXPERIMENT 1: THE FLASHLIGHT & SPINNING GLOBE (DAY & NIGHT)
 // ==========================================
 function SpinningGlobe({ recordAction }: { recordAction: (actionType: string, actionDetails?: any) => void }) {
+  const { s, en } = useSceneText("seasons");
   // Earth rotation in hours: 0 to 24 (local time in India)
   const [hour, setHour] = useState(12);
 
@@ -42,8 +46,8 @@ function SpinningGlobe({ recordAction }: { recordAction: (actionType: string, ac
     <div className="flex flex-col h-full w-full">
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col gap-1 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex justify-between items-center">
-          <span className="font-bold text-amber-300">🌍 Spin the Earth</span>
-          <span className="text-xs font-mono font-bold text-amber-300">India time {String(hour).padStart(2, "0")}:00</span>
+          <span className="font-bold text-amber-300">{s("globe_spin")}</span>
+          <span className="text-xs font-mono font-bold text-amber-300">{s("globe_india_time", { t: `${String(hour).padStart(2, "0")}:00` })}</span>
         </div>
         <input
           type="range"
@@ -52,18 +56,18 @@ function SpinningGlobe({ recordAction }: { recordAction: (actionType: string, ac
           step="1"
           value={hour}
           onChange={(e) => handleHourChange(parseInt(e.target.value))}
-          aria-label="Spin the Earth (India time)"
+          aria-label={s("globe_slider")}
         />
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-950 flex items-end select-none">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`India has ${isIndiaDay ? "day" : "night"}, New York has ${isNyDay ? "day" : "night"}`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("globe_pic", { india: s(isIndiaDay ? "globe_day_word" : "globe_night_word"), ny: s(isNyDay ? "globe_day_word" : "globe_night_word") })}>
           <defs>
             <clipPath id="earth-disc"><circle cx={CX} cy={CY} r={R} /></clipPath>
           </defs>
           {/* Sun and its light from the left */}
           <circle cx="26" cy={CY} r="20" fill="#facc15" />
-          <text x="26" y={CY + 36} textAnchor="middle" fontSize="10" fontWeight="800" fill="#fcd34d">SUN</text>
+          <FitText en={en("globe_sun")} x="26" y={CY + 36} textAnchor="middle" fontSize="10" fontWeight="800" fill="#fcd34d">{s("globe_sun")}</FitText>
           {[-50, -20, 10, 40].map((dy) => (
             <line key={dy} x1="52" y1={CY + dy} x2={CX - R - 6} y2={CY + dy} stroke="#fde047" strokeWidth="2" strokeDasharray="6 5" opacity="0.6" />
           ))}
@@ -75,9 +79,9 @@ function SpinningGlobe({ recordAction }: { recordAction: (actionType: string, ac
           </g>
           <circle cx={CX} cy={CY} r={R} fill="none" stroke="#7dd3fc" strokeWidth="2" />
           <circle cx={CX} cy={CY} r="4" fill="#fbbf24" />
-          <text x={CX} y={CY - R - 6} textAnchor="middle" fontSize="9" fontWeight="700" fill="#94a3b8">North Pole view</text>
-          <text x={CX - R / 2} y={CY + R - 10} textAnchor="middle" fontSize="10" fontWeight="800" fill="#fef9c3">DAY</text>
-          <text x={CX + R / 2} y={CY + R - 10} textAnchor="middle" fontSize="10" fontWeight="800" fill="#94a3b8">NIGHT</text>
+          <FitText en={en("globe_pole_view")} x={CX} y={CY - R - 6} textAnchor="middle" fontSize="9" fontWeight="700" fill="#94a3b8">{s("globe_pole_view")}</FitText>
+          <FitText en={en("globe_day")} x={CX - R / 2} y={CY + R - 10} textAnchor="middle" fontSize="10" fontWeight="800" fill="#fef9c3">{s("globe_day")}</FitText>
+          <FitText en={en("globe_night")} x={CX + R / 2} y={CY + R - 10} textAnchor="middle" fontSize="10" fontWeight="800" fill="#94a3b8">{s("globe_night")}</FitText>
           {/* Spin direction */}
           <path d={`M ${CX + R + 10} ${CY + 20} A ${R + 10} ${R + 10} 0 0 1 ${CX + R + 10} ${CY - 20}`} stroke="#fbbf24" strokeWidth="2" fill="none" />
           <polygon points={`${CX + R + 4},${CY - 18} ${CX + R + 16},${CY - 18} ${CX + R + 10},${CY - 28}`} fill="#fbbf24" />
@@ -85,14 +89,14 @@ function SpinningGlobe({ recordAction }: { recordAction: (actionType: string, ac
           {/* Cities: markers move, labels stay upright */}
           <circle cx={india.x} cy={india.y} r="7" fill="#22c55e" stroke="#ffffff" strokeWidth="2" style={{ transition: 'all 0.3s' }} />
           <rect x={india.x - 26} y={india.y - 26} width="52" height="15" rx="7" fill="#052e16" opacity="0.9" style={{ transition: 'all 0.3s' }} />
-          <text x={india.x} y={india.y - 15} textAnchor="middle" fontSize="9" fontWeight="800" fill="#86efac" style={{ transition: 'all 0.3s' }}>India</text>
+          <FitText en={en("globe_india")} x={india.x} y={india.y - 15} textAnchor="middle" fontSize="9" fontWeight="800" fill="#86efac" style={{ transition: 'all 0.3s' }}>{s("globe_india")}</FitText>
           <circle cx={ny.x} cy={ny.y} r="7" fill="#3b82f6" stroke="#ffffff" strokeWidth="2" style={{ transition: 'all 0.3s' }} />
           <rect x={ny.x - 30} y={ny.y + 10} width="60" height="15" rx="7" fill="#172554" opacity="0.9" style={{ transition: 'all 0.3s' }} />
-          <text x={ny.x} y={ny.y + 21} textAnchor="middle" fontSize="9" fontWeight="800" fill="#93c5fd" style={{ transition: 'all 0.3s' }}>New York</text>
+          <FitText en={en("globe_ny")} x={ny.x} y={ny.y + 21} textAnchor="middle" fontSize="9" fontWeight="800" fill="#93c5fd" style={{ transition: 'all 0.3s' }}>{s("globe_ny")}</FitText>
 
           {/* Status */}
-          <text x="12" y="208" fontSize="10" fontWeight="800" fill={isIndiaDay ? "#fcd34d" : "#94a3b8"}>India: {isIndiaDay ? "☀️ day" : "🌙 night"}</text>
-          <text x="328" y="208" textAnchor="end" fontSize="10" fontWeight="800" fill={isNyDay ? "#fcd34d" : "#94a3b8"}>New York: {isNyDay ? "☀️ day" : "🌙 night"}</text>
+          <FitText en={en(isIndiaDay ? "globe_india_is_day" : "globe_india_is_night")} x="12" y="208" fontSize="10" fontWeight="800" fill={isIndiaDay ? "#fcd34d" : "#94a3b8"}>{s(isIndiaDay ? "globe_india_is_day" : "globe_india_is_night")}</FitText>
+          <FitText en={en(isNyDay ? "globe_ny_is_day" : "globe_ny_is_night")} x="328" y="208" textAnchor="end" fontSize="10" fontWeight="800" fill={isNyDay ? "#fcd34d" : "#94a3b8"}>{s(isNyDay ? "globe_ny_is_day" : "globe_ny_is_night")}</FitText>
         </svg>
       </div>
 
@@ -100,14 +104,10 @@ function SpinningGlobe({ recordAction }: { recordAction: (actionType: string, ac
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
-          {hour === 12
-            ? "☀️ Noon in India, and night in New York!"
-            : isIndiaDay
-              ? "☀️ India is facing the Sun: daytime"
-              : "🌙 India has turned away from the Sun: night"}
+          {s(hour === 12 ? "globe_noon" : isIndiaDay ? "globe_facing" : "globe_away")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          The Sun does not move. The Earth spins once a day, so each place turns into the light and then into the dark.
+          {s("globe_why")}
         </p>
       </div>
     </div>
@@ -118,6 +118,7 @@ function SpinningGlobe({ recordAction }: { recordAction: (actionType: string, ac
 // EXPERIMENT 2: THE 23.5° TILTED AXIS & SEASONS
 // ==========================================
 function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, actionDetails?: any) => void }) {
+  const { s } = useSceneText("seasons");
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const [monthIndex, setMonthIndex] = useState(5); // Default June (Peak Summer in India)
   const [tiltDeg, setTiltDeg] = useState(23.5); // Natural tilt vs 0° upright
@@ -161,7 +162,7 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
       {/* Control Bar */}
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300 shrink-0 z-20">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-amber-400">Month:</span>
+          <span className="font-bold text-amber-400">{s("tilt_month")}</span>
           <input
             type="range"
             min="0"
@@ -170,15 +171,15 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
             value={monthIndex}
             onChange={(e) => handleMonthChange(parseInt(e.target.value))}
             className="w-24 sm:w-36 accent-amber-500 cursor-pointer min-h-[44px]"
-            aria-label="Earth Orbit Month Slider"
+            aria-label={s("tilt_slider")}
           />
           <span className="text-xs font-mono font-bold text-white bg-slate-800 px-2 py-0.5 rounded">
-            {monthName}
+            {s(MONTH_KEYS[monthIndex])}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-gray-300">Earth's tilt:</span>
+          <span className="text-xs font-bold text-gray-300">{s("tilt_earth_tilt")}</span>
           <div className="flex bg-gray-800 p-0.5 rounded-lg border border-gray-700">
             <button
               onClick={() => toggleTilt(0)}
@@ -186,7 +187,7 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
                 tiltDeg === 0 ? "bg-red-500 text-white" : "text-gray-400 hover:text-white"
               }`}
             >
-              No tilt
+              {s("tilt_none")}
             </button>
             <button
               onClick={() => toggleTilt(23.5)}
@@ -194,7 +195,7 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
                 tiltDeg === 23.5 ? "bg-emerald-500 text-white" : "text-gray-400 hover:text-white"
               }`}
             >
-              Real tilt (23.5°)
+              {s("tilt_real")}
             </button>
           </div>
         </div>
@@ -211,14 +212,14 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
               </span>
             </div>
             <span className="text-[10px] font-bold text-amber-400 mt-1 uppercase tracking-wider">
-              The Sun
+              {s("tilt_the_sun")}
             </span>
           </div>
 
           {/* Sunbeam Angle Path */}
           <div className="flex-1 max-w-[120px] sm:max-w-[180px] h-0.5 border-t-2 border-dashed border-amber-300/40 relative flex items-center justify-center">
             <div className="text-[10px] text-amber-200/80 bg-slate-900 px-1 font-mono">
-              Sunlight
+              {s("tilt_sunlight")}
             </div>
           </div>
 
@@ -232,8 +233,8 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
             >
               {/* Polar Axis Rod */}
               <div className="absolute inset-y-0 left-1/2 w-0.5 bg-red-400/80 z-20" />
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-red-500 z-30" title="North Pole" />
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-blue-500 z-30" title="South Pole" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-red-500 z-30" title={s("tilt_north_pole")} />
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-blue-500 z-30" title={s("tilt_south_pole")} />
 
               {/* Equator */}
               <div className="absolute inset-x-0 top-1/2 h-0.5 bg-yellow-400/60 z-20" />
@@ -241,19 +242,19 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
               {/* Northern Hemisphere Zone */}
               <div className="absolute inset-x-0 top-0 bottom-1/2 flex items-center justify-center">
                 <span className="text-[9px] font-bold text-amber-200 bg-black/50 px-1 rounded">
-                  North (India)
+                  {s("tilt_north_half")}
                 </span>
               </div>
 
               {/* Southern Hemisphere Zone */}
               <div className="absolute inset-x-0 bottom-0 top-1/2 flex items-center justify-center">
                 <span className="text-[9px] font-bold text-cyan-200 bg-black/50 px-1 rounded">
-                  South (Australia)
+                  {s("tilt_south_half")}
                 </span>
               </div>
             </div>
             <span className="text-[10px] font-mono text-gray-400 mt-1">
-              Axis Tilt: {tiltDeg}°
+              {s("tilt_axis", { n: tiltDeg })}
             </span>
           </div>
         </div>
@@ -262,7 +263,7 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
         <div className="mt-4 grid grid-cols-2 gap-3 w-full max-w-sm z-10">
           <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-xl">
             <div className="flex justify-between text-xs font-bold mb-1">
-              <span className="text-amber-300">🇮🇳 North (India):</span>
+              <span className="text-amber-300">{s("tilt_north_meter")}</span>
               <span className="text-white">{northConcentration}%</span>
             </div>
             <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
@@ -272,19 +273,13 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
               />
             </div>
             <span className="text-[10px] text-gray-400 mt-1 block">
-              {tiltDeg === 0
-                ? "Neutral Climate"
-                : isIndiaSummer
-                ? "🔥 Direct Rays (Summer)"
-                : isIndiaWinter
-                ? "❄️ Shallow Rays (Winter)"
-                : "🌱 Moderate (Spring/Autumn)"}
+              {s(tiltDeg === 0 ? "tilt_neutral" : isIndiaSummer ? "tilt_direct" : isIndiaWinter ? "tilt_shallow" : "tilt_moderate_north")}
             </span>
           </div>
 
           <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-xl">
             <div className="flex justify-between text-xs font-bold mb-1">
-              <span className="text-cyan-300">🇦🇺 South (Australia):</span>
+              <span className="text-cyan-300">{s("tilt_south_meter")}</span>
               <span className="text-white">{southConcentration}%</span>
             </div>
             <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
@@ -294,13 +289,7 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
               />
             </div>
             <span className="text-[10px] text-gray-400 mt-1 block">
-              {tiltDeg === 0
-                ? "Neutral Climate"
-                : isIndiaSummer
-                ? "❄️ Slanted Rays (Winter)"
-                : isIndiaWinter
-                ? "🔥 Direct Rays (Summer)"
-                : "🍂 Moderate"}
+              {s(tiltDeg === 0 ? "tilt_neutral" : isIndiaSummer ? "tilt_slanted" : isIndiaWinter ? "tilt_direct" : "tilt_moderate_south")}
             </span>
           </div>
         </div>
@@ -310,16 +299,10 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
       <div className="relative shrink-0 w-full bg-gray-950 border-t border-gray-800 pl-3 pr-12 py-2 text-center z-10">
         <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
-          {tiltDeg === 0
-            ? "🤯 No tilt: no summer and no winter anywhere!"
-            : isIndiaSummer
-              ? "🔥 June: India leans towards the Sun, so it is summer"
-              : isIndiaWinter
-                ? "❄️ December: India leans away from the Sun, so it is winter"
-                : "🌱 March / September: both halves get the same sunlight"}
+          {s(tiltDeg === 0 ? "tilt_no_seasons" : isIndiaSummer ? "tilt_june" : isIndiaWinter ? "tilt_december" : "tilt_equal")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          Seasons come from the Earth's tilt, not its distance. Straight sunlight is hot; slanted sunlight spreads out and is weaker.
+          {s("tilt_why")}
         </p>
       </div>
     </div>
@@ -330,6 +313,7 @@ function TiltedSeasons({ recordAction }: { recordAction: (actionType: string, ac
 // EXPERIMENT 3: ANCIENT SUNDIAL & SHADOW LENGTHS
 // ==========================================
 function SundialShadows({ recordAction }: { recordAction: (actionType: string, actionDetails?: any) => void }) {
+  const { s, en } = useSceneText("seasons");
   // Time from 6 AM (6) to 6 PM (18)
   const [timeHour, setTimeHour] = useState(12);
   const [season, setSeason] = useState<"june" | "december">("june");
@@ -355,9 +339,9 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
     });
   };
 
-  const toggleSeason = (s: "june" | "december") => {
-    setSeason(s);
-    recordAction("toggled_sundial_season", { season: s, timeHour });
+  const toggleSeason = (next: "june" | "december") => {
+    setSeason(next);
+    recordAction("toggled_sundial_season", { season: next, timeHour });
   };
 
   return (
@@ -365,7 +349,7 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
       {/* Control Bar */}
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-300 shrink-0 z-20">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-amber-300">🕑 Time of day</span>
+          <span className="font-bold text-amber-300">{s("dial_time")}</span>
           <input
             type="range"
             min="6"
@@ -374,7 +358,7 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
             value={timeHour}
             onChange={(e) => handleTimeChange(parseFloat(e.target.value))}
             className="w-28 sm:w-40 accent-amber-500 cursor-pointer min-h-[44px]"
-            aria-label="Sundial Time of Day Slider"
+            aria-label={s("dial_slider")}
           />
           <span className="text-xs font-mono font-bold text-amber-300">
             {Math.floor(timeHour)}:{timeHour % 1 === 0 ? "00" : "30"}{" "}
@@ -383,7 +367,7 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-gray-300">Month:</span>
+          <span className="text-xs font-bold text-gray-300">{s("dial_month")}</span>
           <div className="flex bg-gray-800 p-0.5 rounded-lg border border-gray-700">
             <button
               onClick={() => toggleSeason("june")}
@@ -391,7 +375,7 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
                 season === "june" ? "bg-amber-500 text-gray-950" : "text-gray-400 hover:text-white"
               }`}
             >
-              ☀️ June
+              {s("dial_june")}
             </button>
             <button
               onClick={() => toggleSeason("december")}
@@ -399,7 +383,7 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
                 season === "december" ? "bg-cyan-500 text-gray-950" : "text-gray-400 hover:text-white"
               }`}
             >
-              ❄️ December
+              {s("dial_december")}
             </button>
           </div>
         </div>
@@ -407,7 +391,7 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
 
       {/* Side view: sun crosses from East (left) to West (right); the stick's shadow falls the other way */}
       <div className="relative flex-1 min-h-[220px] bg-gradient-to-b from-sky-400 to-sky-200 flex items-end select-none">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`Shadow is ${shadowLength} centimetres long`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("dial_pic", { n: shadowLength })}>
           {(() => {
             const GROUND = 176;
             const BASE = 170;
@@ -426,8 +410,8 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
                 <circle cx={sunX} cy={sunY} r="14" fill="#facc15" stroke="#f59e0b" strokeWidth="2" />
 
                 <rect x="0" y={GROUND} width="340" height={220 - GROUND} fill="#a8a29e" />
-                <text x="14" y={GROUND + 18} fontSize="11" fontWeight="800" fill="#44403c">EAST</text>
-                <text x="326" y={GROUND + 18} textAnchor="end" fontSize="11" fontWeight="800" fill="#44403c">WEST</text>
+                <FitText en={en("dial_east")} x="14" y={GROUND + 18} fontSize="11" fontWeight="800" fill="#44403c">{s("dial_east")}</FitText>
+                <FitText en={en("dial_west")} x="326" y={GROUND + 18} textAnchor="end" fontSize="11" fontWeight="800" fill="#44403c">{s("dial_west")}</FitText>
 
                 {/* Shadow on the ground */}
                 <polygon points={`${BASE},${GROUND} ${tipX},${GROUND + 2} ${tipX},${GROUND - 2}`} fill="#1f2937" opacity="0.7" stroke="#1f2937" strokeWidth="4" strokeLinejoin="round" />
@@ -436,7 +420,7 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
                 <circle cx={BASE} cy={GROUND - STICK} r="4" fill="#b45309" />
 
                 <rect x={BASE - 52} y={GROUND + 24} width="104" height="18" rx="9" fill="#111827" opacity="0.85" />
-                <text x={BASE} y={GROUND + 37} textAnchor="middle" fontSize="10" fontWeight="800" fill="#ffffff">Shadow: {shadowLength} cm</text>
+                <FitText en={en("dial_shadow", { n: shadowLength })} x={BASE} y={GROUND + 37} textAnchor="middle" fontSize="10" fontWeight="800" fill="#ffffff">{s("dial_shadow", { n: shadowLength })}</FitText>
               </g>
             );
           })()}
@@ -448,15 +432,11 @@ function SundialShadows({ recordAction }: { recordAction: (actionType: string, a
         <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
           {timeHour === 12
-            ? `☀️ Noon: the shortest shadow (${shadowLength} cm)!`
-            : timeHour < 12
-              ? "🌅 Morning: the sun is in the East, so the shadow points West"
-              : "🌇 Evening: the sun is in the West, so the shadow points East"}
+            ? s("dial_noon", { n: shadowLength })
+            : s(timeHour < 12 ? "dial_morning" : "dial_evening")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {season === "june"
-            ? "In June the noon sun is almost straight above, so the shadow is tiny."
-            : "In December the sun stays lower, so even the noon shadow is long."}
+          {s(season === "june" ? "dial_june_why" : "dial_december_why")}
         </p>
       </div>
     </div>

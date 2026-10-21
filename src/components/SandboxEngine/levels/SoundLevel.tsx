@@ -4,10 +4,12 @@ import React, { useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
 import { playMatkaTap, playStringTelephone, playShoutWithEcho } from '@/utils/webAudio';
 import { ObservationSpeaker } from "@/components/ReadAloud";
+import { FitText, useSceneText } from '../SceneText';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
 function MatkaPitch({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("sound");
   const [waterLevel, setWaterLevel] = useState(50);
   const [playing, setPlaying] = useState(false);
   const [tapCount, setTapCount] = useState(0);
@@ -16,7 +18,7 @@ function MatkaPitch({ recordAction }: { recordAction: RecordAction }) {
   const pitch = 200 + (waterLevel * 5);
   const isAnomaly = waterLevel > 80;
   useAnomalySignal(isAnomaly, recordAction);
-  const pitchWord = waterLevel > 70 ? "High" : waterLevel < 30 ? "Deep" : "Middle";
+  const pitchWord = waterLevel > 70 ? "high" : waterLevel < 30 ? "deep" : "middle";
 
   const handleTap = () => {
     setPlaying(true);
@@ -36,12 +38,12 @@ function MatkaPitch({ recordAction }: { recordAction: RecordAction }) {
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex flex-col gap-0.5 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-sky-300">💧 Water in matka</span>
+            <span className="font-bold text-sky-300">{s("matka_water")}</span>
             <span className="text-xs font-mono text-gray-300">{waterLevel}%</span>
           </div>
           <input
             type="range" min="10" max="90" step="10" value={waterLevel}
-            aria-label="Water in matka"
+            aria-label={s("matka_water_slider")}
             onChange={e => {
               const val = parseInt(e.target.value);
               setWaterLevel(val);
@@ -52,14 +54,14 @@ function MatkaPitch({ recordAction }: { recordAction: RecordAction }) {
         <button
           onClick={handleTap}
           className="bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-black px-5 rounded-xl shadow text-sm transition-transform flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
-          aria-label="Tap the matka to hear its sound"
+          aria-label={s("matka_tap_label")}
         >
-          👆 TAP MATKA
+          {s("matka_tap")}
         </button>
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-900 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block cursor-pointer" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`${pitchWord} sound`} onClick={handleTap}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block cursor-pointer" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s(`matka_pic_${pitchWord}` as const)} onClick={handleTap}>
           <defs>
             <clipPath id="matka-inside">
               <path d="M 136 62 Q 128 70 136 78 Q 100 100 108 148 Q 118 194 170 194 Q 222 194 232 148 Q 240 100 204 78 Q 212 70 204 62 Z" />
@@ -82,21 +84,21 @@ function MatkaPitch({ recordAction }: { recordAction: RecordAction }) {
             {/* Water */}
             <rect x="100" y={waterY} width="140" height={200 - waterY} fill="#2563eb" opacity="0.8" />
           </g>
-          <text x="170" y={Math.max(84, (56 + waterY) / 2 + 4)} textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff7ed">AIR</text>
-          {waterLevel >= 20 && <text x="170" y={(waterY + 194) / 2 + 4} textAnchor="middle" fontSize="11" fontWeight="800" fill="#dbeafe">WATER</text>}
+          <FitText en={en("matka_air")} x="170" y={Math.max(84, (56 + waterY) / 2 + 4)} textAnchor="middle" fontSize="11" fontWeight="800" fill="#fff7ed">{s("matka_air")}</FitText>
+          {waterLevel >= 20 && <FitText en={en("matka_water_in_pot")} x="170" y={(waterY + 194) / 2 + 4} textAnchor="middle" fontSize="11" fontWeight="800" fill="#dbeafe">{s("matka_water_in_pot")}</FitText>}
 
           {/* Air column height marker */}
           <line x1="250" y1="66" x2="250" y2={waterY} stroke="#fcd34d" strokeWidth="2" />
           <line x1="244" y1="66" x2="256" y2="66" stroke="#fcd34d" strokeWidth="2" />
           <line x1="244" y1={waterY} x2="256" y2={waterY} stroke="#fcd34d" strokeWidth="2" />
-          <text x="262" y={(66 + waterY) / 2 + 4} fontSize="10" fontWeight="700" fill="#fcd34d">air height</text>
+          <FitText en={en("matka_air_height")} x="262" y={(66 + waterY) / 2 + 4} fontSize="10" fontWeight="700" fill="#fcd34d">{s("matka_air_height")}</FitText>
 
           {/* Pitch meter: Deep -> High */}
-          <text x="30" y="40" fontSize="10" fontWeight="700" fill="#d1d5db">Sound</text>
+          <FitText en={en("matka_meter")} x="30" y="40" fontSize="10" fontWeight="700" fill="#d1d5db">{s("matka_meter")}</FitText>
           <rect x="30" y="48" width="14" height="140" rx="7" fill="#1f2937" stroke="#4b5563" />
           <rect x="33" y={185 - (waterLevel / 100) * 134} width="8" height={(waterLevel / 100) * 134} rx="4" fill="#38bdf8" />
-          <text x="50" y="58" fontSize="9" fill="#9ca3af">High</text>
-          <text x="50" y="188" fontSize="9" fill="#9ca3af">Deep</text>
+          <FitText en={en("matka_meter_high")} x="50" y="58" fontSize="9" fill="#9ca3af">{s("matka_meter_high")}</FitText>
+          <FitText en={en("matka_meter_deep")} x="50" y="188" fontSize="9" fill="#9ca3af">{s("matka_meter_deep")}</FitText>
         </svg>
       </div>
 
@@ -104,12 +106,10 @@ function MatkaPitch({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-sky-300 block">
-          {isAnomaly ? "🤯 More water makes a HIGHER sound!" : `🎵 ${pitchWord} sound (${pitch} Hz)`}
+          {isAnomaly ? s("matka_higher") : s(`matka_sound_${pitchWord}` as const, { n: pitch })}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "More water leaves a shorter space of air. A short air space shakes faster, so the sound is higher."
-            : "The air inside the pot shakes when you tap. Add water and tap again: does the sound change?"}
+          {s(isAnomaly ? "matka_higher_why" : "matka_why")}
         </p>
       </div>
     </div>
@@ -117,6 +117,7 @@ function MatkaPitch({ recordAction }: { recordAction: RecordAction }) {
 }
 
 function StringTelephone({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("sound");
   const [tension, setTension] = useState(60);
   const [pinched, setPinched] = useState(false);
   const [talking, setTalking] = useState(false);
@@ -147,12 +148,12 @@ function StringTelephone({ recordAction }: { recordAction: RecordAction }) {
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex flex-col gap-0.5 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-red-300">🧵 String tightness</span>
-            <span className="text-xs font-mono text-gray-300">{slack ? "Loose" : "Tight"} ({tension}%)</span>
+            <span className="font-bold text-red-300">{s("phone_tightness")}</span>
+            <span className="text-xs font-mono text-gray-300">{s(slack ? "phone_loose" : "phone_tight")} ({tension}%)</span>
           </div>
           <input
             type="range" min="10" max="100" step="10" value={tension}
-            aria-label="String tightness"
+            aria-label={s("phone_tightness_slider")}
             onChange={e => {
               const val = parseInt(e.target.value);
               setTension(val);
@@ -171,21 +172,21 @@ function StringTelephone({ recordAction }: { recordAction: RecordAction }) {
               }}
               className="accent-yellow-400 cursor-pointer w-5 h-5"
             />
-            <span>🤏 Pinch string</span>
+            <span>{s("phone_pinch")}</span>
           </label>
           <button
             onClick={handleTalk}
             disabled={talking}
             className="flex-1 bg-red-600 hover:bg-red-500 disabled:opacity-50 active:scale-95 text-white font-black px-5 rounded-xl shadow text-sm transition-transform cursor-pointer"
-            aria-label="Speak into the cup"
+            aria-label={s("phone_speak_label")}
           >
-            🗣️ SPEAK
+            {s("phone_speak")}
           </button>
         </div>
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-800 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={soundPasses ? "Sound travels along the string" : "Sound does not reach the other cup"}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s(soundPasses ? "phone_pic_passes" : "phone_pic_blocked")}>
           <rect x="0" y="190" width="340" height="30" fill="#475569" />
 
           {/* Children */}
@@ -209,7 +210,7 @@ function StringTelephone({ recordAction }: { recordAction: RecordAction }) {
           {pinched && (
             <g>
               <circle cx="170" cy={L.y + sag} r="12" fill="#fcd34d" stroke="#a16207" strokeWidth="2" />
-              <text x="170" y={L.y + sag + 30} textAnchor="middle" fontSize="10" fontWeight="800" fill="#fde047">PINCH</text>
+              <FitText en={en("phone_pinch_on_pic")} x="170" y={L.y + sag + 30} textAnchor="middle" fontSize="10" fontWeight="800" fill="#fde047">{s("phone_pinch_on_pic")}</FitText>
             </g>
           )}
 
@@ -229,11 +230,11 @@ function StringTelephone({ recordAction }: { recordAction: RecordAction }) {
           {talking && (
             <g>
               <rect x="8" y="50" width="70" height="22" rx="11" fill="#ffffff" />
-              <text x="43" y="65" textAnchor="middle" fontSize="11" fontWeight="800" fill="#111827">"Hello!"</text>
+              <FitText en={en("phone_hello")} x="43" y="65" textAnchor="middle" fontSize="11" fontWeight="800" fill="#111827">{s("phone_hello")}</FitText>
               <rect x={soundPasses ? 250 : 236} y="50" width={soundPasses ? 84 : 98} height="22" rx="11" fill={soundPasses ? "#dcfce7" : "#450a0a"} />
-              <text x={soundPasses ? 292 : 285} y="65" textAnchor="middle" fontSize="10" fontWeight="800" fill={soundPasses ? "#166534" : "#fca5a5"}>
-                {soundPasses ? "👂 I hear you!" : "🔇 Nothing…"}
-              </text>
+              <FitText en={en(soundPasses ? "phone_hear_you" : "phone_nothing")} x={soundPasses ? 292 : 285} y="65" textAnchor="middle" fontSize="10" fontWeight="800" fill={soundPasses ? "#166534" : "#fca5a5"}>
+                {s(soundPasses ? "phone_hear_you" : "phone_nothing")}
+              </FitText>
             </g>
           )}
         </svg>
@@ -243,14 +244,10 @@ function StringTelephone({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-red-300 block">
-          {isAnomaly && talking ? "🤯 One pinch stopped the sound!" : soundPasses && talking ? "📞 The sound travelled along the string!" : "Press SPEAK"}
+          {s(isAnomaly && talking ? "phone_pinch_stopped" : soundPasses && talking ? "phone_travelled" : "phone_press")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {pinched
-            ? "Your voice shakes the string. Pinching it stops the shaking, so the sound cannot pass."
-            : slack
-              ? "A loose string cannot carry the shaking well. Pull it tight."
-              : "Your voice makes the tight string shake. The shaking travels to the other cup."}
+          {s(pinched ? "phone_pinch_why" : slack ? "phone_loose_why" : "phone_tight_why")}
         </p>
       </div>
     </div>
@@ -258,6 +255,7 @@ function StringTelephone({ recordAction }: { recordAction: RecordAction }) {
 }
 
 function Echoes({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("sound");
   const [location, setLocation] = useState<"Well" | "Field">("Well");
   const [depth, setDepth] = useState(50);
   const [shouting, setShouting] = useState(false);
@@ -298,7 +296,7 @@ function Echoes({ recordAction }: { recordAction: RecordAction }) {
     <div className="flex flex-col h-full w-full">
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex items-center justify-between gap-2">
-          <span className="font-bold text-emerald-300">Place:</span>
+          <span className="font-bold text-emerald-300">{s("echo_place")}</span>
           <div className="flex gap-1.5">
             {(["Well", "Field"] as const).map(loc => (
               <button
@@ -306,7 +304,7 @@ function Echoes({ recordAction }: { recordAction: RecordAction }) {
                 onClick={() => { setLocation(loc); recordAction('changed_location', { val: loc }); }}
                 className={`px-4 rounded-lg text-xs font-bold transition-all cursor-pointer ${location === loc ? 'bg-emerald-500 text-white shadow' : 'bg-gray-800 text-gray-300'}`}
               >
-                {loc === "Well" ? "🕳️ Well" : "🌾 Open field"}
+                {s(loc === "Well" ? "echo_well" : "echo_field")}
               </button>
             ))}
           </div>
@@ -314,12 +312,12 @@ function Echoes({ recordAction }: { recordAction: RecordAction }) {
         {isWell && (
           <div className="flex flex-col gap-0.5 w-full md:flex-1">
             <div className="flex justify-between items-center">
-              <span className="font-bold text-emerald-300">Well depth</span>
+              <span className="font-bold text-emerald-300">{s("echo_depth")}</span>
               <span className="text-xs font-mono text-gray-300">{depth} m</span>
             </div>
             <input
               type="range" min="10" max="90" step="20" value={depth}
-              aria-label="Well depth in metres"
+              aria-label={s("echo_depth_slider")}
               onChange={e => {
                 const val = parseInt(e.target.value);
                 setDepth(val);
@@ -332,14 +330,14 @@ function Echoes({ recordAction }: { recordAction: RecordAction }) {
           onClick={handleShout}
           disabled={shouting}
           className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 active:scale-95 text-white font-black px-5 rounded-xl shadow text-sm transition-transform cursor-pointer shrink-0"
-          aria-label="Shout"
+          aria-label={s("echo_shout_label")}
         >
-          📣 SHOUT
+          {s("echo_shout")}
         </button>
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-gradient-to-b from-sky-300 to-sky-100 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={isWell && depth >= 30 ? "An echo comes back" : "No clear echo"}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s(isWell && depth >= 30 ? "echo_pic_echo" : "echo_pic_none")}>
           {isWell ? (
             <g>
               {/* Ground cut-away with well shaft */}
@@ -350,7 +348,7 @@ function Echoes({ recordAction }: { recordAction: RecordAction }) {
               <rect x="210" y={GROUND_Y} width="4" height={shaftPx} fill="#78716c" />
               <rect x="150" y={WATER_Y - 6} width="60" height="6" fill="#2563eb" />
               <rect x="140" y={GROUND_Y - 14} width="80" height="14" fill="#9ca3af" stroke="#6b7280" />
-              <text x="232" y={WATER_Y - 2} fontSize="10" fontWeight="700" fill="#fef3c7">{depth} m deep</text>
+              <FitText en={en("echo_deep_label", { n: depth })} x="232" y={WATER_Y - 2} fontSize="10" fontWeight="700" fill="#fef3c7">{s("echo_deep_label", { n: depth })}</FitText>
 
               {/* Sound going down and coming back up */}
               {shouting && (
@@ -396,8 +394,8 @@ function Echoes({ recordAction }: { recordAction: RecordAction }) {
           <g transform={`translate(${isWell ? 112 : 120} ${isWell ? GROUND_Y - 44 : GROUND_Y})`}>
             <circle cx="0" cy="0" r="11" fill="#fcd34d" />
             <rect x="-9" y="11" width="18" height="24" rx="5" fill="#f97316" />
-            {shouting && <text x="16" y="-8" fontSize="11" fontWeight="800" fill="#111827">"HELLO!"</text>}
-            {echoStatus === "echo" && <text x="16" y="-8" fontSize="11" fontWeight="800" fill="#15803d">"…hello!" 👂</text>}
+            {shouting && <FitText en={en("echo_hello")} x="16" y="-8" fontSize="11" fontWeight="800" fill="#111827">{s("echo_hello")}</FitText>}
+            {echoStatus === "echo" && <FitText en={en("echo_hello_back")} x="16" y="-8" fontSize="11" fontWeight="800" fill="#15803d">{s("echo_hello_back")}</FitText>}
           </g>
         </svg>
       </div>
@@ -406,14 +404,10 @@ function Echoes({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-emerald-300 block">
-          {!isWell ? "🌾 No echo in an open field" : depth < 30 ? "Shallow well: the echo mixes with your shout" : `🕳️ Deep well (${depth} m): a clear echo!`}
+          {!isWell ? s("echo_none_field") : depth < 30 ? s("echo_shallow") : s("echo_deep", { n: depth })}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {!isWell
-            ? "There are no hard walls, so the sound spreads out and never comes back."
-            : depth < 30
-              ? "The sound comes back too fast, so you cannot hear it separately."
-              : "Your shout goes down, bounces off the water and stone, and comes back up to your ears."}
+          {s(!isWell ? "echo_field_why" : depth < 30 ? "echo_shallow_why" : "echo_deep_why")}
         </p>
       </div>
     </div>

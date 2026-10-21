@@ -3,6 +3,9 @@
 import React, { useState } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
 import { ObservationSpeaker } from "@/components/ReadAloud";
+import { FitText, useSceneText } from '../SceneText';
+
+const LIGHT_KEY = { Left: "left", Overhead: "top", Right: "right" } as const;
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -10,6 +13,7 @@ type RecordAction = (actionType: string, actionDetails?: any) => void;
 // EXPERIMENT 1: OXYGEN BUBBLES (PHOTOSYNTHESIS)
 // ==========================================
 function OxygenBubbles({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("plants");
   // Light intensity: 10% (lamp far away) to 100% (lamp very close)
   const [lightIntensity, setLightIntensity] = useState(40);
 
@@ -31,18 +35,18 @@ function OxygenBubbles({ recordAction }: { recordAction: RecordAction }) {
     <div className="flex flex-col h-full w-full">
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col gap-1 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex justify-between items-center">
-          <span className="font-bold text-emerald-300">💡 Lamp: far ↔ close</span>
-          <span className="text-xs font-mono text-gray-300">{bubbleRate} bubbles / min</span>
+          <span className="font-bold text-emerald-300">{s("bubbles_lamp")}</span>
+          <span className="text-xs font-mono text-gray-300">{s("bubbles_rate", { n: bubbleRate })}</span>
         </div>
         <input
           type="range" min="10" max="100" step="10" value={lightIntensity}
           onChange={e => handleSlider(parseInt(e.target.value))}
-          aria-label="Move the lamp closer"
+          aria-label={s("bubbles_slider")}
         />
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-900 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`${bubbleRate} bubbles a minute`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("bubbles_pic", { n: bubbleRate })}>
           {/* Lamp and its light */}
           <polygon points={`${lampX - 6},70 120,60 120,200 ${lampX - 6},110`} fill="#fde047" opacity={lightIntensity / 260} />
           <g style={{ transform: `translateX(${lampX}px)`, transition: 'transform 0.4s' }}>
@@ -60,7 +64,7 @@ function OxygenBubbles({ recordAction }: { recordAction: RecordAction }) {
           <path d="M 96 190 L 135 140 L 135 110 M 174 190 L 135 140" stroke="#cbd5e1" strokeWidth="2.5" fill="none" />
           <rect x="128" y="50" width="14" height="66" rx="4" fill="#ffffff" fillOpacity="0.08" stroke="#cbd5e1" strokeWidth="2" />
           <rect x="130" y="52" width="10" height={gasH} rx="3" fill="#bbf7d0" opacity="0.6" style={{ transition: 'height 0.4s' }} />
-          <text x="102" y="48" textAnchor="end" fontSize="10" fontWeight="700" fill="#86efac">oxygen</text>
+          <FitText en={en("bubbles_oxygen")} x="102" y="48" textAnchor="end" fontSize="10" fontWeight="700" fill="#86efac">{s("bubbles_oxygen")}</FitText>
           <line x1="104" y1="45" x2="128" y2="56" stroke="#86efac" strokeWidth="1" />
 
           {/* Waterweed */}
@@ -86,12 +90,10 @@ function OxygenBubbles({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-emerald-300 block">
-          {isAnomaly ? "🌿 Lamp very close: lots of bubbles!" : `🫧 ${bubbleRate} bubbles a minute`}
+          {isAnomaly ? s("bubbles_close") : s("bubbles_count", { n: bubbleRate })}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "The green part of the leaf (chlorophyll) uses light to make food. Oxygen comes out as bubbles."
-            : "Plants make food from light and give out oxygen. Move the lamp: what happens to the bubbles?"}
+          {s(isAnomaly ? "bubbles_close_why" : "bubbles_why")}
         </p>
       </div>
     </div>
@@ -102,6 +104,7 @@ function OxygenBubbles({ recordAction }: { recordAction: RecordAction }) {
 // EXPERIMENT 2: LEAF TRANSPIRATION
 // ==========================================
 function LeafTranspiration({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("plants");
   type Weather = "Direct Sunlight" | "Deep Shade";
   const [weather, setWeather] = useState<Weather>("Direct Sunlight");
   const [hoursElapsed, setHoursElapsed] = useState(2);
@@ -132,27 +135,27 @@ function LeafTranspiration({ recordAction }: { recordAction: RecordAction }) {
               key={w}
               onClick={() => handleSetWeather(w)}
               className={`flex-1 px-3 rounded-xl font-bold transition-all text-xs cursor-pointer ${weather === w ? 'bg-sky-600 text-white shadow' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
-              aria-label={`Put the plant in ${w}`}
+              aria-label={s(w === "Direct Sunlight" ? "bag_put_sun" : "bag_put_shade")}
             >
-              {w === "Direct Sunlight" ? "☀️ Sun" : "🌳 Shade"}
+              {s(w === "Direct Sunlight" ? "bag_sun" : "bag_shade")}
             </button>
           ))}
         </div>
         <div className="flex flex-col gap-0.5 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-sky-300">⏱️ Time</span>
-            <span className="text-xs font-mono text-gray-300">{hoursElapsed} hour{hoursElapsed > 1 ? "s" : ""}</span>
+            <span className="font-bold text-sky-300">{s("bag_time")}</span>
+            <span className="text-xs font-mono text-gray-300">{hoursElapsed > 1 ? s("bag_hours", { n: hoursElapsed }) : s("bag_hour")}</span>
           </div>
           <input
             type="range" min="1" max="4" step="1" value={hoursElapsed}
             onChange={e => handleHours(parseInt(e.target.value))}
-            aria-label="Hours"
+            aria-label={s("bag_hours_slider")}
           />
         </div>
       </div>
 
       <div className={`relative flex-1 min-h-[220px] flex items-end ${isSun ? "bg-gradient-to-b from-sky-400 to-amber-100" : "bg-gradient-to-b from-emerald-900 to-emerald-700"}`}>
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`${drops} water drops inside the bag`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("bag_pic", { n: drops })}>
           {isSun ? <circle cx="40" cy="36" r="20" fill="#facc15" /> : <ellipse cx="60" cy="30" rx="70" ry="24" fill="#14532d" />}
 
           {/* Pot */}
@@ -174,7 +177,7 @@ function LeafTranspiration({ recordAction }: { recordAction: RecordAction }) {
           ))}
 
           <rect x="20" y="186" width="96" height="20" rx="10" fill="#111827" opacity="0.85" />
-          <text x="68" y="200" textAnchor="middle" fontSize="10" fontWeight="800" fill="#7dd3fc">{drops} drops</text>
+          <FitText en={en("bag_drops", { n: drops })} x="68" y="200" textAnchor="middle" fontSize="10" fontWeight="800" fill="#7dd3fc">{s("bag_drops", { n: drops })}</FitText>
         </svg>
       </div>
 
@@ -182,12 +185,10 @@ function LeafTranspiration({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-sky-300 block">
-          {isAnomaly ? "💧 The bag is full of water drops!" : isSun ? "☀️ Drops are forming in the bag" : "🌳 Only a few drops in the shade"}
+          {s(isAnomaly ? "bag_full" : isSun ? "bag_forming" : "bag_few")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isSun
-            ? "Leaves give out water through tiny holes. In warm sun this happens fast, and the water collects on the bag."
-            : "In cool shade the tiny holes in the leaves close, so very little water comes out."}
+          {s(isSun ? "bag_sun_why" : "bag_shade_why")}
         </p>
       </div>
     </div>
@@ -198,6 +199,7 @@ function LeafTranspiration({ recordAction }: { recordAction: RecordAction }) {
 // EXPERIMENT 3: PHOTOTROPISM & STEM BENDING
 // ==========================================
 function Phototropism({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("plants");
   type LightPos = "Left" | "Overhead" | "Right";
   const [lightPos, setLightPos] = useState<LightPos>("Left");
 
@@ -218,23 +220,23 @@ function Phototropism({ recordAction }: { recordAction: RecordAction }) {
   return (
     <div className="flex flex-col h-full w-full">
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col gap-1.5 text-xs text-gray-300 shrink-0 z-20 w-full">
-        <span className="font-bold text-amber-300">💡 Where is the light?</span>
+        <span className="font-bold text-amber-300">{s("bend_where")}</span>
         <div className="grid grid-cols-3 gap-1.5">
           {(["Left", "Overhead", "Right"] as LightPos[]).map(pos => (
             <button
               key={pos}
               onClick={() => handleLightPos(pos)}
               className={`rounded-xl font-bold transition-all text-xs cursor-pointer ${lightPos === pos ? 'bg-amber-500 text-gray-950 shadow' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
-              aria-label={`Put the light on the ${pos}`}
+              aria-label={s(`bend_put_${LIGHT_KEY[pos]}`)}
             >
-              {pos === "Left" ? "⬅ Left" : pos === "Overhead" ? "⬆ Top" : "Right ➡"}
+              {s(`bend_${LIGHT_KEY[pos]}`)}
             </button>
           ))}
         </div>
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-900 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`The plant bends towards the ${lightPos.toLowerCase()} light`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s(`bend_pic_${LIGHT_KEY[lightPos]}`)}>
           {/* Light rays from the lamp */}
           {[-1, 0, 1].map((k) => (
             <line key={k} x1={lamp.x} y1={lamp.y} x2={tip.x + k * 18} y2={tip.y + 20 + Math.abs(k) * 6} stroke="#fde047" strokeWidth="2" strokeDasharray="5 4" opacity="0.7" />
@@ -245,7 +247,7 @@ function Phototropism({ recordAction }: { recordAction: RecordAction }) {
           <rect x="70" y="160" width="200" height="60" fill="#78350f" />
           <rect x="70" y="160" width="200" height="5" fill="#92400e" />
           <path d="M 170 162 L 170 200 M 170 176 Q 156 186 150 204 M 170 182 Q 186 192 190 208" stroke="#fde68a" strokeWidth="2" fill="none" />
-          <text x="200" y="196" fontSize="10" fontWeight="700" fill="#fde68a">roots grow down ⬇</text>
+          <FitText en={en("bend_roots")} x="200" y="196" fontSize="10" fontWeight="700" fill="#fde68a">{s("bend_roots")}</FitText>
 
           {/* Stem bends toward the light */}
           <path d={stem} stroke="#10b981" strokeWidth="6" fill="none" strokeLinecap="round" style={{ transition: 'd 0.7s ease-out' }} />
@@ -258,12 +260,10 @@ function Phototropism({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
-          {isAnomaly ? `🌱 The stem bent towards the light!` : "🌱 Light from the top: the stem grows straight up"}
+          {s(isAnomaly ? "bend_bent" : "bend_straight")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "The shady side of the stem grows longer, so the plant bends towards the light. This is called phototropism."
-            : "Move the light to one side. Roots always grow down because they feel the pull of the Earth."}
+          {s(isAnomaly ? "bend_bent_why" : "bend_why")}
         </p>
       </div>
     </div>

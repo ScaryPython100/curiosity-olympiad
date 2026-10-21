@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAnomalySignal } from '../useAnomalySignal';
 import { ObservationSpeaker } from "@/components/ReadAloud";
+import { FitText, useSceneText } from '../SceneText';
 
 type RecordAction = (actionType: string, actionDetails?: any) => void;
 
@@ -19,6 +20,7 @@ function heatColor(tempC: number) {
 // EXPERIMENT 1: KITCHEN UTENSILS THERMAL CONDUCTION LAB
 // ============================================================================
 function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("chemistry");
   const [stoveHeat, setStoveHeat] = useState(0);
   const [temps, setTemps] = useState({ dal: 20, steel: 20, wood: 20 });
 
@@ -46,12 +48,12 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex flex-col gap-1 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-orange-300">🔥 Stove Heat</span>
+            <span className="font-bold text-orange-300">{s("spoon_heat")}</span>
             <span className="text-xs font-mono text-gray-300">{stoveHeat} / 10</span>
           </div>
           <input
             type="range" min="0" max="10" step="1" value={stoveHeat}
-            aria-label="Stove heat"
+            aria-label={s("spoon_heat_slider")}
             onChange={(e) => {
               setStoveHeat(parseInt(e.target.value));
               recordAction('changed_stove_heat', { val: parseInt(e.target.value) });
@@ -62,12 +64,12 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
           onClick={() => { setTemps({ dal: 20, steel: 20, wood: 20 }); setStoveHeat(0); recordAction('reset_time'); }}
           className="bg-gray-700 hover:bg-gray-600 text-white font-bold px-4 rounded-xl text-xs shrink-0"
         >
-          ↺ Start again
+          {s("spoon_restart")}
         </button>
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-900 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`Dal ${Math.round(temps.dal)} degrees, steel spoon ${Math.round(temps.steel)}, wood spoon ${Math.round(temps.wood)}`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("spoon_pic", { dal: Math.round(temps.dal), steel: Math.round(temps.steel), wood: Math.round(temps.wood) })}>
           <defs>
             <linearGradient id="steel-heat" x1="0" y1="1" x2="0" y2="0">
               <stop offset="0%" stopColor={heatColor(temps.dal)} />
@@ -110,15 +112,15 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
           {/* Handle temperature labels */}
           <g>
             <rect x="36" y="34" width="86" height="34" rx="8" fill="#111827" stroke={steelHot ? "#ef4444" : "#374151"} strokeWidth="2" />
-            <text x="79" y="48" textAnchor="middle" fontSize="10" fontWeight="700" fill="#d1d5db">Steel handle</text>
+            <FitText en={en("spoon_steel_handle")} x="79" y="48" textAnchor="middle" fontSize="10" fontWeight="700" fill="#d1d5db">{s("spoon_steel_handle")}</FitText>
             <text x="79" y="62" textAnchor="middle" fontSize="12" fontWeight="800" fill={steelHot ? "#f87171" : "#e5e7eb"}>{Math.round(temps.steel)}°C {steelHot ? "🔥" : ""}</text>
           </g>
           <g>
             <rect x="218" y="34" width="86" height="34" rx="8" fill="#111827" stroke="#374151" strokeWidth="2" />
-            <text x="261" y="48" textAnchor="middle" fontSize="10" fontWeight="700" fill="#d1d5db">Wood handle</text>
+            <FitText en={en("spoon_wood_handle")} x="261" y="48" textAnchor="middle" fontSize="10" fontWeight="700" fill="#d1d5db">{s("spoon_wood_handle")}</FitText>
             <text x="261" y="62" textAnchor="middle" fontSize="12" fontWeight="800" fill="#fcd34d">{Math.round(temps.wood)}°C</text>
           </g>
-          <text x="170" y="160" textAnchor="middle" fontSize="12" fontWeight="800" fill="#fed7aa">Dal {Math.round(temps.dal)}°C</text>
+          <FitText en={en("spoon_dal_temp", { n: Math.round(temps.dal) })} x="170" y="160" textAnchor="middle" fontSize="12" fontWeight="800" fill="#fed7aa">{s("spoon_dal_temp", { n: Math.round(temps.dal) })}</FitText>
         </svg>
       </div>
 
@@ -126,12 +128,10 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-orange-300 block">
-          {steelHot ? "😣 Ouch! The steel handle is too hot!" : stoveHeat === 0 ? "Turn on the stove" : "Heating the dal…"}
+          {s(steelHot ? "spoon_too_hot" : stoveHeat === 0 ? "spoon_turn_on" : "spoon_heating")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {steelHot
-            ? "Heat travels quickly up through metal to your fingers. Wood stays cool."
-            : "Watch the colour climb up each spoon. Which handle gets hot first?"}
+          {s(steelHot ? "spoon_hot_why" : "spoon_watch")}
         </p>
       </div>
     </div>
@@ -142,6 +142,7 @@ function ExperimentOne({ recordAction }: { recordAction: RecordAction }) {
 // EXPERIMENT 2: EARTHEN MATKA EVAPORATIVE COOLING
 // ============================================================================
 function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("chemistry");
   const [material, setMaterial] = useState<"Metal" | "Clay">("Clay");
   const [humidity, setHumidity] = useState(20);
 
@@ -155,7 +156,7 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
     <div className="flex flex-col h-full w-full">
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex items-center justify-between gap-2">
-          <span className="font-bold text-teal-300">Pot made of:</span>
+          <span className="font-bold text-teal-300">{s("matka_made_of")}</span>
           <div className="flex gap-1.5">
             {(["Clay", "Metal"] as const).map(mat => (
               <button
@@ -166,19 +167,19 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
                 }}
                 className={`px-4 rounded-lg text-xs font-bold ${material === mat ? 'bg-teal-500 text-white' : 'bg-gray-800 text-gray-300'}`}
               >
-                {mat === "Clay" ? "🏺 Clay" : "🥘 Metal"}
+                {s(mat === "Clay" ? "matka_clay" : "matka_metal")}
               </button>
             ))}
           </div>
         </div>
         <div className="flex flex-col gap-1 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-teal-300">💧 Wet air (humidity)</span>
+            <span className="font-bold text-teal-300">{s("matka_humidity")}</span>
             <span className="text-xs font-mono text-gray-300">{humidity}%</span>
           </div>
           <input
             type="range" min="10" max="90" step="10" value={humidity}
-            aria-label="Humidity"
+            aria-label={s("matka_humidity_slider")}
             onChange={e => {
               setHumidity(parseInt(e.target.value));
               recordAction('changed_humidity', { val: parseInt(e.target.value) });
@@ -188,19 +189,19 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-gradient-to-b from-amber-200 to-amber-100 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`Water is ${Math.round(potTemp)} degrees`}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s("matka_pic", { n: Math.round(potTemp) })}>
           {/* Weather */}
           {humidity >= 70 ? (
             <g>
               <ellipse cx="60" cy="34" rx="34" ry="16" fill="#94a3b8" />
               <ellipse cx="86" cy="28" rx="24" ry="14" fill="#94a3b8" />
               {[44, 60, 76, 92].map((x) => <line key={x} x1={x} y1="52" x2={x - 5} y2="66" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" />)}
-              <text x="66" y="84" textAnchor="middle" fontSize="10" fontWeight="700" fill="#334155">Rainy, wet air</text>
+              <FitText en={en("matka_rainy")} x="66" y="84" textAnchor="middle" fontSize="10" fontWeight="700" fill="#334155">{s("matka_rainy")}</FitText>
             </g>
           ) : (
             <g>
               <circle cx="60" cy="40" r="18" fill="#facc15" />
-              <text x="60" y="76" textAnchor="middle" fontSize="10" fontWeight="700" fill="#92400e">Hot, dry air</text>
+              <FitText en={en("matka_dry")} x="60" y="76" textAnchor="middle" fontSize="10" fontWeight="700" fill="#92400e">{s("matka_dry")}</FitText>
             </g>
           )}
 
@@ -244,14 +245,10 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-teal-300 block">
-          {isAnomaly ? "🤔 The matka is not cooling!" : isClay ? `🏺 Matka water: ${Math.round(potTemp)}°C` : `🥘 Metal pot water: ${Math.round(potTemp)}°C`}
+          {isAnomaly ? s("matka_not_cooling") : s(isClay ? "matka_clay_water" : "matka_metal_water", { n: Math.round(potTemp) })}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {isAnomaly
-            ? "When the air is already wet, water on the pot cannot dry up, so it cannot take the heat away."
-            : isClay
-              ? "Water seeps through tiny holes in the clay and dries up. Drying takes heat away, so the water gets cold."
-              : "Metal has no tiny holes, so no water dries on the outside. The water stays warm."}
+          {s(isAnomaly ? "matka_wet_why" : isClay ? "matka_clay_why" : "matka_metal_why")}
         </p>
       </div>
     </div>
@@ -262,6 +259,7 @@ function ExperimentTwo({ recordAction }: { recordAction: RecordAction }) {
 // EXPERIMENT 3: CANDLE IN GLASS (AIR VOLUME)
 // ============================================================================
 function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
+  const { s, en } = useSceneText("chemistry");
   const [glassSize, setGlassSize] = useState(50);
   const [covered, setCovered] = useState(false);
   const [oxygen, setOxygen] = useState(1); // 1 = full jar of fresh air, 0 = used up
@@ -312,12 +310,12 @@ function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
       <div className="sim-toolbar bg-gray-900/95 border-b border-gray-700/80 p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-gray-300 shrink-0 z-20 w-full">
         <div className="flex flex-col gap-1 w-full md:flex-1">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-indigo-300">🫙 Jar Size</span>
-            <span className="text-xs font-mono text-gray-300">{glassSize < 50 ? "Small" : glassSize < 80 ? "Medium" : "Big"}</span>
+            <span className="font-bold text-indigo-300">{s("jar_size")}</span>
+            <span className="text-xs font-mono text-gray-300">{s(glassSize < 50 ? "jar_small" : glassSize < 80 ? "jar_medium" : "jar_big")}</span>
           </div>
           <input
             type="range" min="30" max="100" step="10" value={glassSize} disabled={covered}
-            aria-label="Jar size"
+            aria-label={s("jar_size_slider")}
             onChange={(e) => {
               setGlassSize(parseInt(e.target.value));
               recordAction('changed_glass_size', { val: parseInt(e.target.value) });
@@ -326,16 +324,16 @@ function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
         </div>
         <div className="flex gap-2 shrink-0">
           <button onClick={cover} disabled={covered} className="flex-1 md:flex-none px-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-700 text-white font-bold rounded-xl text-xs shadow">
-            ⬇ Cover diya
+            {s("jar_cover")}
           </button>
           <button onClick={relight} className="flex-1 md:flex-none px-4 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs shadow">
-            🔥 Relight
+            {s("jar_relight")}
           </button>
         </div>
       </div>
 
       <div className="relative flex-1 min-h-[220px] bg-slate-950 flex items-end">
-        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={lit ? "The diya is burning" : "The diya has gone out"}>
+        <svg viewBox="0 0 340 220" className="w-full h-auto max-h-full block" preserveAspectRatio="xMidYMax meet" role="img" aria-label={s(lit ? "jar_pic_burning" : "jar_pic_out")}>
           <defs>
             <radialGradient id="diya-flame" cx="50%" cy="70%" r="60%">
               <stop offset="0%" stopColor="#fef9c3" />
@@ -370,14 +368,14 @@ function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
 
           {/* Oxygen meter */}
           <g>
-            <text x="300" y="58" textAnchor="middle" fontSize="10" fontWeight="700" fill="#d1d5db">Fresh air</text>
+            <FitText en={en("jar_fresh_air")} x="300" y="58" textAnchor="middle" fontSize="10" fontWeight="700" fill="#d1d5db">{s("jar_fresh_air")}</FitText>
             <rect x="290" y="64" width="20" height="110" rx="6" fill="#1f2937" stroke="#4b5563" strokeWidth="2" />
             <rect x="293" y={67 + 104 * (1 - oxygen)} width="14" height={104 * oxygen} rx="4" fill={oxygen > 0.3 ? "#22c55e" : "#ef4444"} />
           </g>
           {burnedSeconds !== null && (
             <g>
               <rect x="18" y="20" width="118" height="24" rx="12" fill="#111827" stroke="#4b5563" />
-              <text x="77" y="36" textAnchor="middle" fontSize="11" fontWeight="800" fill="#fcd34d">Burned {burnedSeconds.toFixed(1)} s</text>
+              <FitText en={en("jar_burned", { n: burnedSeconds.toFixed(1) })} x="77" y="36" textAnchor="middle" fontSize="11" fontWeight="800" fill="#fcd34d">{s("jar_burned", { n: burnedSeconds.toFixed(1) })}</FitText>
             </g>
           )}
         </svg>
@@ -387,14 +385,10 @@ function ExperimentThree({ recordAction }: { recordAction: RecordAction }) {
 
         <ObservationSpeaker />
         <span className="text-sm font-bold text-amber-300 block">
-          {!covered ? "🔥 The diya is burning in open air" : lit ? "⏳ The flame is getting smaller…" : "💨 The flame went out!"}
+          {s(!covered ? "jar_open" : lit ? "jar_smaller" : "jar_out")}
         </span>
         <p className="text-xs text-gray-300 mt-0.5">
-          {!covered
-            ? "Fire needs oxygen from the air. Cover it with a jar and watch."
-            : lit
-              ? "The flame is using up the oxygen trapped inside the jar."
-              : "All the oxygen in the jar was used up. Try a bigger jar: does it burn longer?"}
+          {s(!covered ? "jar_open_why" : lit ? "jar_using_why" : "jar_out_why")}
         </p>
       </div>
     </div>

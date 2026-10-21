@@ -2,6 +2,7 @@
 
 import { useId, useRef, useSyncExternalStore, type ReactNode } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSceneLang } from "@/components/SandboxEngine/SceneText";
 import {
   canSpeak,
   getActiveSpeechId,
@@ -109,10 +110,11 @@ export function ReadAloud({
 
 /**
  * Speaker for an experiment's hint strip. Reads the strip's text (everything
- * in its parent except speaker buttons) when tapped.
+ * in its parent except speaker buttons) when tapped, in the experiment's language.
  */
 export function ObservationSpeaker() {
   const anchor = useRef<HTMLSpanElement>(null);
+  const lang = useSceneLang();
   const readStrip = () => {
     const strip = anchor.current?.parentElement;
     if (!strip) return "";
@@ -123,7 +125,7 @@ export function ObservationSpeaker() {
   };
   return (
     <span ref={anchor} className="absolute right-1.5 top-1/2 -translate-y-1/2">
-      <SpeakButton getText={readStrip} tone="dark" className="!w-9 !h-9" />
+      <SpeakButton getText={readStrip} lang={lang} tone="dark" className="!w-9 !h-9" />
     </span>
   );
 }

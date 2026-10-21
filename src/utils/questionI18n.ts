@@ -55,18 +55,35 @@ const toAsciiDigits = (s: string) =>
     .join("");
 const numbersIn = (s: string): string[] => [...(toAsciiDigits(s).match(/\d+(?:\.\d+)?/g) ?? [])].sort();
 
+// {name} slots that a scene fills in (e.g. "{n} stones"); a translation must keep the same ones
+const PLACEHOLDER = /\{(\w+)\}/g;
+export const placeholdersOf = (s: string): string[] => [...s.matchAll(PLACEHOLDER)].map((m) => m[1]).sort();
+export function samePlaceholders(a: string, b: string): boolean {
+  const x = placeholdersOf(a);
+  const y = placeholdersOf(b);
+  return x.length === y.length && x.every((p, i) => p === y[i]);
+}
+export const fillText = (s: string, vars?: Record<string, string | number>): string =>
+  vars ? s.replace(PLACEHOLDER, (m, k: string) => (k in vars ? String(vars[k]) : m)) : s;
+
 /** Problems with one translated string, compared with its English source. */
 export function checkString(lang: string, en: string, tr: string | undefined): string[] {
   if (!tr || !tr.trim()) return ["empty"];
   const problems: string[] = [];
   const script = SCRIPT[lang];
-  const letters = (tr.match(/\p{L}/gu) ?? []).length;
-  const native = script ? (tr.match(script) ?? []).length : letters;
+  // {placeholders} stay in English, so they do not count as letters
+  const plain = tr.replace(PLACEHOLDER, "");
+  const letters = (plain.match(/\p{L}/gu) ?? []).length;
+  const native = script ? (plain.match(script) ?? []).length : letters;
   // Mostly the target script (a few English science words or letters are fine)
   if (letters > 0 && native / letters < 0.6) problems.push("mostly not in the target script");
   const enNums = numbersIn(en);
   const trNums = numbersIn(tr);
   for (const n of enNums) if (!trNums.includes(n)) problems.push(`number ${n} missing`);
+  if (!samePlaceholders(en, tr)) {
+    const want = placeholdersOf(en).map((p) => `{${p}}`).join(" ");
+    problems.push(`placeholders must be exactly: ${want || "none"} (keep them in English)`);
+  }
   const ratio = tr.length / Math.max(1, en.length);
   // Short options can be much shorter in another language, so only check longer text
   if (en.length > 30 && (ratio < 0.3 || ratio > 4)) problems.push(`length looks wrong (${ratio.toFixed(1)}x)`);
